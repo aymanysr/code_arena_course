@@ -21,6 +21,7 @@
 - Clearly label every page `Prototype · fake state` and state which production authority would own the real transition.
 - Use semantic landmarks and native controls, visible `:focus-visible`, one polite live region, text/icon backups for color, at least 14px text, and at least 44px interactive targets.
 - Verify at 1440x1000 and 390x844 with no document-level horizontal overflow or JavaScript console errors.
+- Playwright files under `/private/tmp` are disposable verification harnesses only; do not add a test suite or test files to the throwaway prototype directory.
 - Preserve the current untracked worktree and add only files named by the active task.
 
 ---
