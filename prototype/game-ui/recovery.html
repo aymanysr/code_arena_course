@@ -134,6 +134,12 @@
     .protocol-step p { margin: 0.45rem 0 0; color: var(--muted); line-height: 1.5; }
     .privacy-note { margin: 0; border-inline-start: 0.25rem solid var(--warning); padding: 0.75rem 0.9rem; background: color-mix(in srgb, var(--warning) 9%, transparent); color: var(--muted); line-height: 1.5; }
     .privacy-note strong { color: var(--ink); }
+    .snapshot-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; }
+    .snapshot-card { min-inline-size: 0; border: 1px solid var(--line); padding: 0.9rem; background: var(--surface-2); }
+    .snapshot-card h3 { color: var(--blue); }
+    .snapshot-card p { margin: 0.5rem 0 0; color: var(--muted); line-height: 1.45; }
+    .snapshot-card strong { color: var(--ink); }
+    .pending-copy { margin: 0; color: var(--muted); line-height: 1.5; }
 
     .bottom-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-block: 1rem 0; }
     .footer-note { max-inline-size: 84ch; margin: 1.25rem 0 0; color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
@@ -147,7 +153,7 @@
     .sr-status { position: fixed; inset: auto auto 0 0; }
 
     @media (max-width: 46rem) {
-      .topbar, .scenario-bar, .recovery-decision, .telemetry-grid, .protocol { grid-template-columns: 1fr; }
+      .topbar, .scenario-bar, .recovery-decision, .telemetry-grid, .protocol, .snapshot-grid { grid-template-columns: 1fr; }
       .match-meta { justify-items: start; text-align: start; }
       .scenario-bar > .control { inline-size: 100%; }
       .scenario-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -189,7 +195,7 @@
         matchClock: { running: true, remainingSeconds: 428 },
         retryCooldown: { running: true, remainingSeconds: 12 },
         privateControls: { available: false, owner: "Saad" },
-        snapshot: { authenticationRequired: false, filteredForRole: false, replayUnacknowledgedActions: false },
+        snapshot: { authenticationRequired: false, filteredForRole: false, replayUnacknowledgedActions: false, roleSpecific: null, sharedProgress: null, chat: null, penalties: null },
         result: { status: "active", awardsWinOrLoss: false }
       };
       if (scenario === "disconnected") return {
@@ -198,15 +204,23 @@
       };
       if (scenario === "reconnecting") return {
         ...common,
-        snapshot: { authenticationRequired: true, filteredForRole: false, replayUnacknowledgedActions: false },
+        snapshot: { authenticationRequired: true, filteredForRole: false, replayUnacknowledgedActions: false, roleSpecific: null, sharedProgress: null, chat: null, penalties: null },
         lastEvent: "Reconnect requires Saad to authenticate again before the game service sends a role-filtered snapshot (simulated)."
       };
       if (scenario === "restored") return {
         ...common,
         player: { ...common.player, connected: true },
         privateControls: { available: true, owner: "Saad" },
-        snapshot: { authenticationRequired: false, filteredForRole: true, replayUnacknowledgedActions: false },
-        lastEvent: "Saad authenticated and received a fresh snapshot filtered to the Answer builder Role (simulated)."
+        snapshot: {
+          authenticationRequired: false,
+          filteredForRole: true,
+          replayUnacknowledgedActions: false,
+          roleSpecific: { clueCards: ["Character-index map", "Stage 2 answer assembly"], controls: ["Assemble Team submission"] },
+          sharedProgress: { currentStage: "Stage 2 · String indexing", completedStages: 1, totalStages: 3 },
+          chat: { team: "Blue Team", latestMessage: "Mina: shared the index mapping." },
+          penalties: { retryCooldownRemainingSeconds: 12, hintsUsed: 1, finishDelaySeconds: 30 }
+        },
+        lastEvent: "Saad authenticated and received a fresh role-specific snapshot with simulated Team progress, chat, and penalties."
       };
       return {
         ...common,
@@ -247,7 +261,7 @@
         label: "Reconnecting · authenticate", className: "", title: "Verify identity before restoring a view", copy: "A reconnect is not a replay. Saad must authenticate again; only then can the game service provide a new snapshot filtered to Saad's Role. Unacknowledged actions are not replayed as new actions."
       };
       if (current.scenario === "restored") return {
-        label: "Restored · private view returned", className: "restored", title: "Saad has a fresh role-filtered snapshot", copy: "Authentication completed and the game service restored only the Answer builder's private view and controls. The Match clock and Retry cooldown continued while Saad was away."
+        label: "Restored · snapshot returned", className: "restored", title: "Saad has a fresh role-filtered snapshot", copy: "Authentication completed and the game service restored Saad's Answer builder view together with shared Team progress, Team chat, and penalty state. The Match clock and Retry cooldown continued while Saad was away."
       };
       return {
         label: "Interrupted · no result", className: "interrupted", title: "No result recorded · Create a new match", copy: "This is an unrecoverable game-service restart path. The prototype does not invent a win or loss from an interrupted Match; players must create a new Match."
@@ -256,6 +270,16 @@
 
     function scenarioName(scenario) {
       return scenario[0].toUpperCase() + scenario.slice(1);
+    }
+
+    function snapshotContents(snapshot) {
+      if (!snapshot.filteredForRole) return `<p class="pending-copy">Role-specific content, shared progress, Team chat, and penalties stay unavailable until reconnect authentication succeeds and a fresh snapshot is authorized.</p>`;
+      return `<div class="snapshot-grid">
+        <article class="snapshot-card"><h3>Role-specific clues</h3><p><strong>${snapshot.roleSpecific.clueCards.length} fake clue cards</strong><br>${snapshot.roleSpecific.controls.join(" · ")}</p></article>
+        <article class="snapshot-card"><h3>Shared team progress</h3><p><strong>${snapshot.sharedProgress.currentStage}</strong><br>${snapshot.sharedProgress.completedStages}/${snapshot.sharedProgress.totalStages} Stages complete</p></article>
+        <article class="snapshot-card"><h3>Team chat</h3><p><strong>${snapshot.chat.team}</strong><br>${snapshot.chat.latestMessage}</p></article>
+        <article class="snapshot-card"><h3>Penalty state</h3><p><strong>${formatSeconds(snapshot.penalties.retryCooldownRemainingSeconds)} Retry cooldown</strong><br>${snapshot.penalties.hintsUsed} Hint · ${snapshot.penalties.finishDelaySeconds}s Finish delay</p></article>
+      </div>`;
     }
 
     function chooseScenario(scenario) {
@@ -302,9 +326,10 @@
           <article class="panel"><div class="panel-head"><p class="eyebrow">Retry cooldown</p><strong class="telemetry-value num ${state.retryCooldown.running ? "live" : "paused"}">${formatSeconds(state.retryCooldown.remainingSeconds)}</strong><p class="telemetry-copy">${cooldown}. The Team can discuss but cannot submit during an active cooldown.</p></div></article>
           <article class="panel"><div class="panel-head"><p class="eyebrow">Saad · Answer builder</p><strong class="telemetry-value slot-status">${state.player.connected ? "Connected" : "Reserved"}</strong><p class="telemetry-copy">${state.player.roleReserved ? "The Role remains reserved; it is not reassigned." : "This scenario never releases the Role."}</p></div></article>
         </section>
-        <section class="panel" aria-labelledby="protocol-title"><div class="panel-head"><p class="eyebrow">Reconnect protocol</p><h2 id="protocol-title">Authenticate, then restore a safe snapshot</h2></div><div class="panel-body"><div class="protocol"><article class="protocol-step"><h3>1. Reconnect authentication</h3><p>${state.snapshot.authenticationRequired ? "Required now: prove that this returning player is Saad." : "Not required in the current fake state."}</p></article><article class="protocol-step"><h3>2. Role-filtered snapshot</h3><p>${state.snapshot.filteredForRole ? "Restored: only Saad's Answer builder clues and controls are available." : "Not restored yet: a snapshot waits until authentication succeeds."}</p></article></div><p class="privacy-note"><strong>Private boundary:</strong> teammates do not inherit Saad's private clues or controls during a disconnect. ${state.snapshot.replayUnacknowledgedActions ? "This prototype never enables replay." : "Unacknowledged actions are not replayed as new actions."}</p></div></section>
+        <section class="panel" aria-labelledby="protocol-title"><div class="panel-head"><p class="eyebrow">Reconnect protocol</p><h2 id="protocol-title">Authenticate, then restore a safe snapshot</h2></div><div class="panel-body"><div class="protocol"><article class="protocol-step"><h3>1. Reconnect authentication</h3><p>${state.snapshot.authenticationRequired ? "Required now: prove that this returning player is Saad." : "Not required in the current fake state."}</p></article><article class="protocol-step"><h3>2. Role-filtered snapshot</h3><p>${state.snapshot.filteredForRole ? "Restored: Saad's private Answer builder view plus shared Team progress, chat, and penalties are available." : "Not restored yet: a snapshot waits until authentication succeeds."}</p></article></div><p class="privacy-note"><strong>Private boundary:</strong> teammates do not inherit Saad's private clues or controls during a disconnect. ${state.snapshot.replayUnacknowledgedActions ? "This prototype never enables replay." : "Unacknowledged actions are not replayed as new actions."}</p></div></section>
+        <section class="panel" aria-labelledby="snapshot-contents-title"><div class="panel-head"><p class="eyebrow">Simulated restoration payload</p><h2 id="snapshot-contents-title">${state.snapshot.filteredForRole ? "Restored snapshot contents" : "Snapshot contents pending"}</h2></div><div class="panel-body">${snapshotContents(state.snapshot)}</div></section>
         <nav class="bottom-actions" aria-label="Prototype navigation"><a class="action-link primary" href="index.html?variant=A">Open active Match</a><a class="action-link" href="outcomes.html">View outcome states</a><a class="action-link" href="journey.html">Open journey map</a>${state.scenario === "interrupted" ? `<a class="action-link" href="lobby.html?variant=A">Create a new match</a>` : ""}</nav>
-        <p class="footer-note">Prototype scope only: this page contains fake in-memory state. The game service would own real Match continuity and result transitions; Core would own real authentication. Network latency, WebSocket behavior, authentication, snapshot filtering, persistence, and restart recovery remain production work and are not demonstrated here.</p>
+        <p class="footer-note">Prototype scope only: this page contains fake in-memory state and fake restoration payloads. The game service would own real Match continuity and result transitions; Core would own real authentication; Chat would own real Team messages. Network latency, WebSocket behavior, authentication, snapshot filtering, persistence, and restart recovery remain production work and are not demonstrated here.</p>
       </div>`;
       document.title = `${description.title} Recovery Prototype | Campus Puzzle Race`;
       stateOutput.textContent = JSON.stringify(state, null, 2);
