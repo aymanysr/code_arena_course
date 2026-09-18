@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Critical Player Journey Prototype | Campus Puzzle Race</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f2f7f3;
+      --muted: #b7c5bd;
+      --bg: #080b0a;
+      --surface: #101714;
+      --surface-2: #15211b;
+      --line: #385146;
+      --green: #9fe1ac;
+      --blue: #91c9ff;
+      --gold: #f5d85a;
+      --focus: #ffffff;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 20rem; background: var(--bg); }
+    body { min-height: 100dvh; margin: 0; overflow-x: hidden; background: var(--bg); color: var(--ink); }
+    a { color: inherit; }
+    :where(a, button):focus-visible { outline: 0.2rem solid var(--focus); outline-offset: 0.2rem; }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      inset: 0.75rem auto auto 0.75rem;
+      min-block-size: 3rem;
+      padding: 0.7rem 1rem;
+      translate: 0 -180%;
+      background: #ffffff;
+      color: #111111;
+      font-weight: 800;
+    }
+    .skip-link:focus { translate: 0; }
+    .prototype-flag {
+      position: fixed;
+      z-index: 20;
+      inset: 0 auto auto 50%;
+      translate: -50% 0;
+      border: 0;
+      border-radius: 0 0 0.45rem 0.45rem;
+      background: var(--gold);
+      color: #15130b;
+      padding: 0.3rem 0.7rem;
+      font: 800 0.875rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .visually-hidden:where(:not(:focus-within, :active)) {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip-path: inset(50%) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      padding: 0 !important;
+    }
+
+    .shell { inline-size: min(90rem, calc(100% - clamp(1.5rem, 6vw, 6rem))); margin-inline: auto; padding-block: 5.25rem 3rem; }
+    .eyebrow { margin: 0; color: var(--green); font: 800 0.875rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 0.08em; text-transform: uppercase; }
+    h1, h2, h3, p { overflow-wrap: break-word; }
+    h1 { max-inline-size: 16ch; margin: 0.45rem 0 0; font-size: clamp(2.25rem, 6vw, 5.5rem); line-height: 0.94; letter-spacing: -0.055em; }
+    h2 { margin: 0; font-size: clamp(1.3rem, 2.5vw, 2rem); letter-spacing: -0.025em; }
+    h3 { margin: 0; font-size: clamp(1.1rem, 2vw, 1.38rem); }
+    .lead { max-inline-size: 68ch; margin: 1.2rem 0 0; color: var(--muted); font-size: 1rem; line-height: 1.6; }
+    .owner-note { max-inline-size: 72ch; margin: 1rem 0 0; border-inline-start: 0.25rem solid var(--gold); padding: 0.75rem 0.9rem; background: color-mix(in srgb, var(--gold) 9%, transparent); color: var(--muted); font-size: 0.9375rem; line-height: 1.5; }
+    .owner-note strong { color: var(--ink); }
+
+    .legend, .evidence, .knowledge { margin-block-start: 1.3rem; border: 1px solid var(--line); background: var(--surface); }
+    .legend { display: flex; flex-wrap: wrap; gap: 0.65rem 1rem; align-items: center; padding: 0.85rem 1rem; }
+    .legend strong { margin-inline-end: 0.25rem; }
+    .legend-list { display: flex; flex: 1; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+    .status { display: inline-flex; align-items: center; min-block-size: 2rem; border: 1px solid currentcolor; border-radius: 999px; padding-inline: 0.7rem; font: 800 0.875rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .prototype { color: var(--green); background: #14281b; }
+    .planned { color: var(--blue); background: #102539; }
+    .mandatory { color: var(--gold); background: #322d15; }
+
+    .journey { margin-block-start: 1.3rem; }
+    .section-intro { margin: 0.65rem 0 0; color: var(--muted); line-height: 1.5; }
+    .route-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.75rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+    .route-list > li { position: relative; min-inline-size: 0; }
+    .route-list > li:not(:last-child)::after { position: absolute; z-index: 1; inset: 50% -0.65rem auto auto; color: var(--green); content: "→"; font-size: 1.25rem; translate: 50% -50%; }
+    .journey-card, .secondary-card, .evidence-card, .knowledge-card { min-block-size: 100%; border: 1px solid var(--line); background: var(--surface); }
+    .journey-card { display: grid; gap: 0.85rem; padding: 1rem; }
+    .journey-card[data-status="prototype"] { border-color: color-mix(in srgb, var(--green) 60%, var(--line)); background: linear-gradient(135deg, #15291c, var(--surface)); }
+    .card-copy { margin: 0; color: var(--muted); font-size: 0.9375rem; line-height: 1.5; }
+    .requirements { display: grid; gap: 0.42rem; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.875rem; line-height: 1.35; }
+    .requirements li::before { color: var(--green); content: "• "; }
+    .route-link { display: inline-flex; align-items: center; justify-content: center; min-block-size: 3rem; margin-block-start: auto; border: 1px solid var(--green); border-radius: 0.35rem; padding: 0.65rem 0.8rem; background: var(--green); color: #102015; font-weight: 850; text-align: center; text-decoration: none; }
+    .route-link:hover { background: #c4f3cd; }
+
+    .branch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-block-start: 1rem; }
+    .secondary-card { display: grid; gap: 0.75rem; padding: 1rem; }
+    .branch-card { border-color: color-mix(in srgb, var(--blue) 55%, var(--line)); background: #101d1c; }
+    .branch-card .route-link { border-color: var(--blue); background: var(--blue); color: #071926; }
+    .branch-card .route-link:hover { background: #c5e2ff; }
+
+    .evidence { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); gap: 1rem; padding: 1rem; }
+    .evidence-card { padding: 1rem; background: var(--surface-2); }
+    .evidence-card h3 { color: var(--gold); }
+    .evidence-card p { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.9375rem; line-height: 1.55; }
+    .evidence-card strong { color: var(--ink); }
+    .knowledge { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: 1rem; }
+    .knowledge-card { padding: 1rem; background: var(--surface-2); }
+    .knowledge-card p { margin: 0.65rem 0 0; color: var(--muted); line-height: 1.55; }
+    footer { margin-block-start: 1.5rem; color: var(--muted); font-size: 0.875rem; line-height: 1.5; }
+
+    @media (max-width: 68rem) {
+      .route-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .route-list > li:nth-child(3)::after { display: none; }
+    }
+    @media (max-width: 46rem) {
+      .shell { inline-size: min(100% - 1.5rem, 42rem); padding-block-start: 4.5rem; }
+      .route-list, .branch-grid, .evidence, .knowledge { grid-template-columns: 1fr; }
+      .route-list > li::after { display: none; }
+      .journey-card { min-block-size: auto; }
+    }
+    @media (prefers-contrast: more) { :root { --line: #95b5a4; --muted: #e0ebe5; } }
+    @media (prefers-reduced-motion: no-preference) { .route-link { transition: background-color 140ms ease; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#journey-map">Skip to journey map</a>
+  <div class="prototype-flag">Prototype · fake state</div>
+
+  <main class="shell" id="content" tabindex="-1">
+    <p class="eyebrow">Campus Puzzle Race · whole-app wayfinding</p>
+    <h1>Critical player journey</h1>
+    <p class="lead">A non-production map of the player-facing surfaces needed to move from account access to a Match result. It separates the four checked local prototypes from delivery work that still needs real services and end-to-end proof.</p>
+    <p class="owner-note"><strong>Production transition authority:</strong> the Core service owns account, profile, friend, and 42 OAuth transitions; the Game service owns Lobby, Match, Result, and recovery transitions; delivery documentation owns policy publication. This page makes no production transition.</p>
+
+    <nav class="legend" aria-label="Journey status legend">
+      <strong>Legend</strong>
+      <ul class="legend-list">
+        <li><span class="status prototype">Prototype available</span></li>
+        <li><span class="status planned">Production planned</span></li>
+        <li><span class="status mandatory">Mandatory delivery</span></li>
+      </ul>
+    </nav>
+
+    <section class="journey" id="journey-map" aria-labelledby="journey-map-title">
+      <h2 id="journey-map-title">Primary route</h2>
+      <p class="section-intro">Account access → Home → Lobby → Live match → Result</p>
+      <ol class="route-list">
+        <li>
+          <article class="journey-card" data-status="planned">
+            <span class="status planned">Production planned</span>
+            <h3>Account access</h3>
+            <p class="card-copy">A secure entry point before any player can join a Lobby.</p>
+            <ul class="requirements"><li>Email/password</li><li>42 OAuth linking</li></ul>
+          </article>
+        </li>
+        <li>
+          <article class="journey-card" data-status="planned">
+            <span class="status planned">Production planned</span>
+            <h3>Home</h3>
+            <p class="card-copy">The signed-in start surface for choosing the next Team activity.</p>
+            <ul class="requirements"><li>Create/join lobby</li><li>Online friends</li></ul>
+          </article>
+        </li>
+        <li>
+          <article class="journey-card" data-status="prototype">
+            <span class="status prototype">Prototype available</span>
+            <h3>Lobby</h3>
+            <p class="card-copy">Selected Team Bays direction for Team and Role selection.</p>
+            <a class="route-link" href="lobby.html?variant=A">Open lobby prototype</a>
+          </article>
+        </li>
+        <li>
+          <article class="journey-card" data-status="prototype">
+            <span class="status prototype">Prototype available</span>
+            <h3>Live match</h3>
+            <p class="card-copy">Selected Operations Console direction for a role-based Match.</p>
+            <a class="route-link" href="index.html?variant=A">Open live match prototype</a>
+          </article>
+        </li>
+        <li>
+          <article class="journey-card" data-status="prototype">
+            <span class="status prototype">Prototype available</span>
+            <h3>Result</h3>
+            <p class="card-copy">Scenario-led outcome states with fake server-decision evidence.</p>
+            <a class="route-link" href="outcomes.html">Open result prototype</a>
+          </article>
+        </li>
+      </ol>
+    </section>
+
+    <section class="journey" aria-labelledby="secondary-surfaces-title">
+      <h2 id="secondary-surfaces-title">Recovery and secondary surfaces</h2>
+      <div class="branch-grid">
+        <article class="secondary-card branch-card">
+          <span class="status prototype">Prototype available</span>
+          <h3>Live match recovery branch</h3>
+          <p class="card-copy">A Match interruption can branch to local disconnect, reconnect, restored, or interrupted scenarios. The Game service would own the real recovery transition.</p>
+          <a class="route-link" href="recovery.html">Open recovery prototype</a>
+        </article>
+        <article class="secondary-card">
+          <span class="status planned">Production planned</span>
+          <h3>Profile &amp; friends</h3>
+          <p class="card-copy">Core-owned identity and social surfaces are required for the planned user modules.</p>
+          <ul class="requirements"><li>Profile</li><li>Avatar</li><li>Friends</li><li>Online status</li></ul>
+        </article>
+        <article class="secondary-card">
+          <span class="status mandatory">Mandatory delivery</span>
+          <h3>Policies</h3>
+          <p class="card-copy">Relevant public pages must be reachable before account access.</p>
+          <ul class="requirements"><li>Privacy Policy</li><li>Terms of Service</li></ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="evidence" aria-labelledby="evidence-title">
+      <div>
+        <p class="eyebrow">Subject-facing scope</p>
+        <h2 id="evidence-title">42 evidence rail</h2>
+      </div>
+      <article class="evidence-card">
+        <h3>Mandatory foundation</h3>
+        <p>Frontend, backend, database, responsive accessible UI, secure account flow, input validation, HTTPS, containerized launch, and policy pages remain delivery obligations. This map is navigation/design evidence only.</p>
+      </article>
+      <article class="evidence-card">
+        <h3>17-point module plan</h3>
+        <p>The planned total includes frameworks, real-time behavior, user interaction, user management, complete game, remote players, multiplayer, microservices, and OAuth. <strong>No module is claimed complete by this prototype.</strong></p>
+      </article>
+    </section>
+
+    <section class="knowledge" aria-label="Journey evidence boundaries">
+      <article class="knowledge-card">
+        <h2>What we know</h2>
+        <p>Lobby, Live match, Result, and Recovery have separate local UI prototypes. Their links and route relationships are represented here for desktop and mobile wayfinding.</p>
+      </article>
+      <article class="knowledge-card">
+        <h2>What remains</h2>
+        <p>Account access, Home, Profile &amp; friends, Policies, and every production service surface remain unimplemented. Authentication, persistence, concurrent users, WebSockets, and policy content still require production evidence.</p>
+      </article>
+    </section>
+
+    <footer>Throwaway navigation prototype. All content is local fake state; no network, authentication, storage, database, or service transition is present.</footer>
+  </main>
+  <p class="visually-hidden" aria-live="polite" aria-atomic="true">Journey map ready. Prototype and production-planned surfaces are labeled.</p>
+</body>
+</html>

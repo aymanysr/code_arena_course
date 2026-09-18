@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-09-18  
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2  
-Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, draft specification, ADRs, and planned module set.
+Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, draft specification, ADRs, and planned module set.
 
 Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player-journey-prototypes.md`](../../docs/superpowers/plans/2026-09-18-critical-player-journey-prototypes.md) covers outcome states, recovery/interruption states, the whole-app journey map, and final selected-direction capture. Planned files are not evidence until their checks pass and this matrix is updated.
 
@@ -88,6 +88,12 @@ This is design evidence only. It does **not** prove durable exactly-once result 
 
 This is intended UX design evidence only. Network latency, WebSocket behavior, authentication, snapshot filtering, persistence, and restart behavior still require production evidence. It does **not** prove graceful disconnection handling, real reconnection logic, concurrent client synchronization, durable role reservation, or any completed production module.
 
+## Critical journey map prototype evidence
+
+`journey.html` is a local, fake-state navigation map for the seven product surfaces: Account access, Home, Lobby, Live match, Result, Profile & friends, and Policies. It shows the primary Account access → Home → Lobby → Live match → Result route, the Live match recovery branch, status labels for prototype, planned, and mandatory-delivery work, and links to the checked Lobby, Live match, Result, and Recovery prototypes. Its evidence rail names the mandatory foundation and planned 17-point module total without claiming a completed module.
+
+This is navigation/design evidence only. Account access, Home, Profile & friends, Policies, and every production service surface remain unimplemented. The map does **not** prove authentication, OAuth linking, policy content, backend/database behavior, persistence, authorization, WebSockets, concurrent-user correctness, or any completed production module.
+
 ### Verification record - 2026-09-18
 
 - Embedded lobby JavaScript parsed successfully.
@@ -97,6 +103,7 @@ This is intended UX design evidence only. Network latency, WebSocket behavior, a
 - The checked browser sessions produced zero JavaScript console errors.
 - The outcome browser check exercised `win`, `loss`, `draw`, and `delay` at 1440x1000 and 390x844, including the 30-second-per-Hint rule, the exact 60-second Finish delay, before-deadline eligibility, equal-time draw, persisted-once indicator, required accounting/timelines and navigation links, one finish-delay finalization, URL scenario switching, and the native state dialog. Keyboard scenario activation retains visibly styled focus on the replacement selected control; keyboard delay advancement moves visibly styled focus to the updated result heading. It also verified at least 14px visible text, no prose-only `time` elements, no document overflow, no undersized targets, and no console/page errors.
 - The recovery browser check exercised `disconnected`, `reconnecting`, `restored`, and `interrupted` at 1440x1000 and 390x844. It verified the reserved Role, continuing Match clock, unavailable private controls while disconnected, re-authentication without action replay, restored role-filtered clues/controls plus simulated shared progress, Team chat, and penalty state, and no fabricated interruption result. It also checked URL scenario switching, the two-step `Continue recovery` transition, native state inspector, no document overflow, no interactive target below 44px at either viewport, and no console/page errors.
+- The journey browser check rendered all seven navigation nodes at 1440x1000 and 390x844. It verified the four exact prototype links, text labels for Prototype available, Production planned, and Mandatory delivery, the mandatory-foundation and 17-point evidence rail, skip-link and visible keyboard focus behavior, no document overflow, no interactive target below 44px, and no console/page errors.
 - This record verifies only the throwaway prototype behavior described here; production evidence remains outstanding wherever the tables say Designed, Not started, or Required later.
 
 ## Requirements not demonstrated by these prototypes
