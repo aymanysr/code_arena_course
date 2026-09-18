@@ -82,6 +82,12 @@ Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player
 
 This is design evidence only. It does **not** prove durable exactly-once result persistence, server clocks, transactional concurrency, deadline enforcement, multi-client synchronization, or any completed production module.
 
+## Match recovery prototype evidence
+
+`recovery.html` exercises four local, fake-state scenarios for `MATCH-C42-014`: Saad disconnects while the Match clock and Retry cooldown continue and the Answer builder Role remains reserved; reconnecting requires authentication without replaying unacknowledged actions; restoring returns only Saad's role-filtered private controls; and an unrecoverable game-service restart records no win or loss and requires a new Match. The page keeps continuity signals visible, distinguishes authentication from snapshot restoration, and states that teammates do not inherit private clues or controls.
+
+This is intended UX design evidence only. Network latency, WebSocket behavior, authentication, snapshot filtering, persistence, and restart behavior still require production evidence. It does **not** prove graceful disconnection handling, real reconnection logic, concurrent client synchronization, durable role reservation, or any completed production module.
+
 ### Verification record - 2026-09-18
 
 - Embedded lobby JavaScript parsed successfully.
@@ -90,6 +96,7 @@ This is design evidence only. It does **not** prove durable exactly-once result 
 - The six checked viewports had no document-level horizontal overflow or interactive target below 44px.
 - The checked browser sessions produced zero JavaScript console errors.
 - The outcome browser check exercised `win`, `loss`, `draw`, and `delay` at 1440x1000 and 390x844, including the 30-second-per-Hint rule, the exact 60-second Finish delay, before-deadline eligibility, equal-time draw, persisted-once indicator, required accounting/timelines and navigation links, one finish-delay finalization, URL scenario switching, and the native state dialog. Keyboard scenario activation retains visibly styled focus on the replacement selected control; keyboard delay advancement moves visibly styled focus to the updated result heading. It also verified at least 14px visible text, no prose-only `time` elements, no document overflow, no undersized targets, and no console/page errors.
+- The recovery browser check exercised `disconnected`, `reconnecting`, `restored`, and `interrupted` at 1440x1000 and 390x844. It verified the reserved Role, continuing Match clock, unavailable private controls while disconnected, re-authentication without action replay, restored role-filtered private controls, and no fabricated interruption result. It also checked URL scenario switching, the two-step `Continue recovery` transition, native state inspector, no document overflow, no interactive target below 44px, and no console/page errors.
 - This record verifies only the throwaway prototype behavior described here; production evidence remains outstanding wherever the tables say Designed, Not started, or Required later.
 
 ## Requirements not demonstrated by these prototypes
