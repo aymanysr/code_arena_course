@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Match Outcome Prototype | Campus Puzzle Race</title>
+  <!-- THROWAWAY LOGIC PROTOTYPE: Does a server-decided eligibility model make wins, losses, ties, and hint finish delays understandable? -->
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      --bg: #07100d;
+      --surface: #0d1a16;
+      --surface-2: #13231e;
+      --line: #315044;
+      --ink: #e4efe9;
+      --muted: #9ab1a6;
+      --accent: #c8f36a;
+      --accent-ink: #102008;
+      --blue: #8dd8ff;
+      --coral: #ff9a80;
+      --warning: #f6cb6f;
+      --focus: #ffffff;
+      --safe: clamp(0.85rem, 3vw, 3rem);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-inline-size: 20rem; background: var(--bg); }
+    body { min-block-size: 100dvh; margin: 0; background: var(--bg); color: var(--ink); }
+    button, a { font: inherit; }
+    button { cursor: pointer; }
+    :where(a, button):focus-visible { outline: 0.2rem solid var(--focus); outline-offset: 0.2rem; }
+
+    .skip-link {
+      position: fixed;
+      z-index: 10;
+      inset: 0.75rem auto auto 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      min-block-size: 3rem;
+      padding-inline: 0.9rem;
+      translate: 0 -180%;
+      background: #ffffff;
+      color: #101010;
+      font-weight: 800;
+    }
+    .skip-link:focus { translate: 0; }
+    .prototype-flag {
+      margin-inline: auto;
+      inline-size: fit-content;
+      border-radius: 0 0 0.45rem 0.45rem;
+      padding: 0.3rem 0.75rem;
+      background: var(--warning);
+      color: #221c08;
+      font: 800 0.8rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .visually-hidden {
+      position: absolute !important;
+      clip-path: inset(50%) !important;
+      overflow: hidden !important;
+      inline-size: 1px !important;
+      block-size: 1px !important;
+      margin: -1px !important;
+      padding: 0 !important;
+      border: 0 !important;
+      white-space: nowrap !important;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .eyebrow { margin: 0; color: var(--muted); font: 800 0.8rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+    .num { font-variant-numeric: tabular-nums; }
+
+    main { min-block-size: 100dvh; padding: 0 var(--safe) max(2rem, env(safe-area-inset-bottom)); }
+    .shell { max-inline-size: 82rem; margin-inline: auto; }
+    .topbar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: end; padding-block: clamp(1.5rem, 5vw, 4rem) 1.25rem; border-block-end: 1px solid var(--line); }
+    h1, h2, h3, p { overflow-wrap: anywhere; }
+    h1 { max-inline-size: 18ch; margin: 0.25rem 0 0; font-size: clamp(2rem, 5vw, 4.6rem); line-height: 0.98; letter-spacing: -0.045em; }
+    h2 { margin: 0; font-size: clamp(1.2rem, 2vw, 1.65rem); }
+    h3 { margin: 0; font-size: 1rem; }
+    .match-meta { display: grid; gap: 0.25rem; justify-items: end; color: var(--muted); text-align: end; }
+    .match-meta strong { color: var(--ink); }
+    .intro { max-inline-size: 72ch; margin: 1.15rem 0 1.4rem; color: var(--muted); line-height: 1.55; }
+
+    .scenario-bar { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 1rem; align-items: center; margin-block-end: 1rem; padding: 0.8rem; border: 1px solid var(--line); background: var(--surface); }
+    .scenario-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .control, .action-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-block-size: 3rem;
+      min-inline-size: 3rem;
+      border: 1px solid var(--line);
+      border-radius: 0.38rem;
+      padding: 0.65rem 0.85rem;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .control[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, var(--surface)); color: var(--accent); }
+    .control.primary { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+    .control:disabled { cursor: not-allowed; opacity: 0.55; }
+
+    .decision { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(15rem, 0.8fr); gap: 1rem; margin-block-end: 1rem; }
+    .panel { min-inline-size: 0; border: 1px solid var(--line); background: var(--surface); }
+    .panel-head { padding: 1rem 1rem 0; }
+    .panel-body { padding: 1rem; }
+    .result-card { display: grid; gap: 1rem; min-block-size: 100%; padding: clamp(1.1rem, 3vw, 2rem); background: var(--surface-2); }
+    .result-card .eyebrow { color: var(--accent); }
+    .result-card h2 { font-size: clamp(1.65rem, 3.3vw, 2.6rem); }
+    .result-card p { max-inline-size: 60ch; margin: 0; color: var(--muted); line-height: 1.55; }
+    .outcome { display: inline-flex; inline-size: fit-content; align-items: center; min-block-size: 2rem; border-radius: 99rem; padding-inline: 0.75rem; background: #1d3027; color: var(--accent); font: 800 0.8rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+    .outcome.pending { background: #392f15; color: var(--warning); }
+    .outcome.draw { background: #233039; color: var(--blue); }
+    .decision-list { display: grid; gap: 0.75rem; margin: 0; }
+    .decision-list div { border-block-end: 1px solid var(--line); padding-block-end: 0.7rem; }
+    .decision-list div:last-child { border: 0; padding-block-end: 0; }
+    .decision-list dt { color: var(--muted); font-size: 0.8rem; }
+    .decision-list dd { margin: 0.2rem 0 0; font-weight: 750; }
+    .persisted { color: var(--accent); }
+    .not-persisted { color: var(--warning); }
+
+    .content-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .timeline { display: grid; gap: 0.85rem; margin: 0; padding: 0; list-style: none; }
+    .timeline li { position: relative; border-inline-start: 2px solid var(--line); padding-inline-start: 1rem; }
+    .timeline li::before { position: absolute; inset: 0 auto auto -0.38rem; inline-size: 0.65rem; block-size: 0.65rem; border-radius: 50%; background: currentColor; content: ""; }
+    .timeline time { display: block; color: var(--muted); font: 700 0.8rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .timeline strong, .timeline span { display: block; margin-block-start: 0.18rem; }
+    .timeline span { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+    .team-blue { color: var(--blue); }
+    .team-coral { color: var(--coral); }
+    .accounting { display: grid; gap: 0.75rem; }
+    .accounting-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.8rem; align-items: center; border-block-end: 1px solid var(--line); padding-block-end: 0.75rem; }
+    .accounting-row:last-child { border: 0; padding-block-end: 0; }
+    .accounting-row span { color: var(--muted); font-size: 0.9rem; }
+    .accounting-row strong { text-align: end; }
+    .rule-note { margin: 1rem 0 0; border-inline-start: 0.25rem solid var(--warning); padding: 0.75rem 0.9rem; background: color-mix(in srgb, var(--warning) 9%, transparent); color: var(--muted); line-height: 1.5; }
+    .rule-note strong { color: var(--ink); }
+
+    .bottom-actions { display: flex; flex-wrap: wrap; gap: 0.65rem; margin-block: 1rem 0; }
+    .action-link.primary { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+    .footer-note { margin: 1.25rem 0 0; color: var(--muted); font-size: 0.88rem; line-height: 1.55; }
+
+    dialog { inline-size: min(42rem, calc(100% - 2rem)); max-block-size: calc(100dvh - 2rem); border: 1px solid var(--line); border-radius: 0.5rem; background: var(--surface); color: var(--ink); padding: 0; }
+    dialog::backdrop { background: rgb(0 0 0 / 0.72); }
+    dialog form { display: grid; gap: 0.8rem; padding: 1rem; }
+    dialog h2 { margin: 0; }
+    dialog pre { max-block-size: 50dvh; margin: 0; overflow: auto; border: 1px solid var(--line); background: #050a08; padding: 0.9rem; color: var(--blue); font: 0.82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
+    .dialog-actions { display: flex; justify-content: flex-end; }
+    .sr-status { position: fixed; inset: auto auto 0 0; }
+
+    @media (max-width: 46rem) {
+      .topbar, .scenario-bar, .decision, .content-grid { grid-template-columns: 1fr; }
+      .match-meta { justify-items: start; text-align: start; }
+      .scenario-bar > .control { inline-size: 100%; }
+      .scenario-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scenario-buttons .control { inline-size: 100%; }
+    }
+    @media (prefers-contrast: more) { :root { --line: #86aa99; --muted: #cad7d0; } }
+    @media (prefers-reduced-motion: no-preference) { .control, .action-link { transition: background-color 140ms ease, border-color 140ms ease; } }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to outcome details</a>
+  <div class="prototype-flag">Prototype · fake state</div>
+  <main id="content" tabindex="-1">
+    <div id="app"></div>
+  </main>
+  <p class="visually-hidden sr-status" id="live-status" aria-live="polite" aria-atomic="true"></p>
+
+  <dialog id="state-dialog" aria-labelledby="state-title">
+    <form method="dialog">
+      <p class="eyebrow">Prototype inspector</p>
+      <h2 id="state-title">Current fake outcome state</h2>
+      <pre tabindex="0"><code id="state-output"></code></pre>
+      <div class="dialog-actions"><button class="control" value="close">Close</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    // Pure scenario data and transition logic: no DOM, network, clock, or persistence dependency.
+    const MATCH_ID = "MATCH-C42-014";
+    const ROOM = "Campus lockdown";
+    const DEADLINE = 900;
+    const scenarios = ["win", "loss", "draw", "delay"];
+
+    function snapshot(scenario) {
+      const common = { scenario, matchId: MATCH_ID, room: ROOM };
+      if (scenario === "win") return {
+        ...common,
+        result: { status: "final", winner: "blue", persisted: true },
+        blue: { solvedAt: 720, hintsUsed: 1, finishDelayRemaining: 0, eligibilityAt: 750 },
+        coral: { solvedAt: 760, hintsUsed: 0, finishDelayRemaining: 0, eligibilityAt: 760 },
+        lastEvent: "Game service selected Blue at eligibility time 12:30 and stored one terminal result (simulated)."
+      };
+      if (scenario === "loss") return {
+        ...common,
+        result: { status: "final", winner: "coral", persisted: true },
+        blue: { solvedAt: 800, hintsUsed: 1, finishDelayRemaining: 0, eligibilityAt: 830 },
+        coral: { solvedAt: 790, hintsUsed: 0, finishDelayRemaining: 0, eligibilityAt: 790 },
+        lastEvent: "Game service selected Coral: its eligibility time is earlier than Blue's (simulated)."
+      };
+      if (scenario === "draw") return {
+        ...common,
+        result: { status: "final", winner: null, persisted: true },
+        blue: { solvedAt: 750, hintsUsed: 1, finishDelayRemaining: 0, eligibilityAt: 780 },
+        coral: { solvedAt: 780, hintsUsed: 0, finishDelayRemaining: 0, eligibilityAt: 780 },
+        lastEvent: "Exact equal eligibility times resolve to a draw; no team wins (simulated)."
+      };
+      return {
+        ...common,
+        result: { status: "pending", winner: null, persisted: false },
+        blue: { solvedAt: 780, hintsUsed: 2, finishDelayRemaining: 60, eligibilityAt: 840 },
+        coral: { solvedAt: null, hintsUsed: 0, finishDelayRemaining: 0, eligibilityAt: null },
+        lastEvent: "Blue solved every stage, but its two accepted hints leave 60 seconds before it can be eligible."
+      };
+    }
+
+    function advanceFinishDelay(current) {
+      if (current.scenario !== "delay" || current.result.status === "final") return current;
+      const next = structuredClone(current);
+      next.blue.finishDelayRemaining = 0;
+      next.result = { status: "final", winner: "blue", persisted: true };
+      next.lastEvent = "Blue's finish delay elapsed. The simulated server finalized Blue once before the deadline.";
+      return next;
+    }
+
+    function requestedScenario() {
+      const candidate = new URLSearchParams(location.search).get("scenario");
+      return scenarios.includes(candidate) ? candidate : "win";
+    }
+
+    let state = snapshot(requestedScenario());
+    const app = document.querySelector("#app");
+    const liveStatus = document.querySelector("#live-status");
+    const stateDialog = document.querySelector("#state-dialog");
+    const stateOutput = document.querySelector("#state-output");
+    window.__OUTCOME_STATE__ = () => structuredClone(state);
+
+    function formatTime(seconds) {
+      if (seconds === null) return "Not completed";
+      return `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+    }
+
+    function teamName(team) { return team === "blue" ? "Blue" : "Coral"; }
+    function resultSummary(current) {
+      if (current.result.status === "pending") return { label: "Pending · finish delay", className: "pending", title: "Blue can still be overtaken", copy: "Blue has solved all stages, but its 60-second hint delay has not elapsed. Coral can still reach an earlier eligibility time and win." };
+      if (current.result.winner === null) return { label: "Final · draw", className: "draw", title: "Match drawn", copy: "Both teams reached the exact same eligibility time. The rules award no winner for an exact tie." };
+      const winner = teamName(current.result.winner);
+      return { label: "Final · result recorded", className: "", title: `${winner} wins`, copy: `${winner}'s eligibility time is the earliest time strictly before the 15:00 deadline. This page illustrates the server decision; it does not persist anything.` };
+    }
+
+    function timeline(team, data) {
+      const label = teamName(team);
+      const color = team === "blue" ? "team-blue" : "team-coral";
+      const completion = data.solvedAt === null
+        ? "No final submission has been accepted."
+        : `All stages solved at ${formatTime(data.solvedAt)}.`;
+      const eligibility = data.eligibilityAt === null
+        ? "No eligibility time yet."
+        : `Eligibility calculated at ${formatTime(data.eligibilityAt)}.`;
+      return `<section class="panel ${color}" aria-labelledby="${team}-timeline-title">
+        <div class="panel-head"><p class="eyebrow">${label} team</p><h2 id="${team}-timeline-title">Decision timeline</h2></div>
+        <div class="panel-body"><ol class="timeline">
+          <li><time>Match deadline · ${formatTime(DEADLINE)}</time><strong>Eligibility must be strictly before this time.</strong><span>At the deadline is not a win.</span></li>
+          <li><time>Final stage · ${formatTime(data.solvedAt)}</time><strong>${completion}</strong><span>${data.hintsUsed} hint${data.hintsUsed === 1 ? "" : "s"} accepted × 30 seconds each.</span></li>
+          <li><time>Eligibility · ${formatTime(data.eligibilityAt)}</time><strong>${eligibility}</strong><span>${data.finishDelayRemaining > 0 ? `${data.finishDelayRemaining}s of finish delay remains.` : "No finish delay remains."}</span></li>
+        </ol></div>
+      </section>`;
+    }
+
+    function accounting(team, data) {
+      const label = teamName(team);
+      return `<div class="accounting-row"><span>${label} · hints / delay</span><strong class="num">${data.hintsUsed} / ${data.hintsUsed * 30}s</strong></div>
+        <div class="accounting-row"><span>${label} · remaining now</span><strong class="num">${data.finishDelayRemaining}s</strong></div>
+        <div class="accounting-row"><span>${label} · eligibility</span><strong class="mono">${formatTime(data.eligibilityAt)}</strong></div>`;
+    }
+
+    function render() {
+      const decision = resultSummary(state);
+      const delayControl = state.scenario === "delay"
+        ? `<button class="control primary" type="button" data-action="advance-delay" ${state.result.status === "final" ? "disabled" : ""}>Advance finish delay</button>`
+        : "";
+      app.innerHTML = `<div class="shell">
+        <header class="topbar">
+          <div><p class="eyebrow">Outcome console · ${state.room}</p><h1>Match decision: ${decision.title}</h1></div>
+          <div class="match-meta"><span class="eyebrow">Authoritative match ID</span><strong class="mono">${state.matchId}</strong><span class="num">Deadline ${formatTime(DEADLINE)}</span></div>
+        </header>
+        <p class="intro">Question this throwaway prototype explores: can players understand that the game service compares server-recorded eligibility times, including hint finish delays, rather than trusting a browser countdown to decide a winner?</p>
+        <nav class="scenario-bar" aria-label="Outcome scenarios">
+          <div class="scenario-buttons">${scenarios.map((scenario) => `<button class="control" type="button" data-scenario="${scenario}" aria-pressed="${state.scenario === scenario}">${scenario[0].toUpperCase() + scenario.slice(1)}</button>`).join("")}</div>
+          <button class="control" type="button" id="show-state">Inspect state</button>
+        </nav>
+        <div class="decision">
+          <section class="result-card" aria-labelledby="decision-title"><p class="eyebrow">Server decision explanation</p><span class="outcome ${decision.className}">${decision.label}</span><h2 id="decision-title">${decision.title}</h2><p>${decision.copy}</p>${delayControl}</section>
+          <aside class="panel" aria-labelledby="accounting-title"><div class="panel-head"><p class="eyebrow">Hint / finish-delay accounting</p><h2 id="accounting-title">Eligibility ledger</h2></div><div class="panel-body accounting">${accounting("blue", state.blue)}${accounting("coral", state.coral)}<div class="accounting-row"><span>Result write</span><strong class="${state.result.persisted ? "persisted" : "not-persisted"}">${state.result.persisted ? "Recorded once · simulated" : "Not terminal yet"}</strong></div></div></aside>
+        </div>
+        <div class="content-grid">${timeline("blue", state.blue)}${timeline("coral", state.coral)}</div>
+        <p class="rule-note"><strong>Rule being tested:</strong> final successful submission time + accumulated hint delay = eligibility time. The earliest eligibility strictly before 15:00 wins; exact equal times draw. A team can lose while waiting through its finish delay.</p>
+        <div class="bottom-actions"><a class="action-link primary" href="journey.html">Play again</a><a class="action-link" href="lobby.html?variant=A">Return to lobby</a></div>
+        <p class="footer-note">Prototype scope only: this is local in-memory state and rendered copy. It does not demonstrate durable exactly-once result persistence, server clocks, concurrency control, network synchronization, or a completed production module.</p>
+      </div>`;
+      document.title = `${decision.title} Outcome Prototype | Campus Puzzle Race`;
+      stateOutput.textContent = JSON.stringify(state, null, 2);
+      liveStatus.textContent = state.lastEvent;
+    }
+
+    function chooseScenario(scenario) {
+      const params = new URLSearchParams(location.search);
+      params.set("scenario", scenario);
+      history.pushState(null, "", `${location.pathname}?${params.toString()}`);
+      state = snapshot(scenario);
+      render();
+    }
+
+    app.addEventListener("click", (event) => {
+      const scenarioButton = event.target.closest("[data-scenario]");
+      if (scenarioButton) { chooseScenario(scenarioButton.dataset.scenario); return; }
+      if (event.target.closest("[data-action='advance-delay']")) { state = advanceFinishDelay(state); render(); }
+    });
+    document.addEventListener("click", (event) => {
+      if (event.target.closest("#show-state")) stateDialog.showModal();
+    });
+    addEventListener("popstate", () => { state = snapshot(requestedScenario()); render(); });
+    render();
+  </script>
+</body>
+</html>

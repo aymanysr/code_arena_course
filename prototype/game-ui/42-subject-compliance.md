@@ -76,6 +76,12 @@ Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player
 - Reduced-motion and increased-contrast preferences are respected.
 - These choices support the mandatory accessible frontend requirement; they do **not** claim the optional WCAG 2.1 AA major module.
 
+## Match outcome prototype evidence
+
+`outcomes.html` exercises four local, fake-state scenarios for `MATCH-C42-014`: Blue wins with an earlier eligibility time before the deadline; Coral wins while Blue completes later; equal eligibility times resolve to a draw; and Blue's 60-second finish delay leaves the result pending while Coral can still win. The page shows the server-decision model, both Team timelines, Hint and Finish delay accounting, an idempotent local delay-advance probe, and a simulated result-persisted-once indicator.
+
+This is design evidence only. It does **not** prove durable exactly-once result persistence, server clocks, transactional concurrency, deadline enforcement, multi-client synchronization, or any completed production module.
+
 ### Verification record - 2026-09-18
 
 - Embedded lobby JavaScript parsed successfully.
@@ -83,6 +89,7 @@ Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player
 - Team moves, unique role selection, readiness clearing, 2v2/3v3 equality, start gating, disconnected-slot reservation, full/started rejection feedback, and the state inspector were exercised in Chromium.
 - The six checked viewports had no document-level horizontal overflow or interactive target below 44px.
 - The checked browser sessions produced zero JavaScript console errors.
+- The outcome browser check exercised `win`, `loss`, `draw`, and `delay` at 1440x1000 and 390x844, including one finish-delay finalization, URL scenario switching, and the native state dialog; it reported no document overflow, undersized targets, or console/page errors.
 - This record verifies only the throwaway prototype behavior described here; production evidence remains outstanding wherever the tables say Designed, Not started, or Required later.
 
 ## Requirements not demonstrated by these prototypes
