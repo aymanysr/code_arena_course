@@ -8,7 +8,7 @@ Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player
 
 ## Maintenance rule
 
-`AGENTS.md` requires this matrix to be reviewed after every project change. Update it in the same change whenever evidence, scope, module claims, assumptions, or compliance status changes. A checked prototype behavior is design evidence only; it is not implementation evidence for a production module.
+`AGENTS.md` requires every project artifact and change to adhere to `ft_transcendence.pdf`, with conflicts resolved in favor of the PDF. This matrix must be reviewed after every project change and updated in the same change whenever evidence, scope, module claims, assumptions, or compliance status changes. A checked prototype behavior is design evidence only; it is not implementation evidence for a production module.
 
 ## Status key
 
