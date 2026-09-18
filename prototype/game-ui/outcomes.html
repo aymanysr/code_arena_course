@@ -31,7 +31,7 @@
     body { min-block-size: 100dvh; margin: 0; background: var(--bg); color: var(--ink); }
     button, a { font: inherit; }
     button { cursor: pointer; }
-    :where(a, button):focus-visible { outline: 0.2rem solid var(--focus); outline-offset: 0.2rem; }
+    :where(a, button, [tabindex="-1"]):focus-visible { outline: 0.2rem solid var(--focus); outline-offset: 0.2rem; }
 
     .skip-link {
       position: fixed;
@@ -281,7 +281,7 @@
         <div class="accounting-row"><span>${label} · eligibility</span><strong class="mono">${formatTime(data.eligibilityAt)}</strong></div>`;
     }
 
-    function render() {
+    function render({ focusSelector } = {}) {
       const decision = resultSummary(state);
       const delayControl = state.scenario === "delay"
         ? `<button class="control primary" type="button" data-action="advance-delay" ${state.result.status === "final" ? "disabled" : ""}>Advance finish delay</button>`
@@ -297,7 +297,7 @@
           <button class="control" type="button" id="show-state">Inspect state</button>
         </nav>
         <div class="decision">
-          <section class="result-card" aria-labelledby="decision-title"><p class="eyebrow">Server decision explanation</p><span class="outcome ${decision.className}">${decision.label}</span><h2 id="decision-title">${decision.title}</h2><p>${decision.copy}</p>${delayControl}</section>
+          <section class="result-card" aria-labelledby="decision-title"><p class="eyebrow">Server decision explanation</p><span class="outcome ${decision.className}">${decision.label}</span><h2 id="decision-title" tabindex="-1">${decision.title}</h2><p>${decision.copy}</p>${delayControl}</section>
           <aside class="panel" aria-labelledby="accounting-title"><div class="panel-head"><p class="eyebrow">Hint / finish-delay accounting</p><h2 id="accounting-title">Eligibility ledger</h2></div><div class="panel-body accounting">${accounting("blue", state.blue)}${accounting("coral", state.coral)}<div class="accounting-row"><span>Result write</span><strong class="${state.result.persisted ? "persisted" : "not-persisted"}">${state.result.persisted ? "Recorded once · simulated" : "Not terminal yet"}</strong></div></div></aside>
         </div>
         <div class="content-grid">${timeline("blue", state.blue)}${timeline("coral", state.coral)}</div>
@@ -308,6 +308,7 @@
       document.title = `${decision.title} Outcome Prototype | Campus Puzzle Race`;
       stateOutput.textContent = JSON.stringify(state, null, 2);
       liveStatus.textContent = state.lastEvent;
+      if (focusSelector) app.querySelector(focusSelector)?.focus();
     }
 
     function chooseScenario(scenario) {
@@ -315,13 +316,13 @@
       params.set("scenario", scenario);
       history.pushState(null, "", `${location.pathname}?${params.toString()}`);
       state = snapshot(scenario);
-      render();
+      render({ focusSelector: `[data-scenario="${scenario}"]` });
     }
 
     app.addEventListener("click", (event) => {
       const scenarioButton = event.target.closest("[data-scenario]");
       if (scenarioButton) { chooseScenario(scenarioButton.dataset.scenario); return; }
-      if (event.target.closest("[data-action='advance-delay']")) { state = advanceFinishDelay(state); render(); }
+      if (event.target.closest("[data-action='advance-delay']")) { state = advanceFinishDelay(state); render({ focusSelector: "#decision-title" }); }
     });
     document.addEventListener("click", (event) => {
       if (event.target.closest("#show-state")) stateDialog.showModal();
