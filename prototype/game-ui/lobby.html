@@ -498,6 +498,7 @@
     }
 
     const store = createStore(initialState);
+    let focusAfterRender = null;
     const app = document.querySelector("#app");
     const liveStatus = document.querySelector("#live-status");
     const stateDialog = document.querySelector("#state-dialog");
@@ -650,7 +651,7 @@
     }
 
     function startedMarkup(state) {
-      return `<div class="app-shell">${topbarMarkup(state)}${eventMarkup(state)}<section class="panel started-card"><p class="eyebrow">Prototype transition</p><h2>Both teams are deployed.</h2><p>The lobby has produced two equal teams with unique roles and confirmed readiness. In production, the game service would serialize this transition and broadcast the authoritative match snapshot.</p><div class="actions inline"><a class="button primary" href="index.html?variant=A">Open active-match prototype</a><button class="button" type="button" data-action="reset">Reset lobby</button></div></section></div>`;
+      return `<div class="app-shell">${topbarMarkup(state, true)}${eventMarkup(state)}<section class="panel started-card"><p class="eyebrow">Prototype transition</p><h2>Both teams are deployed.</h2><p>The lobby has produced two equal teams with unique roles and confirmed readiness. In production, the game service would serialize this transition and broadcast the authoritative match snapshot.</p><div class="actions inline"><a class="button primary" href="index.html?variant=A">Open active-match prototype</a><button class="button" type="button" data-action="reset">Reset lobby</button></div></section></div>`;
     }
 
     const renderers = { A: renderVariantA, B: renderVariantB, C: renderVariantC };
@@ -666,6 +667,10 @@
       document.title = `${meta.name} Lobby Prototype | Campus Puzzle Race`;
       stateOutput.textContent = JSON.stringify({ ...state, derived: readiness(state) }, null, 2);
       liveStatus.textContent = state.lastEvent;
+      if (focusAfterRender) {
+        app.querySelector(focusAfterRender)?.focus();
+        focusAfterRender = null;
+      }
     }
 
     function setVariant(key) {
@@ -779,6 +784,7 @@
           store.update(() => {}, "Start rejected: both teams must be full, uniquely assigned, connected, and ready.");
           return;
         }
+        focusAfterRender = 'a[href="journey.html"]';
         store.update((state) => { state.started = true; }, "Match transition accepted once by the authoritative game service (simulated)." );
         return;
       }
