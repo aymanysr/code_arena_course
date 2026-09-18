@@ -54,7 +54,7 @@
       padding: 0.3rem 0.75rem;
       background: var(--warning);
       color: #221c08;
-      font: 800 0.8rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font: 800 0.875rem/1.2 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
@@ -70,7 +70,7 @@
       white-space: nowrap !important;
     }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .eyebrow { margin: 0; color: var(--muted); font: 800 0.8rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+    .eyebrow { margin: 0; color: var(--muted); font: 800 0.875rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.1em; text-transform: uppercase; }
     .num { font-variant-numeric: tabular-nums; }
 
     main { min-block-size: 100dvh; padding: 0 var(--safe) max(2rem, env(safe-area-inset-bottom)); }
@@ -112,13 +112,13 @@
     .result-card .eyebrow { color: var(--accent); }
     .result-card h2 { font-size: clamp(1.65rem, 3.3vw, 2.6rem); }
     .result-card p { max-inline-size: 60ch; margin: 0; color: var(--muted); line-height: 1.55; }
-    .outcome { display: inline-flex; inline-size: fit-content; align-items: center; min-block-size: 2rem; border-radius: 99rem; padding-inline: 0.75rem; background: #1d3027; color: var(--accent); font: 800 0.8rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; }
+    .outcome { display: inline-flex; inline-size: fit-content; align-items: center; min-block-size: 2rem; border-radius: 99rem; padding-inline: 0.75rem; background: #1d3027; color: var(--accent); font: 800 0.875rem/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: 0.06em; text-transform: uppercase; }
     .outcome.pending { background: #392f15; color: var(--warning); }
     .outcome.draw { background: #233039; color: var(--blue); }
     .decision-list { display: grid; gap: 0.75rem; margin: 0; }
     .decision-list div { border-block-end: 1px solid var(--line); padding-block-end: 0.7rem; }
     .decision-list div:last-child { border: 0; padding-block-end: 0; }
-    .decision-list dt { color: var(--muted); font-size: 0.8rem; }
+    .decision-list dt { color: var(--muted); font-size: 0.875rem; }
     .decision-list dd { margin: 0.2rem 0 0; font-weight: 750; }
     .persisted { color: var(--accent); }
     .not-persisted { color: var(--warning); }
@@ -127,7 +127,7 @@
     .timeline { display: grid; gap: 0.85rem; margin: 0; padding: 0; list-style: none; }
     .timeline li { position: relative; border-inline-start: 2px solid var(--line); padding-inline-start: 1rem; }
     .timeline li::before { position: absolute; inset: 0 auto auto -0.38rem; inline-size: 0.65rem; block-size: 0.65rem; border-radius: 50%; background: currentColor; content: ""; }
-    .timeline time { display: block; color: var(--muted); font: 700 0.8rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .timeline-time { display: block; color: var(--muted); font: 700 0.875rem/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
     .timeline strong, .timeline span { display: block; margin-block-start: 0.18rem; }
     .timeline span { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
     .team-blue { color: var(--blue); }
@@ -148,7 +148,7 @@
     dialog::backdrop { background: rgb(0 0 0 / 0.72); }
     dialog form { display: grid; gap: 0.8rem; padding: 1rem; }
     dialog h2 { margin: 0; }
-    dialog pre { max-block-size: 50dvh; margin: 0; overflow: auto; border: 1px solid var(--line); background: #050a08; padding: 0.9rem; color: var(--blue); font: 0.82rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
+    dialog pre { max-block-size: 50dvh; margin: 0; overflow: auto; border: 1px solid var(--line); background: #050a08; padding: 0.9rem; color: var(--blue); font: 0.875rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; }
     .dialog-actions { display: flex; justify-content: flex-end; }
     .sr-status { position: fixed; inset: auto auto 0 0; }
 
@@ -267,9 +267,9 @@
       return `<section class="panel ${color}" aria-labelledby="${team}-timeline-title">
         <div class="panel-head"><p class="eyebrow">${label} team</p><h2 id="${team}-timeline-title">Decision timeline</h2></div>
         <div class="panel-body"><ol class="timeline">
-          <li><time>Match deadline · ${formatTime(DEADLINE)}</time><strong>Eligibility must be strictly before this time.</strong><span>At the deadline is not a win.</span></li>
-          <li><time>Final stage · ${formatTime(data.solvedAt)}</time><strong>${completion}</strong><span>${data.hintsUsed} hint${data.hintsUsed === 1 ? "" : "s"} accepted × 30 seconds each.</span></li>
-          <li><time>Eligibility · ${formatTime(data.eligibilityAt)}</time><strong>${eligibility}</strong><span>${data.finishDelayRemaining > 0 ? `${data.finishDelayRemaining}s of finish delay remains.` : "No finish delay remains."}</span></li>
+          <li><span class="timeline-time">Match deadline · ${formatTime(DEADLINE)}</span><strong>Eligibility must be strictly before this time.</strong><span>At the deadline is not a win.</span></li>
+          <li><span class="timeline-time">Final stage · ${formatTime(data.solvedAt)}</span><strong>${completion}</strong><span>${data.hintsUsed} hint${data.hintsUsed === 1 ? "" : "s"} accepted × 30 seconds each.</span></li>
+          <li><span class="timeline-time">Eligibility · ${formatTime(data.eligibilityAt)}</span><strong>${eligibility}</strong><span>${data.finishDelayRemaining > 0 ? `${data.finishDelayRemaining}s of finish delay remains.` : "No finish delay remains."}</span></li>
         </ol></div>
       </section>`;
     }

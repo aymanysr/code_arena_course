@@ -89,7 +89,7 @@ This is design evidence only. It does **not** prove durable exactly-once result 
 - Team moves, unique role selection, readiness clearing, 2v2/3v3 equality, start gating, disconnected-slot reservation, full/started rejection feedback, and the state inspector were exercised in Chromium.
 - The six checked viewports had no document-level horizontal overflow or interactive target below 44px.
 - The checked browser sessions produced zero JavaScript console errors.
-- The outcome browser check exercised `win`, `loss`, `draw`, and `delay` at 1440x1000 and 390x844, including one finish-delay finalization, URL scenario switching, and the native state dialog; it reported no document overflow, undersized targets, or console/page errors.
+- The outcome browser check exercised `win`, `loss`, `draw`, and `delay` at 1440x1000 and 390x844, including the 30-second-per-Hint rule, the exact 60-second Finish delay, before-deadline eligibility, equal-time draw, persisted-once indicator, required accounting/timelines and navigation links, one finish-delay finalization, URL scenario switching, and the native state dialog. It also verified at least 14px visible text, no prose-only `time` elements, no document overflow, no undersized targets, and no console/page errors.
 - This record verifies only the throwaway prototype behavior described here; production evidence remains outstanding wherever the tables say Designed, Not started, or Required later.
 
 ## Requirements not demonstrated by these prototypes
