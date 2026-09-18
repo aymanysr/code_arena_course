@@ -94,6 +94,16 @@ This is intended UX design evidence only. Network latency, WebSocket behavior, a
 
 This is navigation/design evidence only. Account access, Home, Profile & friends, Policies, and every production service surface remain unimplemented. The map does **not** prove authentication, OAuth linking, policy content, backend/database behavior, persistence, authorization, WebSockets, concurrent-user correctness, or any completed production module.
 
+## Validated prototype decisions
+
+- **Active Match:** Variant A, **Operations Console**, is the selected direction.
+- **Lobby:** Variant A, **Team Bays**, is the selected direction.
+- **Outcomes:** one Operations Console shell presents scenario-driven, fake server-result states.
+- **Recovery:** reserved Roles and continuing clocks are shown separately from the interrupted-Match state.
+- **Whole-app scope:** the seven-node journey map has prototype evidence only for Lobby, Live match, Result, and Recovery.
+
+Variants B and C remain historical alternatives in the Lobby and Active Match prototype switchers. Production UI must be rebuilt with production tests and must not promote these throwaway prototype files directly.
+
 ### Verification record - 2026-09-18
 
 - Embedded lobby JavaScript parsed successfully.
@@ -104,6 +114,7 @@ This is navigation/design evidence only. Account access, Home, Profile & friends
 - The outcome browser check exercised `win`, `loss`, `draw`, and `delay` at 1440x1000 and 390x844, including the 30-second-per-Hint rule, the exact 60-second Finish delay, before-deadline eligibility, equal-time draw, persisted-once indicator, required accounting/timelines and navigation links, one finish-delay finalization, URL scenario switching, and the native state dialog. Keyboard scenario activation retains visibly styled focus on the replacement selected control; keyboard delay advancement moves visibly styled focus to the updated result heading. It also verified at least 14px visible text, no prose-only `time` elements, no document overflow, no undersized targets, and no console/page errors.
 - The recovery browser check exercised `disconnected`, `reconnecting`, `restored`, and `interrupted` at 1440x1000 and 390x844. It verified the reserved Role, continuing Match clock, unavailable private controls while disconnected, re-authentication without action replay, restored role-filtered clues/controls plus simulated shared progress, Team chat, and penalty state, and no fabricated interruption result. It also checked URL scenario switching, the two-step `Continue recovery` transition, native state inspector, no document overflow, no interactive target below 44px at either viewport, and no console/page errors.
 - The journey browser check rendered all seven navigation nodes at 1440x1000 and 390x844. It verified the four exact prototype links, text labels for Prototype available, Production planned, and Mandatory delivery, the mandatory-foundation and 17-point evidence rail, skip-link and visible keyboard focus behavior, no document overflow, no interactive target below 44px, and no console/page errors.
+- The final critical-journey browser check rendered Journey, selected Lobby Variant A, selected Active Match Variant A, delayed Outcome, and disconnected Recovery at 1440x1000 and 390x844. It verified one H1, visible Prototype labeling, a visible `journey.html` return route on every non-map page, the exact selected-direction labels, no document overflow, no interactive target below 44px, and no console/page errors. Fresh desktop and mobile screenshots were reviewed for unclipped content, readable text, visible primary actions, no switcher collision, and accurate prototype-only claims.
 - This record verifies only the throwaway prototype behavior described here; production evidence remains outstanding wherever the tables say Designed, Not started, or Required later.
 
 ## Requirements not demonstrated by these prototypes

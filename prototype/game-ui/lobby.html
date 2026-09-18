@@ -1,0 +1,823 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Lobby & Role Selection Prototype | Campus Puzzle Race</title>
+  <!-- THROWAWAY UI PROTOTYPE: Three lobby interaction models in the selected Operations Console visual language. Switch with ?variant=A|B|C. -->
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07100d;
+      --surface: #0d1a16;
+      --surface-2: #13231e;
+      --surface-3: #192b25;
+      --line: #315044;
+      --line-strong: #5f8172;
+      --ink: #e4efe9;
+      --muted: #9bb0a6;
+      --accent: #c8f36a;
+      --accent-ink: #102008;
+      --coral: #ff8c73;
+      --blue: #8dd8ff;
+      --warning: #f6cb6f;
+      --danger: #ff866c;
+      --focus: #ffffff;
+      --safe: clamp(1rem, 3.5vw, 3.5rem);
+      --switcher-height: 5.5rem;
+      --radius: 0.5rem;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 20rem; background: var(--bg); }
+    body { min-height: 100dvh; margin: 0; overflow-x: hidden; background: var(--bg); color: var(--ink); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    a { color: inherit; }
+    small { font-size: 0.875rem; }
+
+    :where(button, input, a, summary):focus-visible {
+      outline: 0.2rem solid var(--focus);
+      outline-offset: 0.2rem;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      inset: 0.75rem auto auto 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      min-height: 3rem;
+      translate: 0 -180%;
+      padding: 0.75rem 1rem;
+      background: #ffffff;
+      color: #111111;
+      font-weight: 850;
+    }
+
+    .skip-link:focus { translate: 0; }
+
+    .prototype-flag {
+      position: fixed;
+      z-index: 20;
+      inset: 0 auto auto 50%;
+      translate: -50% 0;
+      border-radius: 0 0 var(--radius) var(--radius);
+      background: var(--warning);
+      color: #17140a;
+      padding: 0.35rem 0.75rem;
+      font: 850 0.875rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .visually-hidden:where(:not(:focus-within, :active)) {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip-path: inset(50%) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      padding: 0 !important;
+    }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .eyebrow {
+      margin: 0;
+      color: var(--muted);
+      font: 850 0.875rem/1.25 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .status-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.42rem;
+      font-weight: 780;
+    }
+
+    .status-mark::before {
+      width: 0.65rem;
+      height: 0.65rem;
+      border-radius: 50%;
+      background: currentColor;
+      content: "";
+    }
+
+    .status-mark.connected { color: var(--accent); }
+    .status-mark.disconnected { color: var(--danger); }
+    .status-mark.empty { color: var(--muted); }
+
+    .app-shell {
+      min-height: 100dvh;
+      padding: max(2.75rem, var(--safe)) var(--safe) calc(var(--switcher-height) + 1.75rem);
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      gap: 1rem;
+      align-items: center;
+      max-width: 96rem;
+      margin: 0 auto 1rem;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 1rem clamp(1rem, 2.2vw, 1.75rem);
+    }
+
+    .topbar h1 { margin: 0.25rem 0 0; font-size: clamp(1.35rem, 2.7vw, 2.2rem); line-height: 1.08; }
+    .identity, .invite { min-width: 11rem; }
+    .identity strong, .invite strong { display: block; margin-block-start: 0.25rem; }
+
+    .journey-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3rem;
+      margin-block-start: 0.7rem;
+      border: 1px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 0.65rem 0.9rem;
+      color: var(--accent);
+      font-weight: 790;
+      text-decoration: none;
+    }
+
+    .journey-link:hover { border-color: var(--ink); background: var(--surface-3); }
+
+    .button {
+      min-height: 3rem;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--ink);
+      padding: 0.65rem 0.9rem;
+      font-weight: 790;
+    }
+
+    .button:hover { background: var(--surface-3); border-color: var(--ink); }
+    .button.primary { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+    .button.danger { border-color: var(--danger); color: #ffd9d1; }
+    .button[aria-disabled="true"] { opacity: 0.48; cursor: not-allowed; }
+    .button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+
+    .format-control {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 0.35rem;
+    }
+
+    .format-control legend { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
+    .format-control input { position: absolute; opacity: 0; pointer-events: none; }
+    .format-control label {
+      display: grid;
+      min-width: 4.5rem;
+      min-height: 3rem;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: 0.32rem;
+      color: var(--muted);
+      font-weight: 850;
+      cursor: pointer;
+    }
+
+    .format-control input:checked + label { border-color: var(--accent); background: var(--surface-3); color: var(--ink); }
+    .format-control input:focus-visible + label { outline: 0.2rem solid var(--focus); outline-offset: 0.1rem; }
+
+    .event-strip {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      max-width: 96rem;
+      margin: 0 auto 1rem;
+      border-inline-start: 0.3rem solid var(--blue);
+      background: color-mix(in srgb, var(--blue) 8%, var(--surface));
+      padding: 0.8rem 1rem;
+    }
+
+    .event-strip p { margin: 0; }
+    .event-strip a { display: inline-flex; align-items: center; min-height: 3rem; white-space: nowrap; font-weight: 780; }
+
+    .panel { border: 1px solid var(--line); background: var(--surface); }
+    .panel-head { border-block-end: 1px solid var(--line); padding: 1rem; }
+    .panel-head h2, .panel-head h3 { margin: 0.2rem 0 0; }
+    .panel-body { padding: 1rem; }
+
+    .team-name { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .team-name .team-color { font-size: 1.25rem; }
+    .team-name.blue .team-color { color: var(--blue); }
+    .team-name.coral .team-color { color: var(--coral); }
+
+    .roster { display: grid; gap: 0.65rem; margin: 0; padding: 0; list-style: none; }
+    .member {
+      display: grid;
+      grid-template-columns: 2.7rem minmax(0, 1fr) auto;
+      gap: 0.7rem;
+      align-items: center;
+      min-height: 4.7rem;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      padding: 0.65rem;
+    }
+
+    .member.you { border-color: var(--accent); }
+    .avatar {
+      display: grid;
+      width: 2.7rem;
+      height: 2.7rem;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--surface-3);
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .member-copy { min-width: 0; }
+    .member-copy strong, .member-copy span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .member-copy span { margin-block-start: 0.15rem; color: var(--muted); font-size: 0.875rem; }
+    .member-state { text-align: end; font-size: 0.875rem; }
+    .member-state strong { display: block; }
+
+    .role-list { display: grid; gap: 0.65rem; margin: 0; padding: 0; border: 0; }
+    .role-option { position: relative; }
+    .role-option input { position: absolute; opacity: 0; pointer-events: none; }
+    .role-option label {
+      display: block;
+      min-height: 5.3rem;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      padding: 0.8rem 0.9rem;
+      cursor: pointer;
+    }
+
+    .role-option label strong, .role-option label span { display: block; }
+    .role-option label span { margin-block-start: 0.25rem; color: var(--muted); font-size: 0.875rem; }
+    .role-option input:checked + label { border-color: var(--accent); box-shadow: inset 0.28rem 0 0 var(--accent); }
+    .role-option input:focus-visible + label { outline: 0.2rem solid var(--focus); outline-offset: 0.1rem; }
+    .role-option input:disabled + label { opacity: 0.45; cursor: not-allowed; }
+    .role-option input:disabled + label::after { display: block; margin-block-start: 0.4rem; color: var(--warning); content: "Occupied on this team"; font-size: 0.875rem; font-weight: 760; }
+
+    .actions { display: grid; gap: 0.55rem; }
+    .actions.inline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .actions.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .guardrail-list { display: grid; gap: 0.7rem; margin: 0; padding: 0; list-style: none; }
+    .guardrail-list li { display: grid; grid-template-columns: auto 1fr; gap: 0.55rem; color: var(--muted); }
+    .guardrail-list li::before { color: var(--accent); content: "✓"; font-weight: 900; }
+
+    /* A: symmetric team bays */
+    .layout-a {
+      display: grid;
+      grid-template-columns: minmax(16rem, 0.86fr) minmax(19rem, 1.15fr) minmax(16rem, 0.86fr);
+      gap: 1rem;
+      max-width: 96rem;
+      margin: 0 auto;
+      align-items: start;
+    }
+
+    .a-center { display: grid; gap: 1rem; }
+    .assignment-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.6rem; margin-block-end: 1rem; }
+    .summary-stat { border: 1px solid var(--line); background: var(--surface-2); padding: 0.7rem; }
+    .summary-stat span, .summary-stat strong { display: block; }
+    .summary-stat span { color: var(--muted); font-size: 0.875rem; }
+    .summary-stat strong { margin-block-start: 0.2rem; }
+
+    /* B: operations matrix */
+    .layout-b { display: grid; gap: 1rem; max-width: 96rem; margin: 0 auto; }
+    .matrix-shell { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: 1rem; }
+    .matrix { width: 100%; border-collapse: collapse; }
+    .matrix caption { padding: 1rem; text-align: start; font-weight: 850; font-size: 1.15rem; }
+    .matrix th, .matrix td { border-block-start: 1px solid var(--line); padding: 0.8rem; text-align: start; vertical-align: middle; }
+    .matrix th { color: var(--muted); font-size: 0.875rem; }
+    .matrix td:last-child { text-align: end; }
+    .matrix .avatar { width: 2.3rem; height: 2.3rem; }
+    .b-dock { display: grid; gap: 1rem; align-content: start; }
+    .role-dock { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; }
+
+    /* C: guided assignment */
+    .layout-c { max-width: 76rem; margin: 0 auto; }
+    .stepper { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0 0 1rem; padding: 0; list-style: none; border: 1px solid var(--line); }
+    .stepper li { min-height: 4.5rem; padding: 0.8rem; color: var(--muted); }
+    .stepper li + li { border-inline-start: 1px solid var(--line); }
+    .stepper li.active { background: var(--surface-3); color: var(--ink); }
+    .stepper strong, .stepper span { display: block; }
+    .stepper span { margin-block-start: 0.2rem; font-size: 0.875rem; }
+    .guided-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.68fr); gap: 1rem; }
+    .team-choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
+    .team-choice { min-height: 7.5rem; text-align: start; }
+    .team-choice strong, .team-choice span { display: block; }
+    .team-choice strong { font-size: 1.15rem; }
+    .team-choice span { margin-block-start: 0.35rem; color: var(--muted); }
+    .guided-role-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; margin-block-start: 1rem; }
+
+    .start-panel { border-color: var(--line-strong); }
+    .start-state { margin: 0 0 0.9rem; color: var(--muted); }
+    .start-state strong { color: var(--ink); }
+    .match-ready { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+    .started-card { display: grid; gap: 1rem; place-items: start; padding: clamp(1.2rem, 4vw, 3rem); }
+    .started-card h2 { margin: 0; font-size: clamp(1.6rem, 4vw, 3.2rem); }
+    .started-card p { max-width: 62ch; color: var(--muted); }
+    .started-card a.button { display: inline-flex; align-items: center; justify-content: center; }
+
+    dialog {
+      width: min(36rem, calc(100% - 2rem));
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0;
+    }
+
+    dialog::backdrop { background: rgb(0 0 0 / 0.72); }
+    dialog form { padding: 1.2rem; }
+    dialog h2 { margin: 0.35rem 0 0.8rem; }
+    dialog pre { max-height: 26rem; overflow: auto; border: 1px solid var(--line); background: var(--bg); padding: 0.8rem; white-space: pre-wrap; font-size: 0.875rem; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-block-start: 1rem; }
+
+    .prototype-switcher {
+      position: static;
+      display: grid;
+      grid-template-columns: auto minmax(12rem, 1fr) auto auto;
+      align-items: stretch;
+      width: min(38rem, calc(100% - 1rem));
+      margin: 3.5rem auto 0.75rem;
+      overflow: hidden;
+      border: 1px solid #59665f;
+      border-radius: 99rem;
+      background: #101713;
+      box-shadow: 0 1rem 3rem rgb(0 0 0 / 0.45);
+      color: #f4f7f5;
+    }
+
+    .prototype-switcher button {
+      min-width: 3.25rem;
+      min-height: 3.25rem;
+      border: 0;
+      border-inline-end: 1px solid #445049;
+      background: transparent;
+      color: inherit;
+      font-weight: 900;
+    }
+
+    .prototype-switcher button:hover { background: #28312d; }
+    .switcher-label { align-self: center; padding: 0.4rem 0.65rem; text-align: center; }
+    .switcher-label strong, .switcher-label small { display: block; }
+    .switcher-label strong { font-size: 0.875rem; }
+    .switcher-label small { color: #aeb9b3; }
+    .state-button { border-inline-end: 0 !important; padding-inline: 0.85rem; }
+
+    @media (max-width: 70rem) {
+      .layout-a { grid-template-columns: 1fr 1fr; }
+      .a-center { grid-column: 1 / -1; grid-row: 1; }
+      .matrix-shell, .guided-grid { grid-template-columns: 1fr; }
+      .b-dock { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 48rem) {
+      :root { --switcher-height: 6.5rem; }
+      .app-shell { padding-inline: 0.75rem; }
+      .topbar { grid-template-columns: 1fr; }
+      .identity, .invite { min-width: 0; }
+      .format-control { justify-content: stretch; }
+      .format-control label { flex: 1; }
+      .event-strip { display: grid; }
+      .event-strip a { white-space: normal; }
+      .layout-a, .b-dock { grid-template-columns: 1fr; }
+      .a-center { grid-column: auto; grid-row: auto; }
+      .assignment-summary, .role-dock, .guided-role-grid { grid-template-columns: 1fr; }
+      .matrix-wrap { overflow-x: auto; }
+      .matrix { min-width: 38rem; }
+      .stepper { grid-template-columns: 1fr; }
+      .stepper li + li { border-inline-start: 0; border-block-start: 1px solid var(--line); }
+      .team-choice-grid { grid-template-columns: 1fr; }
+      .actions.inline, .actions.three { grid-template-columns: 1fr; }
+      .prototype-switcher { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+      .switcher-label small { display: block; font-size: 0.75rem; }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .button, .role-option label, .team-choice { transition: background-color 140ms ease, border-color 140ms ease, translate 140ms ease; }
+      .button:active, .team-choice:active { translate: 0 0.08rem; }
+    }
+
+    @media (prefers-contrast: more) {
+      :root { --line: #86aa99; --muted: #c3d0ca; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to lobby controls</a>
+  <div class="prototype-flag">Prototype · fake lobby state</div>
+  <nav class="prototype-switcher" aria-label="Lobby prototype variants">
+    <button type="button" id="previous-variant" aria-label="Previous lobby variant">←</button>
+    <div class="switcher-label" aria-live="polite">
+      <strong id="variant-name">A — Team bays</strong>
+      <small id="selected-direction">Selected direction · Team bays</small>
+    </div>
+    <button type="button" id="next-variant" aria-label="Next lobby variant">→</button>
+    <button type="button" class="state-button" id="show-state">State</button>
+  </nav>
+  <main id="content" tabindex="-1">
+    <div id="app"></div>
+  </main>
+  <p class="visually-hidden" id="live-status" aria-live="polite" aria-atomic="true"></p>
+
+  <dialog id="state-dialog" aria-labelledby="state-title">
+    <form method="dialog">
+      <p class="eyebrow">Prototype inspector</p>
+      <h2 id="state-title">Current fake lobby state</h2>
+      <pre tabindex="0"><code id="state-output"></code></pre>
+      <div class="dialog-actions"><button class="button" value="close">Close</button></div>
+    </form>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    const variants = [
+      { key: "A", name: "Team bays" },
+      { key: "B", name: "Operations matrix" },
+      { key: "C", name: "Guided assignment" }
+    ];
+
+    const roleCatalog = [
+      { id: "reader", name: "Code reader", short: "Reads private source and extracts safe facts." },
+      { id: "analyst", name: "Input analyst", short: "Tests inputs and identifies the active rule." },
+      { id: "builder", name: "Answer builder", short: "Assembles the shared team submission." }
+    ];
+
+    const initialState = {
+      inviteCode: "C42-7K9",
+      matchSize: 2,
+      currentPlayerId: "you",
+      hostId: "you",
+      started: false,
+      lastEvent: "Private lobby created. Invite code is not an authentication credential.",
+      teams: {
+        blue: [
+          { id: "you", name: "Aimane", role: "reader", ready: false, connected: true },
+          { id: "saad", name: "Saad", role: "builder", ready: true, connected: true }
+        ],
+        coral: [
+          { id: "amal", name: "Amal", role: null, ready: false, connected: true },
+          null
+        ]
+      }
+    };
+
+    function clone(value) { return structuredClone(value); }
+
+    function createStore(seed) {
+      let state = clone(seed);
+      const subscribers = new Set();
+      return {
+        getState: () => state,
+        update(mutator, eventText) {
+          const next = clone(state);
+          mutator(next);
+          if (eventText) next.lastEvent = eventText;
+          state = next;
+          subscribers.forEach((subscriber) => subscriber(state));
+        },
+        reset() {
+          state = clone(initialState);
+          subscribers.forEach((subscriber) => subscriber(state));
+        },
+        subscribe(subscriber) { subscribers.add(subscriber); }
+      };
+    }
+
+    const store = createStore(initialState);
+    const app = document.querySelector("#app");
+    const liveStatus = document.querySelector("#live-status");
+    const stateDialog = document.querySelector("#state-dialog");
+    const stateOutput = document.querySelector("#state-output");
+
+    function currentVariant() {
+      const requested = new URLSearchParams(location.search).get("variant")?.toUpperCase();
+      return variants.some((variant) => variant.key === requested) ? requested : "A";
+    }
+
+    function activeRoles(state) {
+      return state.matchSize === 2 ? roleCatalog.filter((role) => role.id !== "analyst") : roleCatalog;
+    }
+
+    function slotsFor(state, teamId) {
+      const slots = state.teams[teamId].slice(0, state.matchSize);
+      while (slots.length < state.matchSize) slots.push(null);
+      return slots;
+    }
+
+    function findCurrentPlayer(state) {
+      for (const teamId of ["blue", "coral"]) {
+        const index = state.teams[teamId].findIndex((member) => member?.id === state.currentPlayerId);
+        if (index !== -1) return { teamId, index, member: state.teams[teamId][index] };
+      }
+      return null;
+    }
+
+    function roleName(roleId) {
+      return roleCatalog.find((role) => role.id === roleId)?.name ?? "Role unassigned";
+    }
+
+    function occupiedRoles(state, teamId) {
+      const currentId = state.currentPlayerId;
+      return new Set(slotsFor(state, teamId).filter((member) => member && member.id !== currentId).map((member) => member.role));
+    }
+
+    function readiness(state) {
+      const allSlots = ["blue", "coral"].flatMap((teamId) => slotsFor(state, teamId));
+      const full = allSlots.every(Boolean);
+      const rolesUnique = ["blue", "coral"].every((teamId) => {
+        const roles = slotsFor(state, teamId).filter(Boolean).map((member) => member.role);
+        return roles.length === new Set(roles).size && roles.every(Boolean);
+      });
+      const allReady = full && allSlots.every((member) => member.ready && member.connected);
+      return { full, rolesUnique, allReady, canStart: full && rolesUnique && allReady };
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function memberMarkup(member, index) {
+      if (!member) {
+        return `<li class="member"><span class="avatar" aria-hidden="true">${index + 1}</span><div class="member-copy"><strong>Open slot</strong><span>Waiting for invited player</span></div><div class="member-state"><span class="status-mark empty">Empty</span></div></li>`;
+      }
+      return `<li class="member ${member.id === "you" ? "you" : ""}">
+        <span class="avatar" aria-hidden="true">${escapeHtml(member.name.charAt(0))}</span>
+        <div class="member-copy"><strong>${escapeHtml(member.name)}${member.id === "you" ? " · You" : ""}</strong><span>${escapeHtml(roleName(member.role))}</span></div>
+        <div class="member-state"><strong>${member.ready ? "Ready ✓" : "Not ready"}</strong><span class="status-mark ${member.connected ? "connected" : "disconnected"}">${member.connected ? "Online" : "Reserved"}</span></div>
+      </li>`;
+    }
+
+    function rosterMarkup(state, teamId) {
+      return `<ul class="roster" role="list">${slotsFor(state, teamId).map(memberMarkup).join("")}</ul>`;
+    }
+
+    function roleOptionsMarkup(state, prefix) {
+      const current = findCurrentPlayer(state);
+      const occupied = occupiedRoles(state, current.teamId);
+      return `<fieldset class="role-list"><legend class="visually-hidden">Choose your role</legend>${activeRoles(state).map((role) => {
+        const disabled = occupied.has(role.id);
+        return `<div class="role-option"><input type="radio" name="${prefix}-role" id="${prefix}-${role.id}" value="${role.id}" data-action="choose-role" ${current.member.role === role.id ? "checked" : ""} ${disabled ? "disabled" : ""}><label for="${prefix}-${role.id}"><strong>${escapeHtml(role.name)}</strong><span>${escapeHtml(role.short)}</span></label></div>`;
+      }).join("")}</fieldset>`;
+    }
+
+    function formatControl(state) {
+      return `<fieldset class="format-control"><legend>Match size</legend>
+        <input type="radio" id="format-2" name="format" value="2" data-action="set-size" ${state.matchSize === 2 ? "checked" : ""}><label for="format-2">2 vs 2</label>
+        <input type="radio" id="format-3" name="format" value="3" data-action="set-size" ${state.matchSize === 3 ? "checked" : ""}><label for="format-3">3 vs 3</label>
+      </fieldset>`;
+    }
+
+    function topbarMarkup(state, includeJourneyMap = false) {
+      return `<header class="topbar">
+        <div><p class="eyebrow">Room 01 · Campus lockdown</p><h1>Assemble both response teams</h1>${includeJourneyMap ? '<a class="journey-link" href="journey.html">Journey map</a>' : ""}</div>
+        <div class="invite"><p class="eyebrow">Private invite</p><strong class="mono">${escapeHtml(state.inviteCode)}</strong><button class="button" type="button" data-action="copy-code">Copy code</button></div>
+        <div class="identity"><p class="eyebrow">Authenticated player</p><strong>Aimane · Host</strong></div>
+      </header>`;
+    }
+
+    function eventMarkup(state) {
+      return `<div class="event-strip"><p><strong>Latest:</strong> ${escapeHtml(state.lastEvent)}</p><a href="42-subject-compliance.md">42 compliance matrix</a></div>`;
+    }
+
+    function teamPanel(state, teamId) {
+      const label = teamId === "blue" ? "Blue team" : "Coral team";
+      const current = findCurrentPlayer(state);
+      return `<section class="panel" aria-labelledby="${teamId}-title"><div class="panel-head"><div class="team-name ${teamId}"><div><p class="eyebrow">${teamId === "blue" ? "Team A" : "Team B"}</p><h2 class="team-color" id="${teamId}-title">${label}</h2></div><button class="button" type="button" data-action="choose-team" data-team="${teamId}" aria-pressed="${current.teamId === teamId}">${current.teamId === teamId ? "Your team ✓" : "Join team"}</button></div></div><div class="panel-body">${rosterMarkup(state, teamId)}</div></section>`;
+    }
+
+    function startPanel(state) {
+      const status = readiness(state);
+      const missing = [];
+      if (!status.full) missing.push("fill every player slot");
+      if (!status.rolesUnique) missing.push("resolve duplicate or missing roles");
+      if (!status.allReady) missing.push("all connected players must be ready");
+      return `<section class="panel start-panel ${status.canStart ? "match-ready" : ""}" aria-labelledby="start-title"><div class="panel-head"><p class="eyebrow">Host gate</p><h2 id="start-title">${status.canStart ? "Match can start" : "Lobby needs attention"}</h2></div><div class="panel-body"><p class="start-state">${status.canStart ? "Both teams are full, roles are unique, and every player is connected and ready." : `<strong>Before start:</strong> ${escapeHtml(missing.join("; "))}.`}</p><div class="actions three"><button class="button" type="button" data-action="fill-demo">Fill demo players</button><button class="button" type="button" data-action="toggle-connection">Toggle Saad connection</button><button class="button primary" type="button" data-action="start" aria-disabled="${!status.canStart}">Start live match</button></div></div></section>`;
+    }
+
+    function assignmentPanel(state, prefix) {
+      const current = findCurrentPlayer(state);
+      return `<section class="panel" aria-labelledby="${prefix}-assignment-title"><div class="panel-head"><p class="eyebrow">Private assignment</p><h2 id="${prefix}-assignment-title">Your team and role</h2></div><div class="panel-body"><div class="assignment-summary"><div class="summary-stat"><span>Team</span><strong>${current.teamId === "blue" ? "Blue" : "Coral"}</strong></div><div class="summary-stat"><span>Role</span><strong>${escapeHtml(roleName(current.member.role))}</strong></div><div class="summary-stat"><span>Status</span><strong>${current.member.ready ? "Ready ✓" : "Editing"}</strong></div></div>${roleOptionsMarkup(state, prefix)}<div class="actions inline" style="margin-block-start: 0.75rem"><button class="button" type="button" data-action="random-role">Assign an open role</button><button class="button primary" type="button" data-action="toggle-ready" aria-pressed="${current.member.ready}">${current.member.ready ? "Ready ✓ · Edit selection" : "Lock role and mark ready"}</button></div></div></section>`;
+    }
+
+    function guardrailsPanel() {
+      return `<section class="panel" aria-labelledby="guardrails-title"><div class="panel-head"><p class="eyebrow">42-facing evidence target</p><h2 id="guardrails-title">What production must prove</h2></div><div class="panel-body"><ul class="guardrail-list"><li>Equal teams and unique roles support fair 2v2 and 3v3 play.</li><li>Connection, reservation, and readiness state must synchronize across clients.</li><li>Server authorization—not this UI—must enforce team, role, and start rules.</li><li>This screen is prototype evidence only; it does not prove the claimed modules.</li></ul></div></section>`;
+    }
+
+    function renderVariantA(state) {
+      return `<div class="app-shell">${topbarMarkup(state, true)}${eventMarkup(state)}<div class="layout-a">${teamPanel(state, "blue")}<div class="a-center">${formatControl(state)}${assignmentPanel(state, "a")}${startPanel(state)}${guardrailsPanel()}</div>${teamPanel(state, "coral")}</div></div>`;
+    }
+
+    function tableRows(state, teamId) {
+      const label = teamId === "blue" ? "Blue" : "Coral";
+      return slotsFor(state, teamId).map((member, index) => `<tr><td><strong>${label}</strong></td><td><span class="avatar" aria-hidden="true">${member ? escapeHtml(member.name.charAt(0)) : index + 1}</span></td><td>${member ? `<strong>${escapeHtml(member.name)}${member.id === "you" ? " · You" : ""}</strong>` : "Open slot"}</td><td>${member ? escapeHtml(roleName(member.role)) : "Unassigned"}</td><td>${member ? (member.connected ? "Online" : "Reserved") : "Waiting"}</td><td>${member?.ready ? "Ready ✓" : "—"}</td></tr>`).join("");
+    }
+
+    function renderVariantB(state) {
+      const current = findCurrentPlayer(state);
+      return `<div class="app-shell">${topbarMarkup(state)}${eventMarkup(state)}<div class="layout-b">${formatControl(state)}<div class="matrix-shell"><section class="panel matrix-wrap"><table class="matrix"><caption>Lobby operations matrix</caption><thead><tr><th scope="col">Team</th><th scope="col">ID</th><th scope="col">Player</th><th scope="col">Role</th><th scope="col">Connection</th><th scope="col">Ready</th></tr></thead><tbody>${tableRows(state, "blue")}${tableRows(state, "coral")}</tbody></table></section><aside class="b-dock" aria-label="Your assignment controls"><section class="panel"><div class="panel-head"><p class="eyebrow">Team routing</p><h2>Move your station</h2></div><div class="panel-body actions inline"><button class="button" type="button" data-action="choose-team" data-team="blue" aria-pressed="${current.teamId === "blue"}">Blue team</button><button class="button" type="button" data-action="choose-team" data-team="coral" aria-pressed="${current.teamId === "coral"}">Coral team</button></div></section>${assignmentPanel(state, "b")}</aside></div><div class="role-dock">${startPanel(state)}${guardrailsPanel()}<section class="panel"><div class="panel-head"><p class="eyebrow">Failure probes</p><h2>Server rejection examples</h2></div><div class="panel-body actions"><button class="button danger" type="button" data-action="simulate-full">Attempt to join full lobby</button><button class="button danger" type="button" data-action="simulate-started">Attempt to join started match</button></div></section></div></div></div>`;
+    }
+
+    function guidedStep(state) {
+      const current = findCurrentPlayer(state);
+      if (!current.member.role) return 2;
+      if (!current.member.ready) return 3;
+      return 3;
+    }
+
+    function renderVariantC(state) {
+      const current = findCurrentPlayer(state);
+      const step = guidedStep(state);
+      return `<div class="app-shell">${topbarMarkup(state)}${eventMarkup(state)}<div class="layout-c"><ol class="stepper" aria-label="Role assignment progress"><li class="${step === 1 ? "active" : ""}"><strong>1 · Choose team</strong><span>${current.teamId === "blue" ? "Blue" : "Coral"} selected</span></li><li class="${step === 2 ? "active" : ""}"><strong>2 · Choose role</strong><span>${escapeHtml(roleName(current.member.role))}</span></li><li class="${step === 3 ? "active" : ""}"><strong>3 · Confirm</strong><span>${current.member.ready ? "Ready ✓" : "Review and lock"}</span></li></ol><div class="guided-grid"><section class="panel"><div class="panel-head"><p class="eyebrow">Step 1</p><h2>Where will you play?</h2></div><div class="panel-body"><div class="team-choice-grid"><button class="button team-choice" type="button" data-action="choose-team" data-team="blue" aria-pressed="${current.teamId === "blue"}"><strong>Blue team</strong><span>${slotsFor(state, "blue").filter(Boolean).length}/${state.matchSize} joined</span></button><button class="button team-choice" type="button" data-action="choose-team" data-team="coral" aria-pressed="${current.teamId === "coral"}"><strong>Coral team</strong><span>${slotsFor(state, "coral").filter(Boolean).length}/${state.matchSize} joined</span></button></div><div class="guided-role-grid">${activeRoles(state).map((role) => { const unavailable = occupiedRoles(state, current.teamId).has(role.id); return `<button class="button team-choice" type="button" data-action="choose-role-button" data-role="${role.id}" aria-pressed="${current.member.role === role.id}" aria-disabled="${unavailable}"><strong>${escapeHtml(role.name)}</strong><span>${unavailable ? "Occupied on this team" : escapeHtml(role.short)}</span></button>`; }).join("")}</div></div></section><aside class="b-dock" aria-label="Guided confirmation"><section class="panel"><div class="panel-head"><p class="eyebrow">Current selection</p><h2>${current.teamId === "blue" ? "Blue" : "Coral"} · ${escapeHtml(roleName(current.member.role))}</h2></div><div class="panel-body"><p class="start-state">Changing team or role clears readiness so every player explicitly confirms the final assignment.</p><div class="actions"><button class="button" type="button" data-action="random-role">Assign an open role</button><button class="button primary" type="button" data-action="toggle-ready" aria-pressed="${current.member.ready}">${current.member.ready ? "Ready ✓ · Edit selection" : "Confirm role and mark ready"}</button></div></div></section>${formatControl(state)}</aside></div><div style="display:grid; gap:1rem; margin-block-start:1rem">${startPanel(state)}${guardrailsPanel()}</div></div></div>`;
+    }
+
+    function startedMarkup(state) {
+      return `<div class="app-shell">${topbarMarkup(state)}${eventMarkup(state)}<section class="panel started-card"><p class="eyebrow">Prototype transition</p><h2>Both teams are deployed.</h2><p>The lobby has produced two equal teams with unique roles and confirmed readiness. In production, the game service would serialize this transition and broadcast the authoritative match snapshot.</p><div class="actions inline"><a class="button primary" href="index.html?variant=A">Open active-match prototype</a><button class="button" type="button" data-action="reset">Reset lobby</button></div></section></div>`;
+    }
+
+    const renderers = { A: renderVariantA, B: renderVariantB, C: renderVariantC };
+
+    function render(state) {
+      const variant = currentVariant();
+      app.innerHTML = state.started ? startedMarkup(state) : renderers[variant](state);
+      const meta = variants.find((item) => item.key === variant);
+      document.querySelector("#variant-name").textContent = `${meta.key} — ${meta.name}`;
+      document.querySelector("#selected-direction").textContent = variant === "A"
+        ? "Selected direction · Team bays"
+        : "Historical alternative · Use ← → when not selecting";
+      document.title = `${meta.name} Lobby Prototype | Campus Puzzle Race`;
+      stateOutput.textContent = JSON.stringify({ ...state, derived: readiness(state) }, null, 2);
+      liveStatus.textContent = state.lastEvent;
+    }
+
+    function setVariant(key) {
+      const params = new URLSearchParams(location.search);
+      params.set("variant", key);
+      history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+      render(store.getState());
+    }
+
+    function cycleVariant(direction) {
+      const index = variants.findIndex((variant) => variant.key === currentVariant());
+      setVariant(variants[(index + direction + variants.length) % variants.length].key);
+    }
+
+    function assignDemoRoster(state) {
+      const roleIds = activeRoles(state).map((role) => role.id);
+      const names = { blue: ["Aimane", "Saad", "Yasmine"], coral: ["Amal", "Nora", "Ilyas"] };
+      const ids = { blue: ["you", "saad", "yasmine"], coral: ["amal", "nora", "ilyas"] };
+      for (const teamId of ["blue", "coral"]) {
+        state.teams[teamId] = roleIds.map((role, index) => ({ id: ids[teamId][index], name: names[teamId][index], role, ready: teamId === "blue" && index === 0 ? false : true, connected: true }));
+      }
+    }
+
+    function moveCurrentPlayer(state, targetTeam) {
+      const current = findCurrentPlayer(state);
+      if (current.teamId === targetTeam) return false;
+      const targetSlots = slotsFor(state, targetTeam);
+      const openIndex = targetSlots.findIndex((slot) => !slot);
+      if (openIndex === -1) return false;
+      state.teams[current.teamId][current.index] = null;
+      const moved = { ...current.member, role: null, ready: false };
+      state.teams[targetTeam][openIndex] = moved;
+      return true;
+    }
+
+    function handleAction(action, element) {
+      if (action === "copy-code") {
+        store.update(() => {}, `Invite code ${store.getState().inviteCode} is ready to share. It does not grant authentication.`);
+        return;
+      }
+      if (action === "set-size") {
+        const size = Number(element.value);
+        store.update((state) => {
+          state.matchSize = size;
+          assignDemoRoster(state);
+          findCurrentPlayer(state).member.ready = false;
+        }, `Match format changed to ${size}v${size}. Readiness was cleared for the host.`);
+        return;
+      }
+      if (action === "choose-team") {
+        const target = element.dataset.team;
+        const snapshot = store.getState();
+        const current = findCurrentPlayer(snapshot);
+        const hasOpenSlot = slotsFor(snapshot, target).some((slot) => !slot);
+        if (current.teamId === target || !hasOpenSlot) {
+          store.update(() => {}, `Cannot join ${target}: your team is unchanged or the target team is full.`);
+          return;
+        }
+        store.update((state) => { moveCurrentPlayer(state, target); }, `Joined ${target} team. Choose an available role and confirm again.`);
+        return;
+      }
+      if (action === "choose-role" || action === "choose-role-button") {
+        const role = element.value || element.dataset.role;
+        if (element.getAttribute("aria-disabled") === "true") {
+          store.update(() => {}, `${roleName(role)} is already occupied on your team.`);
+          return;
+        }
+        store.update((state) => {
+          const current = findCurrentPlayer(state);
+          if (occupiedRoles(state, current.teamId).has(role)) return;
+          current.member.role = role;
+          current.member.ready = false;
+        }, `${roleName(role)} selected. Readiness was cleared until you confirm the new assignment.`);
+        return;
+      }
+      if (action === "random-role") {
+        store.update((state) => {
+          const current = findCurrentPlayer(state);
+          const occupied = occupiedRoles(state, current.teamId);
+          const available = activeRoles(state).find((role) => !occupied.has(role.id));
+          current.member.role = available?.id ?? null;
+          current.member.ready = false;
+        }, "An available role was assigned without duplication. Confirm it when ready.");
+        return;
+      }
+      if (action === "toggle-ready") {
+        const current = findCurrentPlayer(store.getState());
+        if (!current.member.role) {
+          store.update(() => {}, "Choose a role before marking yourself ready.");
+          return;
+        }
+        store.update((state) => {
+          const member = findCurrentPlayer(state).member;
+          member.ready = !member.ready;
+        }, current.member.ready ? "Readiness cleared; assignment controls are open again." : "Role locked and readiness confirmed.");
+        return;
+      }
+      if (action === "fill-demo") {
+        store.update((state) => { assignDemoRoster(state); }, "Demo players filled every slot. The host must confirm readiness.");
+        return;
+      }
+      if (action === "toggle-connection") {
+        store.update((state) => {
+          const saad = state.teams.blue.find((member) => member?.id === "saad");
+          if (saad) saad.connected = !saad.connected;
+        }, "Saad's connection state changed. His place and role remain reserved.");
+        return;
+      }
+      if (action === "start") {
+        if (!readiness(store.getState()).canStart) {
+          store.update(() => {}, "Start rejected: both teams must be full, uniquely assigned, connected, and ready.");
+          return;
+        }
+        store.update((state) => { state.started = true; }, "Match transition accepted once by the authoritative game service (simulated)." );
+        return;
+      }
+      if (action === "simulate-full") {
+        store.update(() => {}, "Join rejected: this lobby is full. No player or role state changed.");
+        return;
+      }
+      if (action === "simulate-started") {
+        store.update(() => {}, "Join rejected: this match has already started. No player or role state changed.");
+        return;
+      }
+      if (action === "reset") store.reset();
+    }
+
+    app.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-action]");
+      if (!trigger || trigger.matches("input")) return;
+      handleAction(trigger.dataset.action, trigger);
+    });
+
+    app.addEventListener("change", (event) => {
+      const trigger = event.target.closest("[data-action]");
+      if (!trigger) return;
+      handleAction(trigger.dataset.action, trigger);
+    });
+
+    document.querySelector("#previous-variant").addEventListener("click", () => cycleVariant(-1));
+    document.querySelector("#next-variant").addEventListener("click", () => cycleVariant(1));
+    document.querySelector("#show-state").addEventListener("click", () => stateDialog.showModal());
+
+    addEventListener("keydown", (event) => {
+      if (event.isComposing || event.target.matches("input, textarea, select, [contenteditable='true']")) return;
+      if (event.key === "ArrowLeft") cycleVariant(-1);
+      if (event.key === "ArrowRight") cycleVariant(1);
+    });
+
+    addEventListener("popstate", () => render(store.getState()));
+    store.subscribe(render);
+    render(store.getState());
+  </script>
+</body>
+</html>
