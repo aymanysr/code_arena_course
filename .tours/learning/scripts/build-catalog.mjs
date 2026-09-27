@@ -440,8 +440,6 @@ export async function auditCourseOrder({ lessons, learningDir }) {
   }
   for (let index = 0; index < ordered.length; index++) {
     const lesson = ordered[index];
-    const prev = index > 0 ? expectedOutputs[index - 1] : null;
-    const next = index < ordered.length - 1 ? expectedOutputs[index + 1] : null;
     let templateText;
     try {
       templateText = await readFile(path.join(learningDir, lesson.template), "utf8");
@@ -449,16 +447,12 @@ export async function auditCourseOrder({ lessons, learningDir }) {
       if (error?.code === "ENOENT") continue;
       throw error;
     }
-    const navBlocks = templateText.match(/<p class="nav-row">[\s\S]*?<\/p>/g) ?? [];
-    const navHrefs = navBlocks
-      .flatMap((block) => [...block.matchAll(/href="([^"]+)"/g)].map((match) => match[1]))
-      .filter((href) => href.endsWith(".html"));
-    const expectedNav = [prev, next].filter(Boolean);
-    if (JSON.stringify(navHrefs) !== JSON.stringify(expectedNav)) {
+    const navMarkers = templateText.match(/<!-- COURSE_LESSON_NAV -->/g) ?? [];
+    if (navMarkers.length !== 1) {
       issues.push({
         kind: "nav-order",
         lessonId: lesson.id,
-        detail: `expected ${expectedNav.join(", ") || "no lesson links"}; found ${navHrefs.join(", ") || "no lesson links"}`,
+        detail: `expected exactly one generated navigation marker; found ${navMarkers.length}`,
       });
     }
   }
@@ -1014,7 +1008,7 @@ function renderCourseBatches(data) {
     const lessonItems = batch.lessonIds.map((lessonId) => {
       const lesson = lessonsById.get(lessonId);
       const href = lesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/");
-      return `<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="${html(lesson.id)}" href="${html(href)}"><span class="course-lesson-number" aria-hidden="true">${String(lesson.order).padStart(2, "0")}</span><span class="course-lesson-copy">Lesson ${lesson.order}: ${html(lesson.title)}</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>`;
+      return `<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="${html(lesson.id)}" href="${html(href)}"><span class="course-lesson-number" aria-hidden="true">${String(lesson.order).padStart(2, "0")}</span><span class="course-lesson-copy">Lesson ${lesson.order}: ${html(lesson.title)}</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="${html(lesson.id)}">Not started</span></p></li>`;
     }).join("\n");
     return `<section class="course-batch" aria-labelledby="course-batch-${batch.order}-title">
       <h2 id="course-batch-${batch.order}-title">${html(batch.title)}</h2>
@@ -1024,9 +1018,48 @@ function renderCourseBatches(data) {
   }).join("\n");
 }
 
-export function renderCourseHomeTemplate(template, stylesheet, data) {
+function renderCourseActivityRuntime(activityRuntimeSource, orderedLessons, currentOutput) {
+  if (typeof activityRuntimeSource !== "string" || activityRuntimeSource.trim() === "") return "";
+  const runtimeLessons = orderedLessons.map((lesson) => ({
+    id: lesson.id,
+    order: lesson.order,
+    output: path.posix.relative(path.posix.dirname(currentOutput), lesson.output),
+  }));
+  const serializedLessons = JSON.stringify(runtimeLessons).replace(/</g, "\\u003c");
+  return `<p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>\n<script type="module">\n${activityRuntimeSource.trim()}\nconst courseLessons = ${serializedLessons};\nlet courseStorage = null;\ntry { courseStorage = globalThis.localStorage ?? null; } catch {}\ninstallCourseActivity(document, courseStorage, courseLessons);\n</script>`;
+}
+
+function injectRuntime(template, runtime) {
+  if (!runtime) return template.replaceAll("<!-- COURSE_ACTIVITY_RUNTIME -->", "");
+  if (template.includes("<!-- COURSE_ACTIVITY_RUNTIME -->")) {
+    return template.replaceAll("<!-- COURSE_ACTIVITY_RUNTIME -->", runtime);
+  }
+  return template.replace("</body>", `${runtime}\n</body>`);
+}
+
+function renderLessonNavigation(orderedLessons, lesson) {
+  const currentIndex = orderedLessons.findIndex((item) => item.id === lesson.id);
+  if (currentIndex < 0) return "";
+  const lessonOutput = lesson.output;
+  const hrefFor = (targetOutput) => html(path.posix.relative(path.posix.dirname(lessonOutput), targetOutput));
+  const previous = currentIndex > 0 ? orderedLessons[currentIndex - 1] : null;
+  const next = currentIndex < orderedLessons.length - 1 ? orderedLessons[currentIndex + 1] : null;
+  const links = [
+    `<a data-course-home href="${hrefFor("index.html")}">Course Home</a>`,
+    `<a data-course-explore href="${hrefFor("source-map.html")}">Explore code</a>`,
+  ];
+  if (previous) {
+    const primaryAttribute = next ? "" : " data-primary-course-nav";
+    links.push(`<a data-previous-lesson${primaryAttribute} href="${hrefFor(previous.output)}">← Lesson ${previous.order}: ${html(previous.title)}</a>`);
+  }
+  if (next) links.push(`<a data-next-lesson data-primary-course-nav href="${hrefFor(next.output)}">Next: Lesson ${next.order}, ${html(next.title)} →</a>`);
+  return `<nav class="nav-row lesson-navigation" aria-label="Lesson navigation">${links.join(" · ")}</nav>`;
+}
+
+export function renderCourseHomeTemplate(template, stylesheet, data, activityRuntimeSource = "") {
   const firstLesson = [...(data.lessons ?? [])].sort((left, right) => left.order - right.order)[0];
   const status = catalogSnapshotStatus(data);
+  const orderedLessons = [...(data.lessons ?? [])].sort((left, right) => left.order - right.order);
   const replacements = {
     "<!-- INLINE_COURSE_STYLES -->": `<style>\n${stylesheet}\n</style>`,
     "{{FIRST_LESSON_URL}}": firstLesson
@@ -1040,10 +1073,11 @@ export function renderCourseHomeTemplate(template, stylesheet, data) {
   };
   let result = template;
   for (const [needle, replacement] of Object.entries(replacements)) result = result.replaceAll(needle, replacement);
+  result = injectRuntime(result, renderCourseActivityRuntime(activityRuntimeSource, orderedLessons, "index.html"));
   return result;
 }
 
-export function renderLessonTemplate(template, stylesheet, snapshotId, freshness, lesson = {}, sourceData = { files: [] }, repoRoot = REPO_ROOT) {
+export function renderLessonTemplate(template, stylesheet, snapshotId, freshness, lesson = {}, sourceData = { files: [] }, repoRoot = REPO_ROOT, courseOptions = {}) {
   const badge = freshness.stale === 0
     ? `<span class="status status-current">Source references match ${freshness.total} pinned files</span>`
     : `<span class="status status-stale">${freshness.stale} source reference(s) need review</span>`;
@@ -1064,7 +1098,7 @@ export function renderLessonTemplate(template, stylesheet, snapshotId, freshness
     if (!sourceFile || !Number.isSafeInteger(citedLine) || citedLine < 1 || citedLine > sourceFile.lines) return fallbackHref;
     return `${fallbackHref} data-source-id="${html(sourceFile.sourceId)}" data-source-path="${html(filePath)}" data-source-line="${citedLine}" data-editor-url="${html(vscodeUrl(repoRoot, filePath, citedLine))}"`;
   });
-  const rendered = sourcePreviewLinks
+  let rendered = sourcePreviewLinks
     .replace("<!-- INLINE_COURSE_STYLES -->", `<style>\n${stylesheet}\n</style>`)
     .replaceAll("{{SNAPSHOT_ID}}", snapshotId)
     .replace("{{LESSON_FRESHNESS}}", badge)
@@ -1072,6 +1106,20 @@ export function renderLessonTemplate(template, stylesheet, snapshotId, freshness
     .replaceAll("{{LESSON_ORDER}}", String(metadata.order))
     .replaceAll("{{LESSON_TITLE}}", html(metadata.title))
     .replaceAll("{{LESSON_GOAL}}", html(metadata.goal));
+  const orderedLessons = [...(courseOptions.courseLessons ?? [])].sort((left, right) => left.order - right.order);
+  const activityRuntime = renderCourseActivityRuntime(
+    courseOptions.activityRuntimeSource,
+    orderedLessons,
+    metadata.output,
+  );
+  rendered = rendered.replaceAll("<!-- COURSE_LESSON_NAV -->", renderLessonNavigation(orderedLessons, metadata));
+  if (courseOptions.courseLessons?.length) {
+    rendered = rendered.replace(/<body\b([^>]*)>/i, (match, attributes) => {
+      if (/\bdata-course-lesson=/.test(attributes)) return match;
+      return `<body${attributes} data-course-lesson="${html(metadata.id)}">`;
+    });
+  }
+  rendered = injectRuntime(rendered, activityRuntime);
   const sourcePreview = renderLessonSourcePreview(sourceData.files ?? []);
   return rendered.replace("</body>", `${sourcePreview}\n</body>`);
 }
@@ -1257,12 +1305,13 @@ export async function acceptReviewedSnapshot({
 export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, options = {}) {
   const data = await buildCatalogData({ repoRoot, learningDir, coverageMap, ...options });
   const stylesheet = await readFile(path.join(learningDir, "assets/course.css"), "utf8");
+  const activityRuntimeSource = await readFile(path.join(learningDir, "assets/course-activity.mjs"), "utf8");
   const catalogTemplate = await readFile(path.join(learningDir, "templates/source-map.template.html"), "utf8");
   const catalog = renderCatalogTemplate(catalogTemplate, stylesheet, data, repoRoot);
   const files = new Map();
   if (data.batches.length) {
     const homeTemplate = await readFile(path.join(learningDir, "templates/course-home.template.html"), "utf8");
-    files.set(path.join(learningDir, "index.html"), renderCourseHomeTemplate(homeTemplate, stylesheet, data));
+    files.set(path.join(learningDir, "index.html"), renderCourseHomeTemplate(homeTemplate, stylesheet, data, activityRuntimeSource));
   }
   files.set(path.join(learningDir, "source-map.html"), catalog);
   const orderedLessons = [...data.lessons].sort((left, right) => left.order - right.order);
@@ -1276,6 +1325,7 @@ export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, o
       lesson,
       { files: data.files.filter((file) => (lesson.references ?? []).some((reference) => reference.path === file.path)) },
       repoRoot,
+      { courseLessons: orderedLessons, activityRuntimeSource },
     );
     files.set(path.join(learningDir, lesson.output), page);
   }

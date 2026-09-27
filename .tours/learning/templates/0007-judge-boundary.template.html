@@ -8,7 +8,7 @@
   <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
   <!-- INLINE_COURSE_STYLES -->
 </head>
-<body data-lesson-id="{{LESSON_ID}}">
+<body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
   <a class="skip-link" href="#lesson">Skip to the lesson</a>
   <main class="page" id="lesson">
     <header class="hero">
@@ -135,12 +135,13 @@
         <h3>Rewrite-test prompt</h3>
         <p>First add a hostile Python and compiled-program test that attempts to inspect every environment variable and file available to the submitted program, then verify it cannot recover any hidden input or expected value. Keep this separate from tests for network denial, resource limits, filesystem escape, and “no host credentials.” Run those attacks against the actual container configuration, and do not claim confidentiality until the case data is outside the contestant-readable process/filesystem boundary.</p>
       </article>
-      <p class="nav-row"><a href="0006-evaluation-retries.html">← Lesson 6: Evaluation retries</a> · <a href="0008-persistence-recovery.html">Next: Lesson 8, persistence and recovery →</a></p>
+      <!-- COURSE_LESSON_NAV -->
     </section>
 
     <footer class="footer-note">
       <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson records the current implementation and a source-level confidentiality concern; it changes no game behavior. Docker suites were not run in this session and are not described as passing.</p>
     </footer>
   </main>
+  <!-- COURSE_ACTIVITY_RUNTIME -->
 </body>
 </html>

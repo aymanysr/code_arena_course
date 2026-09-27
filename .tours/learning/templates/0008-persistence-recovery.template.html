@@ -8,7 +8,7 @@
   <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
   <!-- INLINE_COURSE_STYLES -->
 </head>
-<body data-lesson-id="{{LESSON_ID}}">
+<body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
   <a class="skip-link" href="#lesson">Skip to the lesson</a>
   <main class="page" id="lesson">
     <header class="hero">
@@ -174,12 +174,13 @@
         <h3>Rewrite-test prompt</h3>
         <p>Build a test with a real persistent database: create a Match, save a counted Submission and a pending Evaluation, close the first engine/process, create a fresh engine over the same database, then assert stored scores survive, Presence starts offline, and recovery claims the pending work under its original IDs. Add a concurrent-recovery assertion that only one worker holds the claim, and simulate a crash before commit to document whether the Judge can run again—do not assume exactly-once execution across crashes. Add a separate test showing that the in-memory adapter cannot survive constructing new stores. Do not call a two-engine/shared-Map unit test a database restart test.</p>
       </article>
-      <p class="nav-row"><a href="0007-judge-boundary.html">← Lesson 7: Judge boundary</a> · <a href="0009-live-connection.html">Next: Lesson 9, live connection and reconnect →</a></p>
+      <!-- COURSE_LESSON_NAV -->
     </section>
 
     <footer class="footer-note">
       <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. Current Postgres recovery integration cases are linked for study but were not run in this session. This lesson makes no database-schema or game-behavior change.</p>
     </footer>
   </main>
+  <!-- COURSE_ACTIVITY_RUNTIME -->
 </body>
 </html>

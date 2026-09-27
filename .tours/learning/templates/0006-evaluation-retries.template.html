@@ -8,7 +8,7 @@
   <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
   <!-- INLINE_COURSE_STYLES -->
 </head>
-<body data-lesson-id="{{LESSON_ID}}">
+<body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
   <a class="skip-link" href="#lesson">Skip to the lesson</a>
   <main class="page" id="lesson">
     <header class="hero">
@@ -112,12 +112,13 @@
         <h3>Rewrite-test prompt</h3>
         <p>Write separate tests for: same IDs + same payload returns the same outcome and invokes the Judge once; same Evaluation ID + changed code is rejected before duplicate work; a new Submit receives fresh IDs; and a Judge infrastructure failure is not converted into a contestant score. Then test persistence claims across two Game instances using the real database before claiming cross-process protection.</p>
       </article>
-      <p class="nav-row"><a href="0005-problem-editor-run.html">← Lesson 5: Problem and Run</a> · <a href="0007-judge-boundary.html">Next: Lesson 7, the Judge boundary →</a></p>
+      <!-- COURSE_LESSON_NAV -->
     </section>
 
     <footer class="footer-note">
       <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. In-memory tests demonstrate their asserted retry cases; they do not alone prove PostgreSQL claim behavior, sandbox security, or correctness of a separate rewrite.</p>
     </footer>
   </main>
+  <!-- COURSE_ACTIVITY_RUNTIME -->
 </body>
 </html>

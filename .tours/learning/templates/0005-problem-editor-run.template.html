@@ -8,7 +8,7 @@
   <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
   <!-- INLINE_COURSE_STYLES -->
 </head>
-<body data-lesson-id="{{LESSON_ID}}">
+<body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
   <a class="skip-link" href="#lesson">Skip to the lesson</a>
   <main class="page" id="lesson">
     <header class="hero">
@@ -136,12 +136,13 @@
         <h3>Rewrite-test prompt</h3>
         <p>In your own implementation, test these contracts separately: (1) a selected problem provides a language starter; (2) editing updates the source used by Run; (3) Run executes visible tests and updates only visible statuses; (4) hidden inputs never appear in the client snapshot; (5) Submit evaluates hidden groups and is the action that can produce a score. Add a test for constraints if you decide they should appear in the prompt.</p>
       </article>
-      <p class="nav-row"><a href="0004-lobby-to-match.html">← Lesson 4: Lobby to Match</a> · <a href="0006-evaluation-retries.html">Next: Lesson 6, Evaluation retries →</a></p>
+      <!-- COURSE_LESSON_NAV -->
     </section>
 
     <footer class="footer-note">
       <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson describes current problem, editor, and Run behavior. It proposes no UI change and makes no claim that visible tests prove correctness against hidden tests.</p>
     </footer>
   </main>
+  <!-- COURSE_ACTIVITY_RUNTIME -->
 </body>
 </html>

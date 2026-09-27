@@ -8,7 +8,7 @@
   <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
   <!-- INLINE_COURSE_STYLES -->
 </head>
-<body data-lesson-id="{{LESSON_ID}}">
+<body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
   <a class="skip-link" href="#lesson">Skip to the lesson</a>
   <main class="page" id="lesson">
     <header class="hero">
@@ -165,12 +165,13 @@
         <h3>Rewrite-test prompt</h3>
         <p>Test these independently: a participant can rejoin their Match and gets a fresh server baseline; an unrelated authenticated user cannot join that room; stale revisions do not overwrite newer state; opening a second tab and closing the first keeps the user online; in 2v2 one member can go offline without marking their teammate offline; and Player status/Match time continue during a disconnect. Keep HTTP, socket handshake, membership authorization, and production authentication as separately testable boundaries.</p>
       </article>
-      <p class="nav-row"><a href="0008-persistence-recovery.html">← Lesson 8: persistence and recovery</a> · <a href="0010-team-collaboration.html">Next: Lesson 10, shared editing and Readiness →</a></p>
+      <!-- COURSE_LESSON_NAV -->
     </section>
 
     <footer class="footer-note">
       <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. Reconnect and E2E behaviors are labeled by their source evidence; the E2E file was not run as part of this lesson change. Current authentication is a development seam, not production-login evidence.</p>
     </footer>
   </main>
+  <!-- COURSE_ACTIVITY_RUNTIME -->
 </body>
 </html>

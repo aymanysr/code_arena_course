@@ -51,6 +51,13 @@ function makeCoverageMap({ version = 1, batches, roots = [], files = [], exclude
   };
 }
 
+async function writeActivityRuntimeFixture(learningDir) {
+  await writeFile(
+    path.join(learningDir, "assets/course-activity.mjs"),
+    await readFile(new URL("../assets/course-activity.mjs", import.meta.url), "utf8"),
+  );
+}
+
 function makeReferenceSnapshot(files, {
   recordedAt = "2026-09-26T12:00:00.000Z",
   gitHead = "d".repeat(40),
@@ -370,8 +377,9 @@ test("renders a catalog-owned Course Home with a Lesson 1 fallback and visible b
     await mkdir(path.join(learningDir, "templates"), { recursive: true });
     await mkdir(path.join(learningDir, "lessons"), { recursive: true });
     await writeFile(path.join(learningDir, "assets/course.css"), ".course-home { color: inherit; }\n");
+    await writeActivityRuntimeFixture(learningDir);
     await writeFile(path.join(learningDir, "templates/source-map.template.html"), "<!doctype html><title>Source map</title><body>Map</body>");
-    await writeFile(path.join(learningDir, "templates/lesson.html"), "<!doctype html><title>{{LESSON_TITLE}}</title><body><h1>{{LESSON_TITLE}}</h1></body>");
+    await writeFile(path.join(learningDir, "templates/lesson.html"), "<!doctype html><title>{{LESSON_TITLE}}</title><body data-course-lesson=\"{{LESSON_ID}}\"><h1>{{LESSON_TITLE}}</h1><!-- COURSE_LESSON_NAV --><!-- COURSE_ACTIVITY_RUNTIME --></body>");
     await writeFile(path.join(learningDir, "templates/course-home.template.html"), [
       "<!doctype html>",
       "<html lang=\"en\"><head><title>Learn Code Arena</title><!-- INLINE_COURSE_STYLES --></head><body>",
@@ -383,6 +391,7 @@ test("renders a catalog-owned Course Home with a Lesson 1 fallback and visible b
       "<p class=\"quiet\" data-course-snapshot><span class=\"status {{SNAPSHOT_STATUS_CLASS}}\">{{SNAPSHOT_STATUS}}</span> <span>Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>",
       "<p data-course-activity>Activity stays on this browser and is not a mastery score.</p>",
       "<!-- COURSE_BATCHES -->",
+      "<!-- COURSE_ACTIVITY_RUNTIME -->",
       "</main></body></html>",
     ].join("\n"));
     const first = lessonRecord({ id: "lesson-1", order: 1, title: "Read the request", template: "templates/lesson.html", output: "lessons/lesson-1.html" });
@@ -402,16 +411,37 @@ test("renders a catalog-owned Course Home with a Lesson 1 fallback and visible b
     assert.ok(home, "renderCatalogOutputs must include the Course Home");
     assert.equal((home.match(/class=\"primary-button\"/g) ?? []).length, 1);
     assert.match(home, /data-course-start href=\"lessons\/lesson-1\.html\">Start Lesson 1/);
+    assert.match(home, /data-course-storage-unavailable aria-live=\"polite\" hidden/);
+    assert.equal((home.match(/<script type=\"module\">/g) ?? []).length, 1);
+    assert.match(home, /export function installCourseActivity\(/);
+    assert.match(home, /Continue Lesson/);
     assert.match(home, /href=\"source-map\.html\">Explore code<\/a>/);
     assert.match(home, /class=\"quiet\" data-course-snapshot/);
     assert.match(home, /<h2[^>]*>Start here<\/h2>[\s\S]*?<h2[^>]*>Next boundary<\/h2>/);
     assert.doesNotMatch(home, /<summary[^>]*>[\s\S]*?<h[1-6]\b/);
     for (const [lessonId, href] of [["lesson-1", "lesson-1.html"], ["lesson-2", "lesson-2.html"], ["lesson-3", "lesson-3.html"]]) {
       assert.match(home, new RegExp(`<a[^>]+data-lesson-link=\"${lessonId}\"[^>]+href=\"lessons/${href}\"`));
+      assert.match(home, new RegExp(`data-course-activity-status=\"${lessonId}\">Not started<\\/span>`));
     }
     assert.doesNotMatch(home, /data-lesson-link=\"(?:lesson-1|lesson-2|lesson-3)\"[^>]*disabled/);
     assert.ok(home.indexOf("lesson-1.html") < home.indexOf("lesson-2.html"));
     assert.ok(home.indexOf("lesson-2.html") < home.indexOf("lesson-3.html"));
+    const firstPage = rendered.files.get(path.join(learningDir, "lessons/lesson-1.html"));
+    const secondPage = rendered.files.get(path.join(learningDir, "lessons/lesson-2.html"));
+    const thirdPage = rendered.files.get(path.join(learningDir, "lessons/lesson-3.html"));
+    for (const page of [firstPage, secondPage, thirdPage]) {
+      assert.match(page, /data-course-lesson=\"lesson-[123]\"/);
+      assert.match(page, /data-course-storage-unavailable aria-live=\"polite\" hidden/);
+      assert.equal((page.match(/<script type=\"module\">/g) ?? []).length, 1);
+      assert.match(page, /data-course-home href=\"\.\.\/index\.html\"/);
+      assert.match(page, /data-course-explore href=\"\.\.\/source-map\.html\"/);
+    }
+    assert.match(firstPage, /data-next-lesson[^>]*href=\"lesson-2\.html\"/);
+    assert.match(secondPage, /data-previous-lesson[^>]*href=\"lesson-1\.html\"/);
+    assert.match(secondPage, /data-next-lesson[^>]*href=\"lesson-3\.html\"/);
+    assert.match(thirdPage, /data-previous-lesson[^>]*href=\"lesson-2\.html\"/);
+    assert.doesNotMatch(firstPage, /data-previous-lesson/);
+    assert.doesNotMatch(thirdPage, /data-next-lesson/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
@@ -431,6 +461,7 @@ test("renders multiple catalog lessons from separate templates with ordered navi
       path.join(learningDir, "assets/course.css"),
       await readFile(new URL("../assets/course.css", import.meta.url), "utf8"),
     );
+    await writeActivityRuntimeFixture(learningDir);
     await writeFile(
       path.join(learningDir, "templates/source-map.template.html"),
       await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8"),
@@ -517,6 +548,7 @@ test("embeds only cited lesson sources and keeps source text inert", async () =>
       path.join(learningDir, "assets/course.css"),
       await readFile(new URL("../assets/course.css", import.meta.url), "utf8"),
     );
+    await writeActivityRuntimeFixture(learningDir);
     await writeFile(
       path.join(learningDir, "templates/source-map.template.html"),
       await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8"),
@@ -724,8 +756,9 @@ test("normal page generation leaves frozen baselines untouched; explicit accepta
       "",
     ].join("\n"));
     await writeFile(path.join(learningDir, "assets/course.css"), await readFile(new URL("../assets/course.css", import.meta.url), "utf8"));
+    await writeActivityRuntimeFixture(learningDir);
     await writeFile(path.join(learningDir, "templates/source-map.template.html"), await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8"));
-    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>{{LESSON_TITLE}}</h1>{{LESSON_FRESHNESS}}");
+    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>{{LESSON_TITLE}}</h1>{{LESSON_FRESHNESS}}<!-- COURSE_LESSON_NAV -->");
     const snapshotPath = path.join(learningDir, "reference-snapshot.json");
     const checksumPath = path.join(repoRoot, ".tours/reference-baseline.sha256");
     const beforeSnapshot = "existing reviewed snapshot remains unchanged\n";
@@ -990,11 +1023,9 @@ test("keeps the core learning pages connected in the intended beginner order", a
   const ordered = [...coverageMap.lessons].sort((left, right) => left.order - right.order);
   assert.equal(ordered.length, 14);
   assert.deepEqual(ordered.map((lesson) => lesson.order), ordered.map((_, index) => index + 1));
-  const outputs = ordered.map((lesson) => lesson.output.split("/").pop());
   for (let index = 0; index < ordered.length; index++) {
     const template = await readFile(path.join(learningDir, ordered[index].template), "utf8");
-    if (index > 0) assert.match(template, new RegExp(`href="${outputs[index - 1]}"`), `${ordered[index].template} links back`);
-    if (index < ordered.length - 1) assert.match(template, new RegExp(`href="${outputs[index + 1]}"`), `${ordered[index].template} links forward`);
+    assert.equal((template.match(/<!-- COURSE_LESSON_NAV -->/g) ?? []).length, 1, `${ordered[index].template} delegates navigation to the catalog renderer`);
   }
   const issues = await auditCourseOrder({ lessons: coverageMap.lessons, learningDir });
   assert.deepEqual(issues, []);
@@ -1166,8 +1197,7 @@ test("renders the 2v2 collaboration lesson with authoritative revision and readi
   assert.match(template, /Ticket-14 four-client browser proof is source evidence, not a run from this lesson update/);
   assert.match(template, /real HTTP\/socket\/Postgres 2v2 suite and browser reconnect E2E were inspected but not run here/);
   assert.match(template, /not run/);
-  assert.match(template, /href="0009-live-connection\.html"/);
-  assert.match(template, /href="0011-team-chat\.html"/);
+  assert.match(template, /<!-- COURSE_LESSON_NAV -->/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services)\//);
 });
 
@@ -1191,8 +1221,7 @@ test("renders the team-chat lesson with room isolation and Match-versus-Round li
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Flive-team-chat\.spec\.ts&amp;line=68"/);
   assert.match(template, /process-local/);
   assert.match(template, /not run/);
-  assert.match(template, /href="0010-team-collaboration\.html"/);
-  assert.match(template, /href="0012-arena-screen\.html"/);
+  assert.match(template, /<!-- COURSE_LESSON_NAV -->/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services)\//);
 });
 
@@ -1247,8 +1276,7 @@ test("renders the Arena screen lesson from app entry through snapshot-driven dis
   assert.ok(lesson.references.some(({ path: sourcePath, startLine, endLine }) =>
     sourcePath === "packages/arena-game/src/engine.ts" && startLine === 845 && endLine === 900,
   ), "Lesson 12 maps Match snapshot and final-result projection");
-  assert.match(template, /href="0011-team-chat\.html"/);
-  assert.match(template, /href="0013-running-the-project\.html"/);
+  assert.match(template, /<!-- COURSE_LESSON_NAV -->/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/frontend\//);
 });
 
@@ -1343,8 +1371,7 @@ test("renders the local-runtime lesson with honest service roles and setup links
   assert.match(template, /Nginx does not publish or proxy the worker/);
   assert.match(template, /uses HTTP for local connections.*not evidence.*HTTPS requirement/);
   assert.match(template, /Never copy real secrets/);
-  assert.match(template, /href="0012-arena-screen\.html"/);
-  assert.match(template, /href="0014-rewrite-with-tests\.html"/);
+  assert.match(template, /<!-- COURSE_LESSON_NAV -->/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services|infra|scripts)\//);
 });
 
@@ -1434,7 +1461,7 @@ test("renders the test-evidence capstone and disposes every remaining source pat
   assert.match(rendered, /does not establish hidden-case confidentiality/);
   assert.match(rendered, /42-subject-compliance\.md/);
   assert.match(rendered, /team sign-off/);
-  assert.match(template, /href="0013-running-the-project\.html"/);
+  assert.match(template, /<!-- COURSE_LESSON_NAV -->/);
   assert.match(template, /CodeTour 6/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services|infra|scripts)\//);
 
@@ -1516,11 +1543,12 @@ test("requires affected lessons to be reviewed before accepting a snapshot", asy
     await mkdir(path.join(learningDir, "templates"), { recursive: true });
     await mkdir(path.join(learningDir, "assets"), { recursive: true });
     await writeFile(path.join(repoRoot, "src/engine.ts"), "export const engine = true;\n");
-    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>Lesson</h1>");
+    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>Lesson</h1><!-- COURSE_LESSON_NAV -->");
     await writeFile(
       path.join(learningDir, "assets/course.css"),
       await readFile(new URL("../assets/course.css", import.meta.url), "utf8"),
     );
+    await writeActivityRuntimeFixture(learningDir);
     await writeFile(
       path.join(learningDir, "templates/source-map.template.html"),
       await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8"),
@@ -1574,8 +1602,8 @@ test("checks README and nav order against the single coverage order", async () =
       lessonRecord({ id: "0001-first", order: 1, title: "First", template: "templates/first.html", output: "lessons/first.html" }),
       lessonRecord({ id: "0002-second", order: 2, title: "Second", template: "templates/second.html", output: "lessons/second.html" }),
     ];
-    await writeFile(path.join(learningDir, "templates/first.html"), '<p class="nav-row"><a href="second.html">Next</a></p>');
-    await writeFile(path.join(learningDir, "templates/second.html"), '<p class="nav-row"><a href="first.html">Prev</a></p>');
+    await writeFile(path.join(learningDir, "templates/first.html"), '<nav><!-- COURSE_LESSON_NAV --></nav>');
+    await writeFile(path.join(learningDir, "templates/second.html"), '<nav><!-- COURSE_LESSON_NAV --></nav>');
     await writeFile(path.join(learningDir, "README.md"), "[First](lessons/first.html)\n[Second](lessons/second.html)\n");
     assert.deepEqual(await auditCourseOrder({ lessons, learningDir }), []);
 
@@ -1588,19 +1616,10 @@ test("checks README and nav order against the single coverage order", async () =
     assert.equal(missingReadmeLessons.some((issue) => issue.kind === "readme-order"), true);
 
     await writeFile(path.join(learningDir, "README.md"), "[First](lessons/first.html)\n[Second](lessons/second.html)\n");
-    await writeFile(path.join(learningDir, "templates/second.html"), '<p class="nav-row"><a href="elsewhere/first.html">Prev</a></p>');
+    await writeFile(path.join(learningDir, "templates/second.html"), '<nav><!-- COURSE_LESSON_NAV --><!-- COURSE_LESSON_NAV --></nav>');
     const wrongNavTarget = await auditCourseOrder({ lessons, learningDir });
     assert.equal(wrongNavTarget.some((issue) => issue.kind === "nav-order"), true);
-
-    await writeFile(path.join(learningDir, "templates/second.html"), '<p class="nav-row"><a href="first.html">Prev</a><a href="extra.html">Extra</a></p>');
-    const extraNavTarget = await auditCourseOrder({ lessons, learningDir });
-    assert.equal(extraNavTarget.some((issue) => issue.kind === "nav-order"), true);
-
-    await writeFile(path.join(learningDir, "templates/second.html"), '<p class="nav-row"><a href="first.html">Prev</a><a href="#top">Extra</a></p>');
-    const extraAnchor = await auditCourseOrder({ lessons, learningDir });
-    assert.equal(extraAnchor.some((issue) => issue.kind === "nav-order"), false);
-
-    await writeFile(path.join(learningDir, "templates/second.html"), '<p class="nav-row">No nav here</p>');
+    await writeFile(path.join(learningDir, "templates/second.html"), '<nav>No generated navigation</nav>');
     const navDrift = await auditCourseOrder({ lessons, learningDir });
     assert.equal(navDrift.some((issue) => issue.kind === "nav-order"), true);
   } finally {
@@ -1619,11 +1638,12 @@ test("requires every lesson review when creating the first source snapshot", asy
     await mkdir(path.join(learningDir, "assets"), { recursive: true });
     const source = "export const engine = true;\n";
     await writeFile(path.join(repoRoot, "src/engine.ts"), source);
-    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>Lesson</h1>");
+    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>Lesson</h1><!-- COURSE_LESSON_NAV -->");
     await writeFile(
       path.join(learningDir, "assets/course.css"),
       await readFile(new URL("../assets/course.css", import.meta.url), "utf8"),
     );
+    await writeActivityRuntimeFixture(learningDir);
     await writeFile(
       path.join(learningDir, "templates/source-map.template.html"),
       await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8"),

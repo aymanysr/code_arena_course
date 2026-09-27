@@ -486,22 +486,22 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 - Consumes: ordered lesson metadata and storage-like `{ getItem, setItem, removeItem }` objects.
 - Produces: the activity functions in Shared Interfaces, generated previous/next navigation, and a Start/Continue action based on last opened lesson.
 
-- [ ] **Step 1: Write failing pure state tests.** Test empty storage, a valid record, invalid JSON, a future schema version, invalid status strings, a removed lesson ID, `getItem` throwing, `setItem` throwing, started -> self-check-recorded monotonic promotion, and prevention of self-check -> started downgrade.
-- [ ] **Step 2: Run `node --test .tours/learning/scripts/course-activity.test.mjs`.** Expected: FAIL because the module does not exist.
-- [ ] **Step 3: Implement the pure functions.** Use the exact persisted shape from Shared Interfaces. Return a new object from `markLessonActivity()` and return `false` rather than throwing when `writeCourseActivity()` cannot persist.
-- [ ] **Step 4: Add failing generator assertions.** Require every lesson output to include Course Home, Explore code, previous/next links computed from catalog order, `data-course-lesson`, one inlined activity runtime, and a visible storage-unavailable message target with `aria-live="polite"`.
-- [ ] **Step 5: Implement runtime injection.** Read `assets/course-activity.mjs` once in `renderCatalogOutputs()` and inject it into Course Home and lesson placeholders as `<script type="module">`. Keep each generated page self-contained and usable from `file://`.
-- [ ] **Step 6: Wire Course Home.** `installCourseActivity()` reads the valid ordered lesson IDs, rewrites the primary link to `Continue Lesson N` only for a valid `lastLessonId`, and adds text statuses `Not started`, `Started`, or `Self-check recorded` beside lessons.
-- [ ] **Step 7: Wire lessons.** On page load, mark the current lesson `started` and `lastLessonId`. A `[data-course-self-check]` activation promotes it to `self-check-recorded`. Keep source previews, prediction controls, and navigation usable when storage is unavailable.
-- [ ] **Step 8: Replace hand-maintained neighbor links.** Put `<!-- COURSE_LESSON_NAV -->` in each lesson template and have the generator render the previous/next links. Remove duplicated hard-coded nav rows after the generated navigation is covered by tests.
-- [ ] **Step 9: Run unit and generator tests.** Run:
+- [x] **Step 1: Write failing pure state tests.** Test empty storage, a valid record, invalid JSON, a future schema version, invalid status strings, a removed lesson ID, `getItem` throwing, `setItem` throwing, started -> self-check-recorded monotonic promotion, and prevention of self-check -> started downgrade.
+- [x] **Step 2: Run `node --test .tours/learning/scripts/course-activity.test.mjs`.** Expected: FAIL because the module does not exist.
+- [x] **Step 3: Implement the pure functions.** Use the exact persisted shape from Shared Interfaces. Return a new object from `markLessonActivity()` and return `false` rather than throwing when `writeCourseActivity()` cannot persist.
+- [x] **Step 4: Add failing generator assertions.** Require every lesson output to include Course Home, Explore code, previous/next links computed from catalog order, `data-course-lesson`, one inlined activity runtime, and a visible storage-unavailable message target with `aria-live="polite"`.
+- [x] **Step 5: Implement runtime injection.** Read `assets/course-activity.mjs` once in `renderCatalogOutputs()` and inject it into Course Home and lesson placeholders as `<script type="module">`. Keep each generated page self-contained and usable from `file://`.
+- [x] **Step 6: Wire Course Home.** `installCourseActivity()` reads the valid ordered lesson IDs, rewrites the primary link to `Continue Lesson N` only for a valid `lastLessonId`, and adds text statuses `Not started`, `Started`, or `Self-check recorded` beside lessons.
+- [x] **Step 7: Wire lessons.** On page load, mark the current lesson `started` and `lastLessonId`. A `[data-course-self-check]` activation promotes it to `self-check-recorded`. Keep source previews, prediction controls, and navigation usable when storage is unavailable.
+- [x] **Step 8: Replace hand-maintained neighbor links.** Put `<!-- COURSE_LESSON_NAV -->` in each lesson template and have the generator render the previous/next links. Remove duplicated hard-coded nav rows after the generated navigation is covered by tests.
+- [x] **Step 9: Run unit and generator tests.** Run:
 
 ```sh
 node --test .tours/learning/scripts/course-activity.test.mjs .tours/learning/scripts/build-catalog.test.mjs
 ```
 
 Expected: PASS.
-- [ ] **Step 10: Commit.** Commit `feat(course): add local activity and resume`.
+- [x] **Step 10: Commit.** Commit `feat(course): add local activity and resume`.
 
 ### Task 9: Normalize Lesson 1 and validate one complete study session
 

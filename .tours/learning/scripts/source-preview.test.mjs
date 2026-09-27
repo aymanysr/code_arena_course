@@ -49,6 +49,7 @@ before(async () => {
   const template = await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8");
   const homeTemplate = await readFile(new URL("../templates/course-home.template.html", import.meta.url), "utf8");
   const stylesheet = await readFile(new URL("../assets/course.css", import.meta.url), "utf8");
+  const activityRuntime = await readFile(new URL("../assets/course-activity.mjs", import.meta.url), "utf8");
   let prototype;
   try {
     prototype = await readFile(new URL("../../../.scratch/learning-platform-ux-prototype.html", import.meta.url), "utf8");
@@ -92,6 +93,7 @@ before(async () => {
   await writeFile(path.join(fixtureDirectory, "templates/course-home.template.html"), homeTemplate);
   await writeFile(path.join(fixtureDirectory, "templates/source-map.template.html"), template);
   await writeFile(path.join(fixtureDirectory, "assets/course.css"), stylesheet);
+  await writeFile(path.join(fixtureDirectory, "assets/course-activity.mjs"), activityRuntime);
   const renderedCatalog = await renderCatalogOutputs(fixtureDirectory, fixtureDirectory, coverageMap, { tours: [] });
   const { data } = renderedCatalog;
   const renderedMap = renderedCatalog.files.get(path.join(fixtureDirectory, "source-map.html"));
