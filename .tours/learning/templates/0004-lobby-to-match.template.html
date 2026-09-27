@@ -27,58 +27,60 @@
 
     <section class="section" aria-labelledby="predict-title">
       <p class="kicker">First, make a prediction</p>
-      <h2 id="predict-title">A 1v1 invite room has two players and both are Ready. Can the guest start—and can either player submit immediately?</h2>
-      <p class="section-intro">Write down who has permission to start, what still has to be created, and which part of this decision belongs to the server.</p>
+      <h2 id="predict-title">An older <code>getActive()</code> response arrives after a newer room update. Which Lobby state should the screen show?</h2>
+      <p class="section-intro">Predict whether the client should trust the socket payload, accept whichever HTTP response finishes last, or keep the newer authoritative refresh. Then identify who may start a full, Ready room.</p>
       <details class="card">
         <summary>Check your prediction</summary>
-        <p class="mt-1">Only the room host may start. The server rechecks membership, full sides, and everyone's readiness even if the UI button is enabled. Starting creates a Match in <code>MATCH_FOUND</code>; the first Round still needs its own start action before coding can begin.</p>
+        <p class="mt-1">Socket payloads are refresh hints, not replacement room state. <code>LobbySession</code>'s request-version guard means stale responses are discarded; the most recently started request that is still current supplies the view. Separately, only the room host may start; the server checks membership, full sides, and every player's Ready state.</p>
       </details>
     </section>
 
     <section class="section" id="trace" aria-labelledby="trace-title">
       <p class="kicker">Now trace the boundaries</p>
-      <h2 id="trace-title">A Lobby groups players; the Game service creates the Match</h2>
-      <p class="section-intro">The screen collects choices and displays membership/readiness. The backend checks those choices and owns the resulting Match identity.</p>
+      <h2 id="trace-title">Recover a current room, then follow its invitation to a Match</h2>
+      <p class="section-intro">This release exposes invitation-code rooms. The client reconciles its display from the authoritative active-state endpoint; Lobby events and ordinary mutation responses prompt a refresh.</p>
       <ol class="flow-list">
         <li class="source-step">
           <span class="step-number" aria-hidden="true">01</span>
           <div>
-            <h3>The screen asks the Lobby client to act</h3>
-            <p><code>LobbyPage</code> handles the clicks. <code>LobbyClient</code> turns them into HTTP requests such as <code>/lobby/rooms</code>, <code>/lobby/rooms/join</code>, <code>/ready</code>, and <code>/start</code>. The button can guide the player, but it is not the authority.</p>
+            <h3>Open the Lobby and recover the active state</h3>
+            <p><code>LobbySession.start()</code> opens the socket and requests <code>/lobby/active</code>. A room, Match-found, queue, or reconnect event starts another authoritative refresh. The socket payload itself does not replace the displayed snapshot.</p>
             <div class="source-links">
-              <a href="../../../frontend/src/components/LobbyPage.tsx#L90">Create / join / ready / start handlers · LobbyPage.tsx:90</a>
-              <a href="../../../frontend/src/components/LobbyPage.tsx#L170">UI's host-and-readiness display gate · LobbyPage.tsx:170</a>
-              <a href="../../../frontend/src/arena/lobby.ts#L84">Lobby HTTP client · lobby.ts:84</a>
-              <a href="../../../services/game/src/game/lobby.controller.ts#L38">Backend room routes · lobby.controller.ts:38</a>
+              <a href="../../../frontend/src/components/LobbyPage.tsx#L28">Screen actions · LobbyPage.tsx:28</a>
+              <a href="../../../frontend/src/arena/lobby-session.ts#L54">Connect and recover on start/reconnect · lobby-session.ts:54</a>
+              <a href="../../../frontend/src/arena/lobby-session.ts#L83">Fetch active state and discard superseded responses · lobby-session.ts:83</a>
+              <a href="../../../frontend/src/arena/lobby.ts#L157">Authoritative active-state request · lobby.ts:157</a>
+              <a href="../../../frontend/src/arena/lobby-session.test.ts#L64">Newer refresh wins over a delayed response · lobby-session.test.ts:64</a>
             </div>
           </div>
         </li>
         <li class="source-step">
           <span class="step-number" aria-hidden="true">02</span>
           <div>
-            <h3>There are two current ways to gather players</h3>
-            <p><strong>Private room:</strong> the host creates an invite code; players join it and see the room's members, sides, and Ready flags. For 1v1, host starts Left and the guest joins Right. In 2v2, each side needs two members.</p>
-            <p class="mt-1"><strong>Public queue:</strong> a waiting entry is matched when enough players of that mode are available (two for 1v1; four for 2v2). The current matcher orders waiting rows by join time, creates the Match, then marks queue entries matched.</p>
+            <h3>Create a private room or join by invitation code</h3>
+            <p><code>LobbyPage</code> offers Create Room and Join by Code. The host begins on Left; a 1v1 guest joins Right, and in 2v2 each side needs two members. The private-room API returns room data, but the session refreshes before showing the result.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/lobby.ts#L291">Public queue matching · lobby.ts:291</a>
+              <a href="../../../frontend/src/components/LobbyPage.tsx#L311">Invitation-only entry controls · LobbyPage.tsx:311</a>
+              <a href="../../../frontend/src/arena/lobby-session.ts#L124">Create and join through LobbySession · lobby-session.ts:124</a>
+              <a href="../../../frontend/src/arena/lobby.ts#L84">Create or join through HTTP · lobby.ts:84</a>
               <a href="../../../packages/arena-game/src/lobby.ts#L357">Create private room · lobby.ts:357</a>
               <a href="../../../packages/arena-game/src/lobby.ts#L426">Join private room by code · lobby.ts:426</a>
-              <a href="../../../packages/arena-game/test/lobby.test.ts#L67">Two-player queue case · lobby.test.ts:67</a>
-              <a href="../../../packages/arena-game/test/lobby.test.ts#L109">Four-player queue case · lobby.test.ts:109</a>
+              <a href="../../../packages/arena-game/test/lobby.test.ts#L137">Private-room cases · lobby.test.ts:137</a>
+              <a href="../../../frontend/e2e/live-lobby.spec.ts#L40">Invitation-room browser scenario source · live-lobby.spec.ts:40</a>
             </div>
           </div>
         </li>
         <li class="source-step">
           <span class="step-number" aria-hidden="true">03</span>
           <div>
-            <h3>The server checks who may see the room and who may start</h3>
-            <p>Room reads and room socket subscriptions are for members only. To start a private room, the backend checks that the caller is the host, every player slot is filled on the correct sides, and every member is Ready. A direct HTTP request gets these same checks; bypassing the disabled UI button does not bypass the rule.</p>
+            <h3>Refresh after changes and rejoin the room channel</h3>
+            <p>Socket payloads are refresh hints. Room mutations such as Create, Join, Ready, and Leave trigger a new <code>getActive()</code>; the request-version guard discards older responses. After connecting or joining a room channel, the session refreshes again to cover updates that happened during recovery.</p>
             <div class="source-links">
-              <a href="../../../services/game/src/game/game.service.ts#L364">Authorize room membership · game.service.ts:364</a>
+              <a href="../../../frontend/src/arena/lobby-session.ts#L162">Mutation results prompt an authoritative refresh · lobby-session.ts:162</a>
+              <a href="../../../frontend/src/arena/lobby-session.ts#L174">Join the room channel, then refresh · lobby-session.ts:174</a>
+              <a href="../../../frontend/src/arena/lobby-session.test.ts#L133">Mutation and reconnect cases · lobby-session.test.ts:133</a>
+              <a href="../../../frontend/src/arena/lobby-session.test.ts#L168">Refresh after channel join · lobby-session.test.ts:168</a>
               <a href="../../../services/game/src/game/lobby.gateway.ts#L65">Authorize live room subscription · lobby.gateway.ts:65</a>
-              <a href="../../../services/game/src/game/lobby.controller.ts#L95">Private-room start route · lobby.controller.ts:95</a>
-              <a href="../../../packages/arena-game/src/lobby.ts#L685">Host, capacity, and Ready gate · lobby.ts:685</a>
-              <a href="../../../packages/arena-game/test/lobby.test.ts#L215">Gate tests for host / fullness / Ready · lobby.test.ts:215</a>
               <a href="../../../services/game/src/game/lobby.test.ts#L68">Non-members cannot read or subscribe · lobby.test.ts:68</a>
             </div>
           </div>
@@ -86,14 +88,20 @@
         <li class="source-step">
           <span class="step-number" aria-hidden="true">04</span>
           <div>
-            <h3>Game creates a Match, then tells the players to enter it</h3>
-            <p><code>GameService</code> selects the problem versions and calls <code>ArenaEngine.createMatch()</code> with the mode and participant-to-side mapping. The private room becomes matched, and a member-targeted <code>lobby.matchFound</code> event carries the new Match ID. The Match begins at <code>MATCH_FOUND</code>; the first Round has not started yet.</p>
+            <h3>The host requests a start; the server checks the room again</h3>
+            <p>The button only enables when the host sees every slot filled and every player Ready. The server repeats the membership, host, capacity, side, and Ready checks before creating a Match. A successful start response carries its Match ID; duplicate <code>lobby.matchFound</code> events prompt refresh and do not cause a second handoff. The Match begins at <code>MATCH_FOUND</code>; the first Round has not started yet.</p>
             <div class="source-links">
-              <a href="../../../services/game/src/game/game.service.ts#L348">Create Match from private room · game.service.ts:348</a>
-              <a href="../../../services/game/src/game/game.service.ts#L299">Create Match from public queue · game.service.ts:299</a>
-              <a href="../../../services/game/src/game/lobby.gateway.ts#L28">Send events to the selected users · lobby.gateway.ts:28</a>
-              <a href="../../../services/game/src/game/lobby.test.ts#L143">Queue Match begins at MATCH_FOUND · lobby.test.ts:143</a>
-              <a href="../../../frontend/e2e/live-lobby.spec.ts#L38">Private invite-to-Arena browser journey · live-lobby.spec.ts:38</a>
+              <a href="../../../frontend/src/components/LobbyPage.tsx#L56">UI host, capacity, and readiness gate · LobbyPage.tsx:56</a>
+              <a href="../../../frontend/src/components/LobbyPage.tsx#L281">Host-only Start button · LobbyPage.tsx:281</a>
+              <a href="../../../services/game/src/game/game.service.ts#L334">Start private room and create the Match · game.service.ts:334</a>
+              <a href="../../../packages/arena-game/src/lobby.ts#L685">Server host, capacity, and Ready gate · lobby.ts:685</a>
+              <a href="../../../packages/arena-game/test/lobby.test.ts#L215">Host/full/Ready rule cases · lobby.test.ts:215</a>
+              <a href="../../../frontend/src/arena/lobby-session.ts#L150">Use the successful start response's Match ID · lobby-session.ts:150</a>
+              <a href="../../../frontend/src/arena/lobby-session.test.ts#L89">Duplicate Match events hand off once · lobby-session.test.ts:89</a>
+              <a href="../../../services/game/src/game/lobby.gateway.ts#L34">Target Match-found event to room members · lobby.gateway.ts:34</a>
+              <a href="../../../services/game/src/game/lobby.gateway.ts#L37">Send the committed Match ID to room members · lobby.gateway.ts:37</a>
+              <a href="../../../services/game/src/game/lobby.test.ts#L150">Private-room integration path · lobby.test.ts:150</a>
+              <a href="../../../frontend/e2e/live-lobby.spec.ts#L40">Invite-to-Arena browser scenario source · live-lobby.spec.ts:40</a>
             </div>
           </div>
         </li>
@@ -101,13 +109,16 @@
     </section>
 
     <section class="section" aria-labelledby="truth-title">
-      <h2 id="truth-title">Current code and intended first-release scope disagree about Quick Play</h2>
+      <h2 id="truth-title">Public queue backend code remains for a future release</h2>
       <aside class="concept-note">
-        <h3>Keep this discrepancy visible</h3>
-        <p>The current UI, Lobby service, and queue tests include automatic public matchmaking. But <code>.scratch/code-arena/spec.md:19</code> says invitation-code rooms are the first-release entry and automatic matchmaking is not in scope. This course records what the checked code currently does; it does <strong>not</strong> approve expanding release scope or claim that the spec has been updated. Resolve that product decision separately before treating Quick Play as intended release behavior.</p>
+        <h3>The first release is invitation-only</h3>
+        <p><code>.scratch/code-arena/spec.md:19</code> keeps automatic matchmaking out of first-release scope. <code>LobbyPage</code> offers no queue action. When a recovered active state contains a waiting queue entry, <code>LobbySession</code> cancels it; if matching wins that race, it uses the returned Match ID. The public queue endpoint, matcher, client adapter, and API tests remain in code for a future release.</p>
+        <p class="source-links"><a href="../../../.scratch/code-arena/spec.md#L19">Approved first-release scope · spec.md:19</a></p>
+        <p class="source-links"><a href="../../../frontend/src/components/LobbyPage.tsx#L311">Current invitation-only controls · LobbyPage.tsx:311</a> <a href="../../../frontend/src/arena/lobby-session.ts#L97">Clear a recovered waiting queue entry · lobby-session.ts:97</a> <a href="../../../frontend/src/arena/lobby-session.test.ts#L111">Queue recovery cancellation case · lobby-session.test.ts:111</a></p>
+        <p class="source-links"><a href="../../../packages/arena-game/src/lobby.ts#L291">Retained backend matcher · lobby.ts:291</a> <a href="../../../services/game/src/game/lobby.controller.ts#L14">Retained queue API · lobby.controller.ts:14</a> <a href="../../../frontend/src/arena/lobby.ts#L54">Retained HTTP adapter · lobby.ts:54</a> <a href="../../../frontend/e2e/live-lobby.spec.ts#L109">Direct API test source · live-lobby.spec.ts:109</a></p>
       </aside>
       <p class="section-intro mt-1">There is also a development-auth boundary: this Lobby client sends an <code>x-dev-user-id</code> header, which the Game service reads through its development principal seam. That is not evidence of the finished signup/login system.</p>
-      <p class="source-links"><a href="../../../frontend/src/arena/lobby.ts#L39">Development identity header · lobby.ts:39</a> <a href="../../../services/game/src/game/lobby.controller.ts#L14">Controller requires a principal · lobby.controller.ts:14</a></p>
+      <p class="source-links"><a href="../../../frontend/src/arena/lobby.ts#L39">Development identity header · lobby.ts:39</a> <a href="../../../services/game/src/game/lobby.controller.ts#L40">Room route requires a principal · lobby.controller.ts:40</a></p>
     </section>
 
     <section class="section" aria-labelledby="tests-title">
@@ -115,35 +126,35 @@
       <div class="grid split">
         <article class="card">
           <h3>Domain tests</h3>
-          <p>The in-memory Lobby tests check queue capacity and side assignment, private invite joins, start rejection for the wrong host or an unready/not-full room, and that only one Match is created under simultaneous start requests.</p>
-          <p class="source-links"><a href="../../../packages/arena-game/test/lobby.test.ts#L67">Queue tests · lobby.test.ts:67</a> <a href="../../../packages/arena-game/test/lobby.test.ts#L320">Concurrent starts · lobby.test.ts:320</a></p>
+          <p>The in-memory Lobby tests cover retained queue capacity, invite-room creation/joining, and the host/full/Ready start rule. PostgreSQL-backed cases exercise concurrent room joins and starts when that database suite is available.</p>
+          <p class="source-links"><a href="../../../packages/arena-game/test/lobby.test.ts#L67">Retained queue behavior · lobby.test.ts:67</a> <a href="../../../packages/arena-game/test/lobby.test.ts#L215">Private-room start gate · lobby.test.ts:215</a> <a href="../../../packages/arena-game/test/lobby.test.ts#L320">Database-backed start race case · lobby.test.ts:320</a></p>
         </article>
         <article class="card">
           <h3>Service and browser tests</h3>
-          <p>The Game service test crosses HTTP and WebSocket boundaries for private rooms and public 1v1 queue formation. The browser journeys exercise invite-room readiness and public queue entry. A test file is evidence for the cases it asserts; it does not settle the spec disagreement or prove production authentication.</p>
-          <p class="mt-1">The <code>live-lobby.spec.ts</code> Playwright journeys are linked as scenario source, not as a pass from this lesson update.</p>
-          <p class="source-links"><a href="../../../services/game/src/game/lobby.test.ts#L112">HTTP queue match · lobby.test.ts:112</a> <a href="../../../services/game/src/game/lobby.test.ts#L150">HTTP/WebSocket private flow · lobby.test.ts:150</a> <a href="../../../frontend/e2e/live-lobby.spec.ts#L107">Browser queue flow · live-lobby.spec.ts:107</a></p>
+          <p>The service tests exercise the private-room HTTP/socket path and the retained queue API. The Playwright file describes the invitation flow and a direct queue-API scenario; that queue scenario does not mean the Lobby screen has a queue button.</p>
+          <p class="mt-1">Test files and browser journeys are linked as evidence source, not as a pass from this lesson update. They do not establish production authentication.</p>
+          <p class="source-links"><a href="../../../services/game/src/game/lobby.test.ts#L112">Retained HTTP queue API test · lobby.test.ts:112</a> <a href="../../../services/game/src/game/lobby.test.ts#L150">HTTP/WebSocket private flow · lobby.test.ts:150</a> <a href="../../../frontend/e2e/live-lobby.spec.ts#L109">Direct queue-API browser-test source · live-lobby.spec.ts:109</a> <a href="../../../frontend/src/arena/lobby-session.test.ts#L64">Reconciliation behavior tests · lobby-session.test.ts:64</a></p>
         </article>
       </div>
     </section>
 
     <section class="section" id="recall" aria-labelledby="recall-title">
       <p class="kicker">Check the model in your head</p>
-      <h2 id="recall-title">Everyone is Ready, but the guest sends <code>POST /lobby/rooms/:id/start</code> directly. What happens?</h2>
-      <p class="section-intro">Answer before opening the hint. Include the part the UI plays and the separate check the backend must perform.</p>
+      <h2 id="recall-title">A delayed active-state response disagrees with a newer refresh. What should update the screen?</h2>
+      <p class="section-intro">Answer before opening the hint. Include the role of the event, the authoritative request, and the request-version guard.</p>
       <details class="card">
         <summary>Show a useful answer hint</summary>
-        <p class="mt-1">The backend rejects the guest because only the room owner can start. The UI's disabled button is just guidance; the domain gate also verifies capacity and readiness before it asks the Arena engine to create the Match. Then the Match is in <code>MATCH_FOUND</code>, waiting for the first Round to begin.</p>
+        <p class="mt-1">The event prompts another <code>getActive()</code>; its payload does not replace the room snapshot. The request-version guard discards the older response. When a host later requests Start, the backend checks host identity, full sides, and readiness before creating the Match in <code>MATCH_FOUND</code>.</p>
       </details>
       <article class="card mt-1">
         <h3>Rewrite-test prompt</h3>
-        <p>Write separate tests for the boundary and the rule: a non-member cannot read or subscribe to a private room; a non-host cannot start; a host cannot start while slots are empty or someone is not Ready; a valid host request creates one Match only. For the public queue, first decide whether that behavior belongs in your approved product scope.</p>
+        <p>Write separate tests for stale refresh rejection, mutation-triggered refresh, room-channel rejoin after reconnect, one Match handoff for duplicate events, and the server's host/full/Ready gate. Keep any future queue API tests separate from the invitation-only Lobby screen flow.</p>
       </article>
       <p class="nav-row"><a href="0003-rounds-and-final-score.html">← Lesson 3: Round scores</a> · <a href="0005-problem-editor-run.html">Next: Lesson 5, Problem and Run →</a></p>
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson describes current implementation evidence and flags its scope discrepancy; it does not change product behavior or the 42-subject module claims.</p>
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson describes the current invitation-only release path and retained queue API; it does not change product behavior or the 42-subject module claims.</p>
     </footer>
   </main>
 </body>

@@ -811,10 +811,12 @@ test("renders the Lobby-to-Match lesson's source links into the local preview", 
   const rendered = renderLessonTemplate(template, "", "snapshot-id", { stale: 0, total: 9 }, lesson);
 
   assert.match(rendered, /data-lesson-id="0004-lobby-to-match"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Flobby\.controller\.ts&amp;line=95"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fsrc%2Farena%2Flobby-session\.test\.ts&amp;line=64"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage\.tsx&amp;line=311"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Flobby\.ts&amp;line=685"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Flobby\.test\.ts&amp;line=150"/);
-  assert.match(template, /live-lobby\.spec\.ts.*linked as scenario source, not as a pass from this lesson update/);
+  assert.match(template, /The first release is invitation-only/);
+  assert.match(template, /Test files and browser journeys are linked as evidence source, not as a pass from this lesson update/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services)\//);
 });
 
@@ -1478,6 +1480,41 @@ test("teaches Match-deadline closure and cites its source evidence", async () =>
   ));
 });
 
+test("teaches invitation-only Lobby recovery and cites authoritative reconciliation evidence", async () => {
+  const repoRoot = process.cwd();
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const lesson = coverageMap.lessons.find(({ id }) => id === "0004-lobby-to-match");
+  assert.ok(lesson, "coverage map includes Lesson 4");
+  const template = await readFile(path.join(learningDir, lesson.template), "utf8");
+  const lobbyPage = await readFile(path.join(repoRoot, "frontend/src/components/LobbyPage.tsx"), "utf8");
+  const lobbyClient = await readFile(path.join(repoRoot, "frontend/src/arena/lobby.ts"), "utf8");
+  const lobbyDomain = await readFile(path.join(repoRoot, "packages/arena-game/src/lobby.ts"), "utf8");
+
+  assert.match(template, /invitation-only/i);
+  assert.match(template, /socket payloads are refresh hints/i);
+  assert.match(template, /stale responses are discarded/i);
+  assert.match(template, /public queue backend code remains for a future release/i);
+  assert.doesNotMatch(template, /two current ways to gather players/i);
+  assert.match(lobbyPage, /INVITATION-ONLY ENTRY/);
+  assert.doesNotMatch(lobbyPage, /joinQueue|Quick Play/);
+  assert.match(lobbyClient, /async joinQueue\(/);
+  assert.match(lobbyDomain, /async tryMatch\(/);
+  for (const [sourcePath, startLine, endLine] of [
+    ["frontend/src/arena/lobby-session.ts", 83, 122],
+    ["frontend/src/arena/lobby-session.ts", 162, 199],
+    ["frontend/src/arena/lobby-session.test.ts", 64, 87],
+    ["frontend/src/arena/lobby-session.test.ts", 89, 131],
+    ["frontend/src/arena/lobby-session.test.ts", 133, 183],
+    ["frontend/src/components/LobbyPage.tsx", 311, 352],
+    ["frontend/e2e/live-lobby.spec.ts", 109, 126],
+  ]) {
+    assert.ok(lesson.references.some((reference) =>
+      reference.path === sourcePath && reference.startLine === startLine && reference.endLine === endLine,
+    ), `Lesson 4 maps the current ${sourcePath}:${startLine}-${endLine} behavior`);
+  }
+});
+
 test("tracks planned dispositions and the exact remaining source files", async () => {
   const repoRoot = process.cwd();
   const learningDir = path.join(repoRoot, ".tours/learning");
@@ -1525,8 +1562,6 @@ test("tracks planned dispositions and the exact remaining source files", async (
     "services/game/src/game/judge-factory.ts": ["0007-judge-boundary", "0013-running-the-project"],
   };
   const expectedRemaining = [
-    "frontend/src/arena/lobby-session.test.ts",
-    "frontend/src/arena/lobby-session.ts",
     "packages/arena-game/test/container-judge-trust.test.ts",
     "packages/arena-game/test/post-commit-events.test.ts",
     "packages/arena-game/test/worker-judge.test.ts",

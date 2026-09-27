@@ -296,20 +296,20 @@ Expected: all named tests pass. Record the command and result in the lesson evid
 - Consumes: `LobbySession` public snapshot/actions and the existing Lobby HTTP/socket adapter.
 - Produces: Lesson 4 as the invitation-code first-release path with authoritative refresh and stale-response rejection; public queue code is labeled future capability.
 
-- [ ] **Step 1: Write failing assertions for the changed flow.** Require the Lesson 4 template to contain `invitation-only`, `socket payloads are refresh hints`, `stale responses are discarded`, and `public queue backend code remains for a future release`. Require catalog references to both `lobby-session.ts` and its test.
-- [ ] **Step 2: Run the course unit test.** Expected: FAIL because Lesson 4 currently presents private rooms and public queue as equal current entry paths.
-- [ ] **Step 3: Update the prediction.** Ask what the client should show when an older `getActive()` response arrives after a newer Lobby update refresh. The visible answer must say the older response is discarded and the newest authoritative active state wins.
-- [ ] **Step 4: Replace the trace with the current first-release path.** Teach: open Lobby -> recover active state -> create or join invitation room -> subscribe to that room -> treat socket/mutation results as refresh triggers -> host starts only when both sides are full and Ready -> hand off one authoritative Match ID.
-- [ ] **Step 5: Add a bounded future-capability note.** Link the public queue implementation/tests as code that remains available but state that `LobbySession` cancels a recovered waiting entry and `LobbyPage` does not expose a queue action in this release.
-- [ ] **Step 6: Add exact current anchors.** Cite the stale request version guard, mutation refresh, channel rejoin, legacy waiting-queue cancellation, and duplicate Match handoff tests.
-- [ ] **Step 7: Run focused tests.** Run:
+- [x] **Step 1: Write failing assertions for the changed flow.** Require the Lesson 4 template to contain `invitation-only`, `socket payloads are refresh hints`, `stale responses are discarded`, and `public queue backend code remains for a future release`. Require catalog references to both `lobby-session.ts` and its test.
+- [x] **Step 2: Run the course unit test.** Expected: FAIL because Lesson 4 currently presents private rooms and public queue as equal current entry paths.
+- [x] **Step 3: Update the prediction.** Ask what the client should show when an older `getActive()` response arrives after a newer Lobby update refresh. The visible answer says the older response is discarded and the response from the newest still-current authoritative request supplies the view.
+- [x] **Step 4: Replace the trace with the current first-release path.** Teach: open Lobby -> recover active state -> create or join invitation room -> subscribe to that room -> treat socket events and ordinary room-mutation results as refresh triggers -> host starts only when both sides are full and Ready -> use the successful start response's Match ID for one handoff.
+- [x] **Step 5: Add a bounded future-capability note.** Link the public queue implementation/tests as code that remains available but state that `LobbySession` cancels a recovered waiting entry and `LobbyPage` does not expose a queue action in this release.
+- [x] **Step 6: Add exact current anchors.** Cite the stale request version guard, mutation refresh, channel rejoin, legacy waiting-queue cancellation, and duplicate Match handoff tests.
+- [x] **Step 7: Run focused tests.** Run:
 
 ```sh
 npx vitest run frontend/src/arena/lobby-session.test.ts services/game/src/game/lobby.test.ts packages/arena-game/test/lobby.test.ts
 ```
 
-Expected: all focused Lobby tests pass.
-- [ ] **Step 8: Run course tests and commit.** Run `node --test .tours/learning/scripts/build-catalog.test.mjs`; commit `docs(course): teach authoritative invitation lobby`.
+Expected: in-memory LobbySession/domain cases pass. In this workspace 18 passed and 2 Postgres cases skipped; the Game service integration suite did not boot (`service did not boot`, consistent with the baseline loopback-bind restriction), so its six cases did not run.
+- [x] **Step 8: Run course tests and commit.** `node --test .tours/learning/scripts/build-catalog.test.mjs` passes all 39 tests. Commit `docs(course): teach authoritative invitation lobby`.
 
 ### Task 4: Refresh post-commit events, reconnect, and terminal Arena presentation
 
