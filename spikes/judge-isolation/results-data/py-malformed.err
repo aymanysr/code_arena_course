@@ -1,0 +1,4 @@
+  File "/scratch/prog", line 1
+    def broken(:
+               ^
+SyntaxError: invalid syntax

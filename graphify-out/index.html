@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Focused Graphify explorers for the ft_transcendence game architecture."
+    />
+    <title>Focused Graphify Explorers | ft_transcendence</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #11100f;
+        --surface: #1a1816;
+        --surface-strong: #24201c;
+        --line: #3c342c;
+        --text: #f4eee6;
+        --muted: #b9ada0;
+        --quiet: #8d8072;
+        --accent: #f0a35b;
+        --accent-soft: #38281c;
+        --teal: #79c8bb;
+        --purple: #bba5e6;
+        --blue: #8eb8e8;
+        --green: #9fd18b;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--bg);
+      }
+
+      body {
+        min-block-size: 100dvh;
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 85% 5%, #3a291d 0, transparent 28rem),
+          var(--bg);
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      a:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 4px;
+      }
+
+      .skip-link {
+        position: absolute;
+        inset-block-start: 1rem;
+        inset-inline-start: 1rem;
+        z-index: 1;
+        padding: 0.65rem 0.85rem;
+        color: var(--bg);
+        background: var(--accent);
+        border-radius: 0.5rem;
+        transform: translateY(-200%);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .shell {
+        inline-size: min(1180px, calc(100% - 3rem));
+        margin-inline: auto;
+      }
+
+      header {
+        padding-block: clamp(3.5rem, 10vw, 7.5rem) 3rem;
+      }
+
+      .eyebrow {
+        margin: 0 0 1rem;
+        color: var(--accent);
+        font-size: 0.75rem;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        max-inline-size: 48rem;
+        margin-block-start: 0;
+      }
+
+      h1 {
+        max-inline-size: 15ch;
+        margin-block-end: 1.25rem;
+        font-size: clamp(2.8rem, 7vw, 6.25rem);
+        font-weight: 760;
+        letter-spacing: -0.065em;
+        line-height: 0.92;
+      }
+
+      .lede {
+        margin-block-end: 0;
+        color: var(--muted);
+        font-size: clamp(1.05rem, 2vw, 1.35rem);
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-block: 1.75rem 0;
+      }
+
+      nav a,
+      .utility-link {
+        display: inline-flex;
+        align-items: center;
+        min-block-size: 2.75rem;
+        padding: 0.55rem 0.85rem;
+        color: var(--muted);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 0.9rem;
+        text-decoration: none;
+      }
+
+      nav a:hover,
+      .utility-link:hover {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+
+      main {
+        padding-block-end: 4rem;
+      }
+
+      .section-heading {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-block: 0 1.25rem;
+      }
+
+      .section-heading h2 {
+        margin-block-end: 0;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        letter-spacing: -0.04em;
+      }
+
+      .section-heading p {
+        margin-block-end: 0;
+        color: var(--quiet);
+        font-size: 0.9rem;
+        text-align: end;
+      }
+
+      .explorer-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+        gap: 1rem;
+      }
+
+      .explorer-card {
+        display: flex;
+        flex-direction: column;
+        min-block-size: 22rem;
+        padding: 1.35rem;
+        background: color-mix(in srgb, var(--surface) 94%, transparent);
+        border: 1px solid var(--line);
+        border-radius: 1rem;
+        text-decoration: none;
+        transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+      }
+
+      .explorer-card:hover {
+        background: var(--surface-strong);
+        border-color: var(--accent);
+        transform: translateY(-0.2rem);
+      }
+
+      .card-marker {
+        inline-size: 0.75rem;
+        block-size: 0.75rem;
+        margin-block-end: 1.25rem;
+        background: var(--accent);
+        border-radius: 50%;
+        box-shadow: 0 0 0 0.35rem var(--accent-soft);
+      }
+
+      .card-marker.teal { background: var(--teal); }
+      .card-marker.purple { background: var(--purple); }
+      .card-marker.blue { background: var(--blue); }
+      .card-marker.green { background: var(--green); }
+
+      .explorer-card h3 {
+        margin-block-end: 0.55rem;
+        font-size: 1.35rem;
+        letter-spacing: -0.03em;
+      }
+
+      .explorer-card p {
+        margin-block-end: 1.2rem;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-block-start: auto;
+        padding-block: 1rem;
+        border-block: 1px solid var(--line);
+      }
+
+      .stat {
+        display: grid;
+        gap: 0.1rem;
+        min-inline-size: 4.5rem;
+      }
+
+      .stat strong {
+        font-size: 1.15rem;
+        line-height: 1;
+      }
+
+      .stat span {
+        color: var(--quiet);
+        font-size: 0.72rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      .open-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-block-start: 1rem;
+        color: var(--accent);
+        font-size: 0.9rem;
+        font-weight: 700;
+      }
+
+      .open-label span:last-child {
+        font-size: 1.2rem;
+        line-height: 1;
+      }
+
+      .context {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+        gap: 1rem;
+        margin-block-start: 3rem;
+      }
+
+      .context-card {
+        padding: 1.25rem;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 0.85rem;
+      }
+
+      .context-card h2 {
+        margin-block-end: 0.5rem;
+        font-size: 1.05rem;
+      }
+
+      .context-card p {
+        margin-block-end: 0.85rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+
+      .context-card a {
+        color: var(--accent);
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-underline-offset: 0.2em;
+      }
+
+      footer {
+        padding-block: 1.5rem 3rem;
+        color: var(--quiet);
+        border-block-start: 1px solid var(--line);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 640px) {
+        .shell {
+          inline-size: min(100% - 2rem, 1180px);
+        }
+
+        .section-heading {
+          display: block;
+        }
+
+        .section-heading p {
+          margin-block-start: 0.45rem;
+          text-align: start;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#explorers">Skip to focused explorers</a>
+
+    <header class="shell">
+      <p class="eyebrow">ft_transcendence · Graphify navigation</p>
+      <h1>Start with the conversation you need.</h1>
+      <p class="lede">
+        The repository graph is useful for discovery, but too large for everyday reasoning.
+        This folder is the current, shareable Graphify set: four code-only explorers keep one
+        architectural conversation in view at a time.
+      </p>
+      <nav aria-label="Graphify views">
+        <a href="#explorers">Focused explorers</a>
+        <a href="architecture-overview.html">Team architecture overview</a>
+        <a href="README.md">Current scope note</a>
+      </nav>
+    </header>
+
+    <main id="explorers" class="shell" tabindex="-1">
+      <div class="section-heading">
+        <h2>Choose a focused graph</h2>
+        <p>Open the smallest useful view first.</p>
+      </div>
+
+      <section class="explorer-grid" aria-label="Focused Graphify explorers">
+        <a class="explorer-card" href="game-domain/graph.html">
+          <span class="card-marker teal" aria-hidden="true"></span>
+          <h3>Game domain</h3>
+          <p>
+            Match state, round transitions, lobby membership, team collaboration, and the
+            persistence seams used by the game engine.
+          </p>
+          <div class="stats" aria-label="Game domain graph size">
+            <div class="stat"><strong>279</strong><span>nodes</span></div>
+            <div class="stat"><strong>826</strong><span>edges</span></div>
+            <div class="stat"><strong>8</strong><span>communities</span></div>
+          </div>
+          <div class="open-label"><span>Open Graphify explorer</span><span aria-hidden="true">↗</span></div>
+        </a>
+
+        <a class="explorer-card" href="evaluation-judge/graph.html">
+          <span class="card-marker" aria-hidden="true"></span>
+          <h3>Evaluation &amp; judging</h3>
+          <p>
+            Submission claims, evaluation orchestration, ContainerJudge, the optional Judge0
+            adapter, verdict taxonomy, persistence, and telemetry.
+          </p>
+          <div class="stats" aria-label="Evaluation and judging graph size">
+            <div class="stat"><strong>270</strong><span>nodes</span></div>
+            <div class="stat"><strong>617</strong><span>edges</span></div>
+            <div class="stat"><strong>9</strong><span>communities</span></div>
+          </div>
+          <div class="open-label"><span>Open Graphify explorer</span><span aria-hidden="true">↗</span></div>
+        </a>
+
+        <a class="explorer-card" href="realtime-collab-chat/graph.html">
+          <span class="card-marker purple" aria-hidden="true"></span>
+          <h3>Realtime, collaboration &amp; chat</h3>
+          <p>
+            Browser transport, socket authorization, Yjs collaboration, sidecar lifecycles,
+            presence, and the Game-owned team chat path.
+          </p>
+          <div class="stats" aria-label="Realtime collaboration and chat graph size">
+            <div class="stat"><strong>354</strong><span>nodes</span></div>
+            <div class="stat"><strong>735</strong><span>edges</span></div>
+            <div class="stat"><strong>12</strong><span>communities</span></div>
+          </div>
+          <div class="open-label"><span>Open Graphify explorer</span><span aria-hidden="true">↗</span></div>
+        </a>
+
+        <a class="explorer-card" href="persistence-revisions/graph.html">
+          <span class="card-marker green" aria-hidden="true"></span>
+          <h3>Persistence &amp; revisions</h3>
+          <p>
+            Store interfaces, Postgres transactions, optimistic match revisions, evaluation
+            ownership, snapshots, and durable retry boundaries.
+          </p>
+          <div class="stats" aria-label="Persistence and revisions graph size">
+            <div class="stat"><strong>220</strong><span>nodes</span></div>
+            <div class="stat"><strong>481</strong><span>edges</span></div>
+            <div class="stat"><strong>9</strong><span>communities</span></div>
+          </div>
+          <div class="open-label"><span>Open Graphify explorer</span><span aria-hidden="true">↗</span></div>
+        </a>
+      </section>
+
+      <section class="context" aria-label="Supporting project references">
+        <article class="context-card">
+          <h2>Need the team-level picture?</h2>
+          <p>Use the presentation page for ownership, runtime flows, and the decisions behind the boundaries.</p>
+          <a href="architecture-overview.html">Open architecture overview →</a>
+        </article>
+        <article class="context-card">
+          <h2>Need the rationale?</h2>
+          <p>These ADRs document the main boundaries, including sandboxed judging, transport, chat, and persistence.</p>
+          <a href="../docs/adr/0003-sandboxed-code-judging.md">Open architecture decisions →</a>
+        </article>
+        <article class="context-card">
+          <h2>Why are these smaller?</h2>
+          <p>Each explorer is generated from a deliberately selected code slice. Tests, tooling, and unrelated modules stay out of the first view.</p>
+          <a href="README.md">Read the current scope note →</a>
+        </article>
+      </section>
+    </main>
+
+    <footer class="shell">
+      Generated from the current workspace with Graphify. Use the source map and ADR links for deeper verification.
+    </footer>
+  </body>
+</html>

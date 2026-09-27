@@ -1,0 +1,3 @@
+93.184.216.0 blocked: OSError
+169.254.169.254 blocked: OSError
+127.0.0.1 blocked: ConnectionRefusedError

@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Presentation-ready architecture overview for the Code Arena game system.">
+  <title>Code Arena — Architecture Overview</title>
+  <style>
+    :root {
+      --bg: #101416;
+      --bg-deep: #0b0f11;
+      --surface: #171d1f;
+      --surface-2: #1d2527;
+      --surface-3: #111719;
+      --border: rgba(234, 239, 232, .12);
+      --border-strong: rgba(234, 239, 232, .22);
+      --text: #edf1e9;
+      --muted: #a8b1ad;
+      --faint: #71807b;
+      --cream: #f4e7c2;
+      --amber: #e7ac4f;
+      --amber-soft: rgba(231, 172, 79, .14);
+      --teal: #67c2b5;
+      --teal-soft: rgba(103, 194, 181, .13);
+      --coral: #ee8c78;
+      --coral-soft: rgba(238, 140, 120, .14);
+      --sage: #a9c77b;
+      --sage-soft: rgba(169, 199, 123, .13);
+      --blue: #88b7dc;
+      --blue-soft: rgba(136, 183, 220, .13);
+      --violet: #c3a7d9;
+      --violet-soft: rgba(195, 167, 217, .12);
+      --font-body: "Avenir Next", "IBM Plex Sans", "Segoe UI", sans-serif;
+      --font-mono: "SF Mono", "IBM Plex Mono", Menlo, monospace;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .24);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background:
+        radial-gradient(circle at 80% 0%, rgba(103, 194, 181, .08), transparent 34rem),
+        radial-gradient(circle at 8% 20%, rgba(231, 172, 79, .06), transparent 28rem),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font-body);
+      line-height: 1.5;
+    }
+
+    a { color: var(--teal); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    a:hover { color: var(--cream); }
+    button { font: inherit; }
+
+    .wrap {
+      width: min(1440px, calc(100% - 64px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 190px minmax(0, 1fr);
+      gap: 0 42px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 26px;
+      align-self: start;
+      max-height: calc(100dvh - 52px);
+      overflow-y: auto;
+      padding: 28px 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border-strong) transparent;
+    }
+
+    .toc-title, .eyebrow, .section-kicker, .meta, .tag, .stat-label, .flow-label,
+    .source-path, .legend-label {
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+    }
+
+    .toc-title {
+      color: var(--faint);
+      font-size: 10px;
+      font-weight: 700;
+      padding-bottom: 12px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toc a {
+      display: block;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 12px;
+      line-height: 1.35;
+      padding: 8px 10px;
+      margin: 1px 0;
+      border-left: 2px solid transparent;
+      border-radius: 0 6px 6px 0;
+      transition: color .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .toc a:hover, .toc a.active {
+      color: var(--text);
+      background: var(--surface-2);
+      border-left-color: var(--amber);
+    }
+
+    .main { min-width: 0; padding: 34px 0 80px; }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 38px 42px 34px;
+      border: 1px solid var(--border-strong);
+      border-radius: 18px;
+      background:
+        linear-gradient(120deg, rgba(231, 172, 79, .10), transparent 40%),
+        linear-gradient(315deg, rgba(103, 194, 181, .09), transparent 42%),
+        var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -100px;
+      top: -130px;
+      border: 1px solid rgba(244, 231, 194, .16);
+      border-radius: 50%;
+      box-shadow: 0 0 0 26px rgba(244, 231, 194, .025), 0 0 0 52px rgba(244, 231, 194, .018);
+      pointer-events: none;
+    }
+
+    .eyebrow { color: var(--amber); font-size: 10px; font-weight: 700; }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h1 {
+      max-width: 780px;
+      margin: 12px 0 10px;
+      font-size: clamp(34px, 5vw, 66px);
+      line-height: .98;
+      letter-spacing: -.055em;
+      text-wrap: balance;
+    }
+
+    .hero-copy {
+      max-width: 770px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    .hero-copy strong { color: var(--cream); font-weight: 600; }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+    .button-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 40px;
+      padding: 9px 14px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      color: var(--text);
+      background: rgba(255, 255, 255, .04);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .button-link:hover { transform: translateY(-1px); background: var(--surface-2); border-color: var(--teal); }
+    .button-link--primary { color: #16201f; background: var(--cream); border-color: var(--cream); }
+    .button-link--primary:hover { color: #16201f; background: #fff3cf; border-color: #fff3cf; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 26px;
+    }
+
+    .stat {
+      padding: 14px 15px;
+      border-top: 2px solid var(--border-strong);
+      background: rgba(0, 0, 0, .12);
+    }
+
+    .stat:nth-child(1) { border-color: var(--amber); }
+    .stat:nth-child(2) { border-color: var(--teal); }
+    .stat:nth-child(3) { border-color: var(--coral); }
+    .stat:nth-child(4) { border-color: var(--sage); }
+    .stat-value { display: block; color: var(--cream); font-size: 22px; font-weight: 700; letter-spacing: -.03em; }
+    .stat-label { display: block; color: var(--faint); font-size: 9px; margin-top: 4px; }
+
+    .section { padding-top: 72px; scroll-margin-top: 24px; }
+    .section-head { display: flex; justify-content: space-between; align-items: end; gap: 20px; margin-bottom: 20px; }
+    .section-kicker { color: var(--teal); font-size: 10px; font-weight: 700; }
+    h2 { font-size: clamp(25px, 3vw, 37px); line-height: 1.05; letter-spacing: -.04em; margin: 8px 0 0; }
+    .section-intro { max-width: 680px; color: var(--muted); font-size: 14px; margin: 0; }
+
+    .read-rule {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 16px 18px;
+      margin-bottom: 18px;
+      border: 1px solid rgba(231, 172, 79, .35);
+      border-radius: 10px;
+      background: var(--amber-soft);
+    }
+
+    .read-rule__mark { color: var(--amber); font-family: var(--font-mono); font-weight: 700; }
+    .read-rule p { margin: 0; color: var(--cream); font-size: 13px; }
+
+    .architecture {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-3);
+      box-shadow: inset 0 1px rgba(255, 255, 255, .035);
+    }
+
+    .layer {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      background: var(--surface);
+    }
+
+    .layer--client { border-color: rgba(136, 183, 220, .42); background: linear-gradient(120deg, var(--blue-soft), transparent 65%), var(--surface); }
+    .layer--service { border-color: rgba(103, 194, 181, .42); background: linear-gradient(120deg, var(--teal-soft), transparent 65%), var(--surface); }
+    .layer--domain { border-color: rgba(231, 172, 79, .44); background: linear-gradient(120deg, var(--amber-soft), transparent 65%), var(--surface); }
+
+    .layer-top { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 14px; }
+    .layer-number { color: var(--faint); font-family: var(--font-mono); font-size: 11px; }
+    .layer-title { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+    .layer-title h3 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+    .layer-title span { color: var(--muted); font-family: var(--font-mono); font-size: 11px; }
+    .layer-copy { max-width: 650px; color: var(--muted); font-size: 12px; margin: 4px 0 0; }
+
+    .pill-row { display: flex; flex-wrap: wrap; gap: 7px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid var(--border); border-radius: 999px; color: var(--text); background: rgba(255, 255, 255, .045); font-family: var(--font-mono); font-size: 10px; line-height: 1.2; }
+    .pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--faint); }
+    .pill--blue::before { background: var(--blue); }
+    .pill--teal::before { background: var(--teal); }
+    .pill--amber::before { background: var(--amber); }
+    .pill--coral::before { background: var(--coral); }
+    .pill--sage::before { background: var(--sage); }
+    .pill--violet::before { background: var(--violet); }
+
+    .connector { display: flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; color: var(--faint); font-family: var(--font-mono); font-size: 10px; text-align: center; }
+    .connector::before, .connector::after { content: ""; width: 1px; height: 21px; background: linear-gradient(var(--border-strong), var(--teal)); }
+    .connector span { padding: 4px 8px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface-3); }
+
+    .domain-core { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 12px; align-items: stretch; }
+    .core-card { padding: 16px; border: 1px solid rgba(231, 172, 79, .35); border-radius: 9px; background: rgba(231, 172, 79, .08); }
+    .core-card--quiet { border-color: var(--border); background: rgba(255, 255, 255, .035); }
+    .core-card h4 { margin: 0 0 6px; font-size: 14px; }
+    .core-card p { color: var(--muted); font-size: 12px; margin: 0 0 10px; }
+
+    .branches { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .branch { min-width: 0; padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    .branch--judge { border-top: 2px solid var(--coral); }
+    .branch--data { border-top: 2px solid var(--sage); }
+    .branch--realtime { border-top: 2px solid var(--teal); }
+    .branch h4 { margin: 0 0 5px; font-size: 14px; }
+    .branch p { min-height: 42px; color: var(--muted); font-size: 12px; margin: 0 0 11px; }
+    .branch .pill { width: 100%; justify-content: flex-start; margin-bottom: 6px; }
+
+    .callout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+    .callout { padding: 14px 16px; border: 1px dashed var(--border-strong); border-radius: 9px; background: rgba(255, 255, 255, .025); }
+    .callout strong { display: block; color: var(--cream); font-size: 12px; margin-bottom: 4px; }
+    .callout span { color: var(--muted); font-size: 12px; }
+
+    .flow-grid { display: grid; gap: 14px; }
+    .flow-card { padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .flow-card--evaluation { border-left: 3px solid var(--coral); }
+    .flow-card--collab { border-left: 3px solid var(--teal); }
+    .flow-card--chat { border-left: 3px solid var(--violet); }
+    .flow-card-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 15px; }
+    .flow-card h3 { margin: 0 0 4px; font-size: 17px; }
+    .flow-card-head p { color: var(--muted); font-size: 12px; margin: 0; }
+    .flow-label { flex: 0 0 auto; color: var(--faint); font-size: 9px; }
+    .flow-track { display: flex; align-items: stretch; gap: 0; overflow-x: auto; padding-bottom: 4px; }
+    .flow-step { min-width: 132px; flex: 1 0 132px; padding: 12px 13px; border: 1px solid var(--border); background: var(--surface-3); }
+    .flow-step:first-child { border-radius: 8px 0 0 8px; }
+    .flow-step:last-child { border-radius: 0 8px 8px 0; }
+    .flow-step + .flow-step { border-left-color: transparent; }
+    .flow-step__num { color: var(--amber); font-family: var(--font-mono); font-size: 10px; }
+    .flow-step__title { color: var(--text); font-size: 12px; font-weight: 700; line-height: 1.25; margin: 5px 0 3px; }
+    .flow-step__detail { color: var(--muted); font-size: 11px; line-height: 1.4; }
+    .flow-arrow { display: flex; align-items: center; justify-content: center; flex: 0 0 20px; color: var(--faint); background: var(--surface-3); font-size: 16px; }
+
+    .ownership-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .owner { min-width: 0; padding: 17px; border: 1px solid var(--border); border-radius: 11px; background: var(--surface); }
+    .owner--blue { border-top: 2px solid var(--blue); }
+    .owner--teal { border-top: 2px solid var(--teal); }
+    .owner--amber { border-top: 2px solid var(--amber); }
+    .owner--sage { border-top: 2px solid var(--sage); }
+    .owner h3 { margin: 0 0 4px; font-size: 15px; }
+    .owner .source-path { display: block; color: var(--faint); font-size: 9px; margin-bottom: 12px; overflow-wrap: anywhere; }
+    .owner p { color: var(--muted); font-size: 12px; min-height: 62px; margin: 0 0 12px; }
+    .owner-list { list-style: none; padding: 0; margin: 0; }
+    .owner-list li { position: relative; padding-left: 13px; color: var(--text); font-size: 11px; line-height: 1.55; }
+    .owner-list li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; border-radius: 50%; background: var(--faint); }
+    .owner-list--not li { color: var(--muted); }
+    .owner-list--not li::before { background: var(--coral); }
+    .owner-label { color: var(--faint); font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: .1em; margin: 13px 0 4px; }
+
+    .decisions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .decision { padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); }
+    .decision h3 { margin: 8px 0 5px; font-size: 14px; }
+    .decision p { color: var(--muted); font-size: 12px; margin: 0; }
+    .decision .tag { display: inline-block; color: var(--amber); font-size: 9px; }
+    .decision--safety .tag { color: var(--coral); }
+    .decision--boundary .tag { color: var(--teal); }
+    .decision--data .tag { color: var(--sage); }
+
+    .evidence {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr);
+      gap: 14px;
+    }
+
+    .evidence-card { padding: 18px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .evidence-card h3 { margin: 0 0 10px; font-size: 15px; }
+    .evidence-card p { color: var(--muted); font-size: 12px; }
+    .source-map { display: grid; gap: 8px; }
+    .source { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+    .source:first-child { border-top: 0; padding-top: 0; }
+    .source strong { font-size: 12px; }
+    .source code { color: var(--teal); font-family: var(--font-mono); font-size: 10px; overflow-wrap: anywhere; }
+    .legend { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 11px; }
+    .legend-swatch { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; }
+    .legend-label { color: var(--faint); font-size: 9px; }
+
+    .footer-note { margin-top: 34px; padding-top: 17px; border-top: 1px solid var(--border); color: var(--faint); font-size: 11px; }
+    .footer-note strong { color: var(--muted); }
+
+    @media (max-width: 1120px) {
+      .wrap { width: min(100% - 40px, 900px); grid-template-columns: 1fr; }
+      .toc { position: sticky; top: 0; z-index: 5; display: flex; gap: 4px; max-height: none; margin: 0 -20px; padding: 9px 20px; overflow-x: auto; background: rgba(16, 20, 22, .96); border-bottom: 1px solid var(--border); }
+      .toc-title { display: none; }
+      .toc a { flex: 0 0 auto; padding: 7px 10px; border-left: 0; border-bottom: 2px solid transparent; border-radius: 5px 5px 0 0; white-space: nowrap; }
+      .toc a:hover, .toc a.active { border-left: 0; border-bottom-color: var(--amber); }
+      .main { padding-top: 24px; }
+      .ownership-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 760px) {
+      .wrap { width: min(100% - 24px, 640px); }
+      .toc { margin: 0 -12px; padding-left: 12px; padding-right: 12px; }
+      .hero { padding: 28px 22px 22px; }
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .section { padding-top: 52px; }
+      .section-head { display: block; }
+      .section-intro { margin-top: 10px; }
+      .architecture { padding: 13px; }
+      .domain-core, .branches, .callout-row, .decisions, .evidence { grid-template-columns: 1fr; }
+      .ownership-grid { grid-template-columns: 1fr; }
+      .source { grid-template-columns: 1fr; gap: 4px; }
+      .hero-actions .button-link { flex: 1 1 180px; justify-content: center; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="toc" id="toc" aria-label="Architecture sections">
+      <div class="toc-title">Team view</div>
+      <a href="#overview">Overview</a>
+      <a href="#flows">Runtime flows</a>
+      <a href="#ownership">Ownership</a>
+      <a href="#decisions">Guardrails</a>
+      <a href="#evidence">Evidence</a>
+    </nav>
+
+    <main class="main">
+      <header class="hero">
+        <div class="eyebrow">FT_TRANSCENDANCE · CODE ARENA · TEAM ARCHITECTURE</div>
+        <h1>One authoritative game state.<br>Several focused seams.</h1>
+        <p class="hero-copy">
+          This is the readable companion to the four current focused Graphify explorers. Start in the
+          middle with <strong>ArenaEngine</strong>, follow the solid arrows outward, and use the cards
+          below to see where transport, judging, collaboration, chat, and persistence stop being the
+          same concern.
+        </p>
+        <div class="hero-actions">
+          <a class="button-link button-link--primary" href="#overview">Read the overview <span aria-hidden="true">↓</span></a>
+          <a class="button-link" href="./index.html">Choose a focused explorer ↗</a>
+          <a class="button-link" href="./README.md">Read current scope note ↗</a>
+        </div>
+        <div class="stats" aria-label="Current focused Graphify facts">
+          <div class="stat"><span class="stat-value">4</span><span class="stat-label">focused views</span></div>
+          <div class="stat"><span class="stat-value">1,123</span><span class="stat-label">nodes across views</span></div>
+          <div class="stat"><span class="stat-value">2,659</span><span class="stat-label">edges across views</span></div>
+          <div class="stat"><span class="stat-value">AST</span><span class="stat-label">code-only extraction</span></div>
+        </div>
+      </header>
+
+      <section class="section" id="overview">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">01 · Read this first</div>
+            <h2>Architecture at the right altitude</h2>
+          </div>
+          <p class="section-intro">The diagram deliberately shows modules and boundaries, not every function, test, package dependency, or config key.</p>
+        </div>
+
+        <div class="read-rule">
+          <div class="read-rule__mark">READING RULE</div>
+          <p>Solid arrows show the main runtime direction. Dashed cards are replaceable adapters or policy guardrails. The browser renders authoritative snapshots; it does not decide scores, phases, or hidden results.</p>
+        </div>
+
+        <div class="architecture" aria-label="Layered Code Arena architecture overview">
+          <article class="layer layer--client">
+            <div class="layer-top">
+              <div>
+                <div class="layer-number">01 / player surface</div>
+                <div class="layer-title"><h3>Frontend</h3><span>React + CodeMirror + Socket.IO clients</span></div>
+                <p class="layer-copy">Renders the latest server snapshot and sends user intent through explicit transport seams.</p>
+              </div>
+              <span class="tag">presentation</span>
+            </div>
+            <div class="pill-row">
+              <span class="pill pill--blue">ArenaPage</span>
+              <span class="pill pill--blue">ArenaWorkspace</span>
+              <span class="pill pill--teal">ArenaTransport</span>
+              <span class="pill pill--teal">SocketArenaTransport</span>
+              <span class="pill pill--violet">TeamChatClient</span>
+            </div>
+          </article>
+
+          <div class="connector"><span>HTTP actions + game-owned sockets</span></div>
+
+          <article class="layer layer--service">
+            <div class="layer-top">
+              <div>
+                <div class="layer-number">02 / application boundary</div>
+                <div class="layer-title"><h3>Game service</h3><span>NestJS HTTP + WebSocket composition</span></div>
+                <p class="layer-copy">Authenticates the request context, composes stores and adapters, and fans authoritative events back to clients.</p>
+              </div>
+              <span class="tag">thin app layer</span>
+            </div>
+            <div class="pill-row">
+              <span class="pill pill--teal">GameService</span>
+              <span class="pill pill--teal">GameGateway</span>
+              <span class="pill pill--teal">LobbyGateway</span>
+              <span class="pill pill--violet">CollabGateway</span>
+              <span class="pill pill--violet">TeamChatGateway</span>
+              <span class="pill pill--sage">MatchSocketPresence</span>
+            </div>
+          </article>
+
+          <div class="connector"><span>domain commands + authoritative events</span></div>
+
+          <article class="layer layer--domain">
+            <div class="layer-top">
+              <div>
+                <div class="layer-number">03 / game domain</div>
+                <div class="layer-title"><h3>Arena game engine</h3><span>arena-game-engine package</span></div>
+                <p class="layer-copy">Owns match membership, round phases, readiness, scoring, authorization, evaluation identity, and the MatchRecord contract.</p>
+              </div>
+              <span class="tag">source of truth</span>
+            </div>
+            <div class="domain-core">
+              <div class="core-card">
+                <h4>ArenaEngine</h4>
+                <p>Compatibility facade that authorizes actions, coordinates short locks, emits events, and delegates deep responsibilities.</p>
+                <div class="pill-row">
+                  <span class="pill pill--amber">MatchRecord</span>
+                  <span class="pill pill--amber">RoundLifecycle</span>
+                  <span class="pill pill--amber">MatchAuthority</span>
+                </div>
+              </div>
+              <div class="core-card core-card--quiet">
+                <h4>Team + evaluation seams</h4>
+                <p>Deep modules keep collaboration and judging out of the main engine file.</p>
+                <div class="pill-row">
+                  <span class="pill pill--teal">TeamCollaboration</span>
+                  <span class="pill pill--coral">EvaluationOrchestrator</span>
+                </div>
+              </div>
+            </div>
+          </article>
+
+          <div class="branches">
+            <article class="branch branch--judge">
+              <h4>Judging boundary</h4>
+              <p>Untrusted player code crosses one narrow GameJudge interface.</p>
+              <span class="pill pill--coral">ContainerJudge · default</span>
+              <span class="pill pill--coral">Judge0Adapter · optional</span>
+              <span class="pill pill--coral">sealed verdicts + metrics</span>
+            </article>
+            <article class="branch branch--data">
+              <h4>State + persistence</h4>
+              <p>Domain state is durable without making the engine know the storage technology.</p>
+              <span class="pill pill--sage">MatchPersistence</span>
+              <span class="pill pill--sage">PostgresStores</span>
+              <span class="pill pill--sage">In-memory test stores</span>
+            </article>
+            <article class="branch branch--realtime">
+              <h4>Realtime sidecars</h4>
+              <p>Collaboration and chat have separate lifecycles and authorization contexts.</p>
+              <span class="pill pill--teal">Yjs team document</span>
+              <span class="pill pill--violet">Game-owned match chat</span>
+              <span class="pill pill--teal">presence + reconnect</span>
+            </article>
+          </div>
+
+          <div class="callout-row">
+            <div class="callout"><strong>Boundary that protects fairness</strong><span>Clients receive filtered snapshots. Opponent source, hidden inputs, and score decisions stay server-side.</span></div>
+            <div class="callout"><strong>Boundary that protects recoverability</strong><span>Evaluation identity, claims, revisions, and durable state let recovery retry safely without replaying a non-idempotent command.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="flows">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">02 · Follow the arrows</div>
+            <h2>Three runtime stories</h2>
+          </div>
+          <p class="section-intro">These are the paths teammates usually need to understand in a review. Each one ends in an authoritative server result.</p>
+        </div>
+
+        <div class="flow-grid">
+          <article class="flow-card flow-card--evaluation">
+            <div class="flow-card-head"><div><h3>Submit → evaluate → reveal</h3><p>Judge execution is outside the short Match lock; the verdict returns through the same game authority.</p></div><div class="flow-label">JUDGING PATH</div></div>
+            <div class="flow-track">
+              <div class="flow-step"><div class="flow-step__num">01</div><div class="flow-step__title">Editor submit</div><div class="flow-step__detail">Client sends intent + revision.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">02</div><div class="flow-step__title">GameService</div><div class="flow-step__detail">Auth + membership + request identity.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">03</div><div class="flow-step__title">ArenaEngine</div><div class="flow-step__detail">Creates pending SubmissionRecord.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">04</div><div class="flow-step__title">EvaluationOrchestrator</div><div class="flow-step__detail">Claims durable work and coordinates recovery.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">05</div><div class="flow-step__title">Judge adapter</div><div class="flow-step__detail">Container by default; Judge0 is optional.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">06</div><div class="flow-step__title">Commit + emit</div><div class="flow-step__detail">Persist verdict, then publish snapshot/event.</div></div>
+            </div>
+          </article>
+
+          <article class="flow-card flow-card--collab">
+            <div class="flow-card-head"><div><h3>Collaborative editor sync</h3><p>The team document has its own socket namespace and is committed atomically with match state when required.</p></div><div class="flow-label">COLLABORATION PATH</div></div>
+            <div class="flow-track">
+              <div class="flow-step"><div class="flow-step__num">01</div><div class="flow-step__title">CodeMirror</div><div class="flow-step__detail">Local editor changes become Y.Text updates.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">02</div><div class="flow-step__title">CollabGateway</div><div class="flow-step__detail">Authenticates room and member scope.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">03</div><div class="flow-step__title">TeamCollaboration</div><div class="flow-step__detail">Applies accepted frames + bumps revision.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">04</div><div class="flow-step__title">Atomic persistence</div><div class="flow-step__detail">Y.Doc rows and MatchRecord commit together.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">05</div><div class="flow-step__title">Team snapshot</div><div class="flow-step__detail">Readiness and submit gates use the revision.</div></div>
+            </div>
+          </article>
+
+          <article class="flow-card flow-card--chat">
+            <div class="flow-card-head"><div><h3>Game-owned team chat</h3><p>Chat belongs to the Game boundary for the first release; it is not a second source of match authority.</p></div><div class="flow-label">CHAT PATH</div></div>
+            <div class="flow-track">
+              <div class="flow-step"><div class="flow-step__num">01</div><div class="flow-step__title">TeamChat</div><div class="flow-step__detail">2v2 match UI opens a separate sidecar.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">02</div><div class="flow-step__title">TeamChatClient</div><div class="flow-step__detail">Maintains chat socket state + history.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">03</div><div class="flow-step__title">TeamChatGateway</div><div class="flow-step__detail">Checks match/team context before room access.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">04</div><div class="flow-step__title">GameService</div><div class="flow-step__detail">Resolves the authoritative team chat context.</div></div><div class="flow-arrow">→</div>
+              <div class="flow-step"><div class="flow-step__num">05</div><div class="flow-step__title">Team room</div><div class="flow-step__detail">History and pings stay scoped to teammates.</div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="ownership">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">03 · Ask “who owns this?”</div>
+            <h2>Ownership map</h2>
+          </div>
+          <p class="section-intro">When a change crosses one of these boundaries, the owning module should remain the place where the rule is decided.</p>
+        </div>
+
+        <div class="ownership-grid">
+          <article class="owner owner--blue">
+            <h3>Frontend</h3><span class="source-path">frontend/src/arena + components</span>
+            <p>Turns authoritative snapshots into UI and sends user intent through transport seams.</p>
+            <div class="owner-label">Owns</div><ul class="owner-list"><li>editor interaction</li><li>snapshot rendering</li><li>connection UX</li><li>client sidecars</li></ul>
+            <div class="owner-label">Does not own</div><ul class="owner-list owner-list--not"><li>score calculation</li><li>hidden tests or opponent source</li></ul>
+          </article>
+          <article class="owner owner--teal">
+            <h3>Game service</h3><span class="source-path">services/game/src/game</span>
+            <p>Composes HTTP, sockets, principals, persistence selection, and event fan-out around the domain package.</p>
+            <div class="owner-label">Owns</div><ul class="owner-list"><li>request boundary</li><li>socket namespaces</li><li>service lifecycle</li><li>presence gateway</li></ul>
+            <div class="owner-label">Does not own</div><ul class="owner-list owner-list--not"><li>round scoring rules</li><li>judge provider details</li></ul>
+          </article>
+          <article class="owner owner--amber">
+            <h3>Arena engine</h3><span class="source-path">packages/arena-game/src</span>
+            <p>Defines the match model and keeps all competitive decisions behind server-side domain seams.</p>
+            <div class="owner-label">Owns</div><ul class="owner-list"><li>MatchRecord lifecycle</li><li>membership + authorization</li><li>round + reveal rules</li><li>evaluation identity</li></ul>
+            <div class="owner-label">Does not own</div><ul class="owner-list owner-list--not"><li>HTTP framework wiring</li><li>browser rendering</li></ul>
+          </article>
+          <article class="owner owner--sage">
+            <h3>Persistence + judges</h3><span class="source-path">postgres-store.ts · judge adapters</span>
+            <p>Adapters provide durable state and isolated execution without leaking provider or storage details into the domain.</p>
+            <div class="owner-label">Owns</div><ul class="owner-list"><li>transactions + revisions</li><li>evaluation claims</li><li>execution limits</li><li>provider metrics</li></ul>
+            <div class="owner-label">Does not own</div><ul class="owner-list owner-list--not"><li>match phase transitions</li><li>client trust decisions</li></ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="decisions">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">04 · Why the seams exist</div>
+            <h2>Architecture guardrails</h2>
+          </div>
+          <p class="section-intro">These cards are the short version of the ADRs. They explain the boundary decisions without asking teammates to open twelve documents first.</p>
+        </div>
+
+        <div class="decisions">
+          <article class="decision decision--boundary"><span class="tag">ADR-0005 · transport seam</span><h3>One client-facing transport interface</h3><p>Live sockets, mocks, and future transports can vary without spreading connection mechanics through UI components.</p></article>
+          <article class="decision decision--safety"><span class="tag">ADR-0003 + ADR-0012 · judging</span><h3>Untrusted code crosses one GameJudge boundary</h3><p>ContainerJudge is the default isolated runner. Judge0 is an optional adapter, not a second game authority or a fallback that silently changes behavior.</p></article>
+          <article class="decision decision--data"><span class="tag">ADR-0004 · persistence</span><h3>Match persistence is a deep module</h3><p>ArenaEngine depends on MatchPersistence; Postgres and in-memory stores can change without changing the MatchRecord contract.</p></article>
+          <article class="decision decision--safety"><span class="tag">ADR-0011 · concurrency</span><h3>Claims and revisions protect recovery</h3><p>Evaluation claims prevent duplicate work across processes; expected revisions reject stale ordinary writes instead of replaying them.</p></article>
+          <article class="decision decision--boundary"><span class="tag">ADR-0006 + ADR-0009 · sockets</span><h3>Authorization and presence stay server-side</h3><p>Socket context is resolved from the trusted principal, while first/last socket presence policy stays in the Game service.</p></article>
+          <article class="decision decision--boundary"><span class="tag">ADR-0008 · collaboration + chat</span><h3>Realtime sidecars have explicit lifecycles</h3><p>Team collaboration is round-scoped; team chat is match-scoped; neither bypasses the authoritative game state.</p></article>
+          <article class="decision decision--data"><span class="tag">ADR-0001 + ADR-0002 · ownership</span><h3>Game owns first-release match chat</h3><p>The service boundary leaves room for a future Chat service, but the current game-owned chat is the intentional delivery path.</p></article>
+          <article class="decision decision--safety"><span class="tag">42 compliance status</span><h3>Architecture evidence is not module sign-off</h3><p>This page describes implemented seams and current paths; it does not promote any 42 subject module from Designed to complete.</p></article>
+          <article class="decision decision--boundary"><span class="tag">Graphify scope</span><h3>Use the smallest useful graph</h3><p>The current set is split by architectural conversation. Choose one explorer when you need symbol-level paths, communities, or source locations; do not start with a repository hairball.</p></article>
+        </div>
+      </section>
+
+      <section class="section" id="evidence">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">05 · Source map</div>
+            <h2>Where to verify each box</h2>
+          </div>
+          <p class="section-intro">The overview is intentionally opinionated. These source paths are the quickest route from a card back to implementation evidence.</p>
+        </div>
+
+        <div class="evidence">
+          <article class="evidence-card">
+            <h3>Architecture source map</h3>
+            <div class="source-map">
+              <div class="source"><strong>Engine + authority</strong><code>packages/arena-game/src/engine.ts<br>match-authority.ts<br>round-lifecycle.ts</code></div>
+              <div class="source"><strong>Evaluation</strong><code>packages/arena-game/src/evaluation-orchestration.ts<br>judge.ts · container-judge.ts · judge0.ts</code></div>
+              <div class="source"><strong>Persistence</strong><code>packages/arena-game/src/persistence.ts<br>postgres-store.ts · store.ts</code></div>
+              <div class="source"><strong>Game boundary</strong><code>services/game/src/game/game.service.ts<br>game.gateway.ts · collab.gateway.ts<br>team-chat.gateway.ts</code></div>
+              <div class="source"><strong>Frontend seams</strong><code>frontend/src/arena/transport.ts<br>socket.ts · collab.ts · chat.ts · sidecars.ts</code></div>
+              <div class="source"><strong>Decision records</strong><code>docs/adr/0003…0012-*.md</code></div>
+            </div>
+          </article>
+          <article class="evidence-card">
+            <h3>How to present this to the team</h3>
+            <p>Use the overview first. Then pick exactly one runtime story based on the discussion: judging for sandbox questions, collaboration for 2v2 editor questions, or chat for ownership questions.</p>
+            <div class="legend" aria-label="Diagram legend">
+              <div class="legend-item"><span class="legend-swatch" style="background:var(--blue)"></span><span><span class="legend-label">Blue</span><br>player surface</span></div>
+              <div class="legend-item"><span class="legend-swatch" style="background:var(--teal)"></span><span><span class="legend-label">Teal</span><br>service / transport</span></div>
+              <div class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span><span><span class="legend-label">Amber</span><br>domain authority</span></div>
+              <div class="legend-item"><span class="legend-swatch" style="background:var(--coral)"></span><span><span class="legend-label">Coral</span><br>untrusted execution</span></div>
+              <div class="legend-item"><span class="legend-swatch" style="background:var(--sage)"></span><span><span class="legend-label">Sage</span><br>durable state</span></div>
+              <div class="legend-item"><span class="legend-swatch" style="background:var(--violet)"></span><span><span class="legend-label">Violet</span><br>realtime sidecar</span></div>
+            </div>
+            <div class="hero-actions" style="margin-top:20px">
+              <a class="button-link button-link--primary" href="./index.html">Back to focused map ↑</a>
+              <a class="button-link" href="./README.md">Open current scope note ↗</a>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <p class="footer-note"><strong>Current companion:</strong> 25 September 2026 · based on four selected, code-only Graphify slices for <code>packages/arena-game</code>, <code>services/game</code>, and <code>frontend</code>. This page is an architecture explanation, not a replacement for tests, the specification, or the 42-subject compliance record.</p>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const toc = document.getElementById("toc");
+      const links = [...toc.querySelectorAll("a")];
+      const sections = links
+        .map((link) => ({ link, section: document.querySelector(link.getAttribute("href")) }))
+        .filter((item) => item.section);
+
+      const setActive = (section) => {
+        sections.forEach(({ link, section: candidate }) => {
+          link.classList.toggle("active", candidate === section);
+        });
+      };
+
+      if ("IntersectionObserver" in window) {
+        const observer = new IntersectionObserver((entries) => {
+          const visible = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (visible) setActive(visible.target);
+        }, { rootMargin: "-12% 0px -72% 0px", threshold: [0, .2, .6] });
+        sections.forEach(({ section }) => observer.observe(section));
+      }
+
+      links.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          const section = document.querySelector(link.getAttribute("href"));
+          if (!section) return;
+          event.preventDefault();
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+          history.replaceState(null, "", link.getAttribute("href"));
+          setActive(section);
+        });
+      });
+
+      const initial = document.querySelector(location.hash || "#overview");
+      if (initial) setActive(initial);
+    })();
+  </script>
+</body>
+</html>

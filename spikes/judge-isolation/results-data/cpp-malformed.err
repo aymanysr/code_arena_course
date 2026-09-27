@@ -1,0 +1,16 @@
+main.cpp:1:5: error: cannot declare '::main' to be a global variable
+    1 | int main( { return 0; }
+      |     ^~~~
+main.cpp:1:13: error: expected primary-expression before 'return'
+    1 | int main( { return 0; }
+      |             ^~~~~~
+main.cpp:1:13: error: expected '}' before 'return'
+    1 | int main( { return 0; }
+      |           ~ ^~~~~~
+main.cpp:1:12: error: expected ')' before 'return'
+    1 | int main( { return 0; }
+      |         ~  ^~~~~~~
+      |            )
+main.cpp:1:23: error: expected declaration before '}' token
+    1 | int main( { return 0; }
+      |                       ^

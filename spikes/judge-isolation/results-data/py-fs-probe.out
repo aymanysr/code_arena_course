@@ -1,0 +1,4 @@
+['etc', 'proc', 'tmp', 'var', 'root', 'boot', 'opt', 'bin', 'usr', 'media', 'dev', 'home', 'srv', 'sbin', 'sys', 'mnt', 'run', 'lib', 'scratch', '.dockerenv']
+/etc/passwd readable 839 bytes
+/proc/self/environ readable 331 bytes
+../../etc/passwd readable 839 bytes
