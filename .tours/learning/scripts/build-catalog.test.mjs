@@ -1610,7 +1610,7 @@ test("requires affected lessons to be reviewed before accepting a snapshot", asy
   }
 });
 
-test("checks README and nav order against the single coverage order", async () => {
+test("checks README order or Course Home delegation against the single coverage order", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-order-"));
   const learningDir = path.join(tempRoot, "learning");
   try {
@@ -1623,6 +1623,12 @@ test("checks README and nav order against the single coverage order", async () =
     await writeFile(path.join(learningDir, "templates/second.html"), '<nav><!-- COURSE_LESSON_NAV --></nav>');
     await writeFile(path.join(learningDir, "README.md"), "[First](lessons/first.html)\n[Second](lessons/second.html)\n");
     assert.deepEqual(await auditCourseOrder({ lessons, learningDir }), []);
+
+    await writeFile(
+      path.join(learningDir, "README.md"),
+      "[Before Lesson 1](lessons/0000-before-lesson-one.html)\n[Course Home](index.html#build-path)\n",
+    );
+    assert.deepEqual(await auditCourseOrder({ lessons, learningDir }), [], "the generated Course Home owns the ordered lesson list");
 
     await writeFile(path.join(learningDir, "README.md"), "[Second](lessons/second.html)\n[First](lessons/first.html)\n");
     const readmeDrift = await auditCourseOrder({ lessons, learningDir });
@@ -1940,4 +1946,33 @@ test("renders orientation before the fourteen trace lessons", async () => {
   assert.match(orientation, /Find the homes/);
   assert.match(orientation, /packages\/arena-game\/src/);
   assert.match(orientation, /fixed clock/);
+});
+
+test("every trace lesson explains its build use without treating reference tests as parity", async () => {
+  const repoRoot = process.cwd();
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const learningPath = JSON.parse(await readFile(path.join(learningDir, "learning-path.json"), "utf8"));
+  const rendered = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, { tours: [], learningPath });
+  for (const lesson of coverageMap.lessons) {
+    const page = rendered.files.get(path.join(learningDir, lesson.output));
+    assert.match(page, /data-build-card=/, lesson.id + " has build context");
+    assert.match(page, /What must exist first/);
+    assert.match(page, /Your teammate's repo/);
+    assert.match(page, /Pattern:/);
+    assert.match(page, /data-build-source/);
+    assert.match(page, /data-build-test/);
+  }
+  const lessonOne = rendered.files.get(path.join(learningDir, "lessons/0001-follow-one-submit.html"));
+  assert.match(lessonOne, /Before coding Submit/);
+  assert.match(lessonOne, /0000-before-lesson-one.html/);
+  const last = rendered.files.get(path.join(learningDir, "lessons/0014-rewrite-with-tests.html"));
+  assert.match(last, /index.html#build-path/);
+  assert.doesNotMatch(last, /<li><strong>Build the small domain core/);
+  const unsafePath = structuredClone(learningPath);
+  unsafePath.steps[0].why = "<script>alert(1)</script>";
+  const escaped = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, { tours: [], learningPath: unsafePath });
+  const lessonThirteen = escaped.files.get(path.join(learningDir, "lessons/0013-running-the-project.html"));
+  assert.match(lessonThirteen, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.doesNotMatch(lessonThirteen, /<script>alert\(1\)<\/script>/);
 });

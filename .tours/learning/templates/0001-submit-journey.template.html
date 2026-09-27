@@ -15,6 +15,7 @@
       <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
       <h1>{{LESSON_TITLE}}</h1>
       <p class="hero-copy">In about 7 minutes: {{LESSON_GOAL}}</p>
+      <p class="concept-note">Before coding Submit, <a href="0000-before-lesson-one.html">find your starting point</a>. Your own Match, active Round, player membership, fixed clock, and fake Judge need to exist before a Submit test has a meaningful starting state. You can still read this trace now to see where you are going.</p>
       <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
       <div class="stage-bar" aria-label="Lesson stages">
         <span class="stage-pill" id="stage-predict" aria-current="step">1 · Predict</span>
@@ -38,7 +39,7 @@
       <p class="feedback" id="authority-feedback" aria-live="polite">Pick the component that knows the match phase and player membership.</p>
     </section>
 
-    <section class="section" id="trace" aria-labelledby="trace-title" hidden>
+    <section class="section" id="trace" aria-labelledby="trace-title">
       <p class="kicker">Now follow the request</p>
       <h2 id="trace-title">One Submit crosses several small boundaries</h2>
       <p class="section-intro">Follow the links in order. Each source opens at the relevant lines. The UI asks; the server decides; the judge executes.</p>
@@ -122,7 +123,7 @@
       </aside>
     </section>
 
-    <section class="section" id="recall" aria-labelledby="recall-title" hidden>
+    <section class="section" id="recall" aria-labelledby="recall-title">
       <p class="kicker">Check the model in your head</p>
       <h2 id="recall-title">The controller accepts the request shape, but the round is already closed. Who rejects Submit?</h2>
       <p class="section-intro">This is the useful distinction: receiving a request is not the same as deciding whether a game action is legal.</p>
@@ -140,9 +141,11 @@
         <p class="mt-1"><a href="../../../packages/arena-game/test/submit-path.test.ts#L6">Read the behavior contract in the Submit tests</a> · <a href="../source-map.html">Find any file or test in the full source map</a></p>
       </div>
       <div class="button-row mt-1" id="self-check-row" hidden>
-        <button type="button" id="self-check">I can retell the path from memory</button>
+        <button type="button" id="self-check" data-course-self-check>I can retell the path from memory</button>
         <button type="button" class="secondary-button" id="reset-progress">Reset this lesson on this browser</button>
       </div>
+      <p class="quiet mt-1" data-course-self-check-note>This records activity on this browser. It is not proof of mastery or rewrite parity.</p>
+      <p class="quiet mt-1" data-course-self-check-status aria-live="polite"></p>
       <p class="feedback" id="saved-feedback" aria-live="polite" hidden></p>
     </section>
 
@@ -270,8 +273,6 @@
         phaseFeedback.textContent = "Hint: which component has the current round phase?";
         delete authorityFeedback.dataset.kind;
         delete phaseFeedback.dataset.kind;
-        trace.hidden = true;
-        recall.hidden = true;
         recallModel.hidden = true;
         selfCheckRow.hidden = true;
         savedFeedback.hidden = true;

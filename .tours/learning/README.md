@@ -2,6 +2,8 @@
 
 This folder is the single start point for understanding and later rewriting the game. The 14 short lessons are tied to the reviewed source snapshot and its dated test evidence. CodeTours take you to files in VS Code; this course asks you to predict behavior, follow a small path, and check what you remember.
 
+Start at [Before Lesson 1](lessons/0000-before-lesson-one.html) to find the right folders and test commands in your teammate's repo. [Course Home](index.html#build-path) shows what to build and why each step depends on the last one. The 14 numbered lessons trace the reference game; use them to inspect behavior and tests, then write your own code.
+
 ## Start here
 
 1. Read [the mission](MISSION.md) so the lessons stay aimed at rebuilding the game yourself.

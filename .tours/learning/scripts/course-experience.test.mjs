@@ -130,6 +130,14 @@ test("a complete first lesson session works from a direct file and local server"
     assert.ok(new URL(page.url()).pathname.endsWith("lessons/0000-before-lesson-one.html"), `${mode}: Start opens orientation`);
     assert.equal(await page.locator("#homes-title").isVisible(), true, `${mode}: orientation explains where code lives`);
     await page.goto(route(mode, lessonOutput));
+    assert.ok(await page.locator("[data-build-card]").count() > 0, `${mode}: Lesson 1 has build context`);
+    assert.match(await page.locator("[data-build-source]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);
+    assert.match(await page.locator("[data-build-test]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);
+    await page.locator("[data-build-source]").first().click({ noWaitAfter: true });
+    await page.waitForURL(/source-map\.html/);
+    await page.waitForFunction(() => document.querySelector("#source-dialog")?.open);
+    assert.equal(await page.locator("#source-dialog").evaluate((dialog) => dialog.open), true, `${mode}: build source opens its reference`);
+    await page.goto(route(mode, lessonOutput));
     assert.equal(await page.locator("#trace").isVisible(), true, "the full trace is visible before any prediction answer");
     assert.equal(await page.locator("#recall").isVisible(), true, "the retrieval prompt is visible before any prediction answer");
     if (canPersist) {
@@ -173,6 +181,21 @@ test("a complete first lesson session works from a direct file and local server"
       assert.equal(await readStartText(page), "Start with the map →");
       assert.equal(await page.locator("[data-course-storage-unavailable]").isVisible(), true);
     }
+
+    await page.goto(route(mode, "lessons/0014-rewrite-with-tests.html"));
+    assert.ok(await page.locator("[data-build-card]").count() > 0, `${mode}: Lesson 14 has build context`);
+    assert.match(await page.locator("[data-build-source]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);
+    assert.match(await page.locator("[data-build-test]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);
+    assert.equal(await tabUntil(page, "[data-build-source]"), true, `${mode}: keyboard reaches Lesson 14 source link`);
+    assert.equal(await tabUntil(page, "[data-build-test]"), true, `${mode}: keyboard reaches Lesson 14 test link`);
+    const capstoneLinkHeights = await page.locator("[data-build-source], [data-build-test]").evaluateAll(
+      (links) => links.map((link) => Math.round(link.getBoundingClientRect().height)),
+    );
+    assert.ok(capstoneLinkHeights.every((height) => height >= 44), `${mode}: Lesson 14 source and test links meet the 44px target`);
+    await page.locator("[data-build-test]").first().click({ noWaitAfter: true });
+    await page.waitForURL(/source-map\.html/);
+    await page.waitForFunction(() => document.querySelector("#source-dialog")?.open);
+    assert.equal(await page.locator("#source-dialog").evaluate((dialog) => dialog.open), true, `${mode}: Lesson 14 test opens its reference`);
 
     await page.goto(route(mode, lessonOutput));
     assert.equal(await tabUntil(page, "#quiz-authority [data-answer='toolbar']"), true, `${mode}: keyboard reaches prediction controls`);
@@ -330,6 +353,16 @@ test("Course Home and core lessons stay usable at desktop and 320 CSS pixels", a
         assert.equal(await comparisonRegion.evaluate((element) => element.scrollWidth > element.clientWidth), true, "the evidence table scrolls inside its keyboard-focusable region");
       }
       assert.ok(await page.locator("a[data-source-id]").count() > 0, `${output} has keyboard-reachable source links`);
+      assert.ok(await page.locator("[data-build-card]").count() > 0, `${output} has build context`);
+      const cardLinks = page.locator("[data-build-source], [data-build-test]");
+      assert.match(await page.locator("[data-build-source]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);
+      assert.match(await page.locator("[data-build-test]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);
+      const cardLinkHeights = await cardLinks.evaluateAll(
+        (links) => links.map((link) => Math.round(link.getBoundingClientRect().height)),
+      );
+      assert.ok(cardLinkHeights.every((height) => height >= 44), `${output} source and test links meet the 44px target at ${width}px`);
+      assert.equal(await tabUntil(page, "[data-build-source]"), true, `${output} keyboard reaches its build source link`);
+      assert.equal(await tabUntil(page, "[data-build-test]"), true, `${output} keyboard reaches its build test link`);
       assert.equal(await tabUntil(page, "a[data-course-home]"), true, `${output} keyboard reaches Course Home`);
       assert.equal(await tabUntil(page, "a[data-course-explore]"), true, `${output} keyboard reaches Explore code`);
     }

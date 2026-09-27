@@ -411,6 +411,21 @@
     text-align: end;
   }
 
+  .course-lesson-activity {
+    margin-inline-start: 3.15rem;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+  }
+
+  .course-storage-unavailable {
+    max-width: 68ch;
+    margin-block-start: 1rem;
+    padding: 0.7rem 0.9rem;
+    border-inline-start: 3px solid var(--amber);
+    background: var(--amber-soft);
+    color: var(--text);
+  }
+
   .focus-panel {
     border-block: 1px solid var(--border);
   }
@@ -509,7 +524,7 @@
     background: var(--amber-soft);
   }
 
-  .page#lesson > .nav-row {
+  .page#lesson .lesson-navigation {
     max-width: 68ch;
     justify-content: space-between;
     margin-block-start: 2rem;
@@ -517,10 +532,15 @@
     border-block-start: 1px solid var(--border);
   }
 
-  .page#lesson > .nav-row a:last-child {
+  .page#lesson .lesson-navigation a {
     display: inline-flex;
     min-block-size: 2.75rem;
     align-items: center;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.45rem;
+  }
+
+  .page#lesson .lesson-navigation [data-primary-course-nav] {
     padding: 0.55rem 0.9rem;
     border-radius: 0.55rem;
     background: var(--teal);
@@ -529,7 +549,7 @@
     text-decoration: none;
   }
 
-  .page#lesson > .nav-row a:last-child:hover {
+  .page#lesson .lesson-navigation [data-primary-course-nav]:hover {
     background: var(--text);
   }
 
@@ -1108,9 +1128,51 @@
   }
 }
 
+@layer components {
+  .build-path-list {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 72ch;
+    padding-inline-start: 1.5rem;
+  }
+
+  .build-path-list > li {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.55rem;
+    background: var(--surface);
+  }
+
+  .build-path-list h3 {
+    margin-block-end: 0.4rem;
+  }
+
+  .build-path-list p + p {
+    margin-block-start: 0.45rem;
+  }
+
+  .build-path-list a,
+  #orientation .section a,
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding-inline: 0.65rem;
+  }
+
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+  }
+}
+
 </style>
 </head>
-<body data-lesson-id="0008-persistence-recovery">
+<body data-lesson-id="0008-persistence-recovery" data-course-lesson="0008-persistence-recovery">
   <a class="skip-link" href="#lesson">Skip to the lesson</a>
   <main class="page" id="lesson">
     <header class="hero">
@@ -1276,13 +1338,160 @@
         <h3>Rewrite-test prompt</h3>
         <p>Build a test with a real persistent database: create a Match, save a counted Submission and a pending Evaluation, close the first engine/process, create a fresh engine over the same database, then assert stored scores survive, Presence starts offline, and recovery claims the pending work under its original IDs. Add a concurrent-recovery assertion that only one worker holds the claim, and simulate a crash before commit to document whether the Judge can run again—do not assume exactly-once execution across crashes. Add a separate test showing that the in-memory adapter cannot survive constructing new stores. Do not call a two-engine/shared-Map unit test a database restart test.</p>
       </article>
-      <p class="nav-row"><a href="0007-judge-boundary.html">← Lesson 7: Judge boundary</a> · <a href="0009-live-connection.html">Next: Lesson 9, live connection and reconnect →</a></p>
+      <aside class="concept-note" data-build-card="persistence"><h2>How this helps your build: Save accepted Match state</h2><p><strong>Why now:</strong> Reconnect and restart need to recover saved Submissions and Reveals.</p><p><strong>What must exist first:</strong> Add Submission and Reveal</p><p><strong>Your teammate's repo:</strong> In a similar layout, extend packages/arena-game/src/persistence.ts and packages/arena-game/test/persistence.test.ts, then use the existing database adapter.</p><p><strong>Pattern:</strong> Test one storage contract with memory and the real database. Reject writes based on an old revision.</p><p><strong>Create:</strong> Add one Match storage contract, an in-memory version, then a database adapter and restart tests.</p><p><strong>Test:</strong> After restart, the same accepted Submission and Reveal are loaded. An old write cannot replace newer state.</p><p>Reference only: <a data-build-source href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fpersistence.ts">source</a> · <a data-build-test href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fpersistence.test.ts">test</a>. These files show current behavior; run an equivalent test in your own repo before claiming parity.</p></aside><nav class="nav-row lesson-navigation" aria-label="Lesson navigation"><a data-course-home href="../index.html">Course Home</a> · <a data-course-explore href="../source-map.html">Explore code</a> · <a data-previous-lesson href="0007-judge-boundary.html">← Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</a> · <a data-next-lesson data-primary-course-nav href="0009-live-connection.html">Next: Lesson 9, Reconnecting gives you a fresh snapshot—not a frozen game →</a></nav>
     </section>
 
     <footer class="footer-note">
       <p>Source snapshot <code>4edc506dd9158d21</code>. Current Postgres recovery integration cases are linked for study but were not run in this session. This lesson makes no database-schema or game-behavior change.</p>
     </footer>
   </main>
+  <p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>
+<script type="module">
+export const COURSE_ACTIVITY_KEY = "code-arena-learning:activity:v1";
+
+const ACTIVITY_STATUSES = new Set(["started", "self-check-recorded"]);
+
+const emptyActivity = () => ({ version: 1, lastLessonId: null, lessons: {} });
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function readCourseActivity(storage, validLessonIds = []) {
+  if (!storage || typeof storage.getItem !== "function") return emptyActivity();
+
+  let raw;
+  try {
+    raw = storage.getItem(COURSE_ACTIVITY_KEY);
+  } catch {
+    return emptyActivity();
+  }
+  if (raw === null || raw === undefined || raw === "") return emptyActivity();
+
+  try {
+    const parsed = JSON.parse(raw);
+    const validIds = new Set(validLessonIds);
+    if (!isRecord(parsed) || parsed.version !== 1 || !isRecord(parsed.lessons)) return emptyActivity();
+    if (parsed.lastLessonId !== null && (typeof parsed.lastLessonId !== "string" || !validIds.has(parsed.lastLessonId))) {
+      return emptyActivity();
+    }
+
+    const lessons = {};
+    for (const [lessonId, status] of Object.entries(parsed.lessons)) {
+      if (!validIds.has(lessonId) || !ACTIVITY_STATUSES.has(status)) return emptyActivity();
+      lessons[lessonId] = status;
+    }
+    if (parsed.lastLessonId !== null && !Object.hasOwn(lessons, parsed.lastLessonId)) return emptyActivity();
+    return { version: 1, lastLessonId: parsed.lastLessonId, lessons };
+  } catch {
+    return emptyActivity();
+  }
+}
+
+export function writeCourseActivity(storage, activity) {
+  if (!storage || typeof storage.setItem !== "function") return false;
+  try {
+    storage.setItem(COURSE_ACTIVITY_KEY, JSON.stringify(activity));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function markLessonActivity(activity, lessonId, status) {
+  if (typeof lessonId !== "string" || lessonId.length === 0 || !ACTIVITY_STATUSES.has(status)) return activity;
+  const lessons = { ...(isRecord(activity?.lessons) ? activity.lessons : {}) };
+  const prior = lessons[lessonId];
+  lessons[lessonId] = prior === "self-check-recorded" && status === "started"
+    ? prior
+    : status;
+  return { version: 1, lastLessonId: lessonId, lessons };
+}
+
+export function resolveContinueLesson(activity, orderedLessons = []) {
+  const ordered = [...orderedLessons].sort((left, right) => left.order - right.order);
+  const lastLesson = ordered.find((lesson) => lesson.id === activity?.lastLessonId);
+  if (lastLesson && ACTIVITY_STATUSES.has(activity?.lessons?.[lastLesson.id])) return lastLesson;
+  return ordered[0] ?? null;
+}
+
+function activityLabel(status) {
+  if (status === "self-check-recorded") return "Self-check recorded";
+  if (status === "started") return "Started";
+  return "Not started";
+}
+
+function encodePath(output) {
+  return String(output).split("/").map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+export function installCourseActivity(root, storage, orderedLessons = []) {
+  const validLessons = [...orderedLessons]
+    .filter((lesson) => typeof lesson?.id === "string" && Number.isSafeInteger(lesson.order))
+    .sort((left, right) => left.order - right.order);
+  const validIds = validLessons.map(({ id }) => id);
+  const query = (selector) => root?.querySelector?.(selector) ?? null;
+  const queryAll = (selector) => [...(root?.querySelectorAll?.(selector) ?? [])];
+  const unavailableTarget = query("[data-course-storage-unavailable]");
+
+  const showUnavailable = () => {
+    if (!unavailableTarget) return;
+    unavailableTarget.hidden = false;
+    unavailableTarget.textContent = "This browser blocked local progress storage. The course still works; lesson links, predictions, and source previews remain available.";
+  };
+
+  let storageAvailable = Boolean(storage && typeof storage.getItem === "function" && typeof storage.setItem === "function");
+  if (storageAvailable) {
+    try {
+      storage.getItem(COURSE_ACTIVITY_KEY);
+    } catch {
+      storageAvailable = false;
+    }
+  }
+  if (!storageAvailable) showUnavailable();
+
+  let activity = readCourseActivity(storage, validIds);
+  const save = (nextActivity) => {
+    activity = nextActivity;
+    if (!writeCourseActivity(storage, activity)) showUnavailable();
+  };
+
+  const startLink = query("[data-course-start]");
+  if (startLink) {
+    const continueLesson = resolveContinueLesson(activity, validLessons);
+    if (continueLesson && activity.lastLessonId === continueLesson.id && activity.lessons[continueLesson.id]) {
+      startLink.href = encodePath(continueLesson.output);
+      startLink.textContent = `Continue Lesson ${continueLesson.order}`;
+    }
+    for (const statusTarget of queryAll("[data-course-activity-status]")) {
+      const status = activity.lessons[statusTarget.dataset.courseActivityStatus];
+      statusTarget.textContent = activityLabel(status);
+    }
+  }
+
+  const bodyLessonId = root?.body?.dataset?.courseLesson ?? query("[data-course-lesson]")?.dataset?.courseLesson;
+  if (bodyLessonId && validIds.includes(bodyLessonId)) {
+    save(markLessonActivity(activity, bodyLessonId, "started"));
+    for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+      statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+    }
+    for (const selfCheck of queryAll("[data-course-self-check]")) {
+      selfCheck.addEventListener("click", () => {
+        save(markLessonActivity(activity, bodyLessonId, "self-check-recorded"));
+        for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+          statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+        }
+      });
+    }
+  }
+
+  return { activity, storageAvailable };
+}
+const courseLessons = [{"id":"0001-submit-journey","order":1,"output":"0001-follow-one-submit.html"},{"id":"0002-reveal-cutoff","order":2,"output":"0002-reveal-cutoff.html"},{"id":"0003-rounds-and-final-score","order":3,"output":"0003-rounds-and-final-score.html"},{"id":"0004-lobby-to-match","order":4,"output":"0004-lobby-to-match.html"},{"id":"0005-problem-editor-run","order":5,"output":"0005-problem-editor-run.html"},{"id":"0006-evaluation-retries","order":6,"output":"0006-evaluation-retries.html"},{"id":"0007-judge-boundary","order":7,"output":"0007-judge-boundary.html"},{"id":"0008-persistence-recovery","order":8,"output":"0008-persistence-recovery.html"},{"id":"0009-live-connection","order":9,"output":"0009-live-connection.html"},{"id":"0010-team-collaboration","order":10,"output":"0010-team-collaboration.html"},{"id":"0011-team-chat","order":11,"output":"0011-team-chat.html"},{"id":"0012-arena-screen","order":12,"output":"0012-arena-screen.html"},{"id":"0013-running-the-project","order":13,"output":"0013-running-the-project.html"},{"id":"0014-rewrite-with-tests","order":14,"output":"0014-rewrite-with-tests.html"}];
+let courseStorage = null;
+try { courseStorage = globalThis.localStorage ?? null; } catch {}
+installCourseActivity(document, courseStorage, courseLessons);
+</script>
 <div id="source-templates" hidden>
     <template id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml"><span class="hljs-comment"># Single-host Code Arena stack.</span>
 <span class="hljs-comment"># Boot: npm run certs (once, dev TLS) &amp;&amp; cp .env.example .env &amp;&amp; docker compose up --build</span>

@@ -1152,11 +1152,19 @@
   }
 
   .build-path-list a,
-  #orientation .section a {
+  #orientation .section a,
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
     display: inline-flex;
     min-block-size: 2.75rem;
     align-items: center;
     padding-inline: 0.65rem;
+  }
+
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
   }
 }
 

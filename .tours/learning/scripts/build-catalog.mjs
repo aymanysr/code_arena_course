@@ -417,7 +417,7 @@ export async function auditTemplateLinks({ lessons, scope, learningDir, repoRoot
 }
 
 // ponytail: order is checked, not generated — coverage-map.json owns 1..N.
-// Compare lesson destinations exactly; non-lesson links (for example, the final README link) are allowed.
+// README may link the orientation page, then delegate the numbered list to generated Course Home.
 export async function auditCourseOrder({ lessons, learningDir }) {
   const issues = [];
   const ordered = [...(lessons ?? [])].sort((left, right) => left.order - right.order);
@@ -429,14 +429,20 @@ export async function auditCourseOrder({ lessons, learningDir }) {
   const expectedOutputs = ordered.map((lesson) => lesson.output.split("/").pop());
   let readmeOutputs = [];
   let readmeExists = false;
+  let readmeDelegatesToCourseHome = false;
   try {
     const readme = await readFile(path.join(learningDir, "README.md"), "utf8");
     readmeExists = true;
-    readmeOutputs = [...readme.matchAll(/lessons\/([^\s)\]]+\.html)/g)].map((match) => match[1]);
+    readmeOutputs = [...readme.matchAll(/lessons\/([^\s)\]]+\.html)/g)]
+      .map((match) => match[1])
+      .filter((output) => output !== "0000-before-lesson-one.html");
+    readmeDelegatesToCourseHome = /\]\((?:\.\/)?index\.html(?:#[^)]+)?\)/.test(readme);
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }
-  if (readmeExists && JSON.stringify(readmeOutputs) !== JSON.stringify(expectedOutputs)) {
+  const readmeOrderMatches = JSON.stringify(readmeOutputs) === JSON.stringify(expectedOutputs);
+  const readmeDelegationMatches = readmeOutputs.length === 0 && readmeDelegatesToCourseHome;
+  if (readmeExists && !readmeOrderMatches && !readmeDelegationMatches) {
     issues.push({ kind: "readme-order", detail: `README lists ${readmeOutputs.join(",")} but coverage order is ${expectedOutputs.join(",")}` });
   }
   for (let index = 0; index < ordered.length; index++) {
@@ -1074,6 +1080,29 @@ function injectRuntime(template, runtime) {
   return template.replace("</body>", `${runtime}\n</body>`);
 }
 
+function renderLessonBuildCards(pathModel, lesson) {
+  if (!pathModel) return "";
+  const cards = pathModel.steps.filter((step) => step.lessonIds.includes(lesson.id));
+  return cards.map((step) => {
+    const prerequisites = step.requires.length
+      ? step.requires.map((id) => pathModel.steps.find((candidate) => candidate.id === id).title).join(", ")
+      : "Find the homes in your teammate's repo";
+    const sourceUrl = "../source-map.html?file=" + encodeURIComponent(step.sourcePath);
+    const testUrl = "../source-map.html?file=" + encodeURIComponent(step.testPath);
+    return '<aside class="concept-note" data-build-card="' + html(step.id) +
+      '"><h2>How this helps your build: ' + html(step.title) +
+      '</h2><p><strong>Why now:</strong> ' + html(step.why) +
+      '</p><p><strong>What must exist first:</strong> ' + html(prerequisites) +
+      "</p><p><strong>Your teammate's repo:</strong> " + html(step.placement) +
+      '</p><p><strong>Pattern:</strong> ' + html(step.pattern) +
+      '</p><p><strong>Create:</strong> ' + html(step.deliverable) +
+      '</p><p><strong>Test:</strong> ' + html(step.check) +
+      '</p><p>Reference only: <a data-build-source href="' + html(sourceUrl) +
+      '">source</a> · <a data-build-test href="' + html(testUrl) +
+      '">test</a>. These files show current behavior; run an equivalent test in your own repo before claiming parity.</p></aside>';
+  }).join("\n");
+}
+
 function renderLessonNavigation(orderedLessons, lesson) {
   const currentIndex = orderedLessons.findIndex((item) => item.id === lesson.id);
   if (currentIndex < 0) return "";
@@ -1156,7 +1185,10 @@ export function renderLessonTemplate(template, stylesheet, snapshotId, freshness
     orderedLessons,
     metadata.output,
   );
-  rendered = rendered.replaceAll("<!-- COURSE_LESSON_NAV -->", renderLessonNavigation(orderedLessons, metadata));
+  rendered = rendered.replaceAll(
+    "<!-- COURSE_LESSON_NAV -->",
+    renderLessonBuildCards(courseOptions.learningPath, metadata) + renderLessonNavigation(orderedLessons, metadata),
+  );
   if (courseOptions.courseLessons?.length) {
     rendered = rendered.replace(/<body\b([^>]*)>/i, (match, attributes) => {
       if (/\bdata-course-lesson=/.test(attributes)) return match;
@@ -1379,7 +1411,7 @@ export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, o
       lesson,
       { files: data.files.filter((file) => (lesson.references ?? []).some((reference) => reference.path === file.path)) },
       repoRoot,
-      { courseLessons: orderedLessons, activityRuntimeSource },
+      { courseLessons: orderedLessons, activityRuntimeSource, learningPath: data.learningPath },
     );
     files.set(path.join(learningDir, lesson.output), page);
   }
