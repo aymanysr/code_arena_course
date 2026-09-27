@@ -1,0 +1,18 @@
+{
+  "name": "arena-harness",
+  "version": "0.1.0",
+  "description": "Week-2 proof-path harness skeleton (ticket 17). Ports + fakes + mocked 1v1 lifecycle; real judge/services replace the fakes without rewriting tests.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "arena-model": "*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

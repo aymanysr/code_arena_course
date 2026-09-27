@@ -1,0 +1,123 @@
+{
+  "id": "even-ledger",
+  "title": "Even Ledger",
+  "difficulty": "Easy",
+  "tags": [
+    "Array",
+    "Math"
+  ],
+  "description": "Given an array of integers nums, compute the alternating sum: add the elements at even indices and subtract the elements at odd indices (S = nums[0] - nums[1] + nums[2] - nums[3] + ...). An empty array scores 0. Use 64-bit integers; inputs fit so the exact result fits in a signed 64-bit integer.",
+  "examples": [
+    {
+      "label": "Example 1",
+      "input": "nums = [1,2,3,4]",
+      "output": "-2",
+      "explanation": "1 - 2 + 3 - 4 = -2."
+    },
+    {
+      "label": "Example 2",
+      "input": "nums = [5]",
+      "output": "5",
+      "explanation": "A single element at an even index is added."
+    },
+    {
+      "label": "Example 3",
+      "input": "nums = []",
+      "output": "0",
+      "explanation": "The empty array scores 0."
+    }
+  ],
+  "constraints": [
+    "0 <= nums.length <= 100000",
+    "-10^9 <= nums[i] <= 10^9",
+    "The exact alternating sum fits in a signed 64-bit integer."
+  ],
+  "timeLimitMs": 2000,
+  "memoryLimitMb": 256,
+  "starters": {
+    "C++": "#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    long long ledgerSum(const vector<long long>& nums) {\n        // Write your code here\n        return 0;\n    }\n};",
+    "Python": "class Solution:\n    def ledger_sum(self, nums: list[int]) -> int:\n        # Write your code here\n        return 0",
+    "C": "#include <stddef.h>\n\nlong long ledgerSum(long long* nums, int n) {\n    // Write your code here (n == 0 means the score is 0)\n    (void)nums;\n    (void)n;\n    return 0;\n}"
+  },
+  "visibleTests": [
+    {
+      "id": "ex1",
+      "label": "Example 1",
+      "input": "nums = [1,2,3,4]",
+      "expected": "-2"
+    },
+    {
+      "id": "ex2",
+      "label": "Example 2",
+      "input": "nums = [5]",
+      "expected": "5"
+    },
+    {
+      "id": "ex3",
+      "label": "Example 3",
+      "input": "nums = []",
+      "expected": "0"
+    }
+  ],
+  "hiddenGroups": [
+    {
+      "name": "Basic",
+      "weight": 40,
+      "tests": [
+        {
+          "id": "b1",
+          "input": "nums = [0,0,0]",
+          "expected": "0"
+        },
+        {
+          "id": "b2",
+          "input": "nums = [10,-3]",
+          "expected": "13"
+        },
+        {
+          "id": "b3",
+          "input": "nums = [-1,-2,-3]",
+          "expected": "-2"
+        }
+      ]
+    },
+    {
+      "name": "Negatives and zeros",
+      "weight": 30,
+      "tests": [
+        {
+          "id": "n1",
+          "input": "nums = [-5,0,5,0,-5]",
+          "expected": "-5"
+        },
+        {
+          "id": "n2",
+          "input": "nums = [0]",
+          "expected": "0"
+        }
+      ]
+    },
+    {
+      "name": "Bounds",
+      "weight": 30,
+      "tests": [
+        {
+          "id": "e1",
+          "input": "nums = [1000000000,-1000000000]",
+          "expected": "2000000000"
+        },
+        {
+          "id": "e2",
+          "input": "nums = [1000000000,1000000000,1000000000]",
+          "expected": "1000000000"
+        }
+      ]
+    }
+  ],
+  "provenance": {
+    "origin": "original",
+    "created": "2026-09-23"
+  },
+  "driver": "snippet",
+  "entrypoint": "ledger_sum"
+}

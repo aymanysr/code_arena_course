@@ -1,0 +1,27 @@
+{
+  "name": "code-arena",
+  "version": "0.1.0",
+  "description": "Code Arena production monorepo (ticket 01).",
+  "private": true,
+  "type": "commonjs",
+  "workspaces": [
+    "packages/*",
+    "services/*",
+    "frontend"
+  ],
+  "scripts": {
+    "test": "npm test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "certs": "bash scripts/gen-dev-certs.sh",
+    "up": "docker compose up --build",
+    "down": "docker compose down"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "highlight.js": "^11.12.0"
+  }
+}

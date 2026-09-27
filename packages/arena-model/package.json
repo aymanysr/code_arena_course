@@ -1,0 +1,17 @@
+{
+  "name": "arena-model",
+  "version": "0.1.0",
+  "description": "Canonical Code Arena domain/state model (ticket 03). Transcribed from frozen prototype/game-ui/09-arena.html.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

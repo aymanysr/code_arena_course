@@ -1,0 +1,23 @@
+{
+  "name": "arena-chat",
+  "version": "0.1.0",
+  "description": "Deferred Chat service skeleton: boot + health/readiness only (ticket 01); first-release match chat runs in Game.",
+  "private": true,
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.0",
+    "@nestjs/core": "^11.1.0",
+    "@nestjs/platform-express": "^11.1.0",
+    "arena-model": "*",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "@types/node": "^22.16.0"
+  }
+}

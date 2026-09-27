@@ -1,0 +1,57 @@
+{
+  "id": "double-it",
+  "title": "Double It",
+  "difficulty": "Easy",
+  "tags": ["IO", "Math"],
+  "description": "Read a single integer from standard input and print twice its value.",
+  "examples": [
+    {
+      "label": "Example 1",
+      "input": "21",
+      "output": "42",
+      "explanation": "21 doubled is 42."
+    },
+    {
+      "label": "Example 2",
+      "input": "0",
+      "output": "0",
+      "explanation": "Zero doubled is zero."
+    }
+  ],
+  "constraints": [
+    "-10^9 <= x <= 10^9",
+    "Input contains a single integer."
+  ],
+  "timeLimitMs": 2000,
+  "memoryLimitMb": 256,
+  "driver": "stdio",
+  "entrypoint": null,
+  "starters": {
+    "C++": "#include <cstdio>\nint main() {\n    long long x;\n    if (!(std::scanf(\"%lld\", &x))) return 0;\n    std::printf(\"0\\n\");\n    return 0;\n}\n",
+    "Python": "import sys\n\ndef main():\n    x = int(sys.stdin.read().strip())\n    print(0)\n\nmain()\n",
+    "C": "#include <stdio.h>\nint main(void) {\n    long long x;\n    if (scanf(\"%lld\", &x) != 1) return 0;\n    printf(\"0\\n\");\n    return 0;\n}\n"
+  },
+  "visibleTests": [
+    { "id": "v1", "input": "21", "expected": "42" },
+    { "id": "v2", "input": "0", "expected": "0" }
+  ],
+  "hiddenGroups": [
+    {
+      "name": "Positive",
+      "weight": 50,
+      "tests": [
+        { "id": "p1", "input": "7", "expected": "14" },
+        { "id": "p2", "input": "1000", "expected": "2000" }
+      ]
+    },
+    {
+      "name": "ZeroNegative",
+      "weight": 50,
+      "tests": [
+        { "id": "z1", "input": "0", "expected": "0" },
+        { "id": "n1", "input": "-3", "expected": "-6" }
+      ]
+    }
+  ],
+  "provenance": { "origin": "original", "created": "2026-09-23" }
+}

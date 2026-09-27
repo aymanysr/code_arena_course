@@ -1,0 +1,24 @@
+{
+  "name": "arena-game-engine",
+  "version": "0.1.0",
+  "description": "Authoritative Code Arena match engine (tickets 07/08/10/09): membership, Run/Submit, scoring, reveal, clock, events. Judge via GameJudge seam; auth via trusted-principal seam.",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "arena-model": "*",
+    "pg": "^8.13.0",
+    "yjs": "^13.6.33"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

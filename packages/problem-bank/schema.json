@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://arena.local/schemas/problem.json",
+  "title": "Code Arena problem record (ticket 05)",
+  "type": "object",
+  "required": ["id", "title", "difficulty", "tags", "description", "examples", "constraints", "starters", "visibleTests", "hiddenGroups", "provenance"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "title": { "type": "string", "minLength": 1 },
+    "difficulty": { "enum": ["Easy", "Medium", "Hard"] },
+    "tags": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "description": { "type": "string", "minLength": 1 },
+    "examples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["label", "input", "output", "explanation"],
+        "properties": {
+          "label": { "type": "string" },
+          "input": { "type": "string" },
+          "output": { "type": "string" },
+          "explanation": { "type": "string" }
+        }
+      }
+    },
+    "constraints": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+    "timeLimitMs": { "type": "integer", "minimum": 1 },
+    "memoryLimitMb": { "type": "integer", "minimum": 1 },
+    "starters": {
+      "type": "object",
+      "required": ["C++", "Python", "C"],
+      "additionalProperties": { "type": "string" }
+    },
+    "visibleTests": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "input", "expected"],
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "input": { "type": "string" },
+          "expected": { "type": "string" }
+        }
+      }
+    },
+    "hiddenGroups": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "weight", "tests"],
+        "properties": {
+          "name": { "type": "string" },
+          "weight": { "type": "number", "exclusiveMinimum": 0 },
+          "tests": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["id", "input", "expected"],
+              "properties": {
+                "id": { "type": "string" },
+                "input": { "type": "string" },
+                "expected": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["origin", "created"],
+      "properties": {
+        "origin": { "enum": ["original", "compatibly-licensed"] },
+        "source": { "type": "string" },
+        "created": { "type": "string" }
+      }
+    }
+  }
+}
