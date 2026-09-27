@@ -79,8 +79,11 @@
             <h3>The application service wires the call onward</h3>
             <p><code>GameService</code> turns the user ID into a trusted principal and calls <code>ArenaEngine.submit()</code>. It can also trigger a reveal after the accepted result satisfies the reveal condition.</p>
             <div class="source-links">
-              <a href="../../../services/game/src/game/game.service.ts#L230">Submit forwarding · game.service.ts:230</a>
-              <a href="../../../services/game/src/game/game.service.ts#L145">Configured judge · default is ContainerJudge</a>
+              <a href="../../../services/game/src/game/game.service.ts#L216">Submit forwarding · game.service.ts:216</a>
+              <a href="../../../services/game/src/game/game.service.ts#L117">GameService wires its startup-selected judge · game.service.ts:117</a>
+              <a href="../../../services/game/src/game/judge-factory.ts#L19">Select one provider at startup · judge-factory.ts:19</a>
+              <a href="../../../docker-compose.yml#L94">Compose selects the worker provider · docker-compose.yml:94</a>
+              <a href="../../../packages/arena-game/src/worker-judge.ts#L68">Game-to-worker adapter · worker-judge.ts:68</a>
             </div>
           </div>
         </li>
@@ -90,9 +93,9 @@
             <h3>The engine applies the game rules and records the attempt</h3>
             <p>Under the match lock, <code>ArenaEngine</code> checks membership, phase, time, language, and (for 2v2) the current team-ready document. It records a pending submission before asking for a verdict. That makes game authority separate from the UI.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/engine.ts#L511">Submit checks · engine.ts:511</a>
-              <a href="../../../packages/arena-game/src/engine.ts#L607">Pending record · engine.ts:607</a>
-              <a href="../../../packages/arena-game/src/engine.ts#L669">Hand off for evaluation · engine.ts:669</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L554">Submit checks · engine.ts:554</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L646">Pending record · engine.ts:646</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L708">Hand off for evaluation · engine.ts:708</a>
             </div>
           </div>
         </li>
@@ -100,9 +103,9 @@
           <span class="step-number" aria-hidden="true">06</span>
           <div>
             <h3>The orchestrator owns evaluation work; the judge owns execution</h3>
-            <p><code>EvaluationOrchestrator</code> claims the pending evaluation so retries do not create duplicate work. It calls the <code>GameJudge</code> contract. The default <code>ContainerJudge</code> runs the hidden tests in a restricted Docker container; Judge0 is an optional configured adapter.</p>
+            <p><code>EvaluationOrchestrator</code> claims the pending evaluation so retries do not create duplicate work. It calls the <code>GameJudge</code> contract. The provider factory keeps <code>ContainerJudge</code> as the development default; in Compose, <code>WorkerJudgeAdapter</code> is the configured Game-to-Judge-worker boundary. <code>Judge0Adapter</code> remains an optional configured provider, and a provider failure never triggers fallback.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L172">Claim and evaluate · evaluation-orchestration.ts:172</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L191">Claim and evaluate · evaluation-orchestration.ts:191</a>
               <a href="../../../packages/arena-game/src/judge.ts#L107">Judge contract · judge.ts:107</a>
               <a href="../../../packages/arena-game/src/container-judge.ts#L221">Container judge · container-judge.ts:221</a>
             </div>
@@ -133,7 +136,7 @@
       <div class="card mt-1" id="recall-model" hidden>
         <h3>The path, from memory:</h3>
         <p><code>EditorToolbar → CodeWorkspace → live transport → GameController → GameService → ArenaEngine → EvaluationOrchestrator → GameJudge</code></p>
-        <p>The engine enforces the match rules; the judge only runs the program. In this version, ContainerJudge is the default implementation, and Judge0 can be selected by configuration.</p>
+        <p>The engine enforces Match rules; the Judge only runs the program. <code>ContainerJudge</code> is the development default, Compose selects <code>WorkerJudgeAdapter</code> for the worker boundary, and <code>Judge0Adapter</code> is optional configuration. Provider selection happens at startup; failures do not switch providers.</p>
         <p class="mt-1"><a href="../../../packages/arena-game/test/submit-path.test.ts#L6">Read the behavior contract in the Submit tests</a> · <a href="../source-map.html">Find any file or test in the full source map</a></p>
       </div>
       <div class="button-row mt-1" id="self-check-row" hidden>

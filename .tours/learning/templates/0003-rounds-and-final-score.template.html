@@ -47,7 +47,8 @@
             <p>A successful competitive Submit updates that side's counted score for this Round. A newer successful score replaces the old one: 100 followed by 40 leaves 40. If the newer Judge run fails as infrastructure, the last counted score stays 70; a failed run is not a zero.</p>
             <div class="source-links">
               <a href="../../../packages/arena-game/src/records.ts#L40">Counted result and Round fields · records.ts:40</a>
-              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L420">Failed evaluation path · evaluation-orchestration.ts:420</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L472">Successful scored result replaces the current Round result · evaluation-orchestration.ts:472</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L494">Failed evaluation path · evaluation-orchestration.ts:494</a>
               <a href="../../../packages/arena-game/test/submit-path.test.ts#L18">Successful resubmit replaces score · submit-path.test.ts:18</a>
               <a href="../../../packages/arena-game/test/submit-path.test.ts#L35">Failed resubmit preserves 70 · submit-path.test.ts:35</a>
             </div>
@@ -59,7 +60,7 @@
             <h3>The hidden groups produce one Round score</h3>
             <p>Each hidden-test group has a weight. The engine awards basis points for the passing fraction in each group, sums them, then rounds once to a whole percentage. With 70% weight at 3/4 passed and 30% weight at 2/3 passed: 5,250 + 2,000 = 7,250 basis points, which becomes 73/100.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L152">Score a Judge verdict · round-lifecycle.ts:152</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L186">Score a Judge verdict · round-lifecycle.ts:186</a>
               <a href="../../../packages/arena-model/src/scoring.ts#L42">Group weight and passed-test fraction · scoring.ts:42</a>
               <a href="../../../packages/arena-model/src/scoring.ts#L55">Sum basis points and round once · scoring.ts:55</a>
               <a href="../../../packages/arena-game/test/round-lifecycle.test.ts#L44">One of two tests earns 50% · round-lifecycle.test.ts:44</a>
@@ -72,7 +73,7 @@
             <h3>Advancing resets the next Round, not the Match</h3>
             <p><code>advance()</code> moves to the next pre-created Round and clears that Round's counted score, attempts, visible Run results, Reveal, and close/cutoff bookkeeping. Earlier Round records remain available for the final sum. The Match-wide start time stays the same, so the clock continues.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L117">Advance and reset Round state · round-lifecycle.ts:117</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L151">Advance and reset Round state · round-lifecycle.ts:151</a>
               <a href="../../../packages/arena-game/src/records.ts#L70">Match holds all Round records · records.ts:70</a>
               <a href="../../../packages/arena-game/test/round-lifecycle.test.ts#L72">Reset behavior test · round-lifecycle.test.ts:72</a>
               <a href="../../../packages/arena-game/test/lifecycle-1v1.test.ts#L14">Three Rounds; clock never resets · lifecycle-1v1.test.ts:14</a>
@@ -85,7 +86,7 @@
             <h3>After the last Round, total first; tie-break only if needed</h3>
             <p>The Match score is the sum of its Round scores (up to 300 in the three-Round setup). If totals tie, compare the sum of the times when each side achieved its final counted score across Rounds; lower wins. If those times also tie, fewer counted submissions wins. If both still tie, the result is a draw.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L175">Compute final Match result · round-lifecycle.ts:175</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L209">Compute final Match result · round-lifecycle.ts:209</a>
               <a href="../../../packages/arena-model/src/scoring.ts#L79">Add Round scores · scoring.ts:79</a>
               <a href="../../../packages/arena-model/src/scoring.ts#L98">Compare score, time, then submissions · scoring.ts:98</a>
               <a href="../../../packages/arena-model/src/transitions.ts#L23">Allowed Match phase transitions · transitions.ts:23</a>
@@ -114,6 +115,33 @@
         <h3>What these tests prove—and their limit</h3>
         <p>The scoring tests build concrete 1v1 examples for each comparison step. They show those cases follow the current rules; they are not a proof that every possible Match history has been tested. The pure <code>compareSides()</code> function is the shared rule used by final scoring.</p>
       </aside>
+    </section>
+
+    <section class="section" aria-labelledby="deadline-score-title">
+      <p class="kicker">When the Match deadline arrives</p>
+      <h2 id="deadline-score-title">The final score comes from saved Round records</h2>
+      <p class="section-intro">The deadline path persists the current Round Reveal, then saves the Match in <code>MATCH_COMPLETE</code>. The final result is computed from the saved counted Round records: each played Round contributes its counted score, unplayed Rounds contribute zero, and the existing score and tie-break rules still apply.</p>
+      <div class="grid split">
+        <article class="card">
+          <h3>The server is already finished</h3>
+          <p>The client does not need to advance the Round or ask the server to end the Match. The terminal Match state and current Reveal are available from the saved snapshot after reconnect.</p>
+          <p class="source-links">
+            <a href="../../../packages/arena-game/src/engine.ts#L1115">Save the expired Round Reveal and terminal state · engine.ts:1115</a>
+            <a href="../../../packages/arena-game/src/round-lifecycle.ts#L209">Derive final scores from every Round record · round-lifecycle.ts:209</a>
+            <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L23">Count current Reveal and zero unplayed Rounds · deadline-closure.test.ts:23</a>
+            <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L45">Intro expiry contributes a zero Reveal · deadline-closure.test.ts:45</a>
+          </p>
+        </article>
+        <article class="card">
+          <h3>The UI stages their presentation</h3>
+          <p>For a deadline-completed Match, the screen first shows the saved current-Round Reveal and a <q>See final result</q> action. That action changes the presentation only; the server has already committed <code>MATCH_COMPLETE</code>. The ordinary completed flow can show the final result directly after its Reveal phase.</p>
+          <p class="source-links">
+            <a href="../../../frontend/src/components/ArenaPage.tsx#L245">Deadline and ordinary terminal rendering · ArenaPage.tsx:245</a>
+            <a href="../../../frontend/src/components/ArenaPage.test.tsx#L71">Expired Match reveals before final · ArenaPage.test.tsx:71</a>
+            <a href="../../../frontend/src/components/ArenaPage.test.tsx#L79">Ordinary result presentation · ArenaPage.test.tsx:79</a>
+          </p>
+        </article>
+      </div>
     </section>
 
     <section class="section" id="recall" aria-labelledby="recall-title">

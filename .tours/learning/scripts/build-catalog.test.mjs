@@ -755,6 +755,8 @@ test("keeps the two-client 1v1 browser journey linked from the Submit lesson", a
   const rendered = renderLessonTemplate(template, "", "snapshot-id", { stale: 0, total: 14 }, lesson);
 
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Flive-1v1\.spec\.ts&amp;line=61"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory\.ts&amp;line=19"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fworker-judge\.ts&amp;line=68"/);
   assert.match(template, /linked as source, not as a pass from this lesson update/);
 });
 
@@ -769,10 +771,12 @@ test("renders the Reveal cutoff lesson's source links into the local preview", a
   const rendered = renderLessonTemplate(template, "", "snapshot-id", { stale: 0, total: 4 }, lesson);
 
   assert.match(rendered, /data-lesson-id="0002-reveal-cutoff"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fround-lifecycle\.ts&amp;line=98"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=694"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration\.ts&amp;line=432"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fround-lifecycle\.ts&amp;line=120"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=743"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration\.ts&amp;line=463"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fscoring-reveal\.test\.ts&amp;line=86"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fdeadline-closure\.test\.ts&amp;line=11"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fdeadline-closure\.test\.ts&amp;line=69"/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/packages\//);
 });
 
@@ -791,6 +795,8 @@ test("renders the Round score lesson's source links into the local preview", asy
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-model%2Fsrc%2Fscoring\.ts&amp;line=98"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fscoring-reveal\.test\.ts&amp;line=40"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fsubmit-path\.test\.ts&amp;line=35"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fdeadline-closure\.test\.ts&amp;line=23"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fsrc%2Fcomponents%2FArenaPage\.test\.tsx&amp;line=71"/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/packages\//);
 });
 
@@ -1413,4 +1419,158 @@ test("requires every lesson review when creating the first source snapshot", asy
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
+});
+
+test("teaches Match-deadline closure and cites its source evidence", async () => {
+  const repoRoot = process.cwd();
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const lessonTemplate = async (id) => {
+    const lesson = coverageMap.lessons.find((item) => item.id === id);
+    assert.ok(lesson, `coverage map includes ${id}`);
+    return { lesson, template: await readFile(path.join(learningDir, lesson.template), "utf8") };
+  };
+  const { lesson: revealLesson, template: revealTemplate } = await lessonTemplate("0002-reveal-cutoff");
+  const { lesson: scoreLesson, template: scoreTemplate } = await lessonTemplate("0003-rounds-and-final-score");
+  const { lesson: submitLesson, template: submitTemplate } = await lessonTemplate("0001-submit-journey");
+
+  assert.match(revealTemplate, /Match deadline/);
+  assert.match(revealTemplate, /bounded reveal grace/);
+  assert.match(revealTemplate, /sweepExpiredMatches/);
+  assert.match(revealTemplate, /MATCH_COMPLETE/);
+  assert.match(revealTemplate, /unplayed Rounds contribute zero/i);
+  assert.match(scoreTemplate, /persists the current Round Reveal/i);
+  assert.match(scoreTemplate, /MATCH_COMPLETE/);
+  assert.match(scoreTemplate, /computed from the saved counted Round records/i);
+  assert.match(scoreTemplate, /unplayed Rounds contribute zero/i);
+  assert.match(scoreTemplate, /UI stages their presentation/i);
+  assert.match(submitTemplate, /WorkerJudgeAdapter/);
+  assert.match(submitTemplate, /Compose selects the worker provider/);
+  assert.ok(submitLesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "docker-compose.yml" && startLine === 92 && endLine === 97,
+  ));
+  for (const [sourcePath, startLine, endLine] of [
+    ["services/game/src/game/game.service.ts", 216, 221],
+    ["packages/arena-game/src/engine.ts", 547, 569],
+    ["packages/arena-game/src/engine.ts", 646, 668],
+    ["packages/arena-game/src/engine.ts", 708, 724],
+    ["packages/arena-game/src/evaluation-orchestration.ts", 191, 234],
+  ]) {
+    assert.ok(submitLesson.references.some((reference) =>
+      reference.path === sourcePath && reference.startLine === startLine && reference.endLine === endLine,
+    ), `Lesson 1 maps the current ${sourcePath}:${startLine}-${endLine} implementation`);
+  }
+  assert.ok(revealLesson.references.some(({ path: sourcePath, startLine }) =>
+    sourcePath === "packages/arena-game/test/deadline-closure.test.ts" && startLine === 11,
+  ));
+  assert.ok(revealLesson.references.some(({ path: sourcePath, startLine }) =>
+    sourcePath === "packages/arena-game/test/deadline-closure.test.ts" && startLine === 69,
+  ));
+  assert.ok(scoreLesson.references.some(({ path: sourcePath, startLine }) =>
+    sourcePath === "packages/arena-game/test/deadline-closure.test.ts" && startLine === 23,
+  ));
+  assert.ok(scoreLesson.references.some(({ path: sourcePath, startLine }) =>
+    sourcePath === "packages/arena-game/test/deadline-closure.test.ts" && startLine === 69,
+  ));
+  assert.ok(scoreLesson.references.some(({ path: sourcePath }) => sourcePath === "frontend/src/components/ArenaPage.test.tsx"));
+  assert.ok(scoreLesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "packages/arena-game/src/evaluation-orchestration.ts" && startLine === 472 && endLine === 480,
+  ));
+});
+
+test("tracks planned dispositions and the exact remaining source files", async () => {
+  const repoRoot = process.cwd();
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const data = await buildCatalogData({ repoRoot, learningDir, coverageMap });
+  const lessonIdsByPath = new Map();
+  for (const lesson of coverageMap.lessons) {
+    for (const reference of lesson.references) {
+      const ids = lessonIdsByPath.get(reference.path) ?? [];
+      if (!ids.includes(lesson.id)) ids.push(lesson.id);
+      lessonIdsByPath.set(reference.path, ids);
+    }
+  }
+
+  const taughtByLesson = {
+    "frontend/src/arena/lobby-session.ts": ["0004-lobby-to-match"],
+    "frontend/src/arena/lobby-session.test.ts": ["0004-lobby-to-match"],
+    "frontend/src/components/ArenaPage.test.tsx": ["0003-rounds-and-final-score", "0012-arena-screen"],
+    "packages/arena-game/test/deadline-closure.test.ts": ["0002-reveal-cutoff", "0003-rounds-and-final-score"],
+    "packages/arena-game/test/post-commit-events.test.ts": ["0008-persistence-recovery", "0009-live-connection"],
+    "packages/arena-game/src/worker-judge.ts": ["0001-submit-journey", "0007-judge-boundary"],
+    "packages/arena-game/test/worker-judge.test.ts": ["0007-judge-boundary"],
+    "packages/arena-game/test/container-judge-trust.test.ts": ["0007-judge-boundary"],
+    "services/game/src/game/judge-factory.ts": ["0001-submit-journey", "0007-judge-boundary", "0013-running-the-project"],
+    "services/game/src/game/judge-factory.test.ts": ["0007-judge-boundary", "0013-running-the-project"],
+    "services/judge-worker/src/http-server.ts": ["0013-running-the-project"],
+    "services/judge-worker/src/job-queue.ts": ["0013-running-the-project"],
+    "services/judge-worker/src/main.ts": ["0013-running-the-project"],
+    "services/judge-worker/src/readiness.ts": ["0013-running-the-project"],
+    "services/judge-worker/test/http-server.test.ts": ["0014-rewrite-with-tests"],
+    "services/judge-worker/test/job-queue.test.ts": ["0014-rewrite-with-tests"],
+    "services/judge-worker/test/readiness.test.ts": ["0014-rewrite-with-tests"],
+    "services/judge-worker/test/compose-topology.test.ts": ["0014-rewrite-with-tests"],
+  };
+  const supportingPaths = [
+    "services/judge-worker/Dockerfile",
+    "services/judge-worker/docker-entrypoint.sh",
+    "services/judge-worker/package.json",
+    "services/judge-worker/tsconfig.build.json",
+    "services/judge-worker/tsconfig.json",
+  ];
+  const expectedPendingLessons = {
+    "frontend/src/components/ArenaPage.test.tsx": ["0012-arena-screen"],
+    "packages/arena-game/src/worker-judge.ts": ["0007-judge-boundary"],
+    "services/game/src/game/judge-factory.ts": ["0007-judge-boundary", "0013-running-the-project"],
+  };
+  const expectedRemaining = [
+    "frontend/src/arena/lobby-session.test.ts",
+    "frontend/src/arena/lobby-session.ts",
+    "packages/arena-game/test/container-judge-trust.test.ts",
+    "packages/arena-game/test/post-commit-events.test.ts",
+    "packages/arena-game/test/worker-judge.test.ts",
+    "services/game/src/game/judge-factory.test.ts",
+    "services/judge-worker/docker-entrypoint.sh",
+    "services/judge-worker/Dockerfile",
+    "services/judge-worker/package.json",
+    "services/judge-worker/src/http-server.ts",
+    "services/judge-worker/src/job-queue.ts",
+    "services/judge-worker/src/main.ts",
+    "services/judge-worker/src/readiness.ts",
+    "services/judge-worker/test/compose-topology.test.ts",
+    "services/judge-worker/test/http-server.test.ts",
+    "services/judge-worker/test/job-queue.test.ts",
+    "services/judge-worker/test/readiness.test.ts",
+    "services/judge-worker/tsconfig.build.json",
+    "services/judge-worker/tsconfig.json",
+  ];
+  const expectedRemainingSet = new Set(expectedRemaining);
+
+  assert.deepEqual(data.uncoveredFiles.map(({ path: filePath }) => filePath), expectedRemaining);
+  assert.deepEqual(data.unclassified.map(({ path: filePath }) => filePath), []);
+  for (const [filePath, expectedLessonIds] of Object.entries(taughtByLesson)) {
+    const pendingLessonIds = expectedPendingLessons[filePath] ?? [];
+    const expectedLessonIdsNow = expectedRemainingSet.has(filePath)
+      ? []
+      : expectedLessonIds.filter((id) => !pendingLessonIds.includes(id));
+    assert.deepEqual(lessonIdsByPath.get(filePath) ?? [], expectedLessonIdsNow, `${filePath} has its current lesson disposition`);
+    for (const pendingLessonId of pendingLessonIds) {
+      assert.ok(expectedLessonIds.includes(pendingLessonId), `${pendingLessonId} is a planned lesson disposition`);
+    }
+    if (expectedLessonIdsNow.length === 0) {
+      assert.ok(expectedRemainingSet.has(filePath), `${filePath} is one of the explicitly pending source paths`);
+    }
+  }
+  for (const filePath of supportingPaths) {
+    const supporting = coverageMap.supportingFiles.find((item) => item.path === filePath);
+    if (supporting) {
+      assert.ok(supporting.reason.includes("Lesson 13"), `${filePath} has an explicit build-support reason`);
+    } else {
+      assert.ok(expectedRemainingSet.has(filePath), `${filePath} is pending its explicit build-support reason`);
+    }
+  }
+  assert.ok(coverageMap.scope.excluded.some(({ path: excludedPath, reason }) =>
+    excludedPath === ".codex" && reason === "Agent planning state; it is neither game runtime nor learner course content.",
+  ));
 });

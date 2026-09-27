@@ -1,9 +1,9 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-27 (Match deadline, Lobby, and event-convergence follow-up; module rows intentionally unchanged — team sign-off required)
+Last reviewed: 2026-09-27 (Match deadline, Lobby, event-convergence, and course-refresh review; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
-Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), and production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior.
+Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus Lessons 1–3 of the source-linked learning course. The course refresh changes no subject-module claim.
 
 PIVOT 2026-09-23: the production game is Code Arena (1v1/2v2 code battles) and `09-arena.html` is frozen as its approved interaction reference (see `.scratch/ft-transcendence-wayfinder/decisions-2026-09-23.md` and `.scratch/code-arena/spec.md`). The campus puzzle-race direction, its role/stage/clue mechanics, and the puzzle-specific prototypes below are historical evidence, not the production path. `CONTEXT.md` now carries the Code Arena glossary.
 
@@ -73,15 +73,20 @@ demonstrations but do not complete their full subject criteria.
   the frontend no longer exposes queue entry and clears a recovered waiting
   entry. The existing backend queue remains tested directly as an API.
 - Match deadline handling now rejects Run/Submit at expiry, counts an accepted
-  pre-deadline evaluation only when its durable result settles inside reveal
-  grace (including work owned by another Game process), saves the current
-  Round Reveal and final result, and leaves unplayed Rounds at zero. The UI
-  presents the saved Reveal before the terminal result without a player
-  advancing the Match.
+  pre-deadline Evaluation only when its durable result settles inside reveal
+  grace (including work owned by another Game process), persists the current
+  Round Reveal and terminal `MATCH_COMPLETE` Match state, and leaves unplayed
+  Rounds at zero. The final result is computed from saved Round records; the
+  UI presents the saved Reveal before that result without a player advancing
+  the Match.
 - Match events carry the revision read after commit. Failed Match writes
   publish no event; listener exceptions do not roll back state. Events remain
   transient and reconnect/refresh use the latest snapshot; no outbox or Match
   schema change was introduced.
+- Course refresh (2026-09-27): Lessons 1–3 now distinguish the configured
+  Judge-provider boundary, normal Round Reveal, and terminal Match-deadline
+  path. They link to current source and tests and do not present course
+  content or focused tests as completed subject-module evidence.
 - Verification in this workspace: deadline closure (7 tests), post-commit
   events (2), Lobby reconciliation (6), terminal presentation (2), reconnect
   regression, and the frontend suite (49) pass; frontend lint, workspace

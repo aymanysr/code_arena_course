@@ -46,7 +46,7 @@
             <h3>The Round starts closing</h3>
             <p><code>ArenaEngine.publishReveal()</code> asks <code>RoundLifecycle</code> to set <code>closing</code>, then saves that state. This closes the door to new Submissions, but it does not yet publish a score or change the Match phase.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/engine.ts#L694">Start closing · engine.ts:694</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L743">Start closing · engine.ts:743</a>
               <a href="../../../packages/arena-game/src/round-lifecycle.ts#L73">Set closing flag · round-lifecycle.ts:73</a>
               <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L97">New submissions are rejected · scoring-reveal.test.ts:97</a>
             </div>
@@ -58,7 +58,7 @@
             <h3>Already-running evaluations get a grace window</h3>
             <p>The engine waits for the in-flight Judge promises to settle, or until the configured grace time runs out—whichever happens first. A verdict that settles in time can still become the Round's counted result.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/engine.ts#L699">Find pending work and wait · engine.ts:699</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L751">Find pending work and wait · engine.ts:751</a>
               <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L86">Verdict inside grace counts · scoring-reveal.test.ts:86</a>
             </div>
           </div>
@@ -69,8 +69,8 @@
             <h3>The cutoff separates counted work from late work</h3>
             <p>After the wait, <code>prepareReveal()</code> marks the cutoff and identifies unfinished evaluations. When one returns too late, evaluation orchestration stores it as <code>superseded</code> and does not replace the counted result.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L83">Mark cutoff and pending IDs · round-lifecycle.ts:83</a>
-              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L432">Count only before cutoff · evaluation-orchestration.ts:432</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L84">Mark cutoff and pending IDs · round-lifecycle.ts:84</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L463">Count only before deadline grace and cutoff · evaluation-orchestration.ts:463</a>
               <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L109">Late verdict stays out of score · scoring-reveal.test.ts:109</a>
             </div>
           </div>
@@ -81,10 +81,72 @@
             <h3>The engine freezes and publishes the Reveal</h3>
             <p>It builds scores from the results already counted, creates a frozen snapshot, persists it, then commits it to the Round. Only that final commit moves the Match into the Reveal phase. A later Judge result cannot rewrite the published scores.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/engine.ts#L721">Build and persist snapshot · engine.ts:721</a>
-              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L98">Copy and freeze Reveal data · round-lifecycle.ts:98</a>
-              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L110">Commit and change phase · round-lifecycle.ts:110</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L781">Build and persist snapshot · engine.ts:781</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L120">Copy and freeze Reveal data · round-lifecycle.ts:120</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L132">Commit and change phase · round-lifecycle.ts:132</a>
               <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L122">Published snapshot stays stable · scoring-reveal.test.ts:122</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="deadline-title">
+      <p class="kicker">A separate boundary: the whole Match clock</p>
+      <h2 id="deadline-title">Match deadline closes the Match, not just the current Round</h2>
+      <p class="section-intro">A manual Reveal normally ends one Round and waits for player action before the next. The Match deadline takes a terminal path: the server closes the current Round, saves its Reveal, and commits the Match as <code>MATCH_COMPLETE</code> without waiting for either player.</p>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>At the exact Match deadline, Run and Submit are closed</h3>
+            <p>The first player action after expiry also triggers closure, and the Game service periodically runs <code>sweepExpiredMatches()</code> so an idle Match can finish without a player request. Once closure commits, another sweep has nothing left to do.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L482">Run checks expiry · engine.ts:482</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L552">Submit checks expiry · engine.ts:552</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L1009">Sweep expired Matches · engine.ts:1009</a>
+              <a href="../../../services/game/src/game/game.service.ts#L135">Service drives the sweep · game.service.ts:135</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L11">Exact-deadline actions are rejected once · deadline-closure.test.ts:11</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>Accepted work gets one bounded reveal grace</h3>
+            <p>If a Submission was accepted before the deadline, closure waits only until the absolute cutoff <code>Match deadline + reveal grace</code>. It counts if judging commits within that bound, including when another Game process owns the pending Evaluation. A Submission accepted at or after the deadline cannot start.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L1036">Select pending pre-deadline Submissions · engine.ts:1036</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L1049">Use the absolute grace cutoff · engine.ts:1049</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L1095">Wait for persisted Evaluation status · engine.ts:1095</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L69">Accepted Submit settles within grace · deadline-closure.test.ts:69</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L85">Pending work may belong to another Game process · deadline-closure.test.ts:85</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Late evaluations are excluded; an unstarted Round reveals zero</h3>
+            <p>After the cutoff, unfinished Evaluation results are superseded and cannot change the score. If the clock expires in <code>MATCH_FOUND</code> or <code>ROUND_INTRO</code>, the current Round still gets a zero-score Reveal before terminal completion.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L1115">Finish the expired Round · engine.ts:1115</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L99">Prepare a zero-score deadline Reveal · round-lifecycle.ts:99</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L45">Round Intro gets a zero Reveal · deadline-closure.test.ts:45</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L135">Evaluation after grace stays out · deadline-closure.test.ts:135</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>The saved Reveal and terminal Match state survive reconnect</h3>
+            <p>The server persists the current Round's Reveal and saves the Match as <code>MATCH_COMPLETE</code>. Unplayed Rounds contribute zero to the computed final result. The deadline path emits Reveal before the terminal event, and repeat sweeps do not create a second ending.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L1135">Persist Reveal and complete the Match · engine.ts:1135</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L139">Commit terminal phase · round-lifecycle.ts:139</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L23">Reveal, final totals, and one terminal event · deadline-closure.test.ts:23</a>
+              <a href="../../../packages/arena-game/test/deadline-closure.test.ts#L155">No second grace wait after its cutoff · deadline-closure.test.ts:155</a>
             </div>
           </div>
         </li>
