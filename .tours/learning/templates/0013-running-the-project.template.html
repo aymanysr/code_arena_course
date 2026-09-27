@@ -46,6 +46,8 @@
         <dd>“Is this process answering?” The current <code>/health</code> route reports process/model information; it does not prove the application is ready to serve gameplay.</dd>
         <dt class="mt-1">Readiness</dt>
         <dd>“Can required dependencies be reached?” The current <code>/ready</code> route checks TCP reachability for PostgreSQL and Redis. It is a separate route, not a gameplay test.</dd>
+        <dt class="mt-1">Judge Worker readiness</dt>
+        <dd>The worker readiness checks Docker and required images through its separate <code>/ready</code> route. Game's health/readiness routes check Game dependencies instead.</dd>
       </dl>
     </section>
 
@@ -86,9 +88,19 @@
           <span class="step-number" aria-hidden="true">03</span>
           <div>
             <h3>Compose builds the local service stack—but not the whole game</h3>
-            <p>The Compose comment gives the setup order: create self-signed localhost certificates, copy <code>.env.example</code> to the ignored <code>.env</code>, then start Compose. The listed services are PostgreSQL, Redis, Core, Game, Chat, and Nginx. Only Nginx publishes ports 80 and 443. This Compose file has no frontend container and no Judge container; do not infer either one from the presence of build scripts or Judge settings.</p>
+            <p>The Compose comment gives the setup order: create self-signed localhost certificates, copy <code>.env.example</code> to the ignored <code>.env</code>, then start Compose. The services include PostgreSQL, Redis, Core, Game, the Judge Worker, the deferred Chat skeleton, and Nginx. Only Nginx publishes ports 80 and 443; there is no frontend container. Compose sets <code>JUDGE_BACKEND=worker</code> and the Game-side <code>WorkerJudgeAdapter</code> sends requests to <code>JUDGE_WORKER_URL=http://judge-worker:3010</code> over the internal judge network. The worker runs <code>ContainerJudge</code>. Compose mounts the Docker socket into the Judge Worker only. Local direct Game runs default to <code>ContainerJudge</code>; optional Judge0 is another explicitly configured provider.</p>
+            <p class="mt-1">The worker requires <code>JUDGE_WORKER_TOKEN</code>; the value in <code>.env.example</code> is only a placeholder. <code>JUDGE_WORKER_TIMEOUT_MS</code> is 930000 ms. Worker defaults are <code>JUDGE_WORKER_CONCURRENCY=2</code>, <code>JUDGE_WORKER_MAX_QUEUE=8</code>, <code>JUDGE_WORKER_QUEUE_TIMEOUT_MS=30000</code>, and <code>JUDGE_WORKER_JOB_TIMEOUT_MS=900000</code>. Its entrypoint prepares missing judge images. <code>/health</code> is liveness; worker readiness checks Docker and required images through <code>/ready</code>, and Compose waits for that readiness before starting Game. These values describe local Compose configuration, not a production capacity claim.</p>
+            <p class="mt-1">The internal network keeps the worker off the public path: Nginx does not publish or proxy the worker. The Docker socket grants daemon-level authority, so a private Compose network is not proof that running hostile code is safe or isolated from the host.</p>
             <div class="source-links">
               <a href="../../../docker-compose.yml#L1">Local Compose startup and intentional omissions · docker-compose.yml:1</a>
+              <a href="../../../docker-compose.yml#L57">Judge Worker service, bounded queue, socket mount, and readiness check · docker-compose.yml:57</a>
+              <a href="../../../docker-compose.yml#L85">Compose configures Game to use the internal worker · docker-compose.yml:85</a>
+              <a href="../../../services/game/src/game/judge-factory.ts#L19">Game backend selection and no-fallback rule · judge-factory.ts:19</a>
+              <a href="../../../services/judge-worker/src/main.ts#L21">Worker configuration, ContainerJudge, queue, and listener · main.ts:21</a>
+              <a href="../../../services/judge-worker/src/http-server.ts#L183">Worker HTTP endpoints and liveness/readiness routes · http-server.ts:183</a>
+              <a href="../../../services/judge-worker/src/job-queue.ts#L22">Bounded active work and waiting queue settings · job-queue.ts:22</a>
+              <a href="../../../services/judge-worker/src/readiness.ts#L31">Readiness checks Docker and every configured image · readiness.ts:31</a>
+              <a href="../../../infra/nginx/nginx.conf#L19">Public proxy routes omit the internal worker · nginx.conf:19</a>
               <a href="../../../docker-compose.yml#L95">Nginx is the only published service · docker-compose.yml:95</a>
               <a href="../../../scripts/gen-dev-certs.sh#L2">Local-only self-signed TLS certificate generation · gen-dev-certs.sh:2</a>
               <a href="../../../.env.example#L1">Safe placeholder settings and internal ports · .env.example:1</a>

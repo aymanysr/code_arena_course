@@ -43,10 +43,15 @@
           <span class="step-number" aria-hidden="true">01</span>
           <div>
             <h3>The Game chooses the judge; the interface only defines execution</h3>
-            <p><code>GameJudge</code> has two jobs: run visible tests and evaluate sealed groups. It owns no Match state, score counting, or Reveal. The Game service currently defaults to <code>ContainerJudge</code>; <code>JUDGE_BACKEND=judge0</code> selects the optional Judge0 adapter, which requires its configured URL. It does not silently switch providers.</p>
+            <p><code>GameJudge</code> is an execution-only boundary: Game authorizes Run/Submit, selects hidden groups, owns Match rules and durable Evaluation records, and counts score; the Judge runs visible tests or evaluates those sealed groups. Game selects exactly one provider at startup: direct <code>ContainerJudge</code> by default, <code>WorkerJudgeAdapter</code> when configured with <code>JUDGE_BACKEND=worker</code>, or optional Judge0. Compose chooses the worker; provider failures never trigger fallback.</p>
+            <p class="mt-1"><code>WorkerJudgeAdapter</code> sends bearer-authenticated requests to the internal worker, validates result shapes and case identity, and maps transport/response failures to <code>JudgeInfraError</code>. The worker runs <code>ContainerJudge</code>; neither adapter owns Match state or scoring.</p>
             <div class="source-links">
               <a href="../../../packages/arena-game/src/judge.ts#L107">Execution-only contract · judge.ts:107</a>
               <a href="../../../services/game/src/game/game.service.ts#L145">Default ContainerJudge and optional Judge0 wiring · game.service.ts:145</a>
+              <a href="../../../services/game/src/game/judge-factory.ts#L21">Select exactly one configured provider; no fallback · judge-factory.ts:21</a>
+              <a href="../../../packages/arena-game/src/worker-judge.ts#L68">WorkerJudgeAdapter auth, response validation, and error mapping · worker-judge.ts:68</a>
+              <a href="../../../packages/arena-game/test/worker-judge.test.ts#L82">Worker failure stays an infrastructure error; no other provider is tried · worker-judge.test.ts:82</a>
+              <a href="../../../services/game/src/game/judge-factory.test.ts#L32">Unsupported provider fails closed · judge-factory.test.ts:32</a>
               <a href="../../../packages/arena-game/src/container-judge.ts#L196">Visible and sealed methods share the adapter · container-judge.ts:196</a>
               <a href="../../../packages/arena-game/src/judge0.ts#L88">Judge0 stays behind the same interface · judge0.ts:88</a>
             </div>

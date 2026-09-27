@@ -62,6 +62,11 @@
             <tr><th scope="row">Browser E2E</th><td>A tested client journey across UI, transport, and services</td><td>Untested states, all environments, or every security property</td></tr>
             <tr><th scope="row">PostgreSQL</th><td>Database transaction, restart, claim, and cross-process scenarios</td><td>Anything in a test that was skipped or used only an in-memory store</td></tr>
             <tr><th scope="row">Docker Judge</th><td>Actual process/resource/network/filesystem controls exercised by the test</td><td>All attacks, or hidden-case secrecy unless a test reaches and proves that boundary</td></tr>
+            <tr><th scope="row">WorkerJudgeAdapter unit tests</th><td>Bearer auth, response shape/case identity, timeout/error mapping, and explicit provider selection with controlled transports</td><td>A listening worker, a live Compose stack, or container isolation</td></tr>
+            <tr><th scope="row">Judge Worker service tests</th><td>HTTP authentication and dispatch, bounded queue behavior, and Docker/image readiness seams</td><td>HTTP cases whose test server cannot bind, or a real Docker execution</td></tr>
+            <tr><th scope="row">Compose topology test</th><td>Static checks for the internal network, socket ownership, provider wiring, and secret placement</td><td>Starting Compose or observing its runtime health</td></tr>
+            <tr><th scope="row">ContainerJudge fake-runner trust tests</th><td>Response parsing, output limits, and per-case Docker arguments through a fake Docker executable</td><td>A real container or proof of hostile-code isolation</td></tr>
+            <tr><th scope="row">Container security tests</th><td>Actual resource, filesystem, and network attacks when the Docker-backed suite runs</td><td>Hidden-case confidentiality unless that boundary is tested directly</td></tr>
           </tbody>
         </table>
       </div>
@@ -93,6 +98,21 @@
         <a href="../../../frontend/e2e/collab-reconnect.spec.ts#L270">Browser source: process/Postgres restart Scenario E; can kill the service on TCP 3220 · collab-reconnect.spec.ts:270</a>
         <a href="../../../packages/arena-game/test/postgres.test.ts#L384">Postgres restart and replay scenarios · postgres.test.ts:384</a>
         <a href="../../../packages/arena-game/test/judge-security.test.ts#L15">Real Docker sandbox test matrix · judge-security.test.ts:15</a>
+        <a href="0007-judge-boundary.html#trace">Open Lesson 7 for the provider, WorkerJudgeAdapter, and fake-runner test code</a>
+        <a href="../../../services/judge-worker/test/http-server.test.ts#L90">Judge Worker service tests · http-server.test.ts:90</a>
+        <a href="../../../services/judge-worker/test/job-queue.test.ts#L28">Bounded queue service tests · job-queue.test.ts:28</a>
+        <a href="../../../services/judge-worker/test/readiness.test.ts#L5">Docker/image readiness service test · readiness.test.ts:5</a>
+        <a href="../../../services/judge-worker/test/compose-topology.test.ts#L27">Compose topology test · compose-topology.test.ts:27</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="judge-run-title">
+      <h2 id="judge-run-title">Current focused Judge-worker test run</h2>
+      <div class="card">
+        <p>Command run for this lesson update:</p>
+        <p class="mt-1"><code>npx vitest run packages/arena-game/test/worker-judge.test.ts packages/arena-game/test/container-judge-trust.test.ts services/game/src/game/judge-factory.test.ts services/judge-worker/test/*.test.ts</code></p>
+        <p class="mt-1">Twenty tests passed across the WorkerJudgeAdapter (4), fake-runner ContainerJudge trust (5), Game provider factory (3), bounded queue (4), readiness (1), and static Compose topology (3) suites.</p>
+        <p class="mt-1">The six Judge Worker HTTP API cases could not complete: the test fixture's loopback listener failed with <code>listen EPERM 127.0.0.1</code>, and Vitest then reported those cases as timed out. They are environment-blocked, not passing evidence. The static Compose test did not start Compose; the fake-runner tests did not execute real Docker jobs. No Docker-backed sandbox matrix ran.</p>
       </div>
     </section>
 
@@ -178,7 +198,7 @@
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson synthesizes source and dated evidence; it ran no Game-service, PostgreSQL, Docker Judge, or Playwright suite. Nothing here establishes parity in a separate rewrite or changes 42-subject sign-off.</p>
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson includes a focused provider/worker test run with the HTTP listener limitation recorded above; it ran no PostgreSQL, real Docker Judge, or Playwright suite. Nothing here establishes parity in a separate rewrite or changes 42-subject sign-off.</p>
     </footer>
   </main>
 </body>

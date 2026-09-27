@@ -263,7 +263,12 @@
         { "path": "packages/arena-game/test/judge0.test.ts", "startLine": 60, "endLine": 104, "label": "Mock HTTP-client mapping and failure cases" },
         { "path": "spikes/judge-isolation/DECISION.md", "startLine": 1, "endLine": 25, "label": "Historical sandbox mechanism decision" },
         { "path": "spikes/judge-isolation/DECISION.md", "startLine": 27, "endLine": 40, "label": "Measured spike claims and limitations" },
-        { "path": "spikes/judge-isolation/results.md", "startLine": 1, "endLine": 36, "label": "Historical Linux/aarch64 measurements, not a current rerun" }
+        { "path": "spikes/judge-isolation/results.md", "startLine": 1, "endLine": 36, "label": "Historical Linux/aarch64 measurements, not a current rerun" },
+        {"path":"services/game/src/game/judge-factory.ts","startLine":19,"endLine":40,"label":"Select one explicitly configured provider at startup; no provider fallback"},
+        {"path":"services/game/src/game/judge-factory.test.ts","startLine":12,"endLine":36,"label":"Backend selection and fail-closed configuration tests"},
+        {"path":"packages/arena-game/src/worker-judge.ts","startLine":68,"endLine":159,"label":"Bearer-authenticated worker adapter validates result shape/case identity and maps transport failures"},
+        {"path":"packages/arena-game/test/worker-judge.test.ts","startLine":28,"endLine":130,"label":"Worker adapter request, response-validation, and no-fallback unit tests"},
+        { "path": "packages/arena-game/test/container-judge-trust.test.ts", "startLine": 31, "endLine": 169, "label": "Fake-Docker tests for trusted runner output and per-case argument boundaries" }
       ]
     },
     {
@@ -498,7 +503,14 @@
         { "path": "services/game/src/game/game.module.ts", "startLine": 11, "endLine": 26, "label": "Game registers Match, Lobby, collaboration, chat, and development identity adapters" },
         { "path": "services/game/src/health.controller.ts", "startLine": 21, "endLine": 36, "label": "Game liveness and database/Redis reachability endpoints" },
         { "path": "services/game/src/main.ts", "startLine": 1, "endLine": 13, "label": "Game Nest bootstrap and local CORS setting" },
-        { "path": "services/game/tsconfig.json", "startLine": 1, "endLine": 14, "label": "Game TypeScript compiler and decorator metadata configuration" }
+        { "path": "services/game/tsconfig.json", "startLine": 1, "endLine": 14, "label": "Game TypeScript compiler and decorator metadata configuration" },
+        {"path":"services/game/src/game/judge-factory.ts","startLine":19,"endLine":40,"label":"Direct local ContainerJudge default and explicit worker/Judge0 provider selection"},
+        {"path":"services/game/src/game/judge-factory.test.ts","startLine":12,"endLine":36,"label":"Provider configuration and no-fallback test evidence"},
+        {"path":"docker-compose.yml","startLine":57,"endLine":115,"label":"Private Judge Worker network, socket mount, bounded queue, readiness, and Game dependency"},
+        {"path":"services/judge-worker/src/http-server.ts","startLine":183,"endLine":252,"label":"Internal HTTP API, bearer-authenticated dispatch, and health/readiness routes"},
+        {"path":"services/judge-worker/src/job-queue.ts","startLine":22,"endLine":134,"label":"Bounded active jobs and waiting queue with timeout behavior"},
+        {"path":"services/judge-worker/src/main.ts","startLine":21,"endLine":55,"label":"Worker configuration, ContainerJudge, queue wiring, listener, and shutdown"},
+        { "path": "services/judge-worker/src/readiness.ts", "startLine": 31, "endLine": 74, "label": "Readiness requires the Docker daemon and each configured judge image" }
       ]
     },
     {
@@ -545,7 +557,11 @@
         { "path": "frontend/e2e/collab-reconnect.spec.ts", "startLine": 270, "endLine": 377, "label": "Scenario E process/Postgres restart source; not run here and may kill the listener on TCP 3220" },
         { "path": "packages/arena-game/test/postgres.test.ts", "startLine": 384, "endLine": 399, "label": "PostgreSQL restart/replay integration source; environment-dependent and not run here" },
         { "path": "packages/arena-game/test/judge-security.test.ts", "startLine": 15, "endLine": 51, "label": "Real Docker sandbox attack tests; historical result and unresolved case-confidentiality caveat are separate" },
-        { "path": "packages/arena-game/test/collab.test.ts", "startLine": 547, "endLine": 610, "label": "PostgreSQL rollback test source; not run here and truncates test tables" }
+        { "path": "packages/arena-game/test/collab.test.ts", "startLine": 547, "endLine": 610, "label": "PostgreSQL rollback test source; not run here and truncates test tables" },
+        {"path":"services/judge-worker/test/http-server.test.ts","startLine":90,"endLine":193,"label":"Worker API auth, payload bounds, sealed responses, readiness, and queue mapping"},
+        {"path":"services/judge-worker/test/job-queue.test.ts","startLine":28,"endLine":87,"label":"Concurrency, bounded queue, queue timeout, and execution timeout tests"},
+        {"path":"services/judge-worker/test/readiness.test.ts","startLine":5,"endLine":46,"label":"Docker daemon and configured-image readiness recovery test"},
+        { "path": "services/judge-worker/test/compose-topology.test.ts", "startLine": 27, "endLine": 86, "label": "Static Compose assertions for worker isolation, socket ownership, and backend wiring" }
       ]
     }
   ],
@@ -593,6 +609,26 @@
     {
       "path": "spikes/judge-isolation/spike.sh",
       "reason": "Runs the isolated Judge experiment only; it is not production execution behavior or a parity gate."
+    },
+    {
+      "path": "services/judge-worker/Dockerfile",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson."
+    },
+    {
+      "path": "services/judge-worker/docker-entrypoint.sh",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson."
+    },
+    {
+      "path": "services/judge-worker/package.json",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson."
+    },
+    {
+      "path": "services/judge-worker/tsconfig.build.json",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson."
+    },
+    {
+      "path": "services/judge-worker/tsconfig.json",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson."
     }
   ]
 }

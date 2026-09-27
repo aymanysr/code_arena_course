@@ -888,6 +888,23 @@ test("renders the Judge-boundary lesson's source links into the local preview", 
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fjudge\.ts&amp;line=107"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fcontainer-judge\.ts&amp;line=260"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fjudge-security\.test\.ts&amp;line=191"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fworker-judge\.ts&amp;line=68"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory\.ts&amp;line=21"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fworker-judge\.test\.ts&amp;line=82"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory\.test\.ts&amp;line=32"/);
+  for (const sourcePath of [
+    "packages/arena-game/src/worker-judge.ts",
+    "packages/arena-game/test/worker-judge.test.ts",
+    "services/game/src/game/judge-factory.ts",
+    "services/game/src/game/judge-factory.test.ts",
+  ]) {
+    assert.ok(lesson.references.some(({ path: referencePath }) => referencePath === sourcePath),
+      `Lesson 7 maps ${sourcePath}`);
+  }
+  assert.match(template, /WorkerJudgeAdapter/);
+  assert.match(template, /JUDGE_BACKEND=worker/);
+  assert.match(template, /provider failures never trigger fallback/);
+  assert.match(template, /validates.*case identity/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=spikes%2Fjudge-isolation%2FDECISION\.md&amp;line=1"/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:packages|services|spikes)\//);
 });
@@ -1137,9 +1154,15 @@ test("renders the local-runtime lesson with honest service roles and setup links
     "services/game/package.json",
     "services/game/src/app.module.ts",
     "services/game/src/game/game.module.ts",
+    "services/game/src/game/judge-factory.ts",
+    "services/game/src/game/judge-factory.test.ts",
     "services/game/src/health.controller.ts",
     "services/game/src/main.ts",
     "services/game/tsconfig.json",
+    "services/judge-worker/src/http-server.ts",
+    "services/judge-worker/src/job-queue.ts",
+    "services/judge-worker/src/main.ts",
+    "services/judge-worker/src/readiness.ts",
   ];
   for (const sourcePath of expectedSetupPaths) {
     assert.ok(lesson.references.some(({ path: referencePath }) => referencePath === sourcePath),
@@ -1156,8 +1179,24 @@ test("renders the local-runtime lesson with honest service roles and setup links
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=docker-compose\.yml&amp;line=1"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fgame\.module\.ts&amp;line=11"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fchat%2Fsrc%2Fhealth\.controller\.ts&amp;line=21"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Fsrc%2Fhttp-server\.ts&amp;line=183"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Fsrc%2Fjob-queue\.ts&amp;line=22"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory\.ts&amp;line=19"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Fsrc%2Freadiness\.ts&amp;line=31"/);
   assert.match(template, /deferred Chat skeleton/);
-  assert.match(template, /no frontend container and no Judge container/);
+  assert.match(template, /no frontend container/);
+  assert.match(template, /Compose sets <code>JUDGE_BACKEND=worker<\/code>/);
+  assert.match(template, /WorkerJudgeAdapter/);
+  assert.match(template, /JUDGE_WORKER_URL/);
+  assert.match(template, /JUDGE_WORKER_TOKEN/);
+  assert.match(template, /JUDGE_WORKER_TIMEOUT_MS/);
+  assert.match(template, /JUDGE_WORKER_CONCURRENCY/);
+  assert.match(template, /JUDGE_WORKER_MAX_QUEUE/);
+  assert.match(template, /JUDGE_WORKER_QUEUE_TIMEOUT_MS/);
+  assert.match(template, /JUDGE_WORKER_JOB_TIMEOUT_MS/);
+  assert.match(template, /Docker socket into the Judge Worker only/);
+  assert.match(template, /worker readiness checks Docker and required images/);
+  assert.match(template, /Nginx does not publish or proxy the worker/);
   assert.match(template, /uses HTTP for local connections.*not evidence.*HTTPS requirement/);
   assert.match(template, /Never copy real secrets/);
   assert.match(template, /href="0012-arena-screen\.html"/);
@@ -1185,6 +1224,10 @@ test("renders the test-evidence capstone and disposes every remaining source pat
     "packages/arena-game/test/cross-isolation.test.ts",
     "packages/arena-game/test/evaluation-telemetry.test.ts",
     "packages/arena-game/test/lobby-atomic.test.ts",
+    "services/judge-worker/test/http-server.test.ts",
+    "services/judge-worker/test/job-queue.test.ts",
+    "services/judge-worker/test/readiness.test.ts",
+    "services/judge-worker/test/compose-topology.test.ts",
     "packages/arena-game/test/scripted-judge.ts",
     "packages/arena-game/test/setup.ts",
     "packages/arena-harness/src/fake-judge.ts",
@@ -1226,12 +1269,24 @@ test("renders the test-evidence capstone and disposes every remaining source pat
   assert.match(rendered, /data-lesson-id="0014-rewrite-with-tests"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-harness%2Fsrc%2Ffake-judge\.ts&amp;line=1"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fservice\.test\.ts&amp;line=57"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Ftest%2Fhttp-server\.test\.ts&amp;line=90"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Ftest%2Fjob-queue\.test\.ts&amp;line=28"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Ftest%2Freadiness\.test\.ts&amp;line=5"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fjudge-worker%2Ftest%2Fcompose-topology\.test\.ts&amp;line=27"/);
+  assert.match(rendered, /href="0007-judge-boundary\.html#trace"/);
+  assert.match(rendered, /Twenty tests passed across the WorkerJudgeAdapter/);
+  assert.match(rendered, /listen EPERM 127\.0\.0\.1/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Fcollab-reconnect\.spec\.ts&amp;line=270"/);
   assert.match(rendered, /href="\.\.\/\.\.\/\.\.\/prototype\/game-ui\/42-subject-compliance\.md#L60"/);
   assert.match(rendered, /href="\.\.\/\.\.\/\.\.\/prototype\/game-ui\/42-subject-compliance\.md#L237"/);
   assert.doesNotMatch(rendered, /source-map\.html\?file=prototype%2Fgame-ui%2F42-subject-compliance\.md/);
   assert.match(rendered, /PASS only when the equivalent test in your rewrite ran and passed/);
   assert.match(rendered, /PostgreSQL-only proofs were skipped/);
+  assert.match(template, /WorkerJudgeAdapter unit tests/);
+  assert.match(template, /Judge Worker service tests/);
+  assert.match(template, /Compose topology test/);
+  assert.match(template, /Container security tests/);
+  assert.match(template, /npx vitest run packages\/arena-game\/test\/worker-judge\.test\.ts packages\/arena-game\/test\/container-judge-trust\.test\.ts services\/game\/src\/game\/judge-factory\.test\.ts services\/judge-worker\/test\/\*\.test\.ts/);
   assert.match(rendered, /does not establish hidden-case confidentiality/);
   assert.match(rendered, /42-subject-compliance\.md/);
   assert.match(rendered, /team sign-off/);
@@ -1587,28 +1642,8 @@ test("tracks planned dispositions and the exact remaining source files", async (
     "services/judge-worker/tsconfig.build.json",
     "services/judge-worker/tsconfig.json",
   ];
-  const expectedPendingLessons = {
-    "packages/arena-game/src/worker-judge.ts": ["0007-judge-boundary"],
-    "services/game/src/game/judge-factory.ts": ["0007-judge-boundary", "0013-running-the-project"],
-  };
-  const expectedRemaining = [
-    "packages/arena-game/test/container-judge-trust.test.ts",
-    "packages/arena-game/test/worker-judge.test.ts",
-    "services/game/src/game/judge-factory.test.ts",
-    "services/judge-worker/docker-entrypoint.sh",
-    "services/judge-worker/Dockerfile",
-    "services/judge-worker/package.json",
-    "services/judge-worker/src/http-server.ts",
-    "services/judge-worker/src/job-queue.ts",
-    "services/judge-worker/src/main.ts",
-    "services/judge-worker/src/readiness.ts",
-    "services/judge-worker/test/compose-topology.test.ts",
-    "services/judge-worker/test/http-server.test.ts",
-    "services/judge-worker/test/job-queue.test.ts",
-    "services/judge-worker/test/readiness.test.ts",
-    "services/judge-worker/tsconfig.build.json",
-    "services/judge-worker/tsconfig.json",
-  ];
+  const expectedPendingLessons = {};
+  const expectedRemaining = [];
   const expectedRemainingSet = new Set(expectedRemaining);
 
   assert.deepEqual(data.uncoveredFiles.map(({ path: filePath }) => filePath), expectedRemaining);
@@ -1630,6 +1665,8 @@ test("tracks planned dispositions and the exact remaining source files", async (
     const supporting = coverageMap.supportingFiles.find((item) => item.path === filePath);
     if (supporting) {
       assert.ok(supporting.reason.includes("Lesson 13"), `${filePath} has an explicit build-support reason`);
+      assert.ok(supporting.reason.includes("Compose/runtime anchors"), `${filePath} is supported by Lesson 13's Compose/runtime topology`);
+      assert.ok(supporting.reason.includes("supporting build configuration"), `${filePath} remains build configuration, not a second behavior lesson`);
     } else {
       assert.ok(expectedRemainingSet.has(filePath), `${filePath} is pending its explicit build-support reason`);
     }

@@ -178,7 +178,7 @@ renderCatalogOutputs(
 - Consumes: current `buildCatalogData()` file statuses and `formatAuditReport()` output.
 - Produces: exact test expectations for the 23 initially uncovered files, one `.codex` exclusion, and the affected lesson IDs that Tasks 2-5 must satisfy.
 
-- [ ] **Step 1: Add the repository drift fixture to a failing end-state test.** Capture these exact paths as the current diagnostic input, then assert that the completed catalog maps each path to the disposition matrix in Step 3 and leaves `uncovered` empty. The disposition assertion provides the initial failure:
+- [x] **Step 1: Add the repository drift fixture to a failing end-state test.** Capture these exact paths as the current diagnostic input, then assert that the completed catalog maps each path to the disposition matrix in Step 3 and leaves `uncovered` empty. The disposition assertion provides the initial failure:
 
 ```js
 assert.deepEqual(uncovered, [
@@ -209,8 +209,8 @@ assert.deepEqual(uncovered, [
 assert.deepEqual(data.unclassified.map(({ path }) => path), [".codex/PLAN.md"]);
 ```
 
-- [ ] **Step 2: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: the new end-state assertions fail because the new paths have no dispositions.
-- [ ] **Step 3: Add the intended disposition matrix to the test.** Require taught references for:
+- [x] **Step 2: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: the new end-state assertions fail because the new paths have no dispositions.
+- [x] **Step 3: Add the intended disposition matrix to the test.** Require taught references for:
 
 ```js
 const taughtByLesson = {
@@ -236,8 +236,8 @@ const taughtByLesson = {
 ```
 
 Require explicit support-only reasons for the worker Dockerfile, entrypoint, package manifest, and both TypeScript configuration files. The reason must state that Lesson 13 teaches the service topology through the Compose/runtime anchors while these files are supporting build configuration.
-- [ ] **Step 4: Add `.codex` to `scope.excluded`.** Use the reason: `Agent planning state; it is neither game runtime nor learner course content.`
-- [ ] **Step 5: Verify RED before adding lesson dispositions.** The initial end-state assertion must fail with the 23 uncovered paths. As Tasks 2-5 land, update its exact `expectedRemaining` list and explicitly pending cross-lesson references; Task 1 stays open until the final expected uncovered list is empty.
+- [x] **Step 4: Add `.codex` to `scope.excluded`.** Use the reason: `Agent planning state; it is neither game runtime nor learner course content.`
+- [x] **Step 5: Verify RED before adding lesson dispositions.** The initial end-state assertion must fail with the 23 uncovered paths. As Tasks 2-5 land, update its exact `expectedRemaining` list and explicitly pending cross-lesson references; Task 1 stays open until the final expected uncovered list is empty. Final catalog gate: 0 uncovered and 0 unclassified.
 - [x] **Step 6: Commit the catalog gate with the first semantic lesson change.** The staged gate checks the exact known remaining paths so each later task keeps the full course suite green. Commit it with Task 2 as `docs(course): teach deadline closure and final reveal`; finish Task 1's zero-uncovered assertion with Task 5.
 
 ### Task 2: Refresh deadline, Reveal, and final-result teaching
@@ -339,7 +339,7 @@ npx vitest run packages/arena-game/test/post-commit-events.test.ts packages/aren
 ```
 
 Expected: in-memory/frontend cases pass; service cases that require restricted sockets or Postgres must be reported as environment-gated rather than claimed as passing. This workspace: 29 tests passed; all 10 real-socket/Postgres service scenarios were skipped after the service failed to boot (`service did not boot`).
-- [ ] **Step 8: Run course tests and commit.** `node --test .tours/learning/scripts/build-catalog.test.mjs` passes 40/40. Commit `docs(course): teach committed events and terminal presentation`.
+- [x] **Step 8: Run course tests and commit.** `node --test .tours/learning/scripts/build-catalog.test.mjs` passes 40/40. Commit `9e4b6d5 docs(course): teach committed events and terminal presentation`.
 
 ### Task 5: Refresh Judge worker, runtime topology, and rewrite evidence
 
@@ -357,11 +357,11 @@ Expected: in-memory/frontend cases pass; service cases that require restricted s
 - Consumes: the `GameJudge` contract, startup-only provider selection, `WorkerJudgeAdapter`, and Judge worker HTTP/job queue boundaries.
 - Produces: current Judge boundary and operations lessons with exact evidence limits and full dispositions for the remaining new files.
 
-- [ ] **Step 1: Add failing provider/topology assertions.** Require Lesson 7 to distinguish `ContainerJudge`, `WorkerJudgeAdapter`, and Judge0 without fallback. Require Lesson 13 to list the Judge worker service and its health/startup boundary. Require Lesson 14 to cite worker adapter, queue, readiness, HTTP, and Compose topology tests as separate evidence classes.
-- [ ] **Step 2: Run the course test.** Expected: FAIL because the lessons predate the worker service.
-- [ ] **Step 3: Update Lesson 7's boundary trace.** Teach that Game owns authorization, hidden-group selection, scoring, and durable Evaluation state; `WorkerJudgeAdapter` authenticates to one configured worker endpoint, validates response shape and case identity, converts transport failures to `JudgeInfraError`, and never falls back to a different provider.
-- [ ] **Step 4: Update Lesson 13's runtime topology.** Teach the local in-process container default separately from Compose's Game -> Judge worker HTTP path. Cover `JUDGE_BACKEND`, `JUDGE_WORKER_URL`, token, timeout, worker readiness, bounded queue, Docker socket access, and Nginx's external routing. Keep the separate Chat container labeled startup/health scaffolding when that remains current.
-- [ ] **Step 5: Update Lesson 14's evidence table.** Separate:
+- [x] **Step 1: Add failing provider/topology assertions.** Require Lesson 7 to distinguish `ContainerJudge`, `WorkerJudgeAdapter`, and Judge0 without fallback. Require Lesson 13 to list the Judge worker service and its health/startup boundary. Require Lesson 14 to cite worker adapter, queue, readiness, HTTP, and Compose topology tests as separate evidence classes.
+- [x] **Step 2: Run the course test.** Expected: FAIL because the lessons predate the worker service.
+- [x] **Step 3: Update Lesson 7's boundary trace.** Teach that Game owns authorization, hidden-group selection, scoring, and durable Evaluation state; `WorkerJudgeAdapter` authenticates to one configured worker endpoint, validates response shape and case identity, converts transport failures to `JudgeInfraError`, and never falls back to a different provider.
+- [x] **Step 4: Update Lesson 13's runtime topology.** Teach the local in-process container default separately from Compose's Game -> Judge worker HTTP path. Cover `JUDGE_BACKEND`, `JUDGE_WORKER_URL`, token, timeout, worker readiness, bounded queue, Docker socket access, and Nginx's external routing. Keep the separate Chat container labeled startup/health scaffolding when that remains current.
+- [x] **Step 5: Update Lesson 14's evidence table.** Separate:
 
 ```text
 Pure adapter tests: request authentication, timeout/failure mapping, response validation.
@@ -371,16 +371,16 @@ Service/Postgres/browser tests: environment-dependent integration evidence.
 ```
 
 Record exact commands and observed results from this implementation run. Do not carry historical pass counts forward as current results.
-- [ ] **Step 6: Add all remaining dispositions.** Link behavior-bearing worker files to Lessons 7, 13, or 14 using the matrix in Task 1. Mark only the Dockerfile, entrypoint, package manifest, and two `tsconfig` files support-only with the agreed runtime-build reason.
-- [ ] **Step 7: Review Lesson 11.** Confirm its chat sources remain unchanged and current; keep it out of `--reviewed-lessons` unless a referenced file actually drifted.
-- [ ] **Step 8: Run focused tests.** Run:
+- [x] **Step 6: Add all remaining dispositions.** Link behavior-bearing worker files to Lessons 7, 13, or 14 using the matrix in Task 1. Mark only the Dockerfile, entrypoint, package manifest, and two `tsconfig` files support-only with the agreed runtime-build reason.
+- [x] **Step 7: Review Lesson 11.** Confirm its chat sources remain unchanged and current; keep it out of `--reviewed-lessons` unless a referenced file actually drifted. The audit shows no Lesson 11 impact.
+- [x] **Step 8: Run focused tests.** Run:
 
 ```sh
 npx vitest run packages/arena-game/test/worker-judge.test.ts packages/arena-game/test/container-judge-trust.test.ts services/game/src/game/judge-factory.test.ts services/judge-worker/test/*.test.ts
 ```
 
 Expected: pure tests pass; any host-network or Docker restriction is recorded beside the exact skipped command.
-- [ ] **Step 9: Run course tests and commit.** Commit `docs(course): teach judge worker boundaries`.
+- [x] **Step 9: Run course tests and commit.** The catalog suite passes 40/40 and reports 0 uncovered and 0 unclassified source files. Commit `docs(course): teach judge worker boundaries`.
 
 ### Task 6: Repair CodeTours and accept one reviewed implementation snapshot
 

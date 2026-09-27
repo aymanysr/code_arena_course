@@ -1,9 +1,9 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-27 (Match deadline, Lobby, event-convergence, and course-refresh review; module rows intentionally unchanged — team sign-off required)
+Last reviewed: 2026-09-27 (Match deadline, Lobby, event-convergence, and source-linked course review; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
-Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus Lessons 1–4, 8–9, and 12 of the source-linked learning course. The course refresh changes no subject-module claim.
+Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus the source-linked learning-course review for Lessons 1–14. Lesson 11's current chat sources were reviewed and required no refresh. Course content and focused tests do not change a subject-module claim.
 
 PIVOT 2026-09-23: the production game is Code Arena (1v1/2v2 code battles) and `09-arena.html` is frozen as its approved interaction reference (see `.scratch/ft-transcendence-wayfinder/decisions-2026-09-23.md` and `.scratch/code-arena/spec.md`). The campus puzzle-race direction, its role/stage/clue mechanics, and the puzzle-specific prototypes below are historical evidence, not the production path. `CONTEXT.md` now carries the Code Arena glossary.
 
@@ -97,6 +97,14 @@ demonstrations but do not complete their full subject criteria.
   its component tests assert initial markup rather than the action click. These
   source links and test limits do not change the approved product scope or a
   subject-module claim.
+- Lesson 7 now separates Game authority, explicit provider selection, and the
+  WorkerJudgeAdapter contract. Lesson 13 documents direct local ContainerJudge
+  versus Compose's internal Judge Worker, including socket ownership,
+  readiness, and bounded queue configuration. Lesson 14 distinguishes adapter,
+  worker-service, static topology, fake-runner, and Docker security evidence.
+  Its current focused run passed 20 tests; six HTTP API cases could not bind
+  `127.0.0.1` (`EPERM`) and are not recorded as passing. This course update
+  does not claim hostile-code isolation or change product/module scope.
 - Verification in this workspace: deadline closure (7 tests), post-commit
   events (2), Lobby reconciliation (6), terminal presentation (2), reconnect
   regression, and the frontend suite (49) pass; frontend lint, workspace
