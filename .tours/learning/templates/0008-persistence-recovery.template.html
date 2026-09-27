@@ -122,6 +122,20 @@
       </ol>
     </section>
 
+    <section class="section" aria-labelledby="event-persistence-title">
+      <h2 id="event-persistence-title">Match events follow committed state</h2>
+      <p class="section-intro">Match events are delivered only after the Match save commits. The engine queues events raised inside a Match command; the authority returns only after persistence succeeds, then the engine delivers each queued event with the committed revision. If saving fails, the command rejects and a failed Match save publishes no event.</p>
+      <p class="mt-1">The focused test injects a Match-save failure into <code>leaveMatch</code> and checks that <code>match.ended</code> was not emitted and the Match remains in <code>CODING</code>. A second case checks that a delivered event carries the snapshot's committed revision and that a listener error does not undo the commit.</p>
+      <p class="mt-1">This is live, in-process delivery, not a durable outbox. The event path does not keep an event history for replay; a reconnect obtains the current Match snapshot instead. That snapshot restores the current view, not each individual missed event.</p>
+      <div class="source-links mt-1">
+        <a href="../../../packages/arena-game/src/engine.ts#L164">Queue command events until the authority returns · engine.ts:164</a>
+        <a href="../../../packages/arena-game/src/engine.ts#L251">Stamp and deliver committed events; isolate listeners · engine.ts:251</a>
+        <a href="../../../packages/arena-game/src/match-authority.ts#L53">Return from the persistence lock after save · match-authority.ts:53</a>
+        <a href="../../../packages/arena-game/test/post-commit-events.test.ts#L21">Failed save suppresses terminal event · post-commit-events.test.ts:21</a>
+        <a href="../../../packages/arena-game/test/post-commit-events.test.ts#L34">Committed revision and listener-failure test · post-commit-events.test.ts:34</a>
+      </div>
+    </section>
+
     <section class="section" aria-labelledby="matrix-title">
       <h2 id="matrix-title">What survives—and what gets rebuilt?</h2>
       <div class="grid split">

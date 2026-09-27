@@ -88,12 +88,15 @@
           <span class="step-number" aria-hidden="true">03</span>
           <div>
             <h3>The phase decides which screen sections appear</h3>
-            <p>During <code>MATCH_FOUND</code> or <code>ROUND_INTRO</code>, the page offers Start round. During <code>CODING</code> or <code>SCORE_REVEAL</code>, it loads the workspace. A published <code>SCORE_REVEAL</code> adds the Round breakdown; <code>MATCH_COMPLETE</code> shows the final-result panel. That is UI branching on a supplied value—not a second game state machine.</p>
+            <p>During <code>MATCH_FOUND</code> or <code>ROUND_INTRO</code>, the page offers Start round. During <code>CODING</code> or <code>SCORE_REVEAL</code>, it loads the workspace. For an expired Match, <code>MATCH_COMPLETE</code> first shows the saved Round Reveal, followed by a <strong>See final result</strong> button. That button changes only the presentation; the current snapshot computes the final result from saved Match state. In an ordinary completion with time remaining, the page can render the Match result immediately. That is UI branching on supplied values—not a second game state machine.</p>
             <div class="source-links">
               <a href="../../../frontend/src/components/ArenaPage.tsx#L193">Start-round control for intro phases · ArenaPage.tsx:193</a>
               <a href="../../../frontend/src/components/ArenaPage.tsx#L215">Show workspace in Coding/Reveal · ArenaPage.tsx:215</a>
               <a href="../../../frontend/src/components/ArenaPage.tsx#L233">Show the published Round Reveal · ArenaPage.tsx:233</a>
-              <a href="../../../frontend/src/components/ArenaPage.tsx#L244">Show the Match result · ArenaPage.tsx:244</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L245">Show the completed Match Reveal · ArenaPage.tsx:245</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L247">Stage an expired Match result behind a presentation action · ArenaPage.tsx:247</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L845">Build the current snapshot and compute its final result · engine.ts:845</a>
+              <a href="../../../frontend/src/components/ArenaPage.test.tsx#L70">Initial deadline and ordinary terminal render assertions · ArenaPage.test.tsx:70</a>
               <a href="../../../frontend/src/components/RoundScoreReveal.tsx#L4">Present scores and move focus to the Reveal · RoundScoreReveal.tsx:4</a>
               <a href="../../../frontend/src/components/MatchResult.tsx#L23">Present the final score and outcome · MatchResult.tsx:23</a>
             </div>
@@ -125,6 +128,7 @@
         <p><strong>1v1 source:</strong> <code>live-1v1.spec.ts</code> describes two clients moving from Round start through visible Run, sealed Submit, Reveal, and final result at four viewport widths. The compliance record has a dated historical run; this course update did not rerun it, so that is not a pass on the current snapshot.</p>
         <p class="mt-1"><strong>2v2 source:</strong> <code>live-2v2.spec.ts</code> describes four clients, team/readiness display, revision-gated Submit, team Reveal, and reset. Its own header explicitly says this Ticket-14 proof is without Yjs; it cannot prove shared-text convergence. It was not run for this lesson update.</p>
         <p class="mt-1">A browser assertion checks the visible contract of the tested path. Component source shows how props become markup. Neither tells you that every possible state, viewport, or assistive technology was tested.</p>
+        <p class="mt-1">The ArenaPage component test checks the initial expired state (Reveal and button, no result) and the ordinary completed state (result, no button). These initial-render tests do not click the presentation action; the local UI handler is visible in the component source.</p>
       </div>
       <div class="source-links mt-1">
         <a href="../../../frontend/e2e/live-1v1.spec.ts#L61">Two-client 1v1 browser scenario source · live-1v1.spec.ts:61</a>

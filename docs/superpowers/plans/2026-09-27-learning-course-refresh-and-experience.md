@@ -326,20 +326,20 @@ Expected: in-memory LobbySession/domain cases pass. In this workspace 18 passed 
 - Consumes: post-commit `ArenaEngine` events stamped with committed Match revision and snapshot-based reconnect.
 - Produces: Lessons 8, 9, and 12 that distinguish durability, transient delivery, reconnect recovery, and staged terminal UI.
 
-- [ ] **Step 1: Add failing content assertions.** Require Lesson 8 to say that a failed Match save publishes no terminal event; Lesson 9 to say live events are transient and snapshots recover missed updates; Lesson 12 to explain the expired Match Reveal -> `See final result` -> result computed from saved Match state presentation.
-- [ ] **Step 2: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: FAIL before the new evidence is cited.
-- [ ] **Step 3: Update Lesson 8.** Add a short persistence boundary section: save the accepted Match revision first, publish only after commit, isolate listener failures, and use the committed revision in event payloads. Cite the failing-store test as evidence and state that it does not create a durable outbox.
-- [ ] **Step 4: Update Lesson 9.** Add one reconnect rule: socket events prompt clients to obtain/accept newer authoritative state, missed individual events are not replayed, and the snapshot's committed revision prevents an older live message from moving the view backward.
-- [ ] **Step 5: Update Lesson 12.** Teach both terminal render cases from `ArenaPage.test.tsx`: deadline completion with `remainingSeconds === 0` shows the current Round Reveal first and reveals the result computed from saved Match state on explicit presentation action; ordinary completed flow may show the Match result directly after its Reveal phase.
-- [ ] **Step 6: Re-anchor unchanged stale sources in Lessons 5, 6, and 10.** Review every reported range in `ArenaPage.tsx`, `engine.ts`, `evaluation-orchestration.ts`, `team-2v2.test.ts`, and related templates. Change prose only when behavior changed; record each reviewed lesson in the final accept list.
-- [ ] **Step 7: Run focused tests.** Run:
+- [x] **Step 1: Add failing content assertions.** Require Lesson 8 to say that a failed Match save publishes no terminal event; Lesson 9 to say live events are transient and snapshots recover missed updates; Lesson 12 to explain the expired Match Reveal -> `See final result` -> result computed from saved Match state presentation.
+- [x] **Step 2: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: FAIL before the new evidence is cited.
+- [x] **Step 3: Update Lesson 8.** Add a short persistence boundary section: save the accepted Match revision first, publish only after commit, isolate listener failures, and use the committed revision in event payloads. Cite the failing-store test as evidence and state that it does not create a durable outbox.
+- [x] **Step 4: Update Lesson 9.** Add one reconnect rule: socket events prompt clients to obtain/accept newer authoritative state, missed individual events are not replayed, and the snapshot's committed revision prevents an older live message from moving the view backward.
+- [x] **Step 5: Update Lesson 12.** Teach the initial-render evidence in `ArenaPage.test.tsx`: deadline completion with `remainingSeconds === 0` shows the current Round Reveal and a presentation action, while ordinary completed flow shows the Match result directly. Explain that the current snapshot computes the result from saved Match state. State that the component test does not click the presentation action; its handler is source evidence.
+- [x] **Step 6: Re-anchor unchanged stale sources in Lessons 5, 6, 9, and 10.** Review every reported range in `ArenaPage.tsx`, `engine.ts`, `evaluation-orchestration.ts`, `team-2v2.test.ts`, and related templates. Change prose only when behavior changed; record each reviewed lesson in the final accept list.
+- [x] **Step 7: Run focused tests.** Run:
 
 ```sh
 npx vitest run packages/arena-game/test/post-commit-events.test.ts packages/arena-game/test/reconnect.test.ts services/game/src/game/reconnect.test.ts frontend/src/components/ArenaPage.test.tsx
 ```
 
-Expected: in-memory/frontend cases pass; service cases that require restricted sockets or Postgres must be reported as environment-gated rather than claimed as passing.
-- [ ] **Step 8: Run course tests and commit.** Commit `docs(course): teach committed events and terminal presentation`.
+Expected: in-memory/frontend cases pass; service cases that require restricted sockets or Postgres must be reported as environment-gated rather than claimed as passing. This workspace: 29 tests passed; all 10 real-socket/Postgres service scenarios were skipped after the service failed to boot (`service did not boot`).
+- [ ] **Step 8: Run course tests and commit.** `node --test .tours/learning/scripts/build-catalog.test.mjs` passes 40/40. Commit `docs(course): teach committed events and terminal presentation`.
 
 ### Task 5: Refresh Judge worker, runtime topology, and rewrite evidence
 

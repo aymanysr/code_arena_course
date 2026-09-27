@@ -833,7 +833,7 @@ test("renders the Problem-to-Run lesson's source links into the local preview", 
   assert.match(rendered, /data-lesson-id="0005-problem-editor-run"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Fproblem-bank%2Fproblems%2Feven-ledger\.json&amp;line=30"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Ffile-bank\.ts&amp;line=10"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=442"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=477"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fsrc%2Fcomponents%2FCodeWorkspace\.tsx&amp;line=87"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Frun-path\.test\.ts&amp;line=26"/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services)\//);
@@ -867,7 +867,7 @@ test("renders the Evaluation-retry lesson's source links into the local preview"
   const rendered = renderLessonTemplate(template, "", "snapshot-id", { stale: 0, total: 7 }, lesson);
 
   assert.match(rendered, /data-lesson-id="0006-evaluation-retries"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=544"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=581"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration\.ts&amp;line=22"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fsubmit-path\.test\.ts&amp;line=93"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fmatch-revision\.test\.ts&amp;line=58"/);
@@ -915,6 +915,19 @@ test("renders the persistence-and-recovery lesson with durable-store and restart
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:packages|services)\//);
   assert.match(rendered, /process-local/);
   assert.match(rendered, /not run/);
+  assert.match(template, /Match events are delivered only after the Match save commits/);
+  assert.match(template, /a failed Match save publishes no event/);
+  assert.match(template, /the committed revision/);
+  assert.match(template, /not a durable outbox/);
+  assert.ok(lesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "packages/arena-game/test/post-commit-events.test.ts" && startLine === 21 && endLine === 32,
+  ), "Lesson 8 maps failed-save suppression evidence");
+  assert.ok(lesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "packages/arena-game/test/post-commit-events.test.ts" && startLine === 34 && endLine === 54,
+  ), "Lesson 8 maps committed-revision and listener-isolation evidence");
+  assert.ok(lesson.references.some(({ path: sourcePath, startLine }) =>
+    sourcePath === "packages/arena-game/src/engine.ts" && startLine === 164,
+  ), "Lesson 8 maps post-lock event delivery");
 });
 
 test("renders the live-connection lesson with identity, Presence, and reconnect evidence", async () => {
@@ -930,7 +943,7 @@ test("renders the live-connection lesson with identity, Presence, and reconnect 
   assert.match(rendered, /data-lesson-id="0009-live-connection"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fsrc%2Farena%2Fsocket\.ts&amp;line=265"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fgame\.gateway\.ts&amp;line=42"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=794"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=845"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Fmatch-socket-presence\.ts&amp;line=15"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Freconnect\.test\.ts&amp;line=14"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Freconnect\.spec\.ts&amp;line=88"/);
@@ -943,6 +956,13 @@ test("renders the live-connection lesson with identity, Presence, and reconnect 
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Freconnect\.test\.ts&amp;line=86"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=services%2Fgame%2Fsrc%2Fgame%2Freconnect\.test\.ts&amp;line=205"/);
   assert.match(template, /Postgres-backed reconnect suite was inspected but not run here/);
+  assert.match(template, /Live Match events are notifications, not a replayable event log/);
+  assert.match(template, /fetch the authoritative snapshot/);
+  assert.match(template, /Missed individual events are not replayed/);
+  assert.match(template, /older committed revision/);
+  assert.ok(lesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "packages/arena-game/test/post-commit-events.test.ts" && startLine === 21 && endLine === 54,
+  ), "Lesson 9 maps event durability boundaries");
   assert.match(rendered, /not a production authentication implementation/);
   assert.match(rendered, /Presence is not Player status/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services)\//);
@@ -962,7 +982,7 @@ test("renders the 2v2 collaboration lesson with authoritative revision and readi
   assert.match(rendered, /data-lesson-id="0010-team-collaboration"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fteam-collaboration\.ts&amp;line=151"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fteam-collaboration\.ts&amp;line=221"/);
-  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=511"/);
+  assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Fsrc%2Fengine\.ts&amp;line=547"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=packages%2Farena-game%2Ftest%2Fteam-2v2\.test\.ts&amp;line=305"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Flive-collab\.spec\.ts&amp;line=75"/);
   assert.ok(lesson.references.some(({ path: sourcePath, startLine }) =>
@@ -1055,6 +1075,17 @@ test("renders the Arena screen lesson from app entry through snapshot-driven dis
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fsrc%2Fcomponents%2FPhaseBanner\.tsx&amp;line=12"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Flive-1v1\.spec\.ts&amp;line=61"/);
   assert.match(rendered, /href="\.\.\/source-map\.html\?file=frontend%2Fe2e%2Flive-2v2\.spec\.ts&amp;line=70"/);
+  assert.match(template, /expired Match.*first shows the saved Round Reveal/);
+  assert.match(template, /button changes only the presentation/);
+  assert.match(template, /current snapshot computes the final result from saved Match state/);
+  assert.match(template, /ordinary completion with time remaining, the page can render the Match result immediately/);
+  assert.match(template, /initial-render tests do not click the presentation action/);
+  assert.ok(lesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "frontend/src/components/ArenaPage.test.tsx" && startLine === 70 && endLine === 84,
+  ), "Lesson 12 maps both terminal render assertions and their limits");
+  assert.ok(lesson.references.some(({ path: sourcePath, startLine, endLine }) =>
+    sourcePath === "packages/arena-game/src/engine.ts" && startLine === 845 && endLine === 900,
+  ), "Lesson 12 maps Match snapshot and final-result projection");
   assert.match(template, /href="0011-team-chat\.html"/);
   assert.match(template, /href="0013-running-the-project\.html"/);
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/frontend\//);
@@ -1557,13 +1588,11 @@ test("tracks planned dispositions and the exact remaining source files", async (
     "services/judge-worker/tsconfig.json",
   ];
   const expectedPendingLessons = {
-    "frontend/src/components/ArenaPage.test.tsx": ["0012-arena-screen"],
     "packages/arena-game/src/worker-judge.ts": ["0007-judge-boundary"],
     "services/game/src/game/judge-factory.ts": ["0007-judge-boundary", "0013-running-the-project"],
   };
   const expectedRemaining = [
     "packages/arena-game/test/container-judge-trust.test.ts",
-    "packages/arena-game/test/post-commit-events.test.ts",
     "packages/arena-game/test/worker-judge.test.ts",
     "services/game/src/game/judge-factory.test.ts",
     "services/judge-worker/docker-entrypoint.sh",
@@ -1608,4 +1637,72 @@ test("tracks planned dispositions and the exact remaining source files", async (
   assert.ok(coverageMap.scope.excluded.some(({ path: excludedPath, reason }) =>
     excludedPath === ".codex" && reason === "Agent planning state; it is neither game runtime nor learner course content.",
   ));
+});
+
+test("keeps refreshed gameplay lessons on current source anchors", async () => {
+  const repoRoot = process.cwd();
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const expectedReferences = {
+    "0005-problem-editor-run": [
+      ["packages/arena-game/src/engine.ts", 845, 900],
+      ["frontend/src/components/ArenaPage.tsx", 139, 154],
+      ["packages/arena-game/src/engine.ts", 477, 545],
+      ["packages/arena-game/src/engine.ts", 645, 692],
+    ],
+    "0006-evaluation-retries": [
+      ["packages/arena-game/src/engine.ts", 581, 603],
+      ["packages/arena-game/src/engine.ts", 616, 637],
+      ["packages/arena-game/src/evaluation-orchestration.ts", 191, 216],
+    ],
+    "0010-team-collaboration": [
+      ["packages/arena-game/src/engine.ts", 378, 420],
+      ["packages/arena-game/src/engine.ts", 547, 579],
+      ["packages/arena-game/test/team-2v2.test.ts", 289, 338],
+      ["packages/arena-game/test/team-2v2.test.ts", 388, 417],
+    ],
+    "0009-live-connection": [
+      ["packages/arena-game/src/engine.ts", 845, 852],
+    ],
+  };
+
+  for (const [lessonId, expected] of Object.entries(expectedReferences)) {
+    const lesson = coverageMap.lessons.find(({ id }) => id === lessonId);
+    assert.ok(lesson, `coverage map includes ${lessonId}`);
+    for (const [sourcePath, startLine, endLine] of expected) {
+      assert.ok(lesson.references.some((reference) =>
+        reference.path === sourcePath && reference.startLine === startLine && reference.endLine === endLine,
+      ), `${lessonId} maps the reviewed ${sourcePath}:${startLine}-${endLine} behavior`);
+    }
+  }
+
+  const anchors = {
+    "0005-problem-editor-run": [
+      ["packages/arena-game/src/engine.ts", 845],
+      ["frontend/src/components/ArenaPage.tsx", 139],
+      ["packages/arena-game/src/engine.ts", 477],
+      ["packages/arena-game/src/engine.ts", 645],
+    ],
+    "0006-evaluation-retries": [
+      ["packages/arena-game/src/engine.ts", 581],
+      ["packages/arena-game/src/engine.ts", 616],
+      ["packages/arena-game/src/evaluation-orchestration.ts", 191],
+    ],
+    "0010-team-collaboration": [
+      ["packages/arena-game/src/engine.ts", 378],
+      ["packages/arena-game/src/engine.ts", 547],
+      ["packages/arena-game/test/team-2v2.test.ts", 305],
+      ["packages/arena-game/test/team-2v2.test.ts", 388],
+    ],
+    "0009-live-connection": [
+      ["packages/arena-game/src/engine.ts", 845],
+    ],
+  };
+  for (const [lessonId, expected] of Object.entries(anchors)) {
+    const lesson = coverageMap.lessons.find(({ id }) => id === lessonId);
+    const template = await readFile(path.join(learningDir, lesson.template), "utf8");
+    for (const [sourcePath, line] of expected) {
+      assert.ok(template.includes(`../../../${sourcePath}#L${line}`), `${lessonId} links ${sourcePath}:${line}`);
+    }
+  }
 });

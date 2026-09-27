@@ -98,7 +98,7 @@
             <div class="source-links">
               <a href="../../../packages/arena-game/src/team-collaboration.ts#L113">Current revision must match both approvals · team-collaboration.ts:113</a>
               <a href="../../../packages/arena-game/src/team-collaboration.ts#L125">Reject a stale Ready request · team-collaboration.ts:125</a>
-              <a href="../../../packages/arena-game/src/engine.ts#L349">Engine handles readiness and emits the current revision · engine.ts:349</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L378">Engine handles readiness and emits the current revision · engine.ts:378</a>
               <a href="../../../frontend/src/components/ReadyState.tsx#L3">The UI displays each teammate's Ready state · ReadyState.tsx:3</a>
               <a href="../../../frontend/src/components/CodeWorkspace.tsx#L35">Client gates are UX; shared text supplies current code · CodeWorkspace.tsx:35</a>
               <a href="../../../packages/arena-game/test/team-2v2.test.ts#L305">Stale approvals cannot Submit; a new edit clears both · team-2v2.test.ts:305</a>
@@ -112,7 +112,7 @@
             <p>Inside the Match lock, the engine checks the team's Ready gate and current revision. For 2v2 it asks <code>TeamCollaboration</code> for the shared source at that revision and replaces the browser's submitted code with that server-owned text before validation and judging.</p>
             <p class="mt-1">An edit racing with Submit has one whole outcome: Submit freezes the old approved revision before the edit, or the edit advances the revision first and makes old readiness stale. The race must not combine old approval with new code.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/engine.ts#L511">Lock, readiness gate, and frozen team source · engine.ts:511</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L547">Lock, readiness gate, and frozen team source · engine.ts:547</a>
               <a href="../../../packages/arena-game/src/team-collaboration.ts#L221">Return source only at the exact revision and language · team-collaboration.ts:221</a>
               <a href="../../../packages/arena-game/test/team-collaboration.test.ts#L88">Changed text invalidates approvals; stale source revision is rejected · team-collaboration.test.ts:88</a>
               <a href="../../../packages/arena-game/test/team-2v2.test.ts#L388">Edit-versus-Submit race outcomes · team-2v2.test.ts:388</a>

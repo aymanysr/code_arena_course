@@ -83,7 +83,7 @@
               <a href="../../../services/game/src/game/socket-auth.ts#L16">Development-only handshake identity · socket-auth.ts:16</a>
               <a href="../../../services/game/src/game/socket-auth.test.ts#L27">Conflicts and required Match ID tests · socket-auth.test.ts:27</a>
               <a href="../../../services/game/src/game/game.gateway.ts#L42">Verify Match access before room join · game.gateway.ts:42</a>
-              <a href="../../../packages/arena-game/src/engine.ts#L794">Snapshot requires Match membership · engine.ts:794</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L845">Snapshot requires Match membership · engine.ts:845</a>
               <a href="../../../packages/arena-game/test/team-2v2.test.ts#L141">Stranger cannot snapshot or act · team-2v2.test.ts:141</a>
               <a href="../../../services/game/src/game/game.gateway.ts#L87">Command handler uses the attached principal · game.gateway.ts:87</a>
               <a href="../../../services/game/src/game/principal.ts#L1">HTTP development-auth boundary · principal.ts:1</a>
@@ -113,6 +113,7 @@
           <div>
             <h3>Rejoin with a fresh baseline; do not mistake local draft for Match state</h3>
             <p>On a browser network return, the transport opens a fresh socket and waits for the server snapshot. Game joins the authorized Match room before sending that baseline; subsequent event refreshes converge on current truth, and the client drops demonstrably stale revisions. The saved editor draft is local to the browser (see <a href="0005-problem-editor-run.html">Lesson 5</a>); the Match phase, clock, submissions and Reveal come from the server.</p>
+            <p class="mt-1">Live Match events are notifications, not a replayable event log. Each event prompts the client to fetch the authoritative snapshot from <code>/snapshot</code>; after reconnect, the client obtains a fresh baseline. Missed individual events are not replayed. The client compares event and snapshot revisions with the newest applied revision, so an older committed revision cannot move its view backward. Snapshot recovery restores current Match state, not a history of every event.</p>
             <p class="mt-1">A source-level E2E scenario checks network drop, the opponent's continuing actions, clock movement, preserved draft, and resumed controls. Another covers a hard reload. Those scenarios are test code; do not call them a fresh browser-test pass for this lesson.</p>
             <p class="mt-1">The Postgres-backed reconnect suite was inspected but not run here: it boots a local Game listener and uses <code>TEST_PG_URL</code>. This restricted session has already refused local listener startup, so its service scenarios remain source evidence only.</p>
             <aside class="concept-note mt-1">
@@ -124,6 +125,8 @@
               <a href="../../../services/game/src/game/game.gateway.ts#L42">Join room before sending the baseline · game.gateway.ts:42</a>
               <a href="../../../frontend/src/arena/socket.ts#L85">Drop stale revisions and older-round updates · socket.ts:85</a>
               <a href="../../../frontend/src/arena/socket.test.ts#L64">Stale-update guard examples · socket.test.ts:64</a>
+              <a href="../../../packages/arena-game/test/post-commit-events.test.ts#L21">Match event publication boundary · post-commit-events.test.ts:21</a>
+              <a href="../../../services/game/src/game/game.gateway.ts#L36">Forward live events to the authorized Match room · game.gateway.ts:36</a>
               <a href="../../../packages/arena-game/test/reconnect.test.ts#L70">Server snapshot after offline window · reconnect.test.ts:70</a>
               <a href="../../../services/game/src/game/reconnect.test.ts#L86">Real-socket/Postgres reconnect service suite · reconnect.test.ts:86</a>
               <a href="../../../services/game/src/game/reconnect.test.ts#L250">Process-restart service cases · reconnect.test.ts:250</a>

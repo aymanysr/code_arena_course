@@ -46,8 +46,8 @@
             <p>If callers omit them, the engine makes a <code>submissionId</code> and an <code>evaluationId</code>. It also computes a hash of the submitted source. To accept a reused <code>evaluationId</code>, it compares Match, Round, side, submission ID, problem version, language, source hash, and (for a shared team document) document revision.</p>
             <p class="mt-1">So “same Evaluation” means more than “same button was clicked.” Same ID + changed code is a conflict, not permission to change the accepted work.</p>
             <div class="source-links">
-              <a href="../../../packages/arena-game/src/engine.ts#L544">Create IDs and compare in-flight identity · engine.ts:544</a>
-              <a href="../../../packages/arena-game/src/engine.ts#L579">Compare the durable row and recover the terminal result · engine.ts:579</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L581">Create IDs and compare in-flight identity · engine.ts:581</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L616">Compare the durable row and recover the terminal result · engine.ts:616</a>
               <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L22">Fields in EvaluationIdentity · evaluation-orchestration.ts:22</a>
               <a href="../../../packages/arena-game/test/submit-path.test.ts#L48">Same IDs and same data make one attempt · submit-path.test.ts:48</a>
             </div>
@@ -61,7 +61,7 @@
             <div class="source-links">
               <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L39">Scope of the in-flight registry · evaluation-orchestration.ts:39</a>
               <a href="../../../packages/arena-game/src/persistence.ts#L30">Durable persistence and claim contract · persistence.ts:30</a>
-              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L172">Acquire a claim, check terminal state, then evaluate · evaluation-orchestration.ts:172</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L191">Acquire a claim, check terminal state, then evaluate · evaluation-orchestration.ts:191</a>
               <a href="../../../packages/arena-game/test/submit-path.test.ts#L69">In-flight duplicate attaches without a second Judge call · submit-path.test.ts:69</a>
               <a href="../../../packages/arena-game/test/evaluation-orchestration.test.ts#L4">In-process registry ownership tests · evaluation-orchestration.test.ts:4</a>
             </div>
