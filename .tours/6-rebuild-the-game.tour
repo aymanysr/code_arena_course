@@ -1,0 +1,84 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "6 - Rebuild with Behavior Parity Checks",
+  "steps": [
+    {
+      "title": "What 'the same game' means",
+      "description": "Aim for the same observable behavior, not identical source files or internal architecture. This tour is a guide, not a code generator. To know whether your rewrite matches, translate each gate below into tests that run against your own implementation. The existing project tests are examples of the contract; they do not automatically test a separate rewrite."
+    },
+    {
+      "file": ".scratch/code-arena/spec.md",
+      "line": 1,
+      "title": "0. Freeze the course target and label spec differences",
+      "description": "This course teaches the code and tests that exist in the current reference. The spec describes intended product behavior; it does not prove that behavior is implemented. Label every claim IMPLEMENTED AND TESTED, PLANNED OR UNVERIFIED, or SPEC/CODE DISAGREEMENT.\n\nCourse parity choices (approved 2026-09-25): reproduce these current behaviors in your rewrite, and keep the spec differences visible. These are choices about the learning baseline, not amendments to the product spec:\n- Public matchmaking: include the 1v1 public queue because it is exercised by services/game/src/game/lobby.test.ts and frontend/e2e/live-lobby.spec.ts. The spec says automatic matchmaking is outside the first release.\n- Disconnect expiry: reproduce the 1v1 grace-expiry forfeit in packages/arena-game/test/reconnect.test.ts; reproduce the 2v2 behavior in packages/arena-game/test/team-2v2.test.ts, where an expired offline member does not forfeit the match. The spec says no first-release forfeit. Do not generalize the 1v1 rule to 2v2.\n- Team chat history: reproduce the current process-local history in services/game/src/game/team-chat.gateway.ts. Reconnect can restore recent history while that process is running, but a Game service restart loses it. The spec/ADRs describe durable records as intended future persistence.\n\nWhen a later change updates the original game, update this course to the newly tested reference and identify the exact changed files. Never turn a planned behavior into implementation evidence. The 42-subject matrix also separates test evidence from module sign-off."
+    },
+    {
+      "file": "packages/arena-game/test/lobby.test.ts",
+      "line": 11,
+      "title": "Gate 1 — Lobby and match entry",
+      "description": "Your equivalent tests should cover private room creation/join by code; rejecting full or already-started rooms; correct 1v1/2v2 team sizes; ready-up and host start gating; leaving/cancelling; and the current public queue behavior. The live browser journey is in frontend/e2e/live-lobby.spec.ts.\n\nDo not count PostgreSQL race behavior as verified unless the gated tests in lobby-atomic.test.ts actually run. A skipped database test is still open."
+    },
+    {
+      "file": "packages/arena-game/test/round-lifecycle.test.ts",
+      "line": 43,
+      "title": "Gate 2 — Phases, scores, and reveal",
+      "description": "Port the cases here and in scoring-reveal.test.ts. Check legal and illegal phase changes; weighted round scores from 0–100; match totals as the sum of round scores; tie-breaks by counted-score time, then submission count, then draw; and an immutable reveal. Also check that reveal closes new submits, waits for in-flight judging only during the grace window, and does not count a result arriving after cutoff."
+    },
+    {
+      "file": "packages/arena-game/test/run-path.test.ts",
+      "line": 4,
+      "title": "Gate 3 — Run is practice, not a scored submission",
+      "description": "Prove Run sends visible tests only, returns visible feedback, and never changes the counted score. One player's Run must not block the other side. Invalid language, oversized source, non-members, duplicate simultaneous Run, and judge failure each have defined outcomes in this suite."
+    },
+    {
+      "file": "packages/arena-game/test/submit-path.test.ts",
+      "line": 6,
+      "title": "Gate 4 — Submit, retries, and which result counts",
+      "description": "Port these scenarios: a successful later submission replaces the counted result; a failed resubmit preserves the previous counted result; retrying the same request IDs does not duplicate work; reusing an ID for different code is rejected; and submitting after reveal is rejected. Capture the difference between contestant failures (such as compile/TLE) and judge infrastructure failures. This test file will not automatically run against a separately built rewrite."
+    },
+    {
+      "file": "packages/arena-game/test/sealing.test.ts",
+      "line": 9,
+      "title": "Gate 5 — Keep hidden data and opponent code private",
+      "description": "Check actual client-facing snapshots, receipts, events, failure records, and reveals: none may expose hidden inputs or expected answers. One side must not receive the other side's source. Inspect payloads directly; hiding data in the UI is not a privacy boundary."
+    },
+    {
+      "file": "packages/arena-game/test/judge-security.test.ts",
+      "line": 15,
+      "title": "Gate 6 — Verify the real sandbox separately",
+      "description": "These Docker-backed cases check timeout, memory, bounded output, process count, read-only filesystem, path traversal, disabled network, no host secrets in the container, and cleanup. Run them only in a configured Docker environment and count only tests that actually execute. Passing proves these cases, not every possible attack. ContainerJudge is the default; Judge0 is optional and is not required to match game behavior."
+    },
+    {
+      "file": "packages/arena-game/test/team-2v2.test.ts",
+      "line": 74,
+      "title": "Gate 7 — Two teammates act as one side",
+      "description": "Port these 2v2 cases: exactly two distinct players per side; a player cannot act for the other team or mark a teammate ready; both teammates approve the current document revision; any edit or language change invalidates both approvals; stale approval cannot submit; each team has one submission/result stream; and teams can work independently. Also check shared team reveal and 1v1 regression."
+    },
+    {
+      "file": "packages/arena-game/test/team-collaboration.test.ts",
+      "line": 88,
+      "title": "Gate 8 — The shared editor has an authoritative version",
+      "description": "An accepted Yjs edit changes the authoritative document revision once and invalidates approvals. Submit evaluates the server's current shared-document snapshot, not a different source string supplied by a client. Add equivalent checks for stale-round writes, persistence rollback, and reconnecting collaborators from frontend/e2e/collab-reconnect.spec.ts."
+    },
+    {
+      "file": "packages/arena-game/test/reconnect.test.ts",
+      "line": 14,
+      "title": "Gate 9 — Disconnect, reconnect, and recover",
+      "description": "Check that connectivity is separate from game activity; the match clock continues offline; reconnect restores the authoritative filtered snapshot; hidden data stays hidden; older revisions are ignored; and pending evaluations/reveals recover without double-counting. Use persistence.test.ts for the storage contract and postgres.test.ts for cross-process claims and real database restarts. Preserve the reference distinction: 1v1 forfeits after grace expiry (reconnect.test.ts); an expired offline 2v2 member does not forfeit the match (team-2v2.test.ts). The production spec differs; Gate 0 records the course choice."
+    },
+    {
+      "file": "frontend/e2e/live-1v1.spec.ts",
+      "line": 61,
+      "title": "Gate 10 — Test the whole player experience",
+      "description": "Unit tests do not prove the screen, transport, and server work together. Port the journeys in live-1v1.spec.ts, live-2v2.spec.ts, live-team-chat.spec.ts, and reconnect.spec.ts: players enter, edit, run, submit, see reveal, and resume. Chat is team-only in 2v2, absent in 1v1, and does not change readiness or editor state. Current limitation: chat history is process-local and does not survive a Game service restart."
+    },
+    {
+      "title": "How to prove your rewrite matches",
+      "description": "For each gate, write an equivalent test in your new project before implementing that feature. Reuse the same inputs, a fixed clock, and a deterministic fake judge where possible. Compare externally visible results—allowed/rejected actions, snapshots/events, scores, and private data—not class names or internal structure.\n\nA gate is PASS only when your rewrite's test ran and passed. SKIPPED, not yet ported, or only manually inspected means NOT VERIFIED. Keep Docker security and real Postgres/Playwright checks as separate environment-dependent gates. Green tests in this original project are a reference baseline, not proof that your rewrite matches."
+    },
+    {
+      "title": "Suggested build order and reference baseline",
+      "description": "Build in small slices: (1) in-memory match/round state and phase tests; (2) fake judge and visible Run; (3) Submit identity, hidden evaluation, scoring, and reveal; (4) lobby and persistence/recovery; (5) frontend through a transport; (6) 2v2 shared editing/readiness; (7) team chat/reconnect; (8) real sandbox after you understand its security tests.\n\nThe frozen reference test results and skipped checks are recorded in .tours/reference-baseline.md. They verify only this original project; your rewrite must pass its own equivalent tests."
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace how the current Match snapshot becomes the visible Code Arena screen.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 9 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">A new snapshot says “SCORE_REVEAL.” Which part of the screen changes—and who decided the score?</h2>
+      <p class="section-intro">Choose before tracing: the phase banner, the Arena page, the UI component that draws the reveal, or the game engine.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">The Game owns phase changes and scoring. The transport gives React a current <code>ArenaSnapshot</code>; <code>ArenaPage</code> reads its phase and conditionally shows the workspace and Reveal. <code>PhaseBanner</code> prints the phase in words, while <code>RoundScoreReveal</code> displays the already-built Reveal. Those components present game state; they are not the scoring authority.</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt>ArenaSnapshot</dt>
+        <dd>A current view of the Match and Round, including phase, clock, problem, player/team display data, visible tests, and any published Reveal.</dd>
+        <dt class="mt-1">ArenaPage</dt>
+        <dd>The React composition point that subscribes to the transport snapshot and chooses which screen pieces to show for that state.</dd>
+        <dt class="mt-1">Display component</dt>
+        <dd>A small component that turns supplied props into visible text or controls. Showing a score or phase does not mean that component calculated or authorized it.</dd>
+        <dt class="mt-1">Mock transport</dt>
+        <dd>An in-memory teaching/demo adapter. It can drive the same screen, but it is not the live Game service.</dd>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="trace-title">
+      <p class="kicker">Now follow one snapshot</p>
+      <h2 id="trace-title">The data flows into the screen; the screen does not invent Match truth</h2>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The app chooses a live or mock transport</h3>
+            <p><code>main.tsx</code> mounts React's <code>App</code>. In the default demo route, <code>App</code> creates a <code>MockArenaTransport</code>. With <code>?live=1</code> and a Match ID, it connects a <code>SocketArenaTransport</code>; if the live flag has no Match ID yet, it shows the Lobby instead. Keep this distinction in mind: a convincing mock screen is not a production-server test.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/main.tsx#L6">Mount App into the page · main.tsx:6</a>
+              <a href="../../../frontend/src/App.tsx#L46">Default demo creates a mock transport · App.tsx:46</a>
+              <a href="../../../frontend/src/App.tsx#L52">Live mode and current-Match branch · App.tsx:52</a>
+              <a href="../../../frontend/src/App.tsx#L14">Live transport connects and is cleaned up · App.tsx:14</a>
+            </div>
+            <aside class="concept-note mt-1">
+              <h4>Production UI versus the design prototype</h4>
+              <p>This lesson follows the production React files under <code>frontend/src/</code>. The existing <code>prototype/game-ui/09-arena.html</code> is a fake-state interaction prototype; its simulated grader, layout, and screenshots do not prove this React app or the backend.</p>
+            </aside>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>ArenaPage subscribes, then keeps the phase visible</h3>
+            <p><code>ArenaPage</code> calls <code>useArena(transport)</code> to read the current snapshot. It always renders the header and phase banner from that snapshot. The header shows mode, remaining time, and transport connection; the banner turns <code>roundPhase</code> into a short human-readable message. Neither component changes the Match phase.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L36">Read the latest transport snapshot · ArenaPage.tsx:36</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L166">Header receives mode, clock, and connection · ArenaPage.tsx:166</a>
+              <a href="../../../frontend/src/components/ArenaHeader.tsx#L17">Render the top status strip · ArenaHeader.tsx:17</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L170">Banner receives the current Round phase · ArenaPage.tsx:170</a>
+              <a href="../../../frontend/src/components/PhaseBanner.tsx#L12">Map each phase to visible copy · PhaseBanner.tsx:12</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>The phase decides which screen sections appear</h3>
+            <p>During <code>MATCH_FOUND</code> or <code>ROUND_INTRO</code>, the page offers Start round. During <code>CODING</code> or <code>SCORE_REVEAL</code>, it loads the workspace. A published <code>SCORE_REVEAL</code> adds the Round breakdown; <code>MATCH_COMPLETE</code> shows the final-result panel. That is UI branching on a supplied value—not a second game state machine.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L193">Start-round control for intro phases · ArenaPage.tsx:193</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L215">Show workspace in Coding/Reveal · ArenaPage.tsx:215</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L233">Show the published Round Reveal · ArenaPage.tsx:233</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L244">Show the Match result · ArenaPage.tsx:244</a>
+              <a href="../../../frontend/src/components/RoundScoreReveal.tsx#L4">Present scores and move focus to the Reveal · RoundScoreReveal.tsx:4</a>
+              <a href="../../../frontend/src/components/MatchResult.tsx#L23">Present the final score and outcome · MatchResult.tsx:23</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>The workspace arranges panels; MatchPanel chooses duel or teams</h3>
+            <p><code>ArenaWorkspace</code> places the Problem, Code workspace, and Match panel into one responsive grid. Inside that panel, <code>MatchPanel</code> selects <code>DuelPanel</code> for 1v1 or <code>TeamPanel</code> for 2v2. Those smaller components format supplied player/team values. Team Ready is an action callback, not authority: the page routes it to the transport, while Lesson 10 traces the Game's readiness rules. Status text comes from an explicit label map rather than color alone.</p>
+            <p class="mt-1"><code>TestPanel</code> similarly displays visible-test state passed in the snapshot. Its “Passed” label is not the Judge: Lesson 5 follows the action that actually runs those examples.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/components/ArenaWorkspace.tsx#L25">Three-column layout that stacks before large screens · ArenaWorkspace.tsx:25</a>
+              <a href="../../../frontend/src/components/MatchPanel.tsx#L16">Branch on 1v1 versus 2v2 · MatchPanel.tsx:16</a>
+              <a href="../../../frontend/src/components/DuelPanel.tsx#L19">Render the two-player view · DuelPanel.tsx:19</a>
+              <a href="../../../frontend/src/components/TeamPanel.tsx#L25">Render team members and Ready control · TeamPanel.tsx:25</a>
+              <a href="../../../frontend/src/components/status.ts#L4">Convert PlayerStatus values to words · status.ts:4</a>
+              <a href="../../../frontend/src/components/TestPanel.tsx#L18">Display visible-test rows and custom input · TestPanel.tsx:18</a>
+              <a href="../../../frontend/src/index.css#L3">Project color tokens and contrast preference · index.css:3</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">What browser tests show—and what they do not</h2>
+      <div class="card">
+        <p><strong>1v1 source:</strong> <code>live-1v1.spec.ts</code> describes two clients moving from Round start through visible Run, sealed Submit, Reveal, and final result at four viewport widths. The compliance record has a dated historical run; this course update did not rerun it, so that is not a pass on the current snapshot.</p>
+        <p class="mt-1"><strong>2v2 source:</strong> <code>live-2v2.spec.ts</code> describes four clients, team/readiness display, revision-gated Submit, team Reveal, and reset. Its own header explicitly says this Ticket-14 proof is without Yjs; it cannot prove shared-text convergence. It was not run for this lesson update.</p>
+        <p class="mt-1">A browser assertion checks the visible contract of the tested path. Component source shows how props become markup. Neither tells you that every possible state, viewport, or assistive technology was tested.</p>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../../../frontend/e2e/live-1v1.spec.ts#L61">Two-client 1v1 browser scenario source · live-1v1.spec.ts:61</a>
+        <a href="../../../frontend/e2e/live-2v2.spec.ts#L70">Four-client 2v2 browser scenario source · live-2v2.spec.ts:70</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="recall-title">
+      <p class="kicker">Close the source and recall</p>
+      <h2 id="recall-title">If the next snapshot is SCORE_REVEAL, what changes—and what does not?</h2>
+      <details class="card">
+        <summary>Hint, then check yourself</summary>
+        <p class="mt-1">Trace: transport provides snapshot → <code>ArenaPage</code> reads phase → <code>PhaseBanner</code> labels it → page includes the workspace and Reveal view when their conditions match. The Game already owns the phase and score; the components present them.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>For a rewrite, feed a known Match snapshot into your screen and assert the phase label, Round number, correct 1v1/2v2 panel, visible-test text, and Reveal/result appear only in their corresponding phases. Separately test that an action button sends a command and let a Game-rule test decide whether that command is accepted. Do not make the UI calculate a scored Reveal or mistake the mock adapter for live behavior.</p>
+      </article>
+      <p class="nav-row"><a href="0011-team-chat.html">← Lesson 11: team chat and sidecar lifetimes</a> · <a href="0013-running-the-project.html">Next: Lesson 13, services and local setup →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson follows the React production tree, not the fake-state HTML prototype. E2E files are scenario sources; only the dated evidence record describes their historical run.</p>
+    </footer>
+  </main>
+</body>
+</html>

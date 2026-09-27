@@ -1,0 +1,50 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "5 - Storage, Collaboration, Reconnect, and Chat",
+  "steps": [
+    {
+      "title": "Why these pieces matter",
+      "description": "A game service can restart, players can disconnect, and teammates can edit at the same time. This tour follows what is saved, what is restored, and why chat is kept separate from game and editor state."
+    },
+    {
+      "file": "packages/arena-game/src/persistence.ts",
+      "line": 30,
+      "title": "1. The game asks persistence to save and load",
+      "description": "MatchPersistence describes the durable operations the game needs: match state, submissions, reveals, evaluation claims, and team documents. ArenaEngine can depend on this contract without knowing the details of every database query."
+    },
+    {
+      "file": "packages/arena-game/src/postgres-store.ts",
+      "line": 93,
+      "title": "2. Postgres implements those storage needs",
+      "description": "PostgresStores wires database-backed stores into StoreBackedMatchPersistence. Look at saveMatchAndCollab to see the transaction that keeps match state and shared-document rows consistent together."
+    },
+    {
+      "file": "services/game/src/game/game.service.ts",
+      "line": 131,
+      "title": "3. Pending work is recovered when the service starts",
+      "description": "At startup, GameService asks the engine to recover persisted matches and pending evaluations before serving requests. Follow ArenaEngine.recover() to see how it repairs transient state and re-drives pending work. Recovery is a designed path, not a guarantee that every failure is impossible."
+    },
+    {
+      "file": "packages/arena-game/src/team-collaboration.ts",
+      "line": 151,
+      "title": "4. A team edit changes the document revision",
+      "description": "applyUpdate accepts a team document change during coding. A real change increments the document revision and invalidates readiness, so approvals for an older version cannot authorize submission of newer code."
+    },
+    {
+      "file": "services/game/src/game/team-chat.gateway.ts",
+      "line": 30,
+      "title": "5. Chat is not the editor or the game engine",
+      "description": "The gateway uses a separate /chat namespace. Its comments state that chat does not mutate match state, the shared document, or readiness. Important current limitation: this file keeps recent chat history in process memory, so it is not durable history across a service restart."
+    },
+    {
+      "file": "frontend/src/arena/sidecars.ts",
+      "line": 78,
+      "title": "6. The browser cleans up live connections",
+      "description": "The sidecar lifecycle owns the collaboration and chat clients separately from the main game transport. Follow clearCollab and clearChat: when a match or round changes, old connections are disconnected so they do not keep affecting the new screen."
+    },
+    {
+      "title": "Checkpoint — spot the source of truth",
+      "description": "If a teammate edits after you marked the code ready, why should the server invalidate that readiness? Which data survives a game-service restart, and what limitation did you find in chat history? Tour 6 turns what you have learned into a sensible rebuild order."
+    }
+  ]
+}

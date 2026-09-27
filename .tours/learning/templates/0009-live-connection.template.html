@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace live reconnect, socket identity, Presence, and authoritative Match snapshots.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">Your browser loses its connection during a Match. What comes back when it reconnects?</h2>
+      <p class="section-intro">Sort these before reading on: the latest Match snapshot, your unsent editor draft, the countdown clock, your Player status, and the command you were in the middle of sending.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">The Game sends a fresh authoritative snapshot; the local editor draft is separate browser state. The Match clock and in-progress server Evaluation continue while the client is away. Presence changes with the socket, while Player status remains a separate gameplay state. Reconnect does not mean “replay every command that may have been sent.”</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt>Transport connection</dt>
+        <dd>Whether this browser is connected to the Game service; it is not a Match phase.</dd>
+        <dt class="mt-1">Presence</dt>
+        <dd>Whether a player/member currently has a live socket.</dd>
+        <dt class="mt-1">Player status</dt>
+        <dd>The side's gameplay activity, such as coding, running, evaluating, or locked.</dd>
+        <dt class="mt-1">Authoritative snapshot</dt>
+        <dd>A fresh view derived from Game-owned Match state; the browser uses it to converge after missed events.</dd>
+      </dl>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now follow the reconnect</p>
+      <h2 id="trace-title">The socket says who is here; Game still decides which Match they may enter</h2>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The UI depends on a transport, not directly on Socket.IO</h3>
+            <p><code>ArenaTransport</code> is the interface the React view subscribes to. In the live adapter, the browser first fetches a snapshot, then attaches the socket and waits for the Game's socket snapshot as its baseline. Later Game events trigger a fresh HTTP snapshot request instead of applying an event payload as a partial Match patch. Run and Submit use HTTP; some live acknowledgements, such as 2v2 readiness, use the socket.</p>
+            <p class="mt-1">This keeps UI rendering based on one current server view, even if events were missed or arrived out of order.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/transport.ts#L60">The UI-facing transport contract · transport.ts:60</a>
+              <a href="../../../frontend/src/arena/socket.ts#L265">Initial HTTP snapshot and socket baseline · socket.ts:265</a>
+              <a href="../../../frontend/src/arena/socket.ts#L306">Handshake and event subscriptions · socket.ts:306</a>
+              <a href="../../../frontend/src/arena/socket.ts#L366">Apply the socket's baseline snapshot · socket.ts:366</a>
+              <a href="../../../frontend/src/arena/socket.ts#L501">Refresh current state after an event · socket.ts:501</a>
+              <a href="../../../frontend/src/arena/useArena.ts#L5">React subscribes to transport changes · useArena.ts:5</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>Identity is necessary—but Match membership is a separate check</h3>
+            <p>The frontend sends a user and Match identifier in the socket handshake. In this codebase, <code>DEV_PRINCIPAL</code> enables a development-only identity seam; it is not a production authentication implementation. The Game verifies that the principal can snapshot that Match before registering Presence and joining its room. Later action handlers take identity from the attached principal, not from a user ID in the command body.</p>
+            <aside class="concept-note mt-1">
+              <h4>Do not confuse a claimed ID with authorization</h4>
+              <p>A socket test can show how the development handshake rejects missing/conflicting values. It does not prove production login, and a valid user identity alone does not grant access to every Match.</p>
+            </aside>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/socket.ts#L306">Client handshake fields · socket.ts:306</a>
+              <a href="../../../services/game/src/game/socket-auth.ts#L16">Development-only handshake identity · socket-auth.ts:16</a>
+              <a href="../../../services/game/src/game/socket-auth.test.ts#L27">Conflicts and required Match ID tests · socket-auth.test.ts:27</a>
+              <a href="../../../services/game/src/game/game.gateway.ts#L42">Verify Match access before room join · game.gateway.ts:42</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L794">Snapshot requires Match membership · engine.ts:794</a>
+              <a href="../../../packages/arena-game/test/team-2v2.test.ts#L141">Stranger cannot snapshot or act · team-2v2.test.ts:141</a>
+              <a href="../../../services/game/src/game/game.gateway.ts#L87">Command handler uses the attached principal · game.gateway.ts:87</a>
+              <a href="../../../services/game/src/game/principal.ts#L1">HTTP development-auth boundary · principal.ts:1</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Presence changes; gameplay status and the Match clock do not pause</h3>
+            <p><strong>Presence is not Player status.</strong> A socket disconnect moves connectivity to offline; it does not replace a running or evaluating activity with a made-up “disconnected” gameplay state. A Run or Submission already in the Game continues, and the Match clock keeps moving.</p>
+            <p class="mt-1">The Game counts sockets per user and Match: the first socket marks online; only the last close marks offline. In 1v1, Presence is per side and an expired reconnect grace can forfeit. In 2v2, Presence is per member, and an offline member's grace expiry does not forfeit the Match.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-model/src/model.ts#L22">Separate PlayerStatus and Presence types · model.ts:22</a>
+              <a href="../../../services/game/src/game/match-socket-presence.ts#L15">Process-local first/last socket tracker · match-socket-presence.ts:15</a>
+              <a href="../../../services/game/src/game/match-socket-presence.test.ts#L46">Socket counting in 1v1 and 2v2 tests · match-socket-presence.test.ts:46</a>
+              <a href="../../../packages/arena-game/test/reconnect.test.ts#L14">Disconnect preserves gameplay activity · reconnect.test.ts:14</a>
+              <a href="../../../packages/arena-game/test/reconnect.test.ts#L58">Clock continues during offline time · reconnect.test.ts:58</a>
+              <a href="../../../packages/arena-game/test/reconnect.test.ts#L180">1v1 grace, forfeit, and rejoin cases · reconnect.test.ts:180</a>
+              <a href="../../../services/game/src/game/reconnect.test.ts#L205">Service-level 1v1 grace expiry and timely rejoin · reconnect.test.ts:205</a>
+              <a href="../../../packages/arena-game/test/team-2v2.test.ts#L454">2v2 tracks members without grace forfeits · team-2v2.test.ts:454</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Rejoin with a fresh baseline; do not mistake local draft for Match state</h3>
+            <p>On a browser network return, the transport opens a fresh socket and waits for the server snapshot. Game joins the authorized Match room before sending that baseline; subsequent event refreshes converge on current truth, and the client drops demonstrably stale revisions. The saved editor draft is local to the browser (see <a href="0005-problem-editor-run.html">Lesson 5</a>); the Match phase, clock, submissions and Reveal come from the server.</p>
+            <p class="mt-1">A source-level E2E scenario checks network drop, the opponent's continuing actions, clock movement, preserved draft, and resumed controls. Another covers a hard reload. Those scenarios are test code; do not call them a fresh browser-test pass for this lesson.</p>
+            <p class="mt-1">The Postgres-backed reconnect suite was inspected but not run here: it boots a local Game listener and uses <code>TEST_PG_URL</code>. This restricted session has already refused local listener startup, so its service scenarios remain source evidence only.</p>
+            <aside class="concept-note mt-1">
+              <h4>Scale-out limit in the current evidence</h4>
+              <p>The socket-count tracker is an in-process <code>Map</code>. These single-service tests do not establish correct Presence coordination across multiple Game instances or a distributed socket adapter.</p>
+            </aside>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/socket.ts#L276">Fresh socket on browser return · socket.ts:276</a>
+              <a href="../../../services/game/src/game/game.gateway.ts#L42">Join room before sending the baseline · game.gateway.ts:42</a>
+              <a href="../../../frontend/src/arena/socket.ts#L85">Drop stale revisions and older-round updates · socket.ts:85</a>
+              <a href="../../../frontend/src/arena/socket.test.ts#L64">Stale-update guard examples · socket.test.ts:64</a>
+              <a href="../../../packages/arena-game/test/reconnect.test.ts#L70">Server snapshot after offline window · reconnect.test.ts:70</a>
+              <a href="../../../services/game/src/game/reconnect.test.ts#L86">Real-socket/Postgres reconnect service suite · reconnect.test.ts:86</a>
+              <a href="../../../services/game/src/game/reconnect.test.ts#L250">Process-restart service cases · reconnect.test.ts:250</a>
+              <a href="../../../frontend/e2e/reconnect.spec.ts#L88">Network-drop scenario in the E2E source · reconnect.spec.ts:88</a>
+              <a href="../../../frontend/e2e/reconnect.spec.ts#L186">Hard reload and local draft scenario · reconnect.spec.ts:186</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="limits-title">
+      <h2 id="limits-title">A reconnect is not a service restart</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3>Browser disconnect, Game process still running</h3>
+          <p>Game state and the Match clock continue. The socket closes, Presence follows last-socket accounting, and the returning browser requests a current snapshot. The editor draft is a separate local concern.</p>
+        </article>
+        <article class="card">
+          <h3>Game service process restarts</h3>
+          <p>Durability and boot repair become the question instead. Follow <a href="0008-persistence-recovery.html">Lesson 8</a> for the Postgres/in-memory distinction and pending-Evaluation recovery.</p>
+        </article>
+      </div>
+      <p class="section-intro mt-1">The Game's Socket.IO room and this process-local Presence tracker are not proof of horizontal scale-out. The auth code shown here is explicitly a development seam.</p>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">What does reconnect restore, and what does it not change?</h2>
+      <p class="section-intro">Try answering without reopening the trace. Hint: name one server value, one browser-local value, and the two distinct connection/gameplay states.</p>
+      <details class="card">
+        <summary>Show a useful answer</summary>
+        <p class="mt-1">The client joins again and receives an authoritative server snapshot, so current Match phase, clock, Submissions and any Reveal can render. The editor draft is local browser state, not part of that Match snapshot. Presence follows socket counting; Player status remains the gameplay activity, and disconnect alone does not pause the Match clock or cancel a server Evaluation.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Test these independently: a participant can rejoin their Match and gets a fresh server baseline; an unrelated authenticated user cannot join that room; stale revisions do not overwrite newer state; opening a second tab and closing the first keeps the user online; in 2v2 one member can go offline without marking their teammate offline; and Player status/Match time continue during a disconnect. Keep HTTP, socket handshake, membership authorization, and production authentication as separately testable boundaries.</p>
+      </article>
+      <p class="nav-row"><a href="0008-persistence-recovery.html">← Lesson 8: persistence and recovery</a> · <a href="0010-team-collaboration.html">Next: Lesson 10, shared editing and Readiness →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. Reconnect and E2E behaviors are labeled by their source evidence; the E2E file was not run as part of this lesson change. Current authentication is a development seam, not production-login evidence.</p>
+    </footer>
+  </main>
+</body>
+</html>

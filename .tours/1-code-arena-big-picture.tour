@@ -1,0 +1,51 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "1 - Code Arena: Big Picture",
+  "isPrimary": true,
+  "steps": [
+    {
+      "title": "Welcome — how to use this course",
+      "description": "This is a beginner-friendly route through the existing game. When you come back later, open the CodeTour view or Command Palette, choose CodeTour: Start Tour, then select this first tour. Read only the highlighted file and its explanation at each stop. You can pause at any point; the numbered tours link together."
+    },
+    {
+      "file": "frontend/src/components/ArenaPage.tsx",
+      "line": 36,
+      "title": "1. The game screen",
+      "description": "ArenaPage is the main game screen. It reads the current game snapshot and manages screen-level things such as your editor draft. It can also create separate live collaboration and chat connections for 2v2. The screen displays game state; it is not the final authority on game rules."
+    },
+    {
+      "file": "frontend/src/arena/transport.ts",
+      "line": 61,
+      "title": "2. The frontend's doorway to the game",
+      "description": "ArenaTransport is a contract: it lists the actions the screen can ask for, such as run, submit, and advance. The screen can use this contract without knowing whether the current transport talks to a mock or the live server. A contract like this is often called an interface."
+    },
+    {
+      "file": "services/game/src/game/game.controller.ts",
+      "line": 12,
+      "title": "3. The server's HTTP entrance",
+      "description": "GameController receives HTTP requests, checks that the request has the expected basic shape, and passes the action onward. Think of it as the front desk: it routes a request, but the deeper game rules live elsewhere."
+    },
+    {
+      "file": "services/game/src/game/game.service.ts",
+      "line": 117,
+      "title": "4. The game service connects the pieces",
+      "description": "GameService creates ArenaEngine with the selected judge and persistence. This is where the running service assembles its major parts. Follow this file when you need to know which implementation is actually wired in."
+    },
+    {
+      "file": "packages/arena-game/src/engine.ts",
+      "line": 142,
+      "title": "5. The authority for a match",
+      "description": "ArenaEngine is the central game authority. It checks who may act, whether the match is in the right phase, and what state changes after an action. The browser can request an action, but the engine decides whether it is allowed."
+    },
+    {
+      "file": "packages/arena-game/src/records.ts",
+      "line": 45,
+      "title": "6. The main pieces of match data",
+      "description": "Start with RoundState, then look a little below at MatchRecord and SubmissionRecord. These are TypeScript descriptions of the information the game keeps: match settings and participants, each round's state, and each submitted solution."
+    },
+    {
+      "title": "Checkpoint — say the path back in your own words",
+      "description": "Without looking at the previous stops, answer: when a player clicks Submit, which part of the frontend sends the action, which server part enforces the rules, and which component executes the code? It is fine if you only remember the order. Next, take tour 2 to follow one submission in detail."
+    }
+  ]
+}

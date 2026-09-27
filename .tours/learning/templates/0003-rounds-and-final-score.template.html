@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn what resets each Code Arena Round and how the Match winner is decided.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">Which side wins these three Rounds?</h2>
+      <p class="section-intro">Side Left scores 100, then 70, then 55. Side Right scores 85, then 45, then 30. Add the scores, and write down who you think wins before opening the answer.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">Left totals 225; Right totals 160. Left wins on Match score, so no tie-break is needed. Each Round contributes its own 0–100 score to the Match total.</p>
+      </details>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now follow the state</p>
+      <h2 id="trace-title">A fresh Round, one continuing Match</h2>
+      <p class="section-intro">The Match keeps its history. Advancing clears the next Round's work area; it does not erase completed Round scores or restart the Match clock.</p>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>Each side has one current counted result per Round</h3>
+            <p>A successful competitive Submit updates that side's counted score for this Round. A newer successful score replaces the old one: 100 followed by 40 leaves 40. If the newer Judge run fails as infrastructure, the last counted score stays 70; a failed run is not a zero.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/records.ts#L40">Counted result and Round fields · records.ts:40</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L420">Failed evaluation path · evaluation-orchestration.ts:420</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L18">Successful resubmit replaces score · submit-path.test.ts:18</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L35">Failed resubmit preserves 70 · submit-path.test.ts:35</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>The hidden groups produce one Round score</h3>
+            <p>Each hidden-test group has a weight. The engine awards basis points for the passing fraction in each group, sums them, then rounds once to a whole percentage. With 70% weight at 3/4 passed and 30% weight at 2/3 passed: 5,250 + 2,000 = 7,250 basis points, which becomes 73/100.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L152">Score a Judge verdict · round-lifecycle.ts:152</a>
+              <a href="../../../packages/arena-model/src/scoring.ts#L42">Group weight and passed-test fraction · scoring.ts:42</a>
+              <a href="../../../packages/arena-model/src/scoring.ts#L55">Sum basis points and round once · scoring.ts:55</a>
+              <a href="../../../packages/arena-game/test/round-lifecycle.test.ts#L44">One of two tests earns 50% · round-lifecycle.test.ts:44</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Advancing resets the next Round, not the Match</h3>
+            <p><code>advance()</code> moves to the next pre-created Round and clears that Round's counted score, attempts, visible Run results, Reveal, and close/cutoff bookkeeping. Earlier Round records remain available for the final sum. The Match-wide start time stays the same, so the clock continues.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L117">Advance and reset Round state · round-lifecycle.ts:117</a>
+              <a href="../../../packages/arena-game/src/records.ts#L70">Match holds all Round records · records.ts:70</a>
+              <a href="../../../packages/arena-game/test/round-lifecycle.test.ts#L72">Reset behavior test · round-lifecycle.test.ts:72</a>
+              <a href="../../../packages/arena-game/test/lifecycle-1v1.test.ts#L14">Three Rounds; clock never resets · lifecycle-1v1.test.ts:14</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>After the last Round, total first; tie-break only if needed</h3>
+            <p>The Match score is the sum of its Round scores (up to 300 in the three-Round setup). If totals tie, compare the sum of the times when each side achieved its final counted score across Rounds; lower wins. If those times also tie, fewer counted submissions wins. If both still tie, the result is a draw.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L175">Compute final Match result · round-lifecycle.ts:175</a>
+              <a href="../../../packages/arena-model/src/scoring.ts#L79">Add Round scores · scoring.ts:79</a>
+              <a href="../../../packages/arena-model/src/scoring.ts#L98">Compare score, time, then submissions · scoring.ts:98</a>
+              <a href="../../../packages/arena-model/src/transitions.ts#L23">Allowed Match phase transitions · transitions.ts:23</a>
+              <a href="../../../packages/arena-game/test/lifecycle-1v1.test.ts#L39">Complete three Rounds and finalize · lifecycle-1v1.test.ts:39</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="tie-title">
+      <h2 id="tie-title">The tie-break order</h2>
+      <div class="table-scroll" role="region" aria-label="Match winner decision order" tabindex="0">
+        <table class="data-table">
+          <caption>Stop at the first difference. Later rules matter only when earlier values are equal.</caption>
+          <thead><tr><th scope="col">Order</th><th scope="col">Compare</th><th scope="col">Winner</th><th scope="col">Test example</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Total score across Rounds</td><td>Higher total</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L29">225 beats 160</a></td></tr>
+            <tr><td>2</td><td>Total time to achieve each Round's final score</td><td>Lower total time</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L40">Equal 220; Left finished earlier</a></td></tr>
+            <tr><td>3</td><td>Counted submissions</td><td>Fewer</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L62">Equal scores and times; Right submitted fewer</a></td></tr>
+            <tr><td>4</td><td>All three values still equal</td><td>Draw</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L73">Exact tie</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="concept-note mt-1">
+        <h3>What these tests prove—and their limit</h3>
+        <p>The scoring tests build concrete 1v1 examples for each comparison step. They show those cases follow the current rules; they are not a proof that every possible Match history has been tested. The pure <code>compareSides()</code> function is the shared rule used by final scoring.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">A new Round begins. What becomes empty—and what is still available when the Match ends?</h2>
+      <p class="section-intro">Answer without looking: name at least three reset fields, what the Match score adds up, and the tie-break order.</p>
+      <details class="card">
+        <summary>Show a useful answer hint</summary>
+        <p class="mt-1">The next Round's counted score, attempts, Run results, Reveal, and cutoff flags reset. Earlier Rounds remain. Match score adds counted Round scores; ties go to lower final-score time, then fewer submissions, then draw.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Write tests showing (1) a successful resubmit replaces the current Round score, (2) a judge-infrastructure failure keeps the old score, and (3) advancing clears only the next Round's temporary state while keeping earlier scores and the Match clock. Then test each final tie-break separately.</p>
+      </article>
+      <p class="nav-row"><a href="0002-reveal-cutoff.html">← Lesson 2: Reveal cutoff</a> · <a href="0004-lobby-to-match.html">Next: Lesson 4, Lobby to Match →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. The score rules described here come from the current source and cited tests; a separate rewrite still needs its own tests.</p>
+    </footer>
+  </main>
+</body>
+</html>

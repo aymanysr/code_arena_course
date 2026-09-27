@@ -1,0 +1,62 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "2 - Follow One Submission",
+  "steps": [
+    {
+      "title": "Start with one action",
+      "description": "We will follow Submit from the button to the saved result. Keep the distinction in mind: Run checks public examples so you can experiment; Submit asks the server to judge a result for the round."
+    },
+    {
+      "file": "frontend/src/components/EditorToolbar.tsx",
+      "line": 46,
+      "title": "1. Run and Submit are different actions",
+      "description": "The toolbar calls separate callbacks for Run and Submit. Run is for quick feedback. Submitting again replaces your current scored result for this round, as the warning below the buttons says."
+    },
+    {
+      "file": "frontend/src/arena/transport.ts",
+      "line": 84,
+      "title": "2. The action crosses the transport boundary",
+      "description": "The transport exposes run() and submit() as separate operations. This lets the screen ask for an action without having to know the details of HTTP or sockets."
+    },
+    {
+      "file": "services/game/src/game/game.controller.ts",
+      "line": 55,
+      "title": "3. The server receives Run or Submit",
+      "description": "Compare the /run route here with the /submit route a little below. The controller checks basic input limits, then delegates to GameService. It does not decide the score itself."
+    },
+    {
+      "file": "services/game/src/game/game.service.ts",
+      "line": 226,
+      "title": "4. GameService forwards the action",
+      "description": "run() and submit() delegate to ArenaEngine. After a successful submit, GameService may also publish the reveal when the round's reveal condition has been met."
+    },
+    {
+      "file": "packages/arena-game/src/engine.ts",
+      "line": 511,
+      "title": "5. ArenaEngine checks and records the submission",
+      "description": "Before judging, the engine checks match membership, phase, time, and submission rules. In 2v2 it takes the current approved team document from server-owned collaboration state; it does not trust a different source string sent by the browser. It assigns stable IDs and records the submission so retries can be recognized."
+    },
+    {
+      "file": "packages/arena-game/src/evaluation-orchestration.ts",
+      "line": 172,
+      "title": "6. Evaluation work is claimed before execution",
+      "description": "The orchestrator claims the pending evaluation through persistence, then asks a GameJudge to run the hidden test suite. This separates the game workflow (ownership, retries, recording) from the code-execution adapter."
+    },
+    {
+      "file": "packages/arena-game/src/judge.ts",
+      "line": 108,
+      "title": "7. The judge returns verdicts, not match decisions",
+      "description": "GameJudge is the execution contract: it runs source and returns verdicts. It does not own match phases, decide whether a submission is allowed, or publish the round reveal."
+    },
+    {
+      "file": "packages/arena-game/test/submit-path.test.ts",
+      "line": 6,
+      "title": "8. See the journey expressed as behavior",
+      "description": "This test file exercises the submit path. Tests are useful reading tools: they show a concrete action and the result the project expects, without requiring you to understand every helper first."
+    },
+    {
+      "title": "Checkpoint — explain the difference",
+      "description": "In your own words: what does Run do that Submit does not? Why does the engine create a submission record before relying on the judge's answer? Then continue to tour 3 for match state and round rules."
+    }
+  ]
+}

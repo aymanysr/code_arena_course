@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace a checked problem record into the editor and follow Run to the visible tests.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">You edit a solution and press Run. Does that test the hidden cases or change your round score?</h2>
+      <p class="section-intro">Before opening the hint, write down where the problem and starter code come from, then guess which tests Run sends to the judge.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">The problem bank supplies the prompt, examples, starter code and separate visible/hidden suites. The current editor begins with your saved local draft or the selected starter. Run sends that code through the visible suite and updates test status; it does not create a scored submission. Submit is the path that evaluates the sealed hidden suite.</p>
+      </details>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now follow the data and the action</p>
+      <h2 id="trace-title">Problem data, editor draft, and Run are three different things</h2>
+      <p class="section-intro">Follow the links in order. We are tracing the checked problem records and live frontend—not treating the frozen <code>prototype/game-ui/09-arena.html</code> interaction reference as runtime evidence. Notice both what is present and what the current code leaves out.</p>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>A checked JSON record defines the challenge</h3>
+            <p>The problem schema requires a statement, examples, constraints, language starters, visible tests, hidden groups, and provenance. In <em>Even Ledger</em>, the public examples explain the task; the visible suite has three small cases; the hidden groups cover additional inputs and contribute weights during scoring.</p>
+            <p class="mt-1"><em>Double It</em> is a different execution shape: its record declares a standard-input program. The data format describes what to run; it is not itself the screen or the judge.</p>
+            <div class="source-links">
+              <a href="../../../packages/problem-bank/schema.json#L6">Required fields · schema.json:6</a>
+              <a href="../../../packages/problem-bank/problems/even-ledger.json#L30">Constraints, starters, visible and hidden cases · even-ledger.json:30</a>
+              <a href="../../../packages/problem-bank/problems/double-it.json#L27">Standard-input problem record · double-it.json:27</a>
+              <a href="../../../packages/arena-game/src/file-bank.ts#L10">FileBank loads records and separates test suites · file-bank.ts:10</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>The server snapshot gives the Arena its public problem view</h3>
+            <p><code>FileBank</code> maps the record into a statement, examples, starters, and separate visible/hidden collections. The engine snapshot sends title, description, examples and starters, plus visible test inputs. It does not send the hidden groups.</p>
+            <aside class="concept-note mt-1">
+              <h4>A real gap in the current screen</h4>
+              <p>The JSON schema requires <code>constraints</code>, and Even Ledger has them, but <code>FileBank</code> does not put constraints in its returned statement. The public snapshot type and current <code>ProblemPanel</code> therefore cannot display them. This is evidence about the current code—not a claim that the constraints are absent from the problem record.</p>
+            </aside>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/file-bank.ts#L28">What FileBank puts in the returned problem · file-bank.ts:28</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L834">Public snapshot fields · engine.ts:834</a>
+              <a href="../../../frontend/src/arena/types.ts#L18">Frontend problem shape · types.ts:18</a>
+              <a href="../../../frontend/src/components/ProblemPanel.tsx#L3">Fields the player sees · ProblemPanel.tsx:3</a>
+              <a href="../../../frontend/src/components/ArenaWorkspace.tsx#L24">Problem panel and editor composition · ArenaWorkspace.tsx:24</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>The editor works with a draft; the toolbar chooses the action</h3>
+            <p>For a local 1v1 editor, <code>ArenaPage</code> starts from this round/problem/language's saved browser draft or the starter, then stores edits in local storage. In live 2v2, the shared document is authoritative instead. <code>EditorAdapter</code> hides CodeMirror behind a small editor contract. <code>CodeWorkspace</code> reads the current source and language for either Run or Submit.</p>
+            <p class="mt-1">One UI detail to inspect: <code>TestPanel</code>'s “Custom input” box only updates its own component state. It is not passed to the transport, so pressing Run still sends the editor source against the full visible suite; the box does not currently execute that typed input.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L36">Starter and local draft initialization · ArenaPage.tsx:36</a>
+              <a href="../../../frontend/src/components/ArenaPage.tsx#L137">Draft reset and persistence · ArenaPage.tsx:137</a>
+              <a href="../../../frontend/src/components/EditorAdapter.tsx#L11">Editor adapter contract · EditorAdapter.tsx:11</a>
+              <a href="../../../frontend/src/components/EditorToolbar.tsx#L46">Run and Submit buttons · EditorToolbar.tsx:46</a>
+              <a href="../../../frontend/src/components/CodeWorkspace.tsx#L87">Current source goes to Run or Submit · CodeWorkspace.tsx:87</a>
+              <a href="../../../frontend/src/components/TestPanel.tsx#L18">Visible-test status and local custom-input state · TestPanel.tsx:18</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Run travels to the visible suite; Submit takes the scored path</h3>
+            <p>The live transport posts Run to the Game endpoint. The controller checks the request shape, the service delegates, and <code>ArenaEngine.run()</code> authorizes the player and phase, then passes only <code>problem.visible</code> to the judge. It records visible statuses for the panel and returns the side to coding. It does not count a submission, change the score, or publish Reveal.</p>
+            <p class="mt-1">Submit is different: its evaluation is prepared with the hidden groups. Client-facing tests check that hidden input and expected values do not leak into snapshots, receipts, events, or Reveal (Reveal publishes group results, not the raw cases).</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/socket.ts#L443">Live Run request · socket.ts:443</a>
+              <a href="../../../services/game/src/game/game.controller.ts#L55">Run HTTP route · game.controller.ts:55</a>
+              <a href="../../../services/game/src/game/game.service.ts#L226">Service delegates to engine · game.service.ts:226</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L442">Run selects visible tests and saves statuses · engine.ts:442</a>
+              <a href="../../../packages/arena-game/test/run-path.test.ts#L26">Run receives visible IDs; no hidden markers in snapshot · run-path.test.ts:26</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L642">Submit prepares hidden groups for evaluation · engine.ts:642</a>
+              <a href="../../../packages/arena-game/test/sealing.test.ts#L10">Client surfaces stay sealed; Reveal omits raw cases · sealing.test.ts:10</a>
+              <a href="../../../packages/arena-game/test/compiled-bank.test.ts#L51">Real problem records with compiled-container judging · compiled-bank.test.ts:51</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="limits-title">
+      <h2 id="limits-title">A green Run is a clue, not a guarantee</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3>What visible tests tell you</h3>
+          <p>Your current code passed the public cases that Run exercised. This helps catch mistakes quickly, but hidden groups can still find edge cases or produce a lower score at Submit.</p>
+        </article>
+        <article class="card">
+          <h3>What each test proves</h3>
+          <p><code>run-path.test.ts</code> uses the engine's test setup to check routing, state, and suite separation. <code>compiled-bank.test.ts</code> is the end-to-end path using real records and isolated containers. Do not treat a unit test with a fake judge as evidence that the container sandbox itself is secure.</p>
+        </article>
+      </div>
+      <p class="source-links mt-1"><a href="../../../packages/arena-game/test/run-path.test.ts#L4">Run behavior cases · run-path.test.ts:4</a> <a href="../../../packages/arena-game/test/compiled-bank.test.ts#L51">Compiled execution cases · compiled-bank.test.ts:51</a></p>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">Without looking: what data starts the editor, and what does Run send to the judge?</h2>
+      <p class="section-intro">Try to retell the path in one sentence before opening the answer.</p>
+      <details class="card">
+        <summary>Show a useful answer</summary>
+        <p class="mt-1">The server snapshot supplies the selected starter and public problem fields; the editor keeps the current local draft (or the shared 2v2 document); Run sends that source and language to the Game service, which asks the judge to run the visible suite only. Submit follows the separate hidden evaluation and scoring path.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>In your own implementation, test these contracts separately: (1) a selected problem provides a language starter; (2) editing updates the source used by Run; (3) Run executes visible tests and updates only visible statuses; (4) hidden inputs never appear in the client snapshot; (5) Submit evaluates hidden groups and is the action that can produce a score. Add a test for constraints if you decide they should appear in the prompt.</p>
+      </article>
+      <p class="nav-row"><a href="0004-lobby-to-match.html">← Lesson 4: Lobby to Match</a> · <a href="0006-evaluation-retries.html">Next: Lesson 6, Evaluation retries →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson describes current problem, editor, and Run behavior. It proposes no UI change and makes no claim that visible tests prove correctness against hidden tests.</p>
+    </footer>
+  </main>
+</body>
+</html>

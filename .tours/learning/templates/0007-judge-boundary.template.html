@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Separate Game authority, Judge execution, resource sandboxing, and hidden-case confidentiality.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">The Judge runs submitted code in Docker. Does that automatically keep hidden test cases secret from that code?</h2>
+      <p class="section-intro">Also ask: who decides whether the player is allowed to Submit—the Game or the Judge?</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">The Game authorizes and records the action; <code>GameJudge</code> executes code and returns verdicts. Container limits can restrict resources and network access, but that alone does not prove that test data is hidden from the submitted program.</p>
+      </details>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now follow the trust boundaries</p>
+      <h2 id="trace-title">“Not sent to the browser” and “secret from the program” are different guarantees</h2>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The Game chooses the judge; the interface only defines execution</h3>
+            <p><code>GameJudge</code> has two jobs: run visible tests and evaluate sealed groups. It owns no Match state, score counting, or Reveal. The Game service currently defaults to <code>ContainerJudge</code>; <code>JUDGE_BACKEND=judge0</code> selects the optional Judge0 adapter, which requires its configured URL. It does not silently switch providers.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/judge.ts#L107">Execution-only contract · judge.ts:107</a>
+              <a href="../../../services/game/src/game/game.service.ts#L145">Default ContainerJudge and optional Judge0 wiring · game.service.ts:145</a>
+              <a href="../../../packages/arena-game/src/container-judge.ts#L196">Visible and sealed methods share the adapter · container-judge.ts:196</a>
+              <a href="../../../packages/arena-game/src/judge0.ts#L88">Judge0 stays behind the same interface · judge0.ts:88</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>The container has useful resource restrictions</h3>
+            <p>The current Docker command drops capabilities, disables networking, sets CPU/memory/process limits, uses a read-only root filesystem with temporary scratch space, and runs as <code>nobody</code>. These are meaningful containment controls. They are not proof that an attacker cannot read data that the runner itself places inside the job.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/container-judge.ts#L260">Current Docker job flags · container-judge.ts:260</a>
+              <a href="../../../packages/arena-game/src/container-judge.ts#L346">Compile/run script and per-case execution · container-judge.ts:346</a>
+              <a href="../../../packages/arena-game/test/container-judge.test.ts#L62">Missing launcher is infrastructure failure, not a verdict · container-judge.test.ts:62</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Current source suggests hidden cases are readable by submitted code</h3>
+            <aside class="concept-note mt-1">
+              <h4>Security caveat: source-review inference, not an executed exploit</h4>
+              <p>The current job passes base64-encoded <code>INP</code>/<code>EXP</code> case blobs as environment variables and materializes input/expected files under <code>/scratch</code>. For Python snippets, the runner imports the submitted module into the Python driver process that reads those files. For standard-input programs, the compiled program runs as the same job user in that directory. From these code paths, untrusted submissions appear able to inspect or decode the hidden-case blobs. Base64 is encoding, not encryption. No malicious program was run as part of this lesson work.</p>
+              <p class="mt-1">The game-level sealing test still matters: it checks that raw hidden material is absent from snapshots, receipts, events, and Reveal. But that is the browser boundary; it does not test whether contestant code inside the Judge job can read its own environment/files.</p>
+            </aside>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/container-judge.ts#L284">Case material enters the container environment · container-judge.ts:284</a>
+              <a href="../../../packages/arena-game/src/container-judge.ts#L64">Python driver loads submitted source · container-judge.ts:64</a>
+              <a href="../../../packages/arena-game/src/container-judge.ts#L364">Case blobs become readable files and programs run from scratch · container-judge.ts:364</a>
+              <a href="../../../packages/arena-game/test/sealing.test.ts#L10">What client-surface sealing actually asserts · sealing.test.ts:10</a>
+              <a href="../../../packages/arena-game/test/judge-security.test.ts#L191">Environment test checks host-secret-like names only · judge-security.test.ts:191</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Evidence has scope—and some suites could not run here</h3>
+            <p>The Docker security tests exercise resource attacks, filesystem behavior, egress and cleanup; the environment test does not check case-blob confidentiality. Judge0 unit tests use a scripted HTTP client, so they verify adapter mapping and limits, not a deployed Judge0 service or its isolation. The isolation decision/results are a dated Linux/aarch64 spike record, not a current run of the production code.</p>
+            <p class="mt-1">This session cannot access the Docker socket, so the real-container suites are not counted as passing here. The missing-binary unit test can still validate the error classification without launching a real container.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/test/judge-security.test.ts#L18">Current Docker attack cases · judge-security.test.ts:18</a>
+              <a href="../../../packages/arena-game/test/judge0.test.ts#L61">Mock-client Judge0 adapter tests · judge0.test.ts:61</a>
+              <a href="../../../packages/arena-game/src/judge0.ts#L15">Judge0 request disables provider networking · judge0.ts:15</a>
+              <a href="../../../spikes/judge-isolation/DECISION.md#L1">Historical isolation decision (spike) · DECISION.md:1</a>
+              <a href="../../../spikes/judge-isolation/results.md#L1">Measured spike results and platform · results.md:1</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="limits-title">
+      <h2 id="limits-title">What the evidence can—and cannot—support</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3>Supported by source and the sealing test</h3>
+          <p>The default implementation uses a Docker job with concrete resource/network restrictions. The engine-facing test checks that raw hidden markers do not appear on client DTO/event/reveal surfaces.</p>
+        </article>
+        <article class="card">
+          <h3>Not established</h3>
+          <p>This task did not execute Docker tests; old spike measurements do not substitute for current runtime evidence; and neither those controls nor the client-boundary test establish secret hidden cases against hostile submitted code. Keep that confidentiality claim unresolved until isolated by design and a malicious-code regression.</p>
+        </article>
+      </div>
+      <aside class="concept-note mt-1">
+        <h3>Why the course records the caveat</h3>
+        <p>This is a current-source observation for learning, not an implemented fix or a new 42-subject module claim. Do not treat the existence of a “sandbox” as proof of every security property.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">Which layer rejects an illegal Submit, and what separate question must the sandbox answer?</h2>
+      <p class="section-intro">Name both the game-rule boundary and the hostile-code boundary.</p>
+      <details class="card">
+        <summary>Show a useful answer</summary>
+        <p class="mt-1">The Game engine decides whether Submit is legal and updates Match state. The Judge only executes code and returns verdicts. Separately, the execution environment must prevent untrusted code from reading host secrets, escaping resource limits, reaching forbidden services, and learning hidden test inputs/expected values. The current source supports some of those controls but does not establish all of them.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>First add a hostile Python and compiled-program test that attempts to inspect every environment variable and file available to the submitted program, then verify it cannot recover any hidden input or expected value. Keep this separate from tests for network denial, resource limits, filesystem escape, and “no host credentials.” Run those attacks against the actual container configuration, and do not claim confidentiality until the case data is outside the contestant-readable process/filesystem boundary.</p>
+      </article>
+      <p class="nav-row"><a href="0006-evaluation-retries.html">← Lesson 6: Evaluation retries</a> · <a href="0008-persistence-recovery.html">Next: Lesson 8, persistence and recovery →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson records the current implementation and a source-level confidentiality concern; it changes no game behavior. Docker suites were not run in this session and are not described as passing.</p>
+    </footer>
+  </main>
+</body>
+</html>

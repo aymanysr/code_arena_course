@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace how players enter a Code Arena Lobby and how the Game service creates a Match.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">A 1v1 invite room has two players and both are Ready. Can the guest start—and can either player submit immediately?</h2>
+      <p class="section-intro">Write down who has permission to start, what still has to be created, and which part of this decision belongs to the server.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">Only the room host may start. The server rechecks membership, full sides, and everyone's readiness even if the UI button is enabled. Starting creates a Match in <code>MATCH_FOUND</code>; the first Round still needs its own start action before coding can begin.</p>
+      </details>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now trace the boundaries</p>
+      <h2 id="trace-title">A Lobby groups players; the Game service creates the Match</h2>
+      <p class="section-intro">The screen collects choices and displays membership/readiness. The backend checks those choices and owns the resulting Match identity.</p>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The screen asks the Lobby client to act</h3>
+            <p><code>LobbyPage</code> handles the clicks. <code>LobbyClient</code> turns them into HTTP requests such as <code>/lobby/rooms</code>, <code>/lobby/rooms/join</code>, <code>/ready</code>, and <code>/start</code>. The button can guide the player, but it is not the authority.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/components/LobbyPage.tsx#L90">Create / join / ready / start handlers · LobbyPage.tsx:90</a>
+              <a href="../../../frontend/src/components/LobbyPage.tsx#L170">UI's host-and-readiness display gate · LobbyPage.tsx:170</a>
+              <a href="../../../frontend/src/arena/lobby.ts#L84">Lobby HTTP client · lobby.ts:84</a>
+              <a href="../../../services/game/src/game/lobby.controller.ts#L38">Backend room routes · lobby.controller.ts:38</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>There are two current ways to gather players</h3>
+            <p><strong>Private room:</strong> the host creates an invite code; players join it and see the room's members, sides, and Ready flags. For 1v1, host starts Left and the guest joins Right. In 2v2, each side needs two members.</p>
+            <p class="mt-1"><strong>Public queue:</strong> a waiting entry is matched when enough players of that mode are available (two for 1v1; four for 2v2). The current matcher orders waiting rows by join time, creates the Match, then marks queue entries matched.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/lobby.ts#L291">Public queue matching · lobby.ts:291</a>
+              <a href="../../../packages/arena-game/src/lobby.ts#L357">Create private room · lobby.ts:357</a>
+              <a href="../../../packages/arena-game/src/lobby.ts#L426">Join private room by code · lobby.ts:426</a>
+              <a href="../../../packages/arena-game/test/lobby.test.ts#L67">Two-player queue case · lobby.test.ts:67</a>
+              <a href="../../../packages/arena-game/test/lobby.test.ts#L109">Four-player queue case · lobby.test.ts:109</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>The server checks who may see the room and who may start</h3>
+            <p>Room reads and room socket subscriptions are for members only. To start a private room, the backend checks that the caller is the host, every player slot is filled on the correct sides, and every member is Ready. A direct HTTP request gets these same checks; bypassing the disabled UI button does not bypass the rule.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/game.service.ts#L364">Authorize room membership · game.service.ts:364</a>
+              <a href="../../../services/game/src/game/lobby.gateway.ts#L65">Authorize live room subscription · lobby.gateway.ts:65</a>
+              <a href="../../../services/game/src/game/lobby.controller.ts#L95">Private-room start route · lobby.controller.ts:95</a>
+              <a href="../../../packages/arena-game/src/lobby.ts#L685">Host, capacity, and Ready gate · lobby.ts:685</a>
+              <a href="../../../packages/arena-game/test/lobby.test.ts#L215">Gate tests for host / fullness / Ready · lobby.test.ts:215</a>
+              <a href="../../../services/game/src/game/lobby.test.ts#L68">Non-members cannot read or subscribe · lobby.test.ts:68</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Game creates a Match, then tells the players to enter it</h3>
+            <p><code>GameService</code> selects the problem versions and calls <code>ArenaEngine.createMatch()</code> with the mode and participant-to-side mapping. The private room becomes matched, and a member-targeted <code>lobby.matchFound</code> event carries the new Match ID. The Match begins at <code>MATCH_FOUND</code>; the first Round has not started yet.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/game.service.ts#L348">Create Match from private room · game.service.ts:348</a>
+              <a href="../../../services/game/src/game/game.service.ts#L299">Create Match from public queue · game.service.ts:299</a>
+              <a href="../../../services/game/src/game/lobby.gateway.ts#L28">Send events to the selected users · lobby.gateway.ts:28</a>
+              <a href="../../../services/game/src/game/lobby.test.ts#L143">Queue Match begins at MATCH_FOUND · lobby.test.ts:143</a>
+              <a href="../../../frontend/e2e/live-lobby.spec.ts#L38">Private invite-to-Arena browser journey · live-lobby.spec.ts:38</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="truth-title">
+      <h2 id="truth-title">Current code and intended first-release scope disagree about Quick Play</h2>
+      <aside class="concept-note">
+        <h3>Keep this discrepancy visible</h3>
+        <p>The current UI, Lobby service, and queue tests include automatic public matchmaking. But <code>.scratch/code-arena/spec.md:19</code> says invitation-code rooms are the first-release entry and automatic matchmaking is not in scope. This course records what the checked code currently does; it does <strong>not</strong> approve expanding release scope or claim that the spec has been updated. Resolve that product decision separately before treating Quick Play as intended release behavior.</p>
+      </aside>
+      <p class="section-intro mt-1">There is also a development-auth boundary: this Lobby client sends an <code>x-dev-user-id</code> header, which the Game service reads through its development principal seam. That is not evidence of the finished signup/login system.</p>
+      <p class="source-links"><a href="../../../frontend/src/arena/lobby.ts#L39">Development identity header · lobby.ts:39</a> <a href="../../../services/game/src/game/lobby.controller.ts#L14">Controller requires a principal · lobby.controller.ts:14</a></p>
+    </section>
+
+    <section class="section" aria-labelledby="tests-title">
+      <h2 id="tests-title">What the tests show</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3>Domain tests</h3>
+          <p>The in-memory Lobby tests check queue capacity and side assignment, private invite joins, start rejection for the wrong host or an unready/not-full room, and that only one Match is created under simultaneous start requests.</p>
+          <p class="source-links"><a href="../../../packages/arena-game/test/lobby.test.ts#L67">Queue tests · lobby.test.ts:67</a> <a href="../../../packages/arena-game/test/lobby.test.ts#L320">Concurrent starts · lobby.test.ts:320</a></p>
+        </article>
+        <article class="card">
+          <h3>Service and browser tests</h3>
+          <p>The Game service test crosses HTTP and WebSocket boundaries for private rooms and public 1v1 queue formation. The browser journeys exercise invite-room readiness and public queue entry. A test file is evidence for the cases it asserts; it does not settle the spec disagreement or prove production authentication.</p>
+          <p class="mt-1">The <code>live-lobby.spec.ts</code> Playwright journeys are linked as scenario source, not as a pass from this lesson update.</p>
+          <p class="source-links"><a href="../../../services/game/src/game/lobby.test.ts#L112">HTTP queue match · lobby.test.ts:112</a> <a href="../../../services/game/src/game/lobby.test.ts#L150">HTTP/WebSocket private flow · lobby.test.ts:150</a> <a href="../../../frontend/e2e/live-lobby.spec.ts#L107">Browser queue flow · live-lobby.spec.ts:107</a></p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">Everyone is Ready, but the guest sends <code>POST /lobby/rooms/:id/start</code> directly. What happens?</h2>
+      <p class="section-intro">Answer before opening the hint. Include the part the UI plays and the separate check the backend must perform.</p>
+      <details class="card">
+        <summary>Show a useful answer hint</summary>
+        <p class="mt-1">The backend rejects the guest because only the room owner can start. The UI's disabled button is just guidance; the domain gate also verifies capacity and readiness before it asks the Arena engine to create the Match. Then the Match is in <code>MATCH_FOUND</code>, waiting for the first Round to begin.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Write separate tests for the boundary and the rule: a non-member cannot read or subscribe to a private room; a non-host cannot start; a host cannot start while slots are empty or someone is not Ready; a valid host request creates one Match only. For the public queue, first decide whether that behavior belongs in your approved product scope.</p>
+      </article>
+      <p class="nav-row"><a href="0003-rounds-and-final-score.html">← Lesson 3: Round scores</a> · <a href="0005-problem-editor-run.html">Next: Lesson 5, Problem and Run →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson describes current implementation evidence and flags its scope discrepancy; it does not change product behavior or the 42-subject module claims.</p>
+    </footer>
+  </main>
+</body>
+</html>

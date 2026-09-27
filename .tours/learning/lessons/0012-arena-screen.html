@@ -1,0 +1,2314 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace how the current Match snapshot becomes the visible Code Arena screen.">
+  <meta name="course-lesson-id" content="0012-arena-screen">
+  <title>Code Arena · Lesson 12 · The Arena screen is a view of Match state—not another game engine</title>
+  <style>
+@layer reset, base, layout, components, utilities;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  p,
+  ul,
+  ol,
+  figure {
+    margin: 0;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --bg: #f2f1e9;
+    --surface: #fffdf7;
+    --surface-soft: #e9eee8;
+    --border: #cdd6d1;
+    --border-strong: #9eafa7;
+    --text: #172623;
+    --text-dim: #465a53;
+    --teal: #086a60;
+    --teal-soft: #d9eee7;
+    --amber: #8a5a0a;
+    --amber-soft: #f6e9c9;
+    --red: #922e27;
+    --red-soft: #f8e1dc;
+    --shadow: 0 1rem 2.5rem rgb(30 50 44 / 8%);
+    --font-body: "DM Sans", "Avenir Next", system-ui, sans-serif;
+    --font-code: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: 1.55;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  body {
+    min-width: 20rem;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  a {
+    color: var(--teal);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.16em;
+  }
+
+  a:hover {
+    color: var(--amber);
+  }
+
+  :where(a, button, input, select):focus-visible {
+    outline: 3px solid var(--amber);
+    outline-offset: 3px;
+  }
+
+  code,
+  kbd,
+  .mono {
+    font-family: var(--font-code);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111b1a;
+      --surface: #1a2926;
+      --surface-soft: #243733;
+      --border: #3c554e;
+      --border-strong: #69857a;
+      --text: #e7f0eb;
+      --text-dim: #bccbc3;
+      --teal: #73d1ba;
+      --teal-soft: #1e433a;
+      --amber: #f0c36e;
+      --amber-soft: #41351e;
+      --red: #ffaaa0;
+      --red-soft: #482522;
+      --shadow: 0 1rem 2.5rem rgb(0 0 0 / 24%);
+    }
+  }
+}
+
+@layer layout {
+  .page {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding-block: clamp(1.5rem, 4vw, 4rem) 5rem;
+  }
+
+  .hero {
+    max-width: 62ch;
+    padding: 0;
+  }
+
+  .section {
+    margin-block-start: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .page#lesson {
+    width: min(100% - 2rem, 54rem);
+  }
+
+  .page#lesson > .section {
+    max-width: 68ch;
+    margin-block-start: 2.25rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--border);
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-block-start: 0.75rem;
+  }
+
+  .split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-list {
+    display: grid;
+    gap: 0.8rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .table-scroll {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+    overscroll-behavior-inline: contain;
+  }
+
+  @media (max-width: 54rem) {
+    .metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .page {
+      width: min(100% - 1rem, 72rem);
+    }
+
+    .page#lesson {
+      width: min(100% - 1rem, 54rem);
+    }
+
+    .metrics {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+@layer components {
+  .skip-link {
+    position: fixed;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 0.5rem;
+    z-index: 5;
+    transform: translateY(-160%);
+    padding: 0.7rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--text);
+    color: var(--surface);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  .eyebrow,
+  .kicker {
+    color: var(--teal);
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    max-width: 20ch;
+    margin-block: 0.65rem 0.8rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .hero-copy {
+    max-width: 67ch;
+    color: var(--text-dim);
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+  }
+
+  .nav-row,
+  .button-row,
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+  }
+
+  .nav-row {
+    margin-block-start: 1rem;
+  }
+
+  .primary-button {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--teal);
+    border-radius: 0.55rem;
+    background: var(--teal);
+    color: var(--surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .primary-button:hover {
+    background: var(--text);
+    color: var(--surface);
+  }
+
+  .focus-panel {
+    border-block: 1px solid var(--border);
+  }
+
+  .focus-panel > summary {
+    display: flex;
+    min-block-size: 3.25rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.65rem;
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .focus-panel > summary::marker {
+    color: var(--teal);
+  }
+
+  .focus-panel-content {
+    padding-block: 0.5rem 1rem;
+  }
+
+  .card {
+    min-width: 0;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+    background: var(--surface-soft);
+  }
+
+  .metric {
+    display: grid;
+    gap: 0.2rem;
+    align-content: start;
+    min-height: 5rem;
+    padding-block: 0.5rem;
+    border-block-end: 1px solid var(--border);
+  }
+
+  .metric strong {
+    font-family: var(--font-code);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric span {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .section h2 {
+    margin-block-end: 0.7rem;
+    font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+    letter-spacing: -0.035em;
+  }
+
+  .section-intro {
+    max-width: 75ch;
+    margin-block-end: 1.1rem;
+    color: var(--text-dim);
+  }
+
+  .page#lesson > .hero {
+    max-width: 68ch;
+  }
+
+  .page#lesson .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page#lesson .source-step {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    gap: 0.8rem;
+    padding: 1.1rem 0;
+    border: 0;
+    border-block-end: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .page#lesson .step-number {
+    width: auto;
+    aspect-ratio: auto;
+    justify-content: start;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--teal);
+  }
+
+  .page#lesson .concept-note {
+    border: 0;
+    border-inline-start: 3px solid var(--amber);
+    border-radius: 0;
+    background: var(--amber-soft);
+  }
+
+  .page#lesson > .nav-row {
+    max-width: 68ch;
+    justify-content: space-between;
+    margin-block-start: 2rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--border);
+  }
+
+  .page#lesson > .nav-row a:last-child {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding: 0.55rem 0.9rem;
+    border-radius: 0.55rem;
+    background: var(--teal);
+    color: var(--surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .page#lesson > .nav-row a:last-child:hover {
+    background: var(--text);
+  }
+
+  .page#lesson > .footer-note {
+    max-width: 68ch;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.8rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .status-current {
+    color: var(--teal);
+    background: var(--teal-soft);
+  }
+
+  .status-stale {
+    color: var(--red);
+    background: var(--red-soft);
+  }
+
+  .status-open {
+    color: var(--amber);
+    background: var(--amber-soft);
+  }
+
+  .filters {
+    margin-block: 1.1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+  }
+
+  label {
+    display: grid;
+    gap: 0.3rem;
+    min-width: min(100%, 14rem);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+
+  input,
+  select,
+  button {
+    min-block-size: 2.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.55rem;
+    font: inherit;
+  }
+
+  input,
+  select {
+    min-width: 14rem;
+    padding-inline: 0.75rem;
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  button {
+    padding: 0.55rem 0.9rem;
+    background: var(--teal);
+    color: var(--surface);
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  button:hover {
+    filter: brightness(1.08);
+  }
+
+  button[aria-pressed="true"] {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+
+  .secondary-button {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .feedback {
+    min-height: 3rem;
+    margin-block: 0.9rem;
+    padding: 0.8rem 1rem;
+    border-inline-start: 4px solid var(--border-strong);
+    border-radius: 0.35rem;
+    background: var(--surface-soft);
+  }
+
+  .feedback[data-kind="correct"] {
+    border-color: var(--teal);
+  }
+
+  .feedback[data-kind="hint"] {
+    border-color: var(--amber);
+  }
+
+  .data-table {
+    width: 100%;
+    min-width: 66rem;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .data-table caption {
+    padding: 0.9rem 1rem;
+    color: var(--text-dim);
+    text-align: start;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.8rem 0.9rem;
+    border-block-end: 1px solid var(--border);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .data-table th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--surface-soft);
+    color: var(--text-dim);
+    font-family: var(--font-code);
+    font-size: 0.76rem;
+  }
+
+  .data-table tr[hidden] {
+    display: none;
+  }
+
+  .file-link {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--teal);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    text-align: start;
+  }
+
+  .file-link:hover {
+    background: transparent;
+    color: var(--amber);
+    filter: none;
+    text-decoration: underline;
+  }
+
+  .file-link code {
+    overflow-wrap: anywhere;
+  }
+
+  .reference-link {
+    min-block-size: 2.75rem;
+    padding: 0.25rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--teal);
+    font-size: 0.86rem;
+    font-weight: 650;
+    text-align: start;
+  }
+
+  .reference-link:hover {
+    background: transparent;
+    color: var(--amber);
+    filter: none;
+    text-decoration: underline;
+  }
+
+  .source-dialog {
+    position: fixed;
+    inset-block-start: 1rem;
+    inset-inline-start: auto;
+    inset-inline-end: 1rem;
+    width: min(34rem, calc(100% - 2rem));
+    max-width: none;
+    max-height: 72vh;
+    max-height: 72dvh;
+    margin: 0;
+    padding: clamp(0.85rem, 2vw, 1.5rem);
+    border: 1px solid var(--border-strong);
+    border-radius: 1rem;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .source-dialog::backdrop {
+    background: rgb(8 14 13 / 8%);
+  }
+
+  .source-dialog-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    padding-block-end: 0.8rem;
+    border-block-end: 1px solid var(--border);
+  }
+
+  .source-dialog-heading {
+    min-width: 0;
+  }
+
+  .source-dialog h2 {
+    margin-block: 0.25rem;
+    font-size: clamp(1.15rem, 2.5vw, 1.65rem);
+    overflow-wrap: anywhere;
+  }
+
+  .source-dialog-path code {
+    overflow-wrap: anywhere;
+  }
+
+  .source-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .source-dialog-actions form {
+    margin: 0;
+  }
+
+  .source-editor-link {
+    display: inline-flex;
+    min-block-size: 3rem;
+    align-items: center;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.55rem;
+    background: var(--teal);
+    color: var(--surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .source-editor-link:hover {
+    color: var(--surface);
+  }
+
+  .source-dialog-help {
+    margin-block-start: 0.75rem;
+    color: var(--text-dim);
+    font-size: 0.86rem;
+  }
+
+  .source-code-figure {
+    min-width: 0;
+    margin-block-start: 0.8rem;
+  }
+
+  .source-code-figure figcaption {
+    margin-block-end: 0.4rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .source-code {
+    max-block-size: min(48vh, 36rem);
+    max-block-size: min(48dvh, 36rem);
+    min-width: 0;
+    max-width: 100%;
+    overflow: auto;
+    margin: 0;
+    padding-block: 0.7rem;
+    border: 1px solid #496159;
+    border-radius: 0.65rem;
+    background: #111b1a;
+    color: #e7f0eb;
+    font-family: var(--font-code);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    overscroll-behavior: contain;
+  }
+
+  .source-code code {
+    display: block;
+    min-width: max-content;
+    font: inherit;
+    overflow-wrap: normal;
+  }
+
+  .source-line {
+    display: grid;
+    min-width: 100%;
+    grid-template-columns: 3.5rem max-content;
+  }
+
+  .source-line-number {
+    position: sticky;
+    inset-inline-start: 0;
+    padding-inline: 0.55rem 0.7rem;
+    border-inline-end: 1px solid #496159;
+    background: #111b1a;
+    color: #b9cbc2;
+    text-align: end;
+    user-select: none;
+    white-space: pre;
+  }
+
+  .source-line-text {
+    padding-inline: 0.8rem;
+    white-space: pre;
+  }
+
+  .source-line-text .hljs-comment,
+  .source-line-text .hljs-quote {
+    color: #8b9aa8;
+    font-style: italic;
+  }
+
+  .source-line-text .hljs-keyword,
+  .source-line-text .hljs-selector-tag,
+  .source-line-text .hljs-doctag {
+    color: #c792ea;
+  }
+
+  .source-line-text .hljs-string,
+  .source-line-text .hljs-regexp,
+  .source-line-text .hljs-addition {
+    color: #c3e88d;
+  }
+
+  .source-line-text .hljs-number,
+  .source-line-text .hljs-literal,
+  .source-line-text .hljs-symbol,
+  .source-line-text .hljs-bullet {
+    color: #f78c6c;
+  }
+
+  .source-line-text .hljs-title,
+  .source-line-text .hljs-section,
+  .source-line-text .hljs-selector-id {
+    color: #82aaff;
+  }
+
+  .source-line-text .hljs-type,
+  .source-line-text .hljs-built_in,
+  .source-line-text .hljs-class .hljs-title {
+    color: #ffcb6b;
+  }
+
+  .source-line-text .hljs-attr,
+  .source-line-text .hljs-attribute,
+  .source-line-text .hljs-variable,
+  .source-line-text .hljs-property {
+    color: #f07178;
+  }
+
+  .source-line-text .hljs-meta,
+  .source-line-text .hljs-punctuation,
+  .source-line-text .hljs-operator {
+    color: #89ddff;
+  }
+
+  .source-line-text .hljs-deletion {
+    color: #f07178;
+  }
+
+  .source-line.is-reference-line {
+    background: #244238;
+  }
+
+  .source-line.is-reference-line .source-line-number {
+    background: #244238;
+    color: #f0c36e;
+  }
+
+  @media (max-width: 34rem) {
+    .source-dialog {
+      inset-block-start: 0.5rem;
+      inset-inline-end: 0.5rem;
+      width: calc(100% - 1rem);
+      max-height: calc(100vh - 1rem);
+      max-height: calc(100dvh - 1rem);
+      padding: 0.75rem;
+    }
+
+    .source-dialog-header {
+      display: grid;
+    }
+
+    .source-dialog-actions {
+      width: 100%;
+    }
+
+    .source-code {
+      max-block-size: 42vh;
+      max-block-size: 42dvh;
+      font-size: 0.74rem;
+    }
+  }
+
+  .data-table small,
+  .quiet {
+    display: block;
+    margin-block-start: 0.25rem;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+  }
+
+  details {
+    min-width: 12rem;
+  }
+
+  summary {
+    min-block-size: 2rem;
+    cursor: pointer;
+    font-weight: 650;
+  }
+
+  details ul {
+    max-height: 18rem;
+    overflow: auto;
+    padding-inline-start: 1.3rem;
+  }
+
+  .source-step {
+    display: grid;
+    grid-template-columns: 3.2rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+  }
+
+  .step-number {
+    display: grid;
+    place-items: center;
+    width: 2.8rem;
+    aspect-ratio: 1;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    background: var(--teal-soft);
+    color: var(--teal);
+    font-family: var(--font-code);
+    font-weight: 800;
+  }
+
+  .source-step h3 {
+    margin-block: 0.1rem 0.35rem;
+    font-size: 1.1rem;
+  }
+
+  .source-step p {
+    color: var(--text-dim);
+  }
+
+  .source-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-block-start: 0.6rem;
+  }
+
+  .concept-note {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-inline-start: 5px solid var(--amber);
+    border-radius: 0.8rem;
+    background: var(--amber-soft);
+  }
+
+  .concept-note h3 {
+    margin-block-end: 0.35rem;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-block-start: 1rem;
+  }
+
+  .stage-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-block: 1rem;
+  }
+
+  .stage-pill {
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  .stage-pill[aria-current="step"] {
+    border-color: var(--teal);
+    background: var(--teal-soft);
+    color: var(--text);
+    font-weight: 750;
+  }
+
+  .footer-note {
+    margin-block-start: 2rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.86rem;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer utilities {
+  .mt-1 {
+    margin-block-start: 1rem;
+  }
+
+  .mt-2 {
+    margin-block-start: 2rem;
+  }
+
+  .flow-arrow {
+    color: var(--amber);
+    font-family: var(--font-code);
+    font-weight: 800;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .status,
+  .card,
+  .source-step,
+  .concept-note,
+  .source-dialog,
+  .source-code,
+  input,
+  select,
+  button {
+    border: 1px solid CanvasText;
+  }
+
+  .source-line.is-reference-line,
+  .source-line.is-reference-line .source-line-number {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+</style>
+</head>
+<body data-lesson-id="0012-arena-screen">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 12</p>
+      <h1>The Arena screen is a view of Match state—not another game engine</h1>
+      <p class="hero-copy">In about 9 minutes: Trace how the app chooses a mock or live transport, how an Arena snapshot becomes visible screen sections, and where display responsibilities stop.</p>
+      <p class="mt-1"><span class="status status-current">Source references match 16 pinned files</span> <span class="quiet">Snapshot <code>94e3592a698707cc</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">A new snapshot says “SCORE_REVEAL.” Which part of the screen changes—and who decided the score?</h2>
+      <p class="section-intro">Choose before tracing: the phase banner, the Arena page, the UI component that draws the reveal, or the game engine.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">The Game owns phase changes and scoring. The transport gives React a current <code>ArenaSnapshot</code>; <code>ArenaPage</code> reads its phase and conditionally shows the workspace and Reveal. <code>PhaseBanner</code> prints the phase in words, while <code>RoundScoreReveal</code> displays the already-built Reveal. Those components present game state; they are not the scoring authority.</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt>ArenaSnapshot</dt>
+        <dd>A current view of the Match and Round, including phase, clock, problem, player/team display data, visible tests, and any published Reveal.</dd>
+        <dt class="mt-1">ArenaPage</dt>
+        <dd>The React composition point that subscribes to the transport snapshot and chooses which screen pieces to show for that state.</dd>
+        <dt class="mt-1">Display component</dt>
+        <dd>A small component that turns supplied props into visible text or controls. Showing a score or phase does not mean that component calculated or authorized it.</dd>
+        <dt class="mt-1">Mock transport</dt>
+        <dd>An in-memory teaching/demo adapter. It can drive the same screen, but it is not the live Game service.</dd>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="trace-title">
+      <p class="kicker">Now follow one snapshot</p>
+      <h2 id="trace-title">The data flows into the screen; the screen does not invent Match truth</h2>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The app chooses a live or mock transport</h3>
+            <p><code>main.tsx</code> mounts React's <code>App</code>. In the default demo route, <code>App</code> creates a <code>MockArenaTransport</code>. With <code>?live=1</code> and a Match ID, it connects a <code>SocketArenaTransport</code>; if the live flag has no Match ID yet, it shows the Lobby instead. Keep this distinction in mind: a convincing mock screen is not a production-server test.</p>
+            <div class="source-links">
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fmain.tsx&amp;line=6" data-source-id="source-f687de21d327881c" data-source-path="frontend/src/main.tsx" data-source-line="6" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/main.tsx:6">Mount App into the page · main.tsx:6</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2FApp.tsx&amp;line=46" data-source-id="source-e56cb91573ddb6a9" data-source-path="frontend/src/App.tsx" data-source-line="46" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/App.tsx:46">Default demo creates a mock transport · App.tsx:46</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2FApp.tsx&amp;line=52" data-source-id="source-e56cb91573ddb6a9" data-source-path="frontend/src/App.tsx" data-source-line="52" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/App.tsx:52">Live mode and current-Match branch · App.tsx:52</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2FApp.tsx&amp;line=14" data-source-id="source-e56cb91573ddb6a9" data-source-path="frontend/src/App.tsx" data-source-line="14" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/App.tsx:14">Live transport connects and is cleaned up · App.tsx:14</a>
+            </div>
+            <aside class="concept-note mt-1">
+              <h4>Production UI versus the design prototype</h4>
+              <p>This lesson follows the production React files under <code>frontend/src/</code>. The existing <code>prototype/game-ui/09-arena.html</code> is a fake-state interaction prototype; its simulated grader, layout, and screenshots do not prove this React app or the backend.</p>
+            </aside>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>ArenaPage subscribes, then keeps the phase visible</h3>
+            <p><code>ArenaPage</code> calls <code>useArena(transport)</code> to read the current snapshot. It always renders the header and phase banner from that snapshot. The header shows mode, remaining time, and transport connection; the banner turns <code>roundPhase</code> into a short human-readable message. Neither component changes the Match phase.</p>
+            <div class="source-links">
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=36" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="36" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:36">Read the latest transport snapshot · ArenaPage.tsx:36</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=166" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="166" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:166">Header receives mode, clock, and connection · ArenaPage.tsx:166</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaHeader.tsx&amp;line=17" data-source-id="source-d23a9af9d6384a86" data-source-path="frontend/src/components/ArenaHeader.tsx" data-source-line="17" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaHeader.tsx:17">Render the top status strip · ArenaHeader.tsx:17</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=170" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="170" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:170">Banner receives the current Round phase · ArenaPage.tsx:170</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FPhaseBanner.tsx&amp;line=12" data-source-id="source-ac90ba6edae87aab" data-source-path="frontend/src/components/PhaseBanner.tsx" data-source-line="12" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/PhaseBanner.tsx:12">Map each phase to visible copy · PhaseBanner.tsx:12</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>The phase decides which screen sections appear</h3>
+            <p>During <code>MATCH_FOUND</code> or <code>ROUND_INTRO</code>, the page offers Start round. During <code>CODING</code> or <code>SCORE_REVEAL</code>, it loads the workspace. A published <code>SCORE_REVEAL</code> adds the Round breakdown; <code>MATCH_COMPLETE</code> shows the final-result panel. That is UI branching on a supplied value—not a second game state machine.</p>
+            <div class="source-links">
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=193" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="193" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:193">Start-round control for intro phases · ArenaPage.tsx:193</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=215" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="215" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:215">Show workspace in Coding/Reveal · ArenaPage.tsx:215</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=233" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="233" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:233">Show the published Round Reveal · ArenaPage.tsx:233</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaPage.tsx&amp;line=244" data-source-id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx" data-source-line="244" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaPage.tsx:244">Show the Match result · ArenaPage.tsx:244</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FRoundScoreReveal.tsx&amp;line=4" data-source-id="source-9051ea5f4c6ff20b" data-source-path="frontend/src/components/RoundScoreReveal.tsx" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/RoundScoreReveal.tsx:4">Present scores and move focus to the Reveal · RoundScoreReveal.tsx:4</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FMatchResult.tsx&amp;line=23" data-source-id="source-a2a814cf6e51053f" data-source-path="frontend/src/components/MatchResult.tsx" data-source-line="23" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/MatchResult.tsx:23">Present the final score and outcome · MatchResult.tsx:23</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>The workspace arranges panels; MatchPanel chooses duel or teams</h3>
+            <p><code>ArenaWorkspace</code> places the Problem, Code workspace, and Match panel into one responsive grid. Inside that panel, <code>MatchPanel</code> selects <code>DuelPanel</code> for 1v1 or <code>TeamPanel</code> for 2v2. Those smaller components format supplied player/team values. Team Ready is an action callback, not authority: the page routes it to the transport, while Lesson 10 traces the Game's readiness rules. Status text comes from an explicit label map rather than color alone.</p>
+            <p class="mt-1"><code>TestPanel</code> similarly displays visible-test state passed in the snapshot. Its “Passed” label is not the Judge: Lesson 5 follows the action that actually runs those examples.</p>
+            <div class="source-links">
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FArenaWorkspace.tsx&amp;line=25" data-source-id="source-3760f78ca9932372" data-source-path="frontend/src/components/ArenaWorkspace.tsx" data-source-line="25" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/ArenaWorkspace.tsx:25">Three-column layout that stacks before large screens · ArenaWorkspace.tsx:25</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FMatchPanel.tsx&amp;line=16" data-source-id="source-bae2152c7d58ad85" data-source-path="frontend/src/components/MatchPanel.tsx" data-source-line="16" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/MatchPanel.tsx:16">Branch on 1v1 versus 2v2 · MatchPanel.tsx:16</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FDuelPanel.tsx&amp;line=19" data-source-id="source-c7730ea8cf005c0d" data-source-path="frontend/src/components/DuelPanel.tsx" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/DuelPanel.tsx:19">Render the two-player view · DuelPanel.tsx:19</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FTeamPanel.tsx&amp;line=25" data-source-id="source-d7ba6adcccae0384" data-source-path="frontend/src/components/TeamPanel.tsx" data-source-line="25" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/TeamPanel.tsx:25">Render team members and Ready control · TeamPanel.tsx:25</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2Fstatus.ts&amp;line=4" data-source-id="source-740865076a068846" data-source-path="frontend/src/components/status.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/status.ts:4">Convert PlayerStatus values to words · status.ts:4</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FTestPanel.tsx&amp;line=18" data-source-id="source-5e96aee770b41775" data-source-path="frontend/src/components/TestPanel.tsx" data-source-line="18" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/TestPanel.tsx:18">Display visible-test rows and custom input · TestPanel.tsx:18</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Findex.css&amp;line=3" data-source-id="source-b6889d573bf68429" data-source-path="frontend/src/index.css" data-source-line="3" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/index.css:3">Project color tokens and contrast preference · index.css:3</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">What browser tests show—and what they do not</h2>
+      <div class="card">
+        <p><strong>1v1 source:</strong> <code>live-1v1.spec.ts</code> describes two clients moving from Round start through visible Run, sealed Submit, Reveal, and final result at four viewport widths. The compliance record has a dated historical run; this course update did not rerun it, so that is not a pass on the current snapshot.</p>
+        <p class="mt-1"><strong>2v2 source:</strong> <code>live-2v2.spec.ts</code> describes four clients, team/readiness display, revision-gated Submit, team Reveal, and reset. Its own header explicitly says this Ticket-14 proof is without Yjs; it cannot prove shared-text convergence. It was not run for this lesson update.</p>
+        <p class="mt-1">A browser assertion checks the visible contract of the tested path. Component source shows how props become markup. Neither tells you that every possible state, viewport, or assistive technology was tested.</p>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../source-map.html?file=frontend%2Fe2e%2Flive-1v1.spec.ts&amp;line=61" data-source-id="source-d0ef94f85788d979" data-source-path="frontend/e2e/live-1v1.spec.ts" data-source-line="61" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-1v1.spec.ts:61">Two-client 1v1 browser scenario source · live-1v1.spec.ts:61</a>
+        <a href="../source-map.html?file=frontend%2Fe2e%2Flive-2v2.spec.ts&amp;line=70" data-source-id="source-8c615b4862c155ab" data-source-path="frontend/e2e/live-2v2.spec.ts" data-source-line="70" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-2v2.spec.ts:70">Four-client 2v2 browser scenario source · live-2v2.spec.ts:70</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="recall-title">
+      <p class="kicker">Close the source and recall</p>
+      <h2 id="recall-title">If the next snapshot is SCORE_REVEAL, what changes—and what does not?</h2>
+      <details class="card">
+        <summary>Hint, then check yourself</summary>
+        <p class="mt-1">Trace: transport provides snapshot → <code>ArenaPage</code> reads phase → <code>PhaseBanner</code> labels it → page includes the workspace and Reveal view when their conditions match. The Game already owns the phase and score; the components present them.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>For a rewrite, feed a known Match snapshot into your screen and assert the phase label, Round number, correct 1v1/2v2 panel, visible-test text, and Reveal/result appear only in their corresponding phases. Separately test that an action button sends a command and let a Game-rule test decide whether that command is accepted. Do not make the UI calculate a scored Reveal or mistake the mock adapter for live behavior.</p>
+      </article>
+      <p class="nav-row"><a href="0011-team-chat.html">← Lesson 11: team chat and sidecar lifetimes</a> · <a href="0013-running-the-project.html">Next: Lesson 13, services and local setup →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>94e3592a698707cc</code>. This lesson follows the React production tree, not the fake-state HTML prototype. E2E files are scenario sources; only the dated evidence record describes their historical run.</p>
+    </footer>
+  </main>
+<div id="source-templates" hidden>
+    <template id="source-d0ef94f85788d979" data-source-path="frontend/e2e/live-1v1.spec.ts"><span class="hljs-keyword">import</span> { chromium, expect, test, <span class="hljs-keyword">type</span> <span class="hljs-title class_">Page</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@playwright/test&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">GAME</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">WEB</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_WEB_URL</span> ?? <span class="hljs-string">&quot;http://localhost:4173&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SOLVED</span> = <span class="hljs-string">`def ledger_sum(nums):
+    total = 0
+    for i, v in enumerate(nums):
+        total += v if i % 2 == 0 else -v
+    return total
+`</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">STARTER</span> = <span class="hljs-string">`def ledger_sum(nums):
+    return 0
+`</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">HIDDEN_MARKERS</span> = [<span class="hljs-string">&quot;1000000000&quot;</span>, <span class="hljs-string">&#x27;&quot;b1&quot;&#x27;</span>, <span class="hljs-string">&#x27;&quot;n1&quot;&#x27;</span>, <span class="hljs-string">&#x27;&quot;e1&quot;&#x27;</span>];
+<span class="hljs-comment">// <span class="hljs-doctag">NOTE:</span> hidden group display names (&quot;Basic&quot;, &quot;Negatives and zeros&quot;, &quot;Bounds&quot;)</span>
+<span class="hljs-comment">// are intentionally visible — they are the scoring breakdown, not test data.</span>
+<span class="hljs-comment">// Sealed = hidden test ids/inputs/expected outputs, asserted above.</span>
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">api</span>(<span class="hljs-params"><span class="hljs-attr">method</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">user</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">body</span>?: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">status</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">json</span>: <span class="hljs-built_in">never</span> }&gt; {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${GAME}</span><span class="hljs-subst">${path}</span>`</span>, {
+    method,
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>, <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: user },
+    <span class="hljs-attr">body</span>: body === <span class="hljs-literal">undefined</span> ? <span class="hljs-literal">undefined</span> : <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body),
+  });
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: res.<span class="hljs-property">status</span>, <span class="hljs-attr">json</span>: (<span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-literal">null</span>)) <span class="hljs-keyword">as</span> <span class="hljs-built_in">never</span> };
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createMatch</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt; {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">api</span>(<span class="hljs-string">&quot;POST&quot;</span>, <span class="hljs-string">&quot;/matches&quot;</span>, <span class="hljs-string">&quot;e2e-a&quot;</span>, {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span>,
+    <span class="hljs-attr">participants</span>: [
+      { <span class="hljs-attr">userId</span>: <span class="hljs-string">&quot;e2e-a&quot;</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;left&quot;</span> },
+      { <span class="hljs-attr">userId</span>: <span class="hljs-string">&quot;e2e-b&quot;</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;right&quot;</span> },
+    ],
+    <span class="hljs-attr">problemVersionIds</span>: [<span class="hljs-string">&quot;even-ledger&quot;</span>, <span class="hljs-string">&quot;even-ledger&quot;</span>, <span class="hljs-string">&quot;even-ledger&quot;</span>],
+  });
+  <span class="hljs-title function_">expect</span>(res.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
+  <span class="hljs-keyword">return</span> (res.<span class="hljs-property">json</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span> }).<span class="hljs-property">matchId</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">watchErrors</span>(<span class="hljs-params"><span class="hljs-attr">page</span>: <span class="hljs-title class_">Page</span>, <span class="hljs-attr">errors</span>: <span class="hljs-built_in">string</span>[]</span>): <span class="hljs-built_in">void</span> {
+  page.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;console&quot;</span>, <span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (m.<span class="hljs-title function_">type</span>() === <span class="hljs-string">&quot;error&quot;</span>) errors.<span class="hljs-title function_">push</span>(m.<span class="hljs-title function_">text</span>());
+  });
+  page.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;pageerror&quot;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> errors.<span class="hljs-title function_">push</span>(<span class="hljs-title class_">String</span>(e)));
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">clockSeconds</span>(<span class="hljs-params"><span class="hljs-attr">text</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span></span>): <span class="hljs-built_in">number</span> {
+  <span class="hljs-keyword">const</span> m = <span class="hljs-regexp">/(\d+):(\d+)/</span>.<span class="hljs-title function_">exec</span>(text ?? <span class="hljs-string">&quot;&quot;</span>);
+  <span class="hljs-keyword">if</span> (!m) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`unparseable clock: <span class="hljs-subst">${text}</span>`</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Number</span>(m[<span class="hljs-number">1</span>]) * <span class="hljs-number">60</span> + <span class="hljs-title class_">Number</span>(m[<span class="hljs-number">2</span>]);
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">clockOf</span>(<span class="hljs-params"><span class="hljs-attr">page</span>: <span class="hljs-title class_">Page</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">number</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">clockSeconds</span>(<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Match clock/</span>).<span class="hljs-title function_">textContent</span>());
+}
+
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> width <span class="hljs-keyword">of</span> [<span class="hljs-number">1440</span>, <span class="hljs-number">1024</span>, <span class="hljs-number">768</span>, <span class="hljs-number">320</span>]) {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">`live 1v1 duel at <span class="hljs-subst">${width}</span>px (two clients, sealed, reveal, 3 rounds)`</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">errors</span>: <span class="hljs-built_in">string</span>[] = [];
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createMatch</span>();
+      <span class="hljs-keyword">const</span> ctxA = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>({ <span class="hljs-attr">viewport</span>: { width, <span class="hljs-attr">height</span>: <span class="hljs-number">900</span> } });
+      <span class="hljs-keyword">const</span> ctxB = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>({ <span class="hljs-attr">viewport</span>: { width, <span class="hljs-attr">height</span>: <span class="hljs-number">900</span> } });
+      <span class="hljs-keyword">const</span> pageA = <span class="hljs-keyword">await</span> ctxA.<span class="hljs-title function_">newPage</span>();
+      <span class="hljs-keyword">const</span> pageB = <span class="hljs-keyword">await</span> ctxB.<span class="hljs-title function_">newPage</span>();
+      <span class="hljs-title function_">watchErrors</span>(pageA, errors);
+      <span class="hljs-title function_">watchErrors</span>(pageB, errors);
+
+      <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=e2e-a&amp;match=<span class="hljs-subst">${matchId}</span>`</span>);
+      <span class="hljs-keyword">await</span> pageB.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=e2e-b&amp;match=<span class="hljs-subst">${matchId}</span>`</span>);
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageB.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+
+      <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> }).<span class="hljs-title function_">click</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toBeVisible</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Not run&quot;</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+      <span class="hljs-keyword">const</span> t1 = <span class="hljs-keyword">await</span> <span class="hljs-title function_">clockOf</span>(pageA);
+
+      <span class="hljs-comment">// A runs visible tests; B follows into CODING via socket (no second</span>
+      <span class="hljs-comment">// Start click: the button vanishes once the round starts server-side).</span>
+      <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">SOLVED</span>);
+      <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Run&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageB.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toBeVisible</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Passed&quot;</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">20000</span> });
+
+      <span class="hljs-comment">// Concurrent submits: A solved, B starter. Sealed first.</span>
+      <span class="hljs-keyword">await</span> pageB.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">STARTER</span>);
+      <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([
+        pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
+        pageB.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
+      ]);
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">30000</span> });
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageB.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">30000</span> });
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Basic&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> [pageA, pageB]) {
+        <span class="hljs-keyword">const</span> html = <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">content</span>();
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> marker <span class="hljs-keyword">of</span> <span class="hljs-variable constant_">HIDDEN_MARKERS</span>) <span class="hljs-title function_">expect</span>(html).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(marker);
+      }
+
+      <span class="hljs-comment">// Rounds 2-3: abbreviated but complete (start, submit both, reveal, advance).</span>
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> round = <span class="hljs-number">2</span>; round &lt;= <span class="hljs-number">3</span>; round++) {
+        <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Next round&quot;</span> }).<span class="hljs-title function_">click</span>();
+        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+        <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> }).<span class="hljs-title function_">click</span>();
+        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Not run&quot;</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+        <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">SOLVED</span>);
+        <span class="hljs-keyword">await</span> pageB.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">STARTER</span>);
+        <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([
+          pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
+          pageB.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
+        ]);
+        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">30000</span> });
+        <span class="hljs-keyword">if</span> (round &lt; <span class="hljs-number">3</span>) {
+          <span class="hljs-keyword">const</span> tLater = <span class="hljs-keyword">await</span> <span class="hljs-title function_">clockOf</span>(pageA);
+          <span class="hljs-title function_">expect</span>(tLater).<span class="hljs-title function_">toBeLessThan</span>(t1);
+        }
+      }
+
+      <span class="hljs-keyword">await</span> pageA.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;See final result&quot;</span> }).<span class="hljs-title function_">click</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Match complete after 3 rounds&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">20000</span> });
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pageA.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Final — you 300 · opponent 84/</span>)).<span class="hljs-title function_">toBeVisible</span>();
+      <span class="hljs-title function_">expect</span>(errors).<span class="hljs-title function_">toEqual</span>([]);
+    } <span class="hljs-keyword">finally</span> {
+      <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
+    }
+  });
+}
+</template>
+<template id="source-8c615b4862c155ab" data-source-path="frontend/e2e/live-2v2.spec.ts"><span class="hljs-keyword">import</span> { chromium, expect, test, <span class="hljs-keyword">type</span> <span class="hljs-title class_">Page</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@playwright/test&quot;</span>;
+
+<span class="hljs-comment">/**
+ * Ticket 14 four-client proof WITHOUT Yjs collaboration: authoritative team
+ * state, presence, readiness, revision-gated team submit, independent team
+ * activity, sealed evaluation, team reveal, round reset. Shared-text
+ * convergence is explicitly NOT claimed here (ticket 15).
+ */</span>
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">GAME</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">WEB</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_WEB_URL</span> ?? <span class="hljs-string">&quot;http://localhost:4173&quot;</span>;
+
+<span class="hljs-keyword">const</span> U = { <span class="hljs-attr">a1</span>: <span class="hljs-string">&quot;t14e-a1&quot;</span>, <span class="hljs-attr">a2</span>: <span class="hljs-string">&quot;t14e-a2&quot;</span>, <span class="hljs-attr">b1</span>: <span class="hljs-string">&quot;t14e-b1&quot;</span>, <span class="hljs-attr">b2</span>: <span class="hljs-string">&quot;t14e-b2&quot;</span> };
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SOLVED</span> = <span class="hljs-string">`def ledger_sum(nums):
+    total = 0
+    for i, v in enumerate(nums):
+        total += v if i % 2 == 0 else -v
+    return total
+`</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">STARTER</span> = <span class="hljs-string">`def ledger_sum(nums):
+    return 0
+`</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">api</span>(<span class="hljs-params"><span class="hljs-attr">method</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">user</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">body</span>?: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">status</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">json</span>: <span class="hljs-built_in">any</span> }&gt; {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${GAME}</span><span class="hljs-subst">${path}</span>`</span>, {
+    method,
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>, <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: user },
+    <span class="hljs-attr">body</span>: body === <span class="hljs-literal">undefined</span> ? <span class="hljs-literal">undefined</span> : <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body),
+  });
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: res.<span class="hljs-property">status</span>, <span class="hljs-attr">json</span>: <span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-literal">null</span>) };
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createTeamMatch</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>&gt; {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">api</span>(<span class="hljs-string">&quot;POST&quot;</span>, <span class="hljs-string">&quot;/matches&quot;</span>, U.<span class="hljs-property">a1</span>, {
+    <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;2v2&quot;</span>,
+    <span class="hljs-attr">participants</span>: [
+      { <span class="hljs-attr">userId</span>: U.<span class="hljs-property">a1</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;left&quot;</span> },
+      { <span class="hljs-attr">userId</span>: U.<span class="hljs-property">a2</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;left&quot;</span> },
+      { <span class="hljs-attr">userId</span>: U.<span class="hljs-property">b1</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;right&quot;</span> },
+      { <span class="hljs-attr">userId</span>: U.<span class="hljs-property">b2</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;right&quot;</span> },
+    ],
+    <span class="hljs-attr">problemVersionIds</span>: [<span class="hljs-string">&quot;even-ledger&quot;</span>, <span class="hljs-string">&quot;even-ledger&quot;</span>],
+  });
+  <span class="hljs-title function_">expect</span>(res.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
+  <span class="hljs-keyword">return</span> res.<span class="hljs-property">json</span>.<span class="hljs-property">matchId</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">checkReady</span>(<span class="hljs-params"><span class="hljs-attr">page</span>: <span class="hljs-title class_">Page</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+  <span class="hljs-comment">// The checkbox is controlled by the authoritative snapshot: click, then</span>
+  <span class="hljs-comment">// wait for the server round-trip (socket ack + snapshot refresh) to flip it.</span>
+  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>).<span class="hljs-title function_">click</span>();
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>)).<span class="hljs-title function_">toBeChecked</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+}
+
+<span class="hljs-comment">/** Current authoritative team-doc revision for Alpha (ready-gate input). */</span>
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">alphaRevision</span>(<span class="hljs-params"><span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">number</span> | <span class="hljs-literal">null</span>&gt; {
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">api</span>(<span class="hljs-string">&quot;GET&quot;</span>, <span class="hljs-string">`/matches/<span class="hljs-subst">${matchId}</span>/snapshot`</span>, U.<span class="hljs-property">a1</span>);
+  <span class="hljs-keyword">const</span> teams = res.<span class="hljs-property">json</span>.<span class="hljs-property">teams</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">side</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">documentRevision</span>: <span class="hljs-built_in">number</span> | <span class="hljs-literal">null</span> }&gt;;
+  <span class="hljs-keyword">return</span> teams.<span class="hljs-title function_">find</span>(<span class="hljs-function">(<span class="hljs-params">t</span>) =&gt;</span> t.<span class="hljs-property">side</span> === <span class="hljs-string">&quot;left&quot;</span>)?.<span class="hljs-property">documentRevision</span> ?? <span class="hljs-literal">null</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">watchErrors</span>(<span class="hljs-params"><span class="hljs-attr">page</span>: <span class="hljs-title class_">Page</span>, <span class="hljs-attr">errors</span>: <span class="hljs-built_in">string</span>[]</span>): <span class="hljs-built_in">void</span> {
+  page.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;console&quot;</span>, <span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (m.<span class="hljs-title function_">type</span>() === <span class="hljs-string">&quot;error&quot;</span>) errors.<span class="hljs-title function_">push</span>(m.<span class="hljs-title function_">text</span>());
+  });
+  page.<span class="hljs-title function_">on</span>(<span class="hljs-string">&quot;pageerror&quot;</span>, <span class="hljs-function">(<span class="hljs-params">e</span>) =&gt;</span> errors.<span class="hljs-title function_">push</span>(<span class="hljs-title class_">String</span>(e)));
+}
+
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;2v2 ticket-14 proof: teams, readiness, revision gate, independent submit, reveal, reset&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">errors</span>: <span class="hljs-built_in">string</span>[] = [];
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createTeamMatch</span>();
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">pages</span>: <span class="hljs-title class_">Record</span>&lt;keyof <span class="hljs-keyword">typeof</span> U, <span class="hljs-title class_">Page</span>&gt; = {} <span class="hljs-keyword">as</span> <span class="hljs-title class_">Record</span>&lt;keyof <span class="hljs-keyword">typeof</span> U, <span class="hljs-title class_">Page</span>&gt;;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [key, user] <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(U) <span class="hljs-keyword">as</span> <span class="hljs-title class_">Array</span>&lt;[keyof <span class="hljs-keyword">typeof</span> U, <span class="hljs-built_in">string</span>]&gt;) {
+      <span class="hljs-keyword">const</span> ctx = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>({ <span class="hljs-attr">viewport</span>: { <span class="hljs-attr">width</span>: <span class="hljs-number">1440</span>, <span class="hljs-attr">height</span>: <span class="hljs-number">900</span> } });
+      <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> ctx.<span class="hljs-title function_">newPage</span>();
+      <span class="hljs-title function_">watchErrors</span>(page, errors);
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${user}</span>&amp;match=<span class="hljs-subst">${matchId}</span>`</span>);
+      pages[key] = page;
+    }
+    <span class="hljs-keyword">const</span> { a1, a2, b1, b2 } = pages;
+
+    <span class="hljs-keyword">await</span> a1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> [a1, a2, b1, b2]) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toBeVisible</span>();
+
+    <span class="hljs-comment">// Team membership + presence visible on every client.</span>
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByText</span>(U.<span class="hljs-property">a1</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByText</span>(U.<span class="hljs-property">a2</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByText</span>(U.<span class="hljs-property">b1</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(b1.<span class="hljs-title function_">getByText</span>(U.<span class="hljs-property">b1</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(b1.<span class="hljs-title function_">getByText</span>(U.<span class="hljs-property">a1</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-title function_">toBeVisible</span>();
+
+    <span class="hljs-comment">// Readiness: one ready is not enough; both enables team submit.</span>
+    <span class="hljs-keyword">const</span> submitA1 = a1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(submitA1).<span class="hljs-title function_">toBeDisabled</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">checkReady</span>(a1);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Waiting for teammate readiness&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(submitA1).<span class="hljs-title function_">toBeDisabled</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">checkReady</span>(a2);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Both teammates ready.&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a2.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Both teammates ready.&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(submitA1).<span class="hljs-title function_">toBeEnabled</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a2.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> })).<span class="hljs-title function_">toBeEnabled</span>();
+
+    <span class="hljs-comment">// Shared-doc edit invalidates BOTH approvals; submit gates off.</span>
+    <span class="hljs-keyword">await</span> a1.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">SOLVED</span>);
+    <span class="hljs-keyword">await</span> expect.<span class="hljs-title function_">poll</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">alphaRevision</span>(matchId), { <span class="hljs-attr">timeout</span>: <span class="hljs-number">20000</span> }).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Waiting for teammate readiness&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(submitA1).<span class="hljs-title function_">toBeDisabled</span>();
+
+    <span class="hljs-comment">// Re-ready on the new revision; Alpha submits solved (sealed, team-owned).</span>
+    <span class="hljs-comment">// Ticket 15 order matters: the shared text goes in FIRST (a real Yjs</span>
+    <span class="hljs-comment">// edit that bumps the revision), THEN both approve the CURRENT revision.</span>
+    <span class="hljs-comment">// Typing between ready and submit would invalidate and stale the submit.</span>
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">checkReady</span>(a1);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">checkReady</span>(a2);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(submitA1).<span class="hljs-title function_">toBeEnabled</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+    <span class="hljs-keyword">await</span> submitA1.<span class="hljs-title function_">click</span>();
+
+    <span class="hljs-comment">// Beta works independently while Alpha&#x27;s evaluation is in flight/sealed.</span>
+    <span class="hljs-keyword">await</span> b1.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>).<span class="hljs-title function_">fill</span>(<span class="hljs-variable constant_">STARTER</span>);
+    <span class="hljs-keyword">await</span> b1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Run&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">checkReady</span>(b1);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">checkReady</span>(b2);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(b1.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Both teammates ready.&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+    <span class="hljs-keyword">await</span> b1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> }).<span class="hljs-title function_">click</span>();
+
+    <span class="hljs-comment">// One immutable team reveal reaches all four; teammates see equal scores.</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> [a1, a2, b1, b2]) {
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">30000</span> });
+    }
+    <span class="hljs-keyword">const</span> scoreA1 = <span class="hljs-keyword">await</span> a1.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Round 1:/</span>).<span class="hljs-title function_">textContent</span>();
+    <span class="hljs-keyword">const</span> scoreA2 = <span class="hljs-keyword">await</span> a2.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Round 1:/</span>).<span class="hljs-title function_">textContent</span>();
+    <span class="hljs-keyword">const</span> scoreB1 = <span class="hljs-keyword">await</span> b1.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Round 1:/</span>).<span class="hljs-title function_">textContent</span>();
+    <span class="hljs-keyword">const</span> scoreB2 = <span class="hljs-keyword">await</span> b2.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Round 1:/</span>).<span class="hljs-title function_">textContent</span>();
+    <span class="hljs-title function_">expect</span>(scoreA1).<span class="hljs-title function_">toEqual</span>(scoreA2);
+    <span class="hljs-title function_">expect</span>(scoreB1).<span class="hljs-title function_">toEqual</span>(scoreB2);
+    <span class="hljs-title function_">expect</span>(scoreA1).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;100&quot;</span>);
+
+    <span class="hljs-comment">// Round reset: readiness cleared, submit gated again.</span>
+    <span class="hljs-keyword">await</span> a1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Next round&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(a1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> a1.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> [a1, a2]) {
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Waiting for teammate readiness&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">15000</span> });
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> })).<span class="hljs-title function_">toBeDisabled</span>();
+    }
+    <span class="hljs-title function_">expect</span>(errors).<span class="hljs-title function_">toEqual</span>([]);
+  } <span class="hljs-keyword">finally</span> {
+    <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
+  }
+});
+</template>
+<template id="source-e56cb91573ddb6a9" data-source-path="frontend/src/App.tsx"><span class="hljs-keyword">import</span> { lazy, <span class="hljs-title class_">Suspense</span>, useEffect, useMemo, useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">ArenaPage</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./components/ArenaPage.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">MockArenaTransport</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./arena/mock.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">SocketArenaTransport</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./arena/socket.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">LobbyClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./arena/lobby.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">LobbyPage</span> = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span>
+  <span class="hljs-keyword">import</span>(<span class="hljs-string">&quot;./components/LobbyPage.js&quot;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">{ LobbyPage: page }</span>) =&gt;</span> ({ <span class="hljs-attr">default</span>: page })),
+);
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">GAME_URL</span> = (<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">env</span>.<span class="hljs-property">VITE_GAME_URL</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>)?.<span class="hljs-title function_">trim</span>();
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">LiveApp</span>(<span class="hljs-params">{ baseUrl, userId, matchId }: { baseUrl: <span class="hljs-built_in">string</span>; userId: <span class="hljs-built_in">string</span>; matchId: <span class="hljs-built_in">string</span> }</span>) {
+  <span class="hljs-keyword">const</span> transport = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">SocketArenaTransport</span>({ baseUrl, userId, matchId }), [baseUrl, userId, matchId]);
+  <span class="hljs-keyword">const</span> [state, setState] = useState&lt;<span class="hljs-string">&quot;connecting&quot;</span> | <span class="hljs-string">&quot;ready&quot;</span> | <span class="hljs-string">&quot;failed&quot;</span>&gt;(<span class="hljs-string">&quot;connecting&quot;</span>);
+  <span class="hljs-keyword">const</span> [error, setError] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&quot;&quot;</span>);
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">let</span> cancelled = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span> !== <span class="hljs-string">&quot;undefined&quot;</span>) {
+      (<span class="hljs-variable language_">window</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">__arenaTransport</span>?: <span class="hljs-title class_">SocketArenaTransport</span> }).<span class="hljs-property">__arenaTransport</span> = transport;
+    }
+    transport
+      .<span class="hljs-title function_">connect</span>()
+      .<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">if</span> (!cancelled) <span class="hljs-title function_">setState</span>(<span class="hljs-string">&quot;ready&quot;</span>);
+      })
+      .<span class="hljs-title function_">catch</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">e</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (!cancelled) {
+          <span class="hljs-title function_">setError</span>(e <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? e.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;connect failed&quot;</span>);
+          <span class="hljs-title function_">setState</span>(<span class="hljs-string">&quot;failed&quot;</span>);
+        }
+      });
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      cancelled = <span class="hljs-literal">true</span>;
+      transport.<span class="hljs-title function_">disconnect</span>();
+    };
+  }, [transport]);
+  <span class="hljs-keyword">if</span> (state === <span class="hljs-string">&quot;connecting&quot;</span>) <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;p-4 font-mono text-sm&quot;</span>&gt;</span>Connecting to match…<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+  <span class="hljs-keyword">if</span> (state === <span class="hljs-string">&quot;failed&quot;</span>) <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;alert&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;p-4 font-mono text-sm text-red-700&quot;</span>&gt;</span>Connection failed: {error}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">ArenaPage</span> <span class="hljs-attr">transport</span>=<span class="hljs-string">{transport}</span> /&gt;</span></span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">AppContent</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">const</span> [mode, setMode] = useState&lt;<span class="hljs-title class_">MatchMode</span>&gt;(<span class="hljs-string">&quot;1v1&quot;</span>);
+  <span class="hljs-keyword">const</span> transport = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">MockArenaTransport</span>(mode), [mode]);
+  <span class="hljs-keyword">const</span> search = <span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span> !== <span class="hljs-string">&quot;undefined&quot;</span> ? <span class="hljs-variable language_">window</span>.<span class="hljs-property">location</span>.<span class="hljs-property">search</span> : <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">const</span> params = <span class="hljs-keyword">new</span> <span class="hljs-title class_">URLSearchParams</span>(search);
+  <span class="hljs-keyword">const</span> paramMatchId = params.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>) ?? <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">const</span> [liveMatchId, setLiveMatchId] = useState&lt;<span class="hljs-built_in">string</span>&gt;(paramMatchId);
+
+  <span class="hljs-keyword">if</span> (params.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;live&quot;</span>) === <span class="hljs-string">&quot;1&quot;</span>) {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable constant_">GAME_URL</span>)
+      <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;alert&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;p-4 font-mono text-sm&quot;</span>&gt;</span>Live mode requested but VITE_GAME_URL is not configured.<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span></span>;
+    <span class="hljs-keyword">const</span> userId = params.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;user&quot;</span>) ?? <span class="hljs-string">&quot;user-a&quot;</span>;
+
+    <span class="hljs-keyword">if</span> (liveMatchId) {
+      <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">LiveApp</span> <span class="hljs-attr">baseUrl</span>=<span class="hljs-string">{GAME_URL}</span> <span class="hljs-attr">userId</span>=<span class="hljs-string">{userId}</span> <span class="hljs-attr">matchId</span>=<span class="hljs-string">{liveMatchId}</span> /&gt;</span></span>;
+    }
+
+    <span class="hljs-keyword">const</span> lobbyClient = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbyClient</span>(<span class="hljs-variable constant_">GAME_URL</span>, userId);
+    <span class="hljs-keyword">return</span> (
+      <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">LobbyPage</span>
+        <span class="hljs-attr">client</span>=<span class="hljs-string">{lobbyClient}</span>
+        <span class="hljs-attr">userId</span>=<span class="hljs-string">{userId}</span>
+        <span class="hljs-attr">initialMode</span>=<span class="hljs-string">&quot;1v1&quot;</span>
+        <span class="hljs-attr">onMatchFound</span>=<span class="hljs-string">{(mId)</span> =&gt;</span> {
+          setLiveMatchId(mId);
+          if (typeof window !== &quot;undefined&quot;) {
+            const nextUrl = new URL(window.location.href);
+            nextUrl.searchParams.set(&quot;match&quot;, mId);
+            window.history.pushState({}, &quot;&quot;, nextUrl.toString());
+          }
+        }}
+      /&gt;</span>
+    );
+  }
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex gap-2 border-b border-neutral-200 bg-white px-4 py-1&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;group&quot;</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Mode (mock)&quot;</span>&gt;</span>
+        {([&quot;1v1&quot;, &quot;2v2&quot;] as const).map((m) =&gt; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+            <span class="hljs-attr">key</span>=<span class="hljs-string">{m}</span>
+            <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+            <span class="hljs-attr">aria-pressed</span>=<span class="hljs-string">{mode</span> === <span class="hljs-string">m}</span>
+            <span class="hljs-attr">className</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">rounded</span> <span class="hljs-attr">px-2</span> <span class="hljs-attr">py-1</span> <span class="hljs-attr">font-mono</span> <span class="hljs-attr">text-xs</span> ${<span class="hljs-attr">mode</span> === <span class="hljs-string">m</span> ? &quot;<span class="hljs-attr">bg-teal-700</span> <span class="hljs-attr">text-white</span>&quot; <span class="hljs-attr">:</span> &quot;<span class="hljs-attr">border</span> <span class="hljs-attr">border-neutral-300</span>&quot;}`}
+            <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> setMode(m)}
+          &gt;
+            {m}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        ))}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ArenaPage</span> <span class="hljs-attr">transport</span>=<span class="hljs-string">{transport}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">App</span>(<span class="hljs-params"></span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span>
+      <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>
+        &lt;<span class="hljs-attr">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;p-4 font-mono text-sm&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+          Loading Code Arena…
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      }
+    &gt;
+      <span class="hljs-tag">&lt;<span class="hljs-name">AppContent</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-d23a9af9d6384a86" data-source-path="frontend/src/components/ArenaHeader.tsx"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ConnectionState</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/transport.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">clock</span>(<span class="hljs-params"><span class="hljs-attr">seconds</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">const</span> m = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(seconds / <span class="hljs-number">60</span>);
+  <span class="hljs-keyword">const</span> s = seconds % <span class="hljs-number">60</span>;
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${<span class="hljs-built_in">String</span>(m).padStart(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;0&quot;</span>)}</span>:<span class="hljs-subst">${<span class="hljs-built_in">String</span>(s).padStart(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;0&quot;</span>)}</span>`</span>;
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">CONNECTION_VIEW</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">ConnectionState</span>, { <span class="hljs-attr">dot</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">label</span>: <span class="hljs-built_in">string</span> }&gt; = {
+  <span class="hljs-attr">connecting</span>: { <span class="hljs-attr">dot</span>: <span class="hljs-string">&quot;bg-neutral-400&quot;</span>, <span class="hljs-attr">label</span>: <span class="hljs-string">&quot;Connecting…&quot;</span> },
+  <span class="hljs-attr">connected</span>: { <span class="hljs-attr">dot</span>: <span class="hljs-string">&quot;bg-teal-600&quot;</span>, <span class="hljs-attr">label</span>: <span class="hljs-string">&quot;Connected&quot;</span> },
+  <span class="hljs-attr">reconnecting</span>: { <span class="hljs-attr">dot</span>: <span class="hljs-string">&quot;bg-neutral-500&quot;</span>, <span class="hljs-attr">label</span>: <span class="hljs-string">&quot;Reconnecting…&quot;</span> },
+  <span class="hljs-attr">offline</span>: { <span class="hljs-attr">dot</span>: <span class="hljs-string">&quot;bg-red-700&quot;</span>, <span class="hljs-attr">label</span>: <span class="hljs-string">&quot;Offline&quot;</span> },
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ArenaHeader</span>(<span class="hljs-params">{
+  mode,
+  remainingSeconds,
+  connection,
+}: {
+  mode: MatchMode;
+  remainingSeconds: <span class="hljs-built_in">number</span>;
+  connection?: ConnectionState;
+}</span>) {
+  <span class="hljs-keyword">const</span> view = <span class="hljs-variable constant_">CONNECTION_VIEW</span>[connection ?? <span class="hljs-string">&quot;connected&quot;</span>];
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">header</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-2&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-base font-semibold text-neutral-900&quot;</span>&gt;</span>Code Arena<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-300 px-2 py-0.5 font-mono text-xs text-neutral-600&quot;</span>&gt;</span>{mode}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex-1&quot;</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-sm text-neutral-800&quot;</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">Match</span> <span class="hljs-attr">clock</span>, ${<span class="hljs-attr">clock</span>(<span class="hljs-attr">remainingSeconds</span>)} <span class="hljs-attr">remaining</span>`}&gt;</span>
+        {clock(remainingSeconds)}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex items-center gap-1.5&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">inline-block</span> <span class="hljs-attr">h-2</span> <span class="hljs-attr">w-2</span> <span class="hljs-attr">rounded-full</span> ${<span class="hljs-attr">view.dot</span>}`} <span class="hljs-attr">aria-hidden</span>=<span class="hljs-string">&quot;true&quot;</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-600&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+          {view.label}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">header</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-4b2dd3ee517f6af9" data-source-path="frontend/src/components/ArenaPage.tsx"><span class="hljs-keyword">import</span> { lazy, <span class="hljs-title class_">Suspense</span>, useEffect, useMemo, useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">ArenaHeader</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./ArenaHeader.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">MatchResult</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./MatchResult.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">PhaseBanner</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./PhaseBanner.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">RoundScoreReveal</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./RoundScoreReveal.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">CollabClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/collab.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">TeamChatClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/chat.js&quot;</span>;
+<span class="hljs-keyword">import</span> { createArenaSidecarLifecycle, <span class="hljs-keyword">type</span> <span class="hljs-title class_">LiveClientConfig</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/sidecars.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ArenaTransport</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/transport.js&quot;</span>;
+<span class="hljs-keyword">import</span> { useArena } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/useArena.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-title class_">ArenaWorkspace</span> = <span class="hljs-title function_">lazy</span>(<span class="hljs-function">() =&gt;</span>
+  <span class="hljs-keyword">import</span>(<span class="hljs-string">&quot;./ArenaWorkspace.js&quot;</span>).<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">{ ArenaWorkspace: workspace }</span>) =&gt;</span> ({ <span class="hljs-attr">default</span>: workspace })),
+);
+
+<span class="hljs-comment">/**
+ * Local draft key (ticket 11 §5): server state and the unsent editor draft
+ * are different things. The draft lives in this browser only, scoped to the
+ * exact round/problem/language so a stale reconnect never carries round-1
+ * code into round 2. Hard refresh restores it; a new device starts from the
+ * starter. The server never sees the draft — only explicit Run/Submit
+ * payloads leave the browser.
+ */</span>
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">draftKey</span>(<span class="hljs-params"><span class="hljs-attr">transport</span>: <span class="hljs-title class_">ArenaTransport</span>, <span class="hljs-attr">round</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">problem</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">language</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`arena-draft:<span class="hljs-subst">${transport.scopeKey()}</span>:<span class="hljs-subst">${round}</span>:<span class="hljs-subst">${problem}</span>:<span class="hljs-subst">${language}</span>`</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">loadDraft</span>(<span class="hljs-params"><span class="hljs-attr">transport</span>: <span class="hljs-title class_">ArenaTransport</span>, <span class="hljs-attr">round</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">problem</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">language</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span> {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">window</span>.<span class="hljs-property">localStorage</span>.<span class="hljs-title function_">getItem</span>(<span class="hljs-title function_">draftKey</span>(transport, round, problem, language));
+  } <span class="hljs-keyword">catch</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ArenaPage</span>(<span class="hljs-params">{ transport }: { transport: ArenaTransport }</span>) {
+  <span class="hljs-keyword">const</span> snapshot = <span class="hljs-title function_">useArena</span>(transport);
+  <span class="hljs-keyword">const</span> starter = snapshot.<span class="hljs-property">problem</span>.<span class="hljs-property">starters</span>[snapshot.<span class="hljs-property">language</span> <span class="hljs-keyword">as</span> <span class="hljs-string">&quot;Python&quot;</span>] ?? <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">const</span> [code, setCode] = <span class="hljs-title function_">useState</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">loadDraft</span>(transport, snapshot.<span class="hljs-property">round</span>, snapshot.<span class="hljs-property">problem</span>.<span class="hljs-property">id</span>, snapshot.<span class="hljs-property">language</span>) ?? starter);
+  <span class="hljs-keyword">const</span> [actionError, setActionError] = useState&lt;<span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
+  <span class="hljs-keyword">const</span> fixtureControls = transport.<span class="hljs-property">fixtureControls</span>?.() ?? <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">const</span> terminal = snapshot.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span>;
+  <span class="hljs-keyword">const</span> sidecarLifecycle = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createArenaSidecarLifecycle</span>(), []);
+
+  <span class="hljs-comment">// Ticket 15: live 2v2 binds the team Y.Doc (one provider per round —</span>
+  <span class="hljs-comment">// round-scoped so old-round state can never merge forward). 1v1 and mocks</span>
+  <span class="hljs-comment">// keep the local controlled document.</span>
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">collabConfig</span>: <span class="hljs-title class_">LiveClientConfig</span> | <span class="hljs-literal">null</span> = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">if</span> (snapshot.<span class="hljs-property">mode</span> !== <span class="hljs-string">&quot;2v2&quot;</span> || <span class="hljs-keyword">typeof</span> transport.<span class="hljs-property">collabConfig</span> !== <span class="hljs-string">&quot;function&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">return</span> transport.<span class="hljs-title function_">collabConfig</span>();
+  }, [transport, snapshot.<span class="hljs-property">mode</span>, snapshot.<span class="hljs-property">round</span>]);
+
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">chatConfig</span>: <span class="hljs-title class_">LiveClientConfig</span> | <span class="hljs-literal">null</span> = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">if</span> (snapshot.<span class="hljs-property">mode</span> !== <span class="hljs-string">&quot;2v2&quot;</span> || <span class="hljs-keyword">typeof</span> transport.<span class="hljs-property">chatConfig</span> !== <span class="hljs-string">&quot;function&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">return</span> transport.<span class="hljs-title function_">chatConfig</span>();
+  }, [transport, snapshot.<span class="hljs-property">mode</span>]);
+
+  <span class="hljs-keyword">const</span> sidecarScope = <span class="hljs-title function_">useMemo</span>(
+    <span class="hljs-function">() =&gt;</span> ({ <span class="hljs-attr">transportKey</span>: transport, <span class="hljs-attr">round</span>: snapshot.<span class="hljs-property">round</span>, collabConfig, chatConfig }),
+    [transport, snapshot.<span class="hljs-property">round</span>, collabConfig, chatConfig],
+  );
+
+  <span class="hljs-keyword">const</span> [collab, setCollab] = useState&lt;<span class="hljs-title class_">CollabClient</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
+  <span class="hljs-keyword">const</span> [chat, setChat] = useState&lt;<span class="hljs-title class_">TeamChatClient</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
+  <span class="hljs-keyword">const</span> [clientsLoading, setClientsLoading] = <span class="hljs-title function_">useState</span>(<span class="hljs-literal">false</span>);
+  <span class="hljs-keyword">const</span> [collabError, setCollabError] = useState&lt;<span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">let</span> cancelled = <span class="hljs-literal">false</span>;
+    <span class="hljs-title function_">setCollabError</span>(<span class="hljs-literal">null</span>);
+
+    <span class="hljs-keyword">const</span> pending = sidecarLifecycle.<span class="hljs-title function_">sync</span>(sidecarScope);
+    <span class="hljs-keyword">const</span> current = sidecarLifecycle.<span class="hljs-title function_">getState</span>();
+    <span class="hljs-title function_">setCollab</span>(current.<span class="hljs-property">collab</span>);
+    <span class="hljs-title function_">setChat</span>(current.<span class="hljs-property">chat</span>);
+    <span class="hljs-title function_">setClientsLoading</span>(sidecarScope.<span class="hljs-property">collabConfig</span> !== <span class="hljs-literal">null</span> || sidecarScope.<span class="hljs-property">chatConfig</span> !== <span class="hljs-literal">null</span>);
+
+    <span class="hljs-built_in">void</span> pending
+      .<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">next</span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (cancelled || !next) <span class="hljs-keyword">return</span>;
+        <span class="hljs-title function_">setCollab</span>(next.<span class="hljs-property">collab</span>);
+        <span class="hljs-title function_">setChat</span>(next.<span class="hljs-property">chat</span>);
+        <span class="hljs-title function_">setClientsLoading</span>(<span class="hljs-literal">false</span>);
+      })
+      .<span class="hljs-title function_">catch</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">error</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (cancelled) <span class="hljs-keyword">return</span>;
+        <span class="hljs-title function_">setClientsLoading</span>(<span class="hljs-literal">false</span>);
+        <span class="hljs-title function_">setCollabError</span>(error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? error.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Unable to load live collaboration.&quot;</span>);
+      });
+
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      cancelled = <span class="hljs-literal">true</span>;
+    };
+  }, [sidecarLifecycle, sidecarScope]);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-function">() =&gt;</span> sidecarLifecycle.<span class="hljs-title function_">dispose</span>(), [sidecarLifecycle]);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!collab) <span class="hljs-keyword">return</span>;
+    <span class="hljs-title function_">setCollabError</span>(<span class="hljs-literal">null</span>);
+    <span class="hljs-keyword">let</span> cancelled = <span class="hljs-literal">false</span>;
+    collab
+      .<span class="hljs-title function_">connect</span>()
+      .<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">if</span> (!cancelled) <span class="hljs-title function_">setCode</span>(collab.<span class="hljs-title function_">getSource</span>());
+      })
+      .<span class="hljs-title function_">catch</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">e</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+        <span class="hljs-keyword">if</span> (!cancelled) <span class="hljs-title function_">setCollabError</span>(e <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? e.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;shared doc unavailable&quot;</span>);
+      });
+    <span class="hljs-keyword">const</span> unsub = collab.<span class="hljs-title function_">subscribe</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">setCode</span>(collab.<span class="hljs-title function_">getSource</span>()));
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span> !== <span class="hljs-string">&quot;undefined&quot;</span>) {
+      (<span class="hljs-variable language_">window</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">__arenaCollab</span>?: <span class="hljs-title class_">CollabClient</span> | <span class="hljs-literal">null</span> }).<span class="hljs-property">__arenaCollab</span> = collab;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      cancelled = <span class="hljs-literal">true</span>;
+      <span class="hljs-title function_">unsub</span>();
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span> !== <span class="hljs-string">&quot;undefined&quot;</span>) {
+        (<span class="hljs-variable language_">window</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">__arenaCollab</span>?: <span class="hljs-title class_">CollabClient</span> | <span class="hljs-literal">null</span> }).<span class="hljs-property">__arenaCollab</span> = <span class="hljs-literal">null</span>;
+      }
+    };
+  }, [collab]);
+
+  <span class="hljs-comment">// Ticket 16: live 2v2 binds the team chat client. 1v1 and mocks keep null.</span>
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!chat) <span class="hljs-keyword">return</span>;
+    chat.<span class="hljs-title function_">connect</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> {});
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span> !== <span class="hljs-string">&quot;undefined&quot;</span>) {
+      (<span class="hljs-variable language_">window</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">__arenaChat</span>?: <span class="hljs-title class_">TeamChatClient</span> | <span class="hljs-literal">null</span> }).<span class="hljs-property">__arenaChat</span> = chat;
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> <span class="hljs-variable language_">window</span> !== <span class="hljs-string">&quot;undefined&quot;</span>) {
+        (<span class="hljs-variable language_">window</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">__arenaChat</span>?: <span class="hljs-title class_">TeamChatClient</span> | <span class="hljs-literal">null</span> }).<span class="hljs-property">__arenaChat</span> = <span class="hljs-literal">null</span>;
+      }
+    };
+  }, [chat]);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-comment">// 2v2 shared doc: the server is the truth — a stale localStorage draft</span>
+    <span class="hljs-comment">// must never overwrite it on hard refresh (§26D).</span>
+    <span class="hljs-keyword">if</span> (collab) <span class="hljs-keyword">return</span>;
+    <span class="hljs-title function_">setCode</span>(<span class="hljs-title function_">loadDraft</span>(transport, snapshot.<span class="hljs-property">round</span>, snapshot.<span class="hljs-property">problem</span>.<span class="hljs-property">id</span>, snapshot.<span class="hljs-property">language</span>) ?? starter);
+    <span class="hljs-comment">// eslint-disable-next-line react-hooks/exhaustive-deps</span>
+  }, [transport, collab, snapshot.<span class="hljs-property">round</span>, snapshot.<span class="hljs-property">problem</span>.<span class="hljs-property">id</span>, snapshot.<span class="hljs-property">language</span>]);
+
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">if</span> (collab) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-variable language_">window</span>.<span class="hljs-property">localStorage</span>.<span class="hljs-title function_">setItem</span>(<span class="hljs-title function_">draftKey</span>(transport, snapshot.<span class="hljs-property">round</span>, snapshot.<span class="hljs-property">problem</span>.<span class="hljs-property">id</span>, snapshot.<span class="hljs-property">language</span>), code);
+    } <span class="hljs-keyword">catch</span> {
+      <span class="hljs-comment">// Storage full/blocked: draft stays in memory for the session.</span>
+    }
+  }, [transport, collab, snapshot.<span class="hljs-property">round</span>, snapshot.<span class="hljs-property">problem</span>.<span class="hljs-property">id</span>, snapshot.<span class="hljs-property">language</span>, code]);
+
+  <span class="hljs-keyword">function</span> <span class="hljs-title function_">act</span>(<span class="hljs-params"><span class="hljs-attr">fn</span>: () =&gt; <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">unknown</span>&gt;</span>): <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-title function_">setActionError</span>(<span class="hljs-literal">null</span>);
+      <span class="hljs-title function_">fn</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">e</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> <span class="hljs-title function_">setActionError</span>(e <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? e.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;action failed&quot;</span>));
+    };
+  }
+
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;min-h-screen bg-neutral-100 text-neutral-900&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">href</span>=<span class="hljs-string">&quot;#arena-main&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;sr-only focus:not-sr-only focus:absolute focus:bg-white focus:p-2&quot;</span>&gt;</span>
+        Skip to arena
+      <span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ArenaHeader</span> <span class="hljs-attr">mode</span>=<span class="hljs-string">{snapshot.mode}</span> <span class="hljs-attr">remainingSeconds</span>=<span class="hljs-string">{snapshot.remainingSeconds}</span> <span class="hljs-attr">connection</span>=<span class="hljs-string">{transport.connection()}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">main</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;arena-main&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mx-auto max-w-7xl space-y-3 p-3&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex items-start gap-2&quot;</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex-1&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">PhaseBanner</span> <span class="hljs-attr">phase</span>=<span class="hljs-string">{snapshot.roundPhase}</span> <span class="hljs-attr">round</span>=<span class="hljs-string">{snapshot.round}</span> <span class="hljs-attr">totalRounds</span>=<span class="hljs-string">{snapshot.totalRounds}</span> /&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+          {!terminal &amp;&amp; (
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-300 bg-white px-2 py-1 font-mono text-xs text-neutral-600&quot;</span>
+              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> {
+                // Deliberate leave only (§15): immediate forfeit. Socket loss
+                // never routes here.
+                if (window.confirm(&quot;Leave the match? Leaving forfeits immediately.&quot;)) {
+                  act(() =&gt; transport.leave())();
+                }
+              }}
+            &gt;
+              Leave match
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          )}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        {snapshot.notice &amp;&amp; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-neutral-200 bg-white px-3 py-2 font-mono text-xs&quot;</span>&gt;</span>
+            {snapshot.notice}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        )}
+        {(snapshot.roundPhase === &quot;ROUND_INTRO&quot; || snapshot.roundPhase === &quot;MATCH_FOUND&quot;) &amp;&amp; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+            <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+            <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded bg-teal-700 px-4 py-2 text-sm font-medium text-white&quot;</span>
+            <span class="hljs-attr">onClick</span>=<span class="hljs-string">{act(async</span> () =&gt;</span> {
+              if (snapshot.roundPhase === &quot;MATCH_FOUND&quot;) await transport.startRound();
+              await transport.beginCoding();
+            })}
+          &gt;
+            Start round
+          <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+        )}
+        {actionError &amp;&amp; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;alert&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-red-700 bg-white px-3 py-2 font-mono text-xs text-red-700&quot;</span>&gt;</span>
+            {actionError}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        )}
+        {collabError &amp;&amp; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;alert&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-red-700 bg-white px-3 py-2 font-mono text-xs text-red-700&quot;</span>&gt;</span>
+            Shared editor: {collabError}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        )}
+        {(snapshot.roundPhase === &quot;CODING&quot; || snapshot.roundPhase === &quot;SCORE_REVEAL&quot;) &amp;&amp;
+          (clientsLoading || (collabConfig !== null &amp;&amp; collab === null) ? (
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-200 bg-white p-4 font-mono text-sm text-neutral-500&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+              {clientsLoading ? &quot;Loading shared workspace…&quot; : &quot;The shared workspace is unavailable.&quot;}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+          ) : (
+            <span class="hljs-tag">&lt;<span class="hljs-name">Suspense</span>
+              <span class="hljs-attr">fallback</span>=<span class="hljs-string">{</span>
+                &lt;<span class="hljs-attr">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-200 bg-white p-4 font-mono text-sm text-neutral-500&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+                  Loading editor…
+                <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+              }
+            &gt;
+              <span class="hljs-tag">&lt;<span class="hljs-name">ArenaWorkspace</span> <span class="hljs-attr">snapshot</span>=<span class="hljs-string">{snapshot}</span> <span class="hljs-attr">transport</span>=<span class="hljs-string">{transport}</span> <span class="hljs-attr">code</span>=<span class="hljs-string">{code}</span> <span class="hljs-attr">onCode</span>=<span class="hljs-string">{setCode}</span> <span class="hljs-attr">collab</span>=<span class="hljs-string">{collab}</span> <span class="hljs-attr">chat</span>=<span class="hljs-string">{chat}</span> /&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">Suspense</span>&gt;</span>
+          ))}
+        {snapshot.roundPhase === &quot;SCORE_REVEAL&quot; &amp;&amp; snapshot.reveal &amp;&amp; (
+          <span class="hljs-tag">&lt;&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">RoundScoreReveal</span> <span class="hljs-attr">reveal</span>=<span class="hljs-string">{snapshot.reveal}</span> <span class="hljs-attr">round</span>=<span class="hljs-string">{snapshot.round}</span> /&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded bg-teal-700 px-4 py-2 text-sm font-medium text-white&quot;</span>
+              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{act(()</span> =&gt;</span> transport.advance())}
+            &gt;
+              {snapshot.round &lt; snapshot.totalRounds ? &quot;Next round&quot; : &quot;See final result&quot;}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          <span class="hljs-tag">&lt;/&gt;</span>
+        )}
+        {snapshot.roundPhase === &quot;MATCH_COMPLETE&quot; &amp;&amp; snapshot.reveal &amp;&amp; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">MatchResult</span> <span class="hljs-attr">reveal</span>=<span class="hljs-string">{snapshot.reveal}</span> <span class="hljs-attr">round</span>=<span class="hljs-string">{snapshot.round}</span> <span class="hljs-attr">matchFinal</span>=<span class="hljs-string">{snapshot.matchFinal}</span> /&gt;</span>
+        )}
+        {fixtureControls &amp;&amp; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex flex-wrap gap-2 border-t border-neutral-200 pt-2&quot;</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Mock controls&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-500&quot;</span>&gt;</span>mock:<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-300 px-2 py-1 font-mono text-xs&quot;</span>
+              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> fixtureControls.publishReveal()}
+            &gt;
+              publish reveal
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-300 px-2 py-1 font-mono text-xs&quot;</span>
+              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> fixtureControls.nextRound()}
+            &gt;
+              next round
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded border border-neutral-300 px-2 py-1 font-mono text-xs&quot;</span>
+              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> fixtureControls.setMateReady(true)}
+            &gt;
+              mate ready
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+        )}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">main</span>&gt;</span></span>
+    &lt;/div&gt;
+  );
+}
+</template>
+<template id="source-3760f78ca9932372" data-source-path="frontend/src/components/ArenaWorkspace.tsx"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">CodeWorkspace</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./CodeWorkspace.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">MatchPanel</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./MatchPanel.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">ProblemPanel</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./ProblemPanel.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ArenaTransport</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/transport.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">CollabClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/collab.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">TeamChatClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/chat.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ArenaSnapshot</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">ArenaWorkspace</span>(<span class="hljs-params">{
+  snapshot,
+  transport,
+  code,
+  onCode,
+  collab,
+  chat,
+}: {
+  snapshot: ArenaSnapshot;
+  transport: ArenaTransport;
+  code: <span class="hljs-built_in">string</span>;
+  onCode: (code: <span class="hljs-built_in">string</span>) =&gt; <span class="hljs-built_in">void</span>;
+  collab?: CollabClient | <span class="hljs-literal">null</span>;
+  chat?: TeamChatClient | <span class="hljs-literal">null</span>;
+}</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)_minmax(0,4fr)]&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ProblemPanel</span> <span class="hljs-attr">problem</span>=<span class="hljs-string">{snapshot.problem}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">CodeWorkspace</span> <span class="hljs-attr">snapshot</span>=<span class="hljs-string">{snapshot}</span> <span class="hljs-attr">transport</span>=<span class="hljs-string">{transport}</span> <span class="hljs-attr">code</span>=<span class="hljs-string">{code}</span> <span class="hljs-attr">onCode</span>=<span class="hljs-string">{onCode}</span> <span class="hljs-attr">collab</span>=<span class="hljs-string">{collab}</span> /&gt;</span>
+      {/*
+        ponytail: readiness checkbox is optimistic; the authoritative snapshot
+        corrects it on the next refresh. Rejections (e.g. stale revision)
+        stay silent here so a racing invalidate never pops a console error.
+      */}
+      <span class="hljs-tag">&lt;<span class="hljs-name">MatchPanel</span>
+        <span class="hljs-attr">snapshot</span>=<span class="hljs-string">{snapshot}</span>
+        <span class="hljs-attr">onSetReady</span>=<span class="hljs-string">{(v)</span> =&gt;</span> void transport.setReady(v).catch(() =&gt; {})}
+        chat={chat}
+      /&gt;
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-c7730ea8cf005c0d" data-source-path="frontend/src/components/DuelPanel.tsx"><span class="hljs-keyword">import</span> { <span class="hljs-variable constant_">STATUS_LABEL</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./status.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">SideView</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">SideRow</span>(<span class="hljs-params">{ side, you }: { side: SideView; you?: <span class="hljs-built_in">boolean</span> }</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex items-baseline justify-between gap-2 px-3 py-2&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-sm font-medium text-neutral-900&quot;</span>&gt;</span>
+          {you ? &quot;YOU&quot; : side.name}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-500&quot;</span>&gt;</span>
+          {STATUS_LABEL[side.status]} · {side.presence} · {side.submissions} submission{side.submissions === 1 ? &quot;&quot; : &quot;s&quot;}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">DuelPanel</span>(<span class="hljs-params">{ you, opponent }: { you: SideView; opponent: SideView }</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Duel&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-neutral-200 bg-white&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">SideRow</span> <span class="hljs-attr">side</span>=<span class="hljs-string">{you}</span> <span class="hljs-attr">you</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;border-t border-neutral-200 px-3 py-1 font-mono text-xs text-neutral-400&quot;</span>&gt;</span>VS<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">SideRow</span> <span class="hljs-attr">side</span>=<span class="hljs-string">{opponent}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-bae2152c7d58ad85" data-source-path="frontend/src/components/MatchPanel.tsx"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">DuelPanel</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./DuelPanel.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">TeamChat</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./TeamChat.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">TeamPanel</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./TeamPanel.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">TeamChatClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/chat.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">ArenaSnapshot</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">MatchPanel</span>(<span class="hljs-params">{
+  snapshot,
+  onSetReady,
+  chat,
+}: {
+  snapshot: ArenaSnapshot;
+  onSetReady: (value: <span class="hljs-built_in">boolean</span>) =&gt; <span class="hljs-built_in">void</span>;
+  chat?: TeamChatClient | <span class="hljs-literal">null</span>;
+}</span>) {
+  <span class="hljs-keyword">if</span> (snapshot.<span class="hljs-property">mode</span> === <span class="hljs-string">&quot;2v2&quot;</span>) {
+    <span class="hljs-keyword">return</span> (
+      <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;space-y-3&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">TeamPanel</span> <span class="hljs-attr">alpha</span>=<span class="hljs-string">{snapshot.alpha}</span> <span class="hljs-attr">beta</span>=<span class="hljs-string">{snapshot.beta}</span> <span class="hljs-attr">ready</span>=<span class="hljs-string">{snapshot.ready}</span> <span class="hljs-attr">onSetReady</span>=<span class="hljs-string">{onSetReady}</span> /&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">TeamChat</span> <span class="hljs-attr">client</span>=<span class="hljs-string">{chat}</span> <span class="hljs-attr">readOnly</span>=<span class="hljs-string">{snapshot.roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span>} /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+    );
+  }
+  <span class="hljs-keyword">return</span> <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">DuelPanel</span> <span class="hljs-attr">you</span>=<span class="hljs-string">{snapshot.you}</span> <span class="hljs-attr">opponent</span>=<span class="hljs-string">{snapshot.opponent}</span> /&gt;</span></span>;
+}
+</template>
+<template id="source-a2a814cf6e51053f" data-source-path="frontend/src/components/MatchResult.tsx"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchFinalView</span>, <span class="hljs-title class_">RevealView</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">MatchResult</span>(<span class="hljs-params">{
+  reveal,
+  round,
+  matchFinal,
+}: {
+  reveal: RevealView;
+  round: <span class="hljs-built_in">number</span>;
+  matchFinal?: MatchFinalView | <span class="hljs-literal">null</span>;
+}</span>) {
+  <span class="hljs-keyword">const</span> you = matchFinal?.<span class="hljs-property">you</span> ?? reveal.<span class="hljs-property">totals</span>.<span class="hljs-property">you</span>;
+  <span class="hljs-keyword">const</span> opponent = matchFinal?.<span class="hljs-property">opponent</span> ?? reveal.<span class="hljs-property">totals</span>.<span class="hljs-property">opponent</span>;
+  <span class="hljs-keyword">const</span> outcome =
+    matchFinal?.<span class="hljs-property">outcome</span> ??
+    (reveal.<span class="hljs-property">totals</span>.<span class="hljs-property">you</span> &gt; reveal.<span class="hljs-property">totals</span>.<span class="hljs-property">opponent</span>
+      ? <span class="hljs-string">&quot;You win the match.&quot;</span>
+      : reveal.<span class="hljs-property">totals</span>.<span class="hljs-property">you</span> &lt; reveal.<span class="hljs-property">totals</span>.<span class="hljs-property">opponent</span>
+        ? <span class="hljs-string">&quot;Opponent wins the match.&quot;</span>
+        : <span class="hljs-string">&quot;The match is a draw.&quot;</span>);
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Match result&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-neutral-200 bg-white px-3 py-2&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-sm font-semibold&quot;</span>&gt;</span>Match complete after {round} round{round === 1 ? &quot;&quot; : &quot;s&quot;}<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-700&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+        Final — you {you} · opponent {opponent}. {outcome}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-ac90ba6edae87aab" data-source-path="frontend/src/components/PhaseBanner.tsx"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">RoundPhase</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">MESSAGE</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">RoundPhase</span>, <span class="hljs-built_in">string</span>&gt; = {
+  <span class="hljs-attr">MATCH_FOUND</span>: <span class="hljs-string">&quot;Match found. Get ready.&quot;</span>,
+  <span class="hljs-attr">ROUND_INTRO</span>: <span class="hljs-string">&quot;Round intro. Start the round to begin coding.&quot;</span>,
+  <span class="hljs-attr">CODING</span>: <span class="hljs-string">&quot;Coding. Run visible examples, then submit for sealed evaluation.&quot;</span>,
+  <span class="hljs-attr">SCORE_REVEAL</span>: <span class="hljs-string">&quot;Scores revealed. Review group breakdown below.&quot;</span>,
+  <span class="hljs-attr">ROUND_COMPLETE</span>: <span class="hljs-string">&quot;Round complete.&quot;</span>,
+  <span class="hljs-attr">MATCH_COMPLETE</span>: <span class="hljs-string">&quot;Match complete.&quot;</span>,
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">PhaseBanner</span>(<span class="hljs-params">{ phase, round, totalRounds }: { phase: RoundPhase; round: <span class="hljs-built_in">number</span>; totalRounds: <span class="hljs-built_in">number</span> }</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm text-neutral-800&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-500&quot;</span>&gt;</span>
+        Round {round}/{totalRounds} · {phase}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-0.5&quot;</span>&gt;</span>{MESSAGE[phase]}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-9051ea5f4c6ff20b" data-source-path="frontend/src/components/RoundScoreReveal.tsx"><span class="hljs-keyword">import</span> { useEffect, useRef } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">RevealView</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">RoundScoreReveal</span>(<span class="hljs-params">{ reveal, round }: { reveal: RevealView; round: <span class="hljs-built_in">number</span> }</span>) {
+  <span class="hljs-keyword">const</span> ref = useRef&lt;<span class="hljs-title class_">HTMLElement</span>&gt;(<span class="hljs-literal">null</span>);
+  <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
+    ref.<span class="hljs-property">current</span>?.<span class="hljs-title function_">focus</span>();
+  }, [round]);
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">section</span>
+      <span class="hljs-attr">ref</span>=<span class="hljs-string">{ref}</span>
+      <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;reveal-section&quot;</span>
+      <span class="hljs-attr">tabIndex</span>=<span class="hljs-string">{-1}</span>
+      <span class="hljs-attr">aria-label</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">Round</span> ${<span class="hljs-attr">round</span>} <span class="hljs-attr">score</span> <span class="hljs-attr">reveal</span>`}
+      <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-teal-700 bg-white focus-visible:outline-2 focus-visible:outline-teal-700&quot;</span>
+    &gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;border-b border-neutral-200 px-3 py-2 text-sm font-semibold&quot;</span>&gt;</span>
+        Round {round}: {reveal.roundScore} / 100
+      <span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">table</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;w-full font-mono text-xs&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">thead</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-left text-neutral-500&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-1 font-medium&quot;</span>&gt;</span>Group<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-1 font-medium&quot;</span>&gt;</span>Weight<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">th</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-1 font-medium&quot;</span>&gt;</span>Earned<span class="hljs-tag">&lt;/<span class="hljs-name">th</span>&gt;</span>
+          <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">thead</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">tbody</span>&gt;</span>
+          {reveal.groups.map((g) =&gt; (
+            <span class="hljs-tag">&lt;<span class="hljs-name">tr</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{g.name}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;border-t border-neutral-100&quot;</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">td</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-1&quot;</span>&gt;</span>{g.name}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">td</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-1&quot;</span>&gt;</span>{g.weight}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">td</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-1&quot;</span>&gt;</span>{g.earned}<span class="hljs-tag">&lt;/<span class="hljs-name">td</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">tr</span>&gt;</span>
+          ))}
+        <span class="hljs-tag">&lt;/<span class="hljs-name">tbody</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">table</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 py-2 font-mono text-xs text-neutral-700&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+        Match totals — you {reveal.totals.you} · opponent {reveal.totals.opponent}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-740865076a068846" data-source-path="frontend/src/components/status.ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">PlayerStatus</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-comment">/** Text labels mirror arena-model STATUS_LABEL so status is never color-only. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">const</span> <span class="hljs-attr">STATUS_LABEL</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">PlayerStatus</span>, <span class="hljs-built_in">string</span>&gt; = {
+  <span class="hljs-attr">coding</span>: <span class="hljs-string">&quot;Coding&quot;</span>,
+  <span class="hljs-attr">running</span>: <span class="hljs-string">&quot;Running&quot;</span>,
+  <span class="hljs-attr">submitted</span>: <span class="hljs-string">&quot;Submitted&quot;</span>,
+  <span class="hljs-attr">evaluating</span>: <span class="hljs-string">&quot;Evaluating&quot;</span>,
+  <span class="hljs-attr">locked</span>: <span class="hljs-string">&quot;Locked in&quot;</span>,
+};
+</template>
+<template id="source-d7ba6adcccae0384" data-source-path="frontend/src/components/TeamPanel.tsx"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">ReadyState</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./ReadyState.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-variable constant_">STATUS_LABEL</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./status.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">Readiness</span>, <span class="hljs-title class_">TeamView</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">TeamBlock</span>(<span class="hljs-params">{ title, team }: { title: <span class="hljs-built_in">string</span>; team: TeamView }</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h4</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 pt-2 font-mono text-xs font-semibold uppercase tracking-wide text-neutral-500&quot;</span>&gt;</span>{title}<span class="hljs-tag">&lt;/<span class="hljs-name">h4</span>&gt;</span>
+      {team.members.map((m) =&gt; (
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{m.name}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex items-baseline justify-between gap-2 px-3 py-1.5&quot;</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-sm text-neutral-900&quot;</span>&gt;</span>{m.name}<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-500&quot;</span>&gt;</span>
+            {STATUS_LABEL[m.status]} · {m.presence}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      ))}
+      <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 pb-1 font-mono text-xs text-neutral-500&quot;</span>&gt;</span>
+        Team submissions: {team.submissions}
+        {team.score !== null &amp;&amp; ` · Team score: ${team.score}`}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></span>
+  );
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">TeamPanel</span>(<span class="hljs-params">{
+  alpha,
+  beta,
+  ready,
+  onSetReady,
+}: {
+  alpha: TeamView;
+  beta: TeamView;
+  ready: Readiness;
+  onSetReady: (value: <span class="hljs-built_in">boolean</span>) =&gt; <span class="hljs-built_in">void</span>;
+}</span>) {
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Teams&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-md border border-neutral-200 bg-white&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">TeamBlock</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;Your team&quot;</span> <span class="hljs-attr">team</span>=<span class="hljs-string">{alpha}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;border-t border-neutral-200&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">ReadyState</span> <span class="hljs-attr">ready</span>=<span class="hljs-string">{ready}</span> <span class="hljs-attr">onSetReady</span>=<span class="hljs-string">{onSetReady}</span> /&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;border-t border-neutral-200 px-3 py-1 font-mono text-xs text-neutral-400&quot;</span>&gt;</span>VS<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">TeamBlock</span> <span class="hljs-attr">title</span>=<span class="hljs-string">&quot;Other team&quot;</span> <span class="hljs-attr">team</span>=<span class="hljs-string">{beta}</span> /&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-5e96aee770b41775" data-source-path="frontend/src/components/TestPanel.tsx"><span class="hljs-keyword">import</span> { useState } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">TestView</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">DOT</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">TestView</span>[<span class="hljs-string">&quot;status&quot;</span>], <span class="hljs-built_in">string</span>&gt; = {
+  <span class="hljs-attr">idle</span>: <span class="hljs-string">&quot;bg-neutral-300&quot;</span>,
+  <span class="hljs-attr">running</span>: <span class="hljs-string">&quot;bg-amber-400&quot;</span>,
+  <span class="hljs-attr">passed</span>: <span class="hljs-string">&quot;bg-teal-600&quot;</span>,
+  <span class="hljs-attr">failed</span>: <span class="hljs-string">&quot;bg-red-500&quot;</span>,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">LABEL</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">TestView</span>[<span class="hljs-string">&quot;status&quot;</span>], <span class="hljs-built_in">string</span>&gt; = {
+  <span class="hljs-attr">idle</span>: <span class="hljs-string">&quot;Not run&quot;</span>,
+  <span class="hljs-attr">running</span>: <span class="hljs-string">&quot;Running examples…&quot;</span>,
+  <span class="hljs-attr">passed</span>: <span class="hljs-string">&quot;Passed&quot;</span>,
+  <span class="hljs-attr">failed</span>: <span class="hljs-string">&quot;Failed&quot;</span>,
+};
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">TestPanel</span>(<span class="hljs-params">{ tests }: { tests: TestView[] }</span>) {
+  <span class="hljs-keyword">const</span> [customInput, setCustomInput] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&quot;&quot;</span>);
+  <span class="hljs-keyword">return</span> (
+    <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">section</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Visible tests&quot;</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;border-t border-neutral-200&quot;</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">h3</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 pt-2 font-mono text-xs font-semibold uppercase tracking-wide text-neutral-500&quot;</span>&gt;</span>Visible tests<span class="hljs-tag">&lt;/<span class="hljs-name">h3</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">ul</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;divide-y divide-neutral-100&quot;</span>&gt;</span>
+        {tests.map((t) =&gt; (
+          <span class="hljs-tag">&lt;<span class="hljs-name">li</span> <span class="hljs-attr">key</span>=<span class="hljs-string">{t.id}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex flex-wrap items-baseline gap-x-3 px-3 py-2&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">aria-hidden</span> <span class="hljs-attr">className</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">inline-block</span> <span class="hljs-attr">h-2</span> <span class="hljs-attr">w-2</span> <span class="hljs-attr">rounded-full</span> ${<span class="hljs-attr">DOT</span>[<span class="hljs-attr">t.status</span>]}`} /&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs font-medium&quot;</span>&gt;</span>{t.id}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-xs text-neutral-700&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;status&quot;</span>&gt;</span>
+              {LABEL[t.status]}
+            <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+            {t.output !== null &amp;&amp; (
+              <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;w-full font-mono text-xs text-neutral-600&quot;</span>&gt;</span>
+                output: {t.output}
+                {t.ms !== null &amp;&amp; ` · ${t.ms}ms`}
+              <span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+            )}
+          <span class="hljs-tag">&lt;/<span class="hljs-name">li</span>&gt;</span>
+        ))}
+      <span class="hljs-tag">&lt;/<span class="hljs-name">ul</span>&gt;</span>
+      <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;px-3 pb-3&quot;</span>&gt;</span>
+        <span class="hljs-tag">&lt;<span class="hljs-name">label</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-600&quot;</span>&gt;</span>
+          Custom input (visible behavior only)
+          <span class="hljs-tag">&lt;<span class="hljs-name">textarea</span>
+            <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-1 h-16 w-full rounded-md border border-neutral-300 p-2 font-mono text-xs&quot;</span>
+            <span class="hljs-attr">value</span>=<span class="hljs-string">{customInput}</span>
+            <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(e)</span> =&gt;</span> setCustomInput(e.target.value)}
+            placeholder=&quot;nums = [4, 5]&quot;
+          /&gt;
+        <span class="hljs-tag">&lt;/<span class="hljs-name">label</span>&gt;</span>
+      <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+    <span class="hljs-tag">&lt;/<span class="hljs-name">section</span>&gt;</span></span>
+  );
+}
+</template>
+<template id="source-b6889d573bf68429" data-source-path="frontend/src/index.css"><span class="hljs-keyword">@import</span> <span class="hljs-string">&quot;tailwindcss&quot;</span>;
+
+<span class="hljs-keyword">@theme</span> {
+  <span class="hljs-attr">--color-neutral-50</span>: <span class="hljs-number">#fafafa</span>;
+  <span class="hljs-attr">--color-neutral-100</span>: <span class="hljs-number">#f5f5f5</span>;
+  <span class="hljs-attr">--color-neutral-200</span>: <span class="hljs-number">#e5e5e5</span>;
+  <span class="hljs-attr">--color-neutral-300</span>: <span class="hljs-number">#d4d4d4</span>;
+  <span class="hljs-attr">--color-neutral-400</span>: <span class="hljs-number">#a3a3a3</span>;
+  <span class="hljs-attr">--color-neutral-500</span>: <span class="hljs-number">#737373</span>;
+  <span class="hljs-attr">--color-neutral-600</span>: <span class="hljs-number">#525252</span>;
+  <span class="hljs-attr">--color-neutral-700</span>: <span class="hljs-number">#404040</span>;
+  <span class="hljs-attr">--color-neutral-800</span>: <span class="hljs-number">#262626</span>;
+  <span class="hljs-attr">--color-neutral-900</span>: <span class="hljs-number">#171717</span>;
+
+  <span class="hljs-attr">--color-teal-600</span>: <span class="hljs-number">#0d9488</span>;
+  <span class="hljs-attr">--color-teal-700</span>: <span class="hljs-number">#0f766e</span>;
+
+  <span class="hljs-attr">--color-red-700</span>: <span class="hljs-number">#b91c1c</span>;
+}
+
+<span class="hljs-selector-pseudo">:root</span> {
+  <span class="hljs-attribute">color-scheme</span>: light;
+}
+
+<span class="hljs-selector-tag">body</span> {
+  <span class="hljs-attribute">background</span>: <span class="hljs-number">#f5f5f5</span>;
+}
+
+<span class="hljs-keyword">@media</span> (<span class="hljs-attribute">prefers-contrast</span>: more) {
+  <span class="hljs-selector-tag">body</span> {
+    <span class="hljs-attribute">background</span>: <span class="hljs-number">#fff</span>;
+  }
+}
+</template>
+<template id="source-f687de21d327881c" data-source-path="frontend/src/main.tsx"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">StrictMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> { createRoot } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react-dom/client&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">App</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./App.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-string">&quot;./index.css&quot;</span>;
+
+<span class="hljs-title function_">createRoot</span>(<span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&quot;root&quot;</span>)!).<span class="hljs-title function_">render</span>(
+  <span class="language-xml"><span class="hljs-tag">&lt;<span class="hljs-name">StrictMode</span>&gt;</span>
+    <span class="hljs-tag">&lt;<span class="hljs-name">App</span> /&gt;</span>
+  <span class="hljs-tag">&lt;/<span class="hljs-name">StrictMode</span>&gt;</span></span>,
+);
+</template>
+  </div>
+  <dialog class="source-dialog" id="source-dialog" aria-labelledby="source-dialog-title" aria-describedby="source-dialog-help">
+    <header class="source-dialog-header">
+      <div class="source-dialog-heading">
+        <p class="eyebrow">Code Arena · current source</p>
+        <h2 id="source-dialog-title">Source excerpt</h2>
+        <p id="source-file-path" class="source-dialog-path"><code></code></p>
+        <p id="source-file-summary" class="quiet"></p>
+      </div>
+      <div class="source-dialog-actions">
+        <a class="source-editor-link" id="source-editor-link" href="vscode://file/">Open in VS Code</a>
+        <form method="dialog"><button class="secondary-button" id="source-dialog-close" type="submit" autofocus>Close preview</button></form>
+      </div>
+    </header>
+    <p id="source-dialog-help" class="source-dialog-help">A short excerpt around the cited line. The lesson stays open behind this preview.</p>
+    <figure class="source-code-figure">
+      <figcaption id="source-code-caption">Cited source excerpt with explicit line numbers</figcaption>
+      <pre class="source-code" tabindex="0" aria-labelledby="source-code-caption"><code id="source-code-lines"></code></pre>
+    </figure>
+  </dialog>
+  <script>
+    (() => {
+      const sourceDialog = document.getElementById("source-dialog");
+      const sourceTitle = document.getElementById("source-dialog-title");
+      const sourcePath = document.querySelector("#source-file-path code");
+      const sourceSummary = document.getElementById("source-file-summary");
+      const sourceEditorLink = document.getElementById("source-editor-link");
+      const sourceCloseButton = document.getElementById("source-dialog-close");
+      const sourceCode = document.getElementById("source-code-lines");
+      const sourceCodeScroll = sourceCode.closest("pre");
+      let sourceOpener = null;
+
+      sourceDialog.addEventListener("close", () => {
+        const opener = sourceOpener;
+        sourceOpener = null;
+        if (opener?.isConnected) opener.focus({ preventScroll: true });
+      });
+      sourceDialog.addEventListener("keydown", (event) => {
+        if (event.key !== "Tab") return;
+        const focusable = [...sourceDialog.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+          .filter((element) => !element.hidden && element.getAttribute("aria-hidden") !== "true");
+        if (focusable.length === 0) return;
+        const currentIndex = focusable.indexOf(document.activeElement);
+        const nextIndex = event.shiftKey
+          ? (currentIndex <= 0 ? focusable.length - 1 : currentIndex - 1)
+          : (currentIndex < 0 || currentIndex === focusable.length - 1 ? 0 : currentIndex + 1);
+        event.preventDefault();
+        focusable[nextIndex].focus({ preventScroll: true });
+      });
+
+      const openSourcePreview = (link, sourceTemplate) => {
+        const filePath = link.dataset.sourcePath;
+        const citedLine = Number(link.dataset.sourceLine);
+        const sourceText = sourceTemplate.content.textContent.replace(/\r\n?/g, "\n");
+        const lines = sourceText.length === 0 ? [""] : sourceText.split("\n");
+        if (sourceText.endsWith("\n")) lines.pop();
+        if (lines.length === 0) lines.push("");
+        if (!Number.isSafeInteger(citedLine) || citedLine < 1 || citedLine > lines.length) return;
+
+        const highlightedLines = lines.map(() => document.createDocumentFragment());
+        let highlightedLineIndex = 0;
+        const appendHighlightedText = (value, tokenClasses) => {
+          const parts = value.split("\n");
+          for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+            if (parts[partIndex] && highlightedLineIndex < highlightedLines.length) {
+              let renderedToken = document.createTextNode(parts[partIndex]);
+              for (let classIndex = tokenClasses.length - 1; classIndex >= 0; classIndex -= 1) {
+                const token = document.createElement("span");
+                token.className = tokenClasses[classIndex];
+                token.append(renderedToken);
+                renderedToken = token;
+              }
+              highlightedLines[highlightedLineIndex].append(renderedToken);
+            }
+            if (partIndex < parts.length - 1) highlightedLineIndex += 1;
+          }
+        };
+        const collectHighlightedText = (node, tokenClasses = []) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            appendHighlightedText(node.nodeValue ?? "", tokenClasses);
+            return;
+          }
+          const nextTokenClasses = node.nodeType === Node.ELEMENT_NODE && node.nodeName === "SPAN"
+            ? [...tokenClasses, ...[...node.classList].filter((name) => /^hljs-[a-z0-9_-]+$/i.test(name))]
+            : tokenClasses;
+          node.childNodes.forEach((child) => collectHighlightedText(child, nextTokenClasses));
+        };
+        sourceTemplate.content.childNodes.forEach((node) => collectHighlightedText(node));
+
+        const firstLine = Math.max(1, citedLine - 5);
+        const lastLine = Math.min(lines.length, citedLine + 5);
+        const numberWidth = String(lines.length).length;
+        const fragment = document.createDocumentFragment();
+        for (let lineNumber = firstLine; lineNumber <= lastLine; lineNumber += 1) {
+          const line = document.createElement("span");
+          line.className = "source-line";
+          if (lineNumber === citedLine) line.classList.add("is-reference-line");
+
+          const number = document.createElement("span");
+          number.className = "source-line-number";
+          number.setAttribute("aria-hidden", "true");
+          number.textContent = String(lineNumber).padStart(numberWidth, " ");
+
+          const text = document.createElement("span");
+          text.className = "source-line-text";
+          text.append(highlightedLines[lineNumber - 1]);
+          line.append(number, text);
+          fragment.append(line);
+        }
+
+        sourceTitle.textContent = "Code excerpt from " + filePath;
+        sourcePath.textContent = filePath;
+        sourceSummary.textContent = "Lines " + firstLine + "–" + lastLine + " of " + lines.length;
+        sourceEditorLink.href = link.dataset.editorUrl;
+        sourceCode.replaceChildren(fragment);
+        sourceCodeScroll.scrollTop = 0;
+        sourceCodeScroll.scrollLeft = 0;
+        sourceOpener = link;
+        sourceDialog.showModal();
+        sourceCloseButton.focus({ preventScroll: true });
+      };
+
+      document.addEventListener("click", (event) => {
+        const link = event.target.closest?.("a[data-source-id][data-source-line]");
+        if (!link) return;
+        const sourceTemplate = document.getElementById(link.dataset.sourceId);
+        if (!(sourceTemplate instanceof HTMLTemplateElement)) return;
+        event.preventDefault();
+        openSourcePreview(link, sourceTemplate);
+      });
+    })();
+  </script>
+</body>
+</html>

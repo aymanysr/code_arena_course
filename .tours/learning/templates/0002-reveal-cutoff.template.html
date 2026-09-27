@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn when an in-flight submission can count toward a Code Arena Reveal.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 8 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">The Judge is still working when Reveal starts. What happens to its result?</h2>
+      <p class="section-intro">Imagine the Judge returns once during the grace window, and once after the cutoff. Write down whether each score appears in Reveal before opening the explanation.</p>
+      <details class="card">
+        <summary>Show the prediction to check</summary>
+        <p class="mt-1">A result that settles during grace can count. A result still unfinished at cutoff is superseded: its verdict cannot change the score frozen into Reveal. New submissions are rejected as soon as the Round starts closing.</p>
+      </details>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now trace four moments</p>
+      <h2 id="trace-title">Closing is not the same moment as publishing</h2>
+      <p class="section-intro">Follow the source links in order. This is one current implementation path; the tests below check the important timing cases.</p>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The Round starts closing</h3>
+            <p><code>ArenaEngine.publishReveal()</code> asks <code>RoundLifecycle</code> to set <code>closing</code>, then saves that state. This closes the door to new Submissions, but it does not yet publish a score or change the Match phase.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L694">Start closing · engine.ts:694</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L73">Set closing flag · round-lifecycle.ts:73</a>
+              <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L97">New submissions are rejected · scoring-reveal.test.ts:97</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>Already-running evaluations get a grace window</h3>
+            <p>The engine waits for the in-flight Judge promises to settle, or until the configured grace time runs out—whichever happens first. A verdict that settles in time can still become the Round's counted result.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L699">Find pending work and wait · engine.ts:699</a>
+              <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L86">Verdict inside grace counts · scoring-reveal.test.ts:86</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>The cutoff separates counted work from late work</h3>
+            <p>After the wait, <code>prepareReveal()</code> marks the cutoff and identifies unfinished evaluations. When one returns too late, evaluation orchestration stores it as <code>superseded</code> and does not replace the counted result.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L83">Mark cutoff and pending IDs · round-lifecycle.ts:83</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L432">Count only before cutoff · evaluation-orchestration.ts:432</a>
+              <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L109">Late verdict stays out of score · scoring-reveal.test.ts:109</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>The engine freezes and publishes the Reveal</h3>
+            <p>It builds scores from the results already counted, creates a frozen snapshot, persists it, then commits it to the Round. Only that final commit moves the Match into the Reveal phase. A later Judge result cannot rewrite the published scores.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L721">Build and persist snapshot · engine.ts:721</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L98">Copy and freeze Reveal data · round-lifecycle.ts:98</a>
+              <a href="../../../packages/arena-game/src/round-lifecycle.ts#L110">Commit and change phase · round-lifecycle.ts:110</a>
+              <a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L122">Published snapshot stays stable · scoring-reveal.test.ts:122</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Three words that are easy to mix up</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3><code>closing</code></h3>
+          <p>New Submissions are no longer accepted. Existing evaluations may still finish during grace. The phase can still be <code>CODING</code>.</p>
+        </article>
+        <article class="card">
+          <h3>Cutoff</h3>
+          <p>The grace wait has ended. Unfinished evaluations are superseded and cannot affect the score for this Reveal.</p>
+        </article>
+        <article class="card">
+          <h3>Published</h3>
+          <p>The authoritative snapshot has been persisted and committed. That is when the phase changes to Reveal.</p>
+        </article>
+        <article class="card">
+          <h3>Immutable snapshot</h3>
+          <p>The stored score and breakdown stay fixed. A caller can edit its own returned copy; that does not edit the saved Reveal.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="tests-title">
+      <h2 id="tests-title">What the tests check</h2>
+      <div class="table-scroll" role="region" aria-label="Reveal timing test cases" tabindex="0">
+        <table class="data-table">
+          <caption>These cases use the scripted test Judge and explicit grace durations.</caption>
+          <thead>
+            <tr><th scope="col">Test case</th><th scope="col">Evidence</th><th scope="col">What it demonstrates</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Verdict inside grace</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L86">Lines 86–95</a></td><td>The completed verdict is included in Reveal.</td></tr>
+            <tr><td>New Submit while closing</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L97">Lines 97–106</a></td><td>A fresh action is rejected while older work gets its chance to settle.</td></tr>
+            <tr><td>Verdict after cutoff</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L109">Lines 109–120</a></td><td>The existing counted score remains in Reveal after late work finishes.</td></tr>
+            <tr><td>Consumer mutation and republish</td><td><a href="../../../packages/arena-game/test/scoring-reveal.test.ts#L122">Lines 122–132</a></td><td>The saved Reveal does not change when the returned copy is edited; a second publish is rejected.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <aside class="concept-note mt-1">
+        <h3>What this test file does not prove</h3>
+        <p>These cases do not measure real Docker/Judge timing under load or prove every possible race is impossible. They use a controlled fake Judge to check these particular state rules. Container isolation is a different question and has its own tests.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">The Round says <code>closing</code>, but the phase still says <code>CODING</code>. A Judge result arrives after cutoff. Can it change the Reveal?</h2>
+      <p class="section-intro">Answer in your own words before opening the hint. Explain what happens to new Submissions, in-flight work, and the saved score.</p>
+      <details class="card">
+        <summary>Show a useful answer hint</summary>
+        <p class="mt-1">No. Closing rejects new Submissions but gives existing work a short grace window. Once the cutoff passes, unfinished evaluations are superseded. The engine builds and persists the Reveal from counted results, then commits the phase change. The late verdict cannot rewrite that snapshot.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>In your future implementation, write two tests before writing the timer: one where an in-flight verdict finishes before the grace limit, and one where it finishes after the cutoff. Assert that the first is counted and the second cannot alter the published Reveal. Add a third assertion that new Submissions are rejected as soon as the Round starts closing.</p>
+      </article>
+      <p class="nav-row"><a href="0001-follow-one-submit.html">← Lesson 1: follow one Submit</a> · <a href="0003-rounds-and-final-score.html">Next: Lesson 3, round scores →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This page explains the current implementation and cited tests; it is not evidence that a separate rewrite has the same behavior.</p>
+    </footer>
+  </main>
+</body>
+</html>

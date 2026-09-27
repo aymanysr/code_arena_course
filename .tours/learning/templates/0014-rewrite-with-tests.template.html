@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Turn the current Code Arena source and tests into safe, honest behavior-parity gates for a rewrite.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 12 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">The original project's Submit test passes. Is your rewrite's Submit gate now PASS?</h2>
+      <p class="section-intro">Pick one: yes, because it is the same feature; yes, after reading the source; or only after an equivalent test runs and passes against the rewrite itself.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">Only the third answer. The original repository is the reference for expected behavior. Its test does not run against a separate rewrite unless you deliberately port or reproduce that test there and execute it there. Reading source, copying code, a manual click, or a green reference test is not a rewrite pass.</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt>Reference baseline</dt>
+        <dd>The exact reviewed source snapshot plus dated test evidence. This course pins current file hashes; older test results keep their original dates and environment labels.</dd>
+        <dt class="mt-1">Parity gate</dt>
+        <dd>A behavior-sized test in your rewrite that uses the same inputs and compares visible outcomes: accepted/rejected actions, snapshots/events, scores, and data that must stay private.</dd>
+        <dt class="mt-1">Fake</dt>
+        <dd>A controlled test substitute. It can test the rule or adapter contract that calls it; it cannot prove a real Docker container or PostgreSQL server behaved correctly.</dd>
+        <dt class="mt-1">Skipped / not run</dt>
+        <dd>Evidence is still open. A skipped test and a test file that merely exists are not a pass.</dd>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="evidence-title">
+      <p class="kicker">Sort tests by the boundary they exercise</p>
+      <h2 id="evidence-title">One green layer cannot stand in for all the others</h2>
+      <div class="card">
+        <table class="w-full">
+          <thead><tr><th scope="col">Evidence layer</th><th scope="col">Useful for</th><th scope="col">Not proof of</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Domain/unit</th><td>Rules, transitions, scoring, isolation, deterministic retries</td><td>HTTP, sockets, real persistence, or container isolation</td></tr>
+            <tr><th scope="row">Frontend/unit</th><td>Editor-language routing, configuration failure, mock transport and subscriptions</td><td>A live Game service or a real browser session</td></tr>
+            <tr><th scope="row">Service/API</th><td>HTTP/socket adapters, identity, acknowledgements, process wiring</td><td>Every browser viewport or arbitrary distributed scale</td></tr>
+            <tr><th scope="row">Browser E2E</th><td>A tested client journey across UI, transport, and services</td><td>Untested states, all environments, or every security property</td></tr>
+            <tr><th scope="row">PostgreSQL</th><td>Database transaction, restart, claim, and cross-process scenarios</td><td>Anything in a test that was skipped or used only an in-memory store</td></tr>
+            <tr><th scope="row">Docker Judge</th><td>Actual process/resource/network/filesystem controls exercised by the test</td><td>All attacks, or hidden-case secrecy unless a test reaches and proves that boundary</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../../../packages/arena-harness/src/judge-port.ts#L1">Fake and real Judges share this harness port · judge-port.ts:1</a>
+        <a href="../../../packages/arena-harness/src/fake-judge.ts#L1">Deterministic fake evaluation · fake-judge.ts:1</a>
+        <a href="../../../packages/arena-harness/src/mock-game.ts#L1">MockGame composes fixtures and a fake, not the production service · mock-game.ts:1</a>
+        <a href="../../../packages/arena-harness/test/lifecycle.test.ts#L29">A full mocked 1v1 proof-path shape · lifecycle.test.ts:29</a>
+        <a href="../../../packages/arena-harness/test/bank.test.ts#L9">Problem-bank shape and hidden-group weight validation · bank.test.ts:9</a>
+        <a href="../../../frontend/src/arena/fixture.ts#L3">Fixed sample Problem and starter snippets · fixture.ts:3</a>
+        <a href="../../../frontend/src/arena/mock-authority.ts#L11">Frontend mock owns fixture state only · mock-authority.ts:11</a>
+        <a href="../../../frontend/src/arena/mock.ts#L13">Mock adapter implements the same UI transport seam · mock.ts:13</a>
+        <a href="../../../frontend/test/mock-transport.test.ts#L7">Frontend mock tests exercise the mock authority and transport · mock-transport.test.ts:7</a>
+        <a href="../../../frontend/test/live-config.test.ts#L6">Live URL configuration fails visibly instead of silently mocking · live-config.test.ts:6</a>
+        <a href="../../../frontend/test/transport-session.test.ts#L4">Transport connection and notification unit tests · transport-session.test.ts:4</a>
+        <a href="../../../frontend/src/components/EditorAdapter.test.ts#L6">Editor language-routing unit tests · EditorAdapter.test.ts:6</a>
+        <a href="../../../packages/arena-model/test/transitions.test.ts#L19">Model phase/readiness transition tests · transitions.test.ts:19</a>
+        <a href="../../../packages/arena-model/test/scoring.test.ts#L13">Weighted score and tie-break tests · scoring.test.ts:13</a>
+        <a href="../../../packages/arena-game/test/cross-isolation.test.ts#L18">Cross-Match/team isolation and adversarial-input unit scenarios · cross-isolation.test.ts:18</a>
+        <a href="../../../packages/arena-game/test/lobby-atomic.test.ts#L39">Database-gated Lobby race tests · lobby-atomic.test.ts:39</a>
+        <a href="../../../services/game/src/game/service.test.ts#L57">Real service HTTP/socket/container integration source · service.test.ts:57</a>
+        <a href="../../../frontend/e2e/live-lobby.spec.ts#L38">Browser source: enter through Lobby · live-lobby.spec.ts:38</a>
+        <a href="../../../frontend/e2e/live-1v1.spec.ts#L61">Browser source: 1v1 play through Reveal · live-1v1.spec.ts:61</a>
+        <a href="../../../frontend/e2e/live-2v2.spec.ts#L70">Browser source: four-client 2v2 journey · live-2v2.spec.ts:70</a>
+        <a href="../../../frontend/e2e/live-collab.spec.ts#L75">Browser source: shared editing and readiness · live-collab.spec.ts:75</a>
+        <a href="../../../frontend/e2e/live-team-chat.spec.ts#L68">Browser source: team-chat journey · live-team-chat.spec.ts:68</a>
+        <a href="../../../frontend/e2e/reconnect.spec.ts#L88">Browser source: reconnect states · reconnect.spec.ts:88</a>
+        <a href="../../../frontend/e2e/collab-reconnect.spec.ts#L94">Browser source: collaboration transport-drop scenarios · collab-reconnect.spec.ts:94</a>
+        <a href="../../../frontend/e2e/collab-reconnect.spec.ts#L270">Browser source: process/Postgres restart Scenario E; can kill the service on TCP 3220 · collab-reconnect.spec.ts:270</a>
+        <a href="../../../packages/arena-game/test/postgres.test.ts#L384">Postgres restart and replay scenarios · postgres.test.ts:384</a>
+        <a href="../../../packages/arena-game/test/judge-security.test.ts#L15">Real Docker sandbox test matrix · judge-security.test.ts:15</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="historical-title">
+      <h2 id="historical-title">Read the recorded results with their dates attached</h2>
+      <div class="card">
+        <p>The CodeTour baseline says these reference-project unit runs were captured on <strong>2026-09-25</strong>; the hash snapshot was refreshed on 2026-09-26 without rerunning those commands:</p>
+        <ul>
+          <li>Arena engine: 22 files passed, 1 skipped; 182 tests passed and 12 skipped. PostgreSQL-only proofs were skipped because the test database was unavailable.</li>
+          <li>Game service: 9 files and 52 tests passed.</li>
+          <li>Frontend unit suite: 8 files and 41 tests passed.</li>
+          <li>The baseline record says its Playwright E2E suite was not run.</li>
+        </ul>
+        <p class="mt-1">A separate 2026-09-25 Ticket 17 matrix record reports a full Playwright run of 26/26 and Docker sandbox cases passing. Keep the records separate: they describe different captures/scopes, and do not provide a shared run ID to reconcile. Both describe the reference project, not your rewrite.</p>
+        <p class="mt-1">On 2026-09-26, a source review in the matrix narrowed the hidden-case security claim: hidden values are absent from browser DTOs, but the current default Judge job can inspect case data in its own environment/scratch files. That review was not an exploit run and does not establish hidden-case confidentiality. Treat adversarial isolation as unresolved until the runner boundary changes and a regression test demonstrates it.</p>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../../reference-baseline.md">Open the dated CodeTour test baseline</a>
+        <a href="../../../prototype/game-ui/42-subject-compliance.md">Open the current compliance matrix and Ticket 17 evidence</a>
+        <a href="../../../packages/arena-game/src/evaluation-telemetry.ts#L23">Telemetry records timing/outcomes; it is not a queue or Match decision · evaluation-telemetry.ts:23</a>
+        <a href="../../../packages/arena-game/test/evaluation-telemetry.test.ts#L4">Telemetry aggregation tests · evaluation-telemetry.test.ts:4</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="rewrite-title">
+      <p class="kicker">Turn the reference into your rebuild recipe</p>
+      <h2 id="rewrite-title">Write a failing behavior test before you implement each slice</h2>
+      <ol class="flow-list">
+        <li><strong>Freeze and label the target.</strong> Use this reviewed source snapshot. Keep spec/code differences visible: public 1v1 queue, the different 1v1 versus 2v2 grace-expiry behavior, and process-local team-chat history.</li>
+        <li><strong>Build the small domain core.</strong> Match creation, Round phases, score, and transitions; use a fake clock and deterministic fake Judge.</li>
+        <li><strong>Add Run, then Submit.</strong> Test visible feedback separately from counted results; then cover request identity/retries, hidden evaluation, cutoff, score, and immutable Reveal.</li>
+        <li><strong>Add Lobby and authority boundaries.</strong> Test membership, rooms/queue, admission races, who can start, and who can act before wiring more UI.</li>
+        <li><strong>Add persistence and recovery.</strong> Port in-memory contracts first; then run equivalent Postgres restart/concurrency tests against a disposable database.</li>
+        <li><strong>Add frontend and transport.</strong> Render authoritative snapshots, send commands, then verify service and real-browser flows.</li>
+        <li><strong>Add 2v2, shared editing, readiness, and team chat.</strong> Test four distinct users, revision-bound approval, team isolation, reconnect, and the current chat lifetime.</li>
+        <li><strong>Finish with real infrastructure gates.</strong> Run Docker sandbox and full browser matrices in their intended isolated environment. Keep source inspection, unit fakes, Postgres, Docker, and browser results as separate checkboxes.</li>
+      </ol>
+      <article class="card mt-1">
+        <h3>The parity rule</h3>
+        <p>For every gate, reuse the same starting state, inputs, and fixed clock when practical. Compare externally visible results—allowed/rejected action, receipt, snapshot/event, score, and private data—not class names. <strong>PASS only when the equivalent test in your rewrite ran and passed.</strong> Not ported, manually inspected, skipped, or only green in this repository means NOT VERIFIED.</p>
+      </article>
+      <div class="source-links mt-1">
+        <a href="../../../packages/arena-model/src/events.ts#L6">Shared realtime event contract · events.ts:6</a>
+        <a href="../../../packages/arena-model/test/events.test.ts#L4">Event catalog completeness tests · events.test.ts:4</a>
+        <a href="../../../packages/arena-harness/src/fixtures.ts#L1">Reusable deterministic scenario fixtures · fixtures.ts:1</a>
+        <a href="../../../packages/arena-game/test/scripted-judge.ts#L14">Scripted outcomes and controllable in-flight evaluations · scripted-judge.ts:14</a>
+        <a href="../../../packages/arena-game/test/setup.ts#L21">Shared clock, actors, and scripted fixture setup · setup.ts:21</a>
+        <a href="../../../services/game/src/game/errors.ts#L5">Service error mapping is another observable API boundary · errors.ts:5</a>
+        <a href="../../../services/game/src/game/dev-fixture-gate.test.ts#L8">Development match-creation seam is explicitly gated · dev-fixture-gate.test.ts:8</a>
+      </div>
+      <aside class="concept-note mt-1">
+        <h4>Use the detailed rebuild tour next</h4>
+        <p>Open <code>.tours/6-rebuild-the-game.tour</code> in VS Code for the nine behavior gates and precise scenario checklists. It is navigation and planning guidance; it does not generate the rewrite or prove a gate passed.</p>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="compliance-title">
+      <h2 id="compliance-title">A course pass cannot sign off a 42 module</h2>
+      <div class="card">
+        <p>The authoritative PDF says each claimed module must be fully functional and will be demonstrated at evaluation; incomplete modules count for zero. The current project matrix tracks requirements, evidence, limitations, and team sign-off. A linked lesson, passing test, historical E2E record, or successful local setup command does not flip a module's status.</p>
+        <p class="mt-1">The matrix currently lists a planned module set, not completed module claims. Keep the matrix untouched while learning unless the actual project evidence, scope, assumptions, or status changes. The module decision belongs to the project team and the evaluation evidence—not this course.</p>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../../../ft_transcendence.pdf">Authoritative 42-subject requirements PDF</a>
+        <a href="../../../prototype/game-ui/42-subject-compliance.md#L60">Current status vocabulary and mandatory requirements · matrix:60</a>
+        <a href="../../../prototype/game-ui/42-subject-compliance.md#L85">Planned module evidence and status · matrix:85</a>
+        <a href="../../../prototype/game-ui/42-subject-compliance.md#L237">Ticket 17 verification record and team sign-off boundary · matrix:237</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="recall-title">
+      <p class="kicker">Close the source and recall</p>
+      <h2 id="recall-title">When can you mark your rewrite's Lobby gate PASS?</h2>
+      <details class="card">
+        <summary>Hint, then check yourself</summary>
+        <p class="mt-1">Only after you port or write an equivalent test against your separate implementation, run it there, and record a pass. Record environment-dependent skips honestly. The original project and this learning course supply the reference contract, not a result for the rewrite.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Choose Gate 1 from CodeTour 6. Copy one Lobby scenario into your rewrite's test suite with the same participants and initial state. Make the test fail before implementation, implement only enough to satisfy it, and record the exact command and result. Add a second case for a rejected full or already-started room; do not infer database-race coverage unless its PostgreSQL test ran.</p>
+      </article>
+      <p class="nav-row"><a href="0013-running-the-project.html">← Lesson 13: services and local setup</a> · <a href="../README.md">Back to the course start page →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. This lesson synthesizes source and dated evidence; it ran no Game-service, PostgreSQL, Docker Judge, or Playwright suite. Nothing here establishes parity in a separate rewrite or changes 42-subject sign-off.</p>
+    </footer>
+  </main>
+</body>
+</html>

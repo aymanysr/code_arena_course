@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A searchable, source-linked inventory of Code Arena files and learning coverage.">
+  <title>Code Arena · Learning Map</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to learning map</a>
+  <main class="page" id="main">
+    <header class="hero">
+      <p class="eyebrow">Code Arena · learning workspace</p>
+      <h1>Understand the game one behavior at a time.</h1>
+      <p class="hero-copy">Start with one short lesson. Follow a player action to the code that owns the rule, then check the test.</p>
+      <p class="nav-row"><a class="primary-button" id="start-lesson" href="{{FIRST_LESSON_URL}}">{{FIRST_LESSON_ACTION}} <span aria-hidden="true">→</span></a></p>
+      <p class="mt-1"><span class="status {{SNAPSHOT_STATUS_CLASS}}">{{SNAPSHOT_STATUS}}</span> <span class="quiet">Source snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <p id="lesson-progress" class="quiet mt-1" aria-live="polite">Lesson progress is saved only as started or self-checked on this browser. It is not a mastery score.</p>
+    </header>
+
+    <section class="section" aria-label="Course navigation">
+      <details class="focus-panel" id="course-list">
+        <summary>Browse the full lesson list and editor tours</summary>
+        <div class="focus-panel-content">
+          <h2 id="course-lessons-title">Course lessons</h2>
+          <p class="section-intro">Follow the lessons in order. A source status reports whether a cited file still matches the saved snapshot; it does not report mastery.</p>
+          <ol class="flow-list" id="lesson-list">
+            {{LESSON_LIST}}
+          </ol>
+          <nav class="nav-row" aria-label="Editor tours">
+            <a href="{{CODETOUR_1_URL}}">Open CodeTour 1 in VS Code</a>
+            <a href="{{CODETOUR_2_URL}}">Open CodeTour 2 in VS Code</a>
+          </nav>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="coverage-summary-title">
+      <details class="focus-panel">
+        <summary id="coverage-summary-title">Check course coverage and source freshness</summary>
+        <div class="focus-panel-content">
+          <p class="section-intro">These counts describe the source map. They do not measure how much you have learned.</p>
+          <div class="grid metrics" aria-label="Coverage summary">
+            <article class="metric"><strong>{{COUNT_TOTAL}}</strong><span>files in the declared inventory</span></article>
+            <article class="metric"><strong>{{COUNT_CURRENT}}</strong><span>lesson links current at this snapshot</span></article>
+            <article class="metric"><strong>{{COUNT_STALE}}</strong><span>lesson links that need review</span></article>
+            <article class="metric"><strong>{{COUNT_SUPPORTING}}</strong><span>support-only files</span></article>
+            <article class="metric"><strong>{{COUNT_UNCOVERED}}</strong><span>files without a lesson or support reason</span></article>
+            <article class="metric"><strong>{{COUNT_EXCLUDED}}</strong><span>files outside scope with a reason</span></article>
+          </div>
+          <p class="quiet mt-1">{{COUNT_UNCLASSIFIED}} source-like files are outside the declared scope.</p>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="inventory-title">
+      <details class="focus-panel" id="source-inventory">
+        <summary id="inventory-title">Search the code, tests, and routes</summary>
+        <div class="focus-panel-content">
+          <p class="section-intro">Search by file, symbol, route, socket event, or test. “Linked to a lesson” means the file is cited and current; it does not mean every line is taught.</p>
+          <search class="filters" aria-label="Filter source files">
+            <div class="filter-row">
+              <label for="search-files">Search the inventory
+                <input id="search-files" type="search" autocomplete="off" placeholder="Try: ArenaEngine, submit, reveal…">
+              </label>
+              <label for="filter-status">Coverage status
+                <select id="filter-status">
+                  <option value="all">All statuses</option>
+                  <option value="current-lesson-reference">Linked to current lesson</option>
+                  <option value="source-changed-since-lesson">Lesson source changed</option>
+                  <option value="support-only">Supporting reference</option>
+                  <option value="uncovered">Uncovered file</option>
+                </select>
+              </label>
+              <label for="filter-area">Project area
+                <select id="filter-area"><option value="all">All areas</option></select>
+              </label>
+              <button class="secondary-button" id="clear-filters" type="button">Clear filters</button>
+            </div>
+            <p class="quiet mt-1" id="filter-results" aria-live="polite"></p>
+          </search>
+          <div class="table-scroll">
+            <table class="data-table">
+              <caption>Click a file or lesson reference to preview its code. Use “Open in VS Code” for the full file.</caption>
+              <thead><tr><th scope="col">Coverage</th><th scope="col">Area</th><th scope="col">File</th><th scope="col">Lesson references</th><th scope="col">Code and test landmarks</th></tr></thead>
+              <tbody id="file-rows">
+                {{FILE_ROWS}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <section class="section" aria-label="Coverage rules">
+      <details class="focus-panel">
+        <summary>What does full coverage mean?</summary>
+        <div class="focus-panel-content">
+          <p class="section-intro">The scanner includes recognized text, code, config, and test files under the declared roots. It reports source-like files elsewhere. Dependencies, generated output, design prototypes, and scratch plans are excluded.</p>
+          <div class="grid split">
+            <article class="card">
+              <h3>Implementation and support roots</h3>
+              <ul>{{SCOPE_ROOTS}}</ul>
+            </article>
+            <article class="card">
+              <h3>Outside implementation coverage</h3>
+              <ul>{{EXCLUDED_ROOTS}}</ul>
+            </article>
+          </div>
+          <details class="card mt-1">
+            <summary>Source-like files outside the declared scope</summary>
+            <div id="unclassified-list">{{UNCLASSIFIED}}</div>
+          </details>
+          <details class="card mt-1">
+            <summary>Lesson anchor integrity</summary>
+            <div>{{REFERENCE_CHECKS}}</div>
+          </details>
+          <p class="footer-note">The automatic landmarks are a map, not a semantic proof. A full rewrite course still needs focused lessons and behavior checks.</p>
+        </div>
+      </details>
+    </section>
+
+    <footer class="footer-note">Generated by <code>.tours/learning/scripts/build-catalog.mjs</code>. Before studying after code changes, run <code>node .tours/learning/scripts/build-catalog.mjs --check</code>.</footer>
+  </main>
+  <div id="source-templates" hidden>
+    {{SOURCE_TEMPLATES}}
+  </div>
+  <dialog class="source-dialog" id="source-dialog" aria-labelledby="source-dialog-title" aria-describedby="source-dialog-help">
+    <header class="source-dialog-header">
+      <div class="source-dialog-heading">
+        <p class="eyebrow">Code Arena · current source</p>
+        <h2 id="source-dialog-title">Code preview</h2>
+        <p id="source-file-path" class="source-dialog-path"><code></code></p>
+        <p id="source-file-summary" class="quiet"></p>
+      </div>
+      <div class="source-dialog-actions">
+        <a class="source-editor-link" id="source-editor-link" href="vscode://file/">Open in VS Code</a>
+        <form method="dialog"><button class="secondary-button" type="submit">Close preview</button></form>
+      </div>
+    </header>
+    <p id="source-dialog-help" class="source-dialog-help">Lesson reference lines are highlighted. The preview shows the exact source used to build this map.</p>
+    <figure class="source-code-figure">
+      <figcaption id="source-code-caption">Syntax-colored source code with line numbers</figcaption>
+      <pre class="source-code" tabindex="0" aria-labelledby="source-code-caption"><code id="source-code-lines"></code></pre>
+    </figure>
+  </dialog>
+  <script>
+    (() => {
+      const rows = [...document.querySelectorAll("#file-rows tr")];
+      const search = document.getElementById("search-files");
+      const status = document.getElementById("filter-status");
+      const area = document.getElementById("filter-area");
+      const result = document.getElementById("filter-results");
+      const sourceDialog = document.getElementById("source-dialog");
+      const sourceTitle = document.getElementById("source-dialog-title");
+      const sourcePath = document.querySelector("#source-file-path code");
+      const sourceSummary = document.getElementById("source-file-summary");
+      const sourceEditorLink = document.getElementById("source-editor-link");
+      const sourceCode = document.getElementById("source-code-lines");
+      const sourceCodeScroll = sourceCode.closest("pre");
+      let returnToLesson = null;
+      const projectRootUrl = new URL("../../", window.location.href);
+      const resolveReturnUrl = (value) => {
+        if (!value) return null;
+        try {
+          const target = new URL(value, window.location.href);
+          if (target.protocol !== window.location.protocol || target.host !== window.location.host) return null;
+          if (!target.pathname.startsWith(projectRootUrl.pathname) || !target.pathname.endsWith(".html")) return null;
+          return target.href;
+        } catch {
+          return null;
+        }
+      };
+      const clearPreviewAddress = () => {
+        const cleanUrl = new URL(window.location.href);
+        for (const key of ["file", "line", "end", "return"]) cleanUrl.searchParams.delete(key);
+        window.history.replaceState(window.history.state, "", `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+      };
+      sourceDialog.addEventListener("close", () => {
+        if (!returnToLesson) return;
+        const destination = returnToLesson;
+        returnToLesson = null;
+        let cameFromDestination = false;
+        try {
+          const previousPage = new URL(document.referrer);
+          const returnPage = new URL(destination);
+          cameFromDestination = previousPage.protocol === returnPage.protocol &&
+            previousPage.host === returnPage.host && previousPage.pathname === returnPage.pathname;
+        } catch {
+          cameFromDestination = false;
+        }
+        if (cameFromDestination && window.history.length > 1) window.history.back();
+        else window.location.replace(destination);
+      });
+      const areas = [...new Set(rows.map((row) => row.dataset.area))].sort();
+      for (const name of areas) {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        area.append(option);
+      }
+      const update = () => {
+        const needle = search.value.trim().toLocaleLowerCase();
+        let visible = 0;
+        for (const row of rows) {
+          const matches = (!needle || row.dataset.search.includes(needle)) &&
+            (status.value === "all" || row.dataset.status === status.value) &&
+            (area.value === "all" || row.dataset.area === area.value);
+          row.hidden = !matches;
+          if (matches) visible += 1;
+        }
+        result.textContent = `Showing ${visible} of ${rows.length} files.`;
+      };
+      search.addEventListener("input", update);
+      status.addEventListener("change", update);
+      area.addEventListener("change", update);
+      document.getElementById("clear-filters").addEventListener("click", () => {
+        search.value = "";
+        status.value = "all";
+        area.value = "all";
+        update();
+        search.focus();
+      });
+      const openSourcePreview = (trigger, requestedStart = null, requestedEnd = null) => {
+        const sourceTemplate = document.getElementById(trigger.dataset.sourceId);
+        if (!(sourceTemplate instanceof HTMLTemplateElement)) return;
+
+        const filePath = trigger.dataset.sourcePath;
+        const sourceText = sourceTemplate.content.textContent.replace(/\r\n?/g, "\n");
+        const lines = sourceText.length === 0 ? [""] : sourceText.split("\n");
+        if (sourceText.endsWith("\n")) lines.pop();
+        if (lines.length === 0) lines.push("");
+        const highlightedLines = lines.map(() => document.createDocumentFragment());
+        let highlightedLineIndex = 0;
+        const appendHighlightedText = (value, tokenClasses) => {
+          const parts = value.split("\n");
+          for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+            if (parts[partIndex] && highlightedLineIndex < highlightedLines.length) {
+              let renderedToken = document.createTextNode(parts[partIndex]);
+              for (let classIndex = tokenClasses.length - 1; classIndex >= 0; classIndex -= 1) {
+                const token = document.createElement("span");
+                token.className = tokenClasses[classIndex];
+                token.append(renderedToken);
+                renderedToken = token;
+              }
+              highlightedLines[highlightedLineIndex].append(renderedToken);
+            }
+            if (partIndex < parts.length - 1) highlightedLineIndex += 1;
+          }
+        };
+        const collectHighlightedText = (node, tokenClasses = []) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            appendHighlightedText(node.nodeValue ?? "", tokenClasses);
+            return;
+          }
+          const nextTokenClasses = node.nodeType === Node.ELEMENT_NODE && node.nodeName === "SPAN"
+            ? [...tokenClasses, ...[...node.classList].filter((name) => /^hljs-[a-z0-9_-]+$/i.test(name))]
+            : tokenClasses;
+          node.childNodes.forEach((child) => collectHighlightedText(child, nextTokenClasses));
+        };
+        sourceTemplate.content.childNodes.forEach((node) => collectHighlightedText(node));
+
+        const startLine = requestedStart ?? (Number(trigger.dataset.startLine) || 0);
+        const endLine = requestedEnd ?? (Number(trigger.dataset.endLine) || startLine);
+        const lineCountWidth = String(lines.length).length;
+        let firstReferenceLine = null;
+        const fragment = document.createDocumentFragment();
+
+        for (let index = 0; index < lines.length; index += 1) {
+          const lineNumber = index + 1;
+          const line = document.createElement("span");
+          line.className = "source-line";
+          if (startLine > 0 && lineNumber >= startLine && lineNumber <= endLine) {
+            line.classList.add("is-reference-line");
+            firstReferenceLine ??= line;
+          }
+
+          const number = document.createElement("span");
+          number.className = "source-line-number";
+          number.setAttribute("aria-hidden", "true");
+          number.textContent = String(lineNumber).padStart(lineCountWidth, " ");
+
+          const text = document.createElement("span");
+          text.className = "source-line-text";
+          text.append(highlightedLines[index]);
+          line.append(number, text);
+          fragment.append(line);
+        }
+
+        sourceTitle.textContent = `Code preview: ${filePath}`;
+        sourcePath.textContent = filePath;
+        sourceSummary.textContent = `${lines.length} lines · source snapshot {{SNAPSHOT_ID}}`;
+        sourceEditorLink.href = trigger.dataset.editorUrl.replace(/:\d+$/, `:${startLine || 1}`);
+        sourceCode.replaceChildren(fragment);
+        sourceCodeScroll.scrollTop = 0;
+        sourceDialog.showModal();
+
+        if (firstReferenceLine) {
+          requestAnimationFrame(() => {
+            const lineTop = firstReferenceLine.getBoundingClientRect().top;
+            const codeTop = sourceCodeScroll.getBoundingClientRect().top;
+            sourceCodeScroll.scrollTop += lineTop - codeTop - sourceCodeScroll.clientHeight / 2;
+          });
+        }
+      };
+      document.getElementById("file-rows").addEventListener("click", (event) => {
+        const trigger = event.target.closest?.(".source-preview-trigger");
+        if (trigger) openSourcePreview(trigger);
+      });
+      update();
+      const query = new URLSearchParams(window.location.search);
+      const requestedFile = query.get("file");
+      if (requestedFile) {
+        returnToLesson = resolveReturnUrl(query.get("return"));
+        clearPreviewAddress();
+        const trigger = [...document.querySelectorAll("#file-rows .source-preview-trigger")]
+          .find((candidate) => candidate.dataset.sourcePath === requestedFile);
+        if (trigger) {
+          const line = Number(query.get("line")) || 0;
+          const endLine = Number(query.get("end")) || line;
+          openSourcePreview(trigger, line, endLine);
+        } else {
+          result.textContent = `No source preview is available for ${requestedFile} in this scope.`;
+        }
+      }
+      try {
+        const progress = JSON.parse(localStorage.getItem("code-arena-learning:0001-follow-one-submit") ?? "null");
+        if (progress?.selfCheckComplete) {
+          document.getElementById("lesson-progress").textContent = "Lesson 1: self-check finished on this browser. This is a reminder, not evidence of mastery; explain the path from memory to your teacher when you return.";
+        } else if (progress?.opened) {
+          document.getElementById("lesson-progress").textContent = "Lesson 1: started on this browser. Continue with the short retrieval questions; you can pause any time.";
+        }
+      } catch {
+        document.getElementById("lesson-progress").textContent = "Lesson progress could not be saved in this browser; the source map and lesson still work.";
+      }
+    })();
+  </script>
+</body>
+</html>

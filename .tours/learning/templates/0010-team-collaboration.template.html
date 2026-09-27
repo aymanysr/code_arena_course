@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Understand how 2v2 shared editing, document revisions, readiness, and team Submit fit together.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">Both Alpha teammates are Ready on document revision 1. One teammate edits the shared code. What changes?</h2>
+      <p class="section-intro">Decide what happens to the document revision, each teammate's Ready state, Beta's document, and a repeated copy of the same Yjs update.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">If the accepted update changes the actual source text, Alpha advances to revision 2 and both Alpha approvals are invalidated. Beta has a separate team document, so it is not changed by Alpha's edit. A duplicate update that changes no source text does not earn another application revision. Both Alpha players must approve revision 2 before their team can Submit.</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt>Yjs document</dt>
+        <dd>The shared CRDT state used to merge teammates' text edits. A Yjs update frame is not itself the game's approval number.</dd>
+        <dt class="mt-1">DocumentRevision</dt>
+        <dd>A monotonic, team-and-Round-scoped number for the current shared document. In this code it is an application identity, not a Yjs state vector.</dd>
+        <dt class="mt-1">Readiness</dt>
+        <dd>Each member approves a particular document revision. An approval for revision 1 cannot authorize a changed revision 2.</dd>
+        <dt class="mt-1">Authoritative submission source</dt>
+        <dd>The server-owned team document at the approved revision. For 2v2, the Judge receives this source rather than trusting the browser's code field.</dd>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="trace-title">
+      <p class="kicker">Now follow one accepted edit</p>
+      <h2 id="trace-title">One edit crosses a collaboration channel and a game-rule boundary</h2>
+      <p class="section-intro">Follow these small steps in order. The collaboration socket carries shared text; the Game engine remains the authority for revisions, readiness, and Submit.</p>
+
+      <ol class="source-steps">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The browser sends a Yjs update, not permission to Submit</h3>
+            <p><code>CollabClient</code> watches its shared Y.Doc and emits incremental updates on the separate <code>/collab</code> namespace. The gateway verifies the trusted socket principal and asks the Game to sync before joining a server-derived team room. A room name or user ID supplied by the browser does not choose which team's document it may access.</p>
+            <p class="mt-1">The game socket still owns Match phase, readiness, and Submit. Keep the two channels straight: a text update changes shared data; it does not make either teammate Ready.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/collab.ts#L119">Local Yjs updates sent to server · collab.ts:119</a>
+              <a href="../../../services/game/src/game/collab.gateway.ts#L14">Separate collaboration namespace and authority split · collab.gateway.ts:14</a>
+              <a href="../../../services/game/src/game/collab.gateway.ts#L41">Authorize and sync before joining the room · collab.gateway.ts:41</a>
+              <a href="../../../services/game/src/game/collab.gateway.ts#L67">Validate and apply an update frame · collab.gateway.ts:67</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>The Game distinguishes a new source from a replay</h3>
+            <p><code>CollabDocs</code> applies the CRDT frame and compares the source text before and after. If the source did not change—for example, a duplicate frame—<code>changed</code> is false, so the application revision does not advance just because another network frame arrived.</p>
+            <p class="mt-1">For a real source change, <code>TeamCollaboration</code> checks team mode, Coding phase, membership, and the current Round; then it increments that side's <code>DocumentRevision</code>, invalidates both members' approvals, and persists the Match plus team document. If persistence fails, its rollback path restores the previous document, revision, language, and readiness.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/collab.ts#L80">Deduplicate by actual source text · collab.ts:80</a>
+              <a href="../../../services/game/src/game/collab.gateway.ts#L96">Cursor awareness bypasses document revision · collab.gateway.ts:96</a>
+              <a href="../../../packages/arena-game/src/records.ts#L20">Application revision and per-member approval fields · records.ts:20</a>
+              <a href="../../../packages/arena-game/src/team-collaboration.ts#L151">Changed edit, revision bump, invalidation, and rollback call · team-collaboration.ts:151</a>
+              <a href="../../../packages/arena-game/src/team-collaboration.ts#L330">Clear both approvals and restore the previous state on failure · team-collaboration.ts:330</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L138">Postgres transaction for Match plus shared-document state · postgres-store.ts:138</a>
+            </div>
+            <aside class="concept-note mt-1">
+              <h4>Yjs update count is not the application revision</h4>
+              <p>The revision represents the current team document version used by readiness and Submit. Awareness/cursor messages are separate ephemeral signals; they are not edits and do not make the document revision advance.</p>
+            </aside>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Both teammates approve the same current revision</h3>
+            <p>Readiness is stored per user on the current Round, with the approved document revision. The Game rejects a Ready request for an old revision. After an accepted edit changes revision 1 to revision 2, both team members become not-ready; they must each approve revision 2.</p>
+            <p class="mt-1">The checkbox and disabled Submit button are helpful UI feedback, not the security or game-rule boundary. <code>ArenaEngine</code> repeats the checks while holding the Match lock.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/team-collaboration.ts#L113">Current revision must match both approvals · team-collaboration.ts:113</a>
+              <a href="../../../packages/arena-game/src/team-collaboration.ts#L125">Reject a stale Ready request · team-collaboration.ts:125</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L349">Engine handles readiness and emits the current revision · engine.ts:349</a>
+              <a href="../../../frontend/src/components/ReadyState.tsx#L3">The UI displays each teammate's Ready state · ReadyState.tsx:3</a>
+              <a href="../../../frontend/src/components/CodeWorkspace.tsx#L35">Client gates are UX; shared text supplies current code · CodeWorkspace.tsx:35</a>
+              <a href="../../../packages/arena-game/test/team-2v2.test.ts#L305">Stale approvals cannot Submit; a new edit clears both · team-2v2.test.ts:305</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Submit freezes the server-owned source</h3>
+            <p>Inside the Match lock, the engine checks the team's Ready gate and current revision. For 2v2 it asks <code>TeamCollaboration</code> for the shared source at that revision and replaces the browser's submitted code with that server-owned text before validation and judging.</p>
+            <p class="mt-1">An edit racing with Submit has one whole outcome: Submit freezes the old approved revision before the edit, or the edit advances the revision first and makes old readiness stale. The race must not combine old approval with new code.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L511">Lock, readiness gate, and frozen team source · engine.ts:511</a>
+              <a href="../../../packages/arena-game/src/team-collaboration.ts#L221">Return source only at the exact revision and language · team-collaboration.ts:221</a>
+              <a href="../../../packages/arena-game/test/team-collaboration.test.ts#L88">Changed text invalidates approvals; stale source revision is rejected · team-collaboration.test.ts:88</a>
+              <a href="../../../packages/arena-game/test/team-2v2.test.ts#L388">Edit-versus-Submit race outcomes · team-2v2.test.ts:388</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">What the tests show—and what they do not</h2>
+      <div class="card">
+        <p><strong>Run here:</strong> the server-free <code>CollabClient</code> unit suite passed 6 tests. It checks local baseline merging, duplicate-frame idempotence, and ephemeral cursor mapping/removal; it does not connect two browsers or prove socket delivery.</p>
+        <p><strong>Run here:</strong> the focused TeamCollaboration and ArenaEngine suites passed 33 tests using in-memory fixtures. They exercise changed text, both-readiness invalidation, stale revision rejection, and the edit/Submit lock race; they do not prove the real Postgres transaction or browser integration.</p>
+        <p class="mt-1"><strong>Postgres rollback:</strong> a failure-injection example exists for a language switch in <code>packages/arena-game/test/collab.test.ts</code>, but that suite truncates database tables. It was not run here; use only a disposable test database that you have verified is safe to clear. It does not directly test failed persistence of a text edit.</p>
+        <p class="mt-1"><strong>Live integration:</strong> <code>collab-ws.test.ts</code> was attempted, but the test service could not bind its local port in this restricted environment (<code>listen EPERM</code>), so its nine cases did not execute. The real HTTP/socket/Postgres 2v2 suite and browser reconnect E2E were inspected but not run here. The latter's Scenario E finds listeners on TCP 3220 and sends <code>SIGKILL</code>; run it only against a verified disposable service and test database. The Ticket-14 four-client browser proof is source evidence, not a run from this lesson update; its header says it does not use Yjs, so it cannot prove shared-text convergence. These sources describe convergence, team isolation, readiness, post-edit invalidation, frozen Submit, process restart, and Round reset; they are not passing results.</p>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../../../frontend/src/arena/collab.test.ts#L26">Client baseline and duplicate-frame unit tests · collab.test.ts:26</a>
+        <a href="../../../frontend/src/arena/collab.test.ts#L53">Client awareness/cursor unit tests · collab.test.ts:53</a>
+        <a href="../../../services/game/src/game/team-2v2.test.ts#L135">Real-service 2v2/Postgres suite source · team-2v2.test.ts:135</a>
+        <a href="../../../frontend/e2e/live-2v2.spec.ts#L70">Ticket-14 four-client proof without Yjs · live-2v2.spec.ts:70</a>
+        <a href="../../../frontend/e2e/collab-reconnect.spec.ts#L94">Collaboration reconnect Scenario B source · collab-reconnect.spec.ts:94</a>
+        <a href="../../../frontend/e2e/collab-reconnect.spec.ts#L270">Service restart and Postgres Scenario E source · collab-reconnect.spec.ts:270</a>
+        <a href="../../../packages/arena-game/test/collab.test.ts#L547">Database failure-injection source; truncates tables · collab.test.ts:547</a>
+        <a href="../../../services/game/src/game/collab-ws.test.ts#L190">Socket-level edit, teammate relay, and replay scenarios · collab-ws.test.ts:190</a>
+        <a href="../../../frontend/e2e/live-collab.spec.ts#L75">Four-client collaboration browser scenario · live-collab.spec.ts:75</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="recall-title">
+      <p class="kicker">Close the source and recall</p>
+      <h2 id="recall-title">Can you explain why editing makes both teammates Ready again?</h2>
+      <details class="card">
+        <summary>Hint, then check yourself</summary>
+        <p class="mt-1">State the chain in order: changed shared text → new application revision → invalidate both approvals → both approve that same revision → server checks and freezes that source. A repeated frame with no text change is not a new application revision.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>In your rewrite, test one accepted source edit after both teammates approved revision 1. Assert the shared text is revision 2, both approvals are invalid, a revision-1 Submit is rejected, and Submit becomes possible only after both members approve revision 2. Also assert the Judge receives the server document rather than a deliberately different client code payload; duplicate updates do not bump the application revision; and an edit racing with Submit yields either a fully frozen old revision or a stale-approval rejection, never a mixed state. Add a persistence-failure case using a disposable database before claiming transaction rollback.</p>
+      </article>
+      <p class="nav-row"><a href="0009-live-connection.html">← Lesson 9: reconnect and Presence</a> · <a href="0011-team-chat.html">Next: Lesson 11, team chat and sidecar lifetimes →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. The current application revision is distinct from a Yjs frame. In-memory domain tests passed; the socket service could not bind here, browser E2E was not run, and destructive Postgres test source is linked for study only.</p>
+    </footer>
+  </main>
+</body>
+</html>

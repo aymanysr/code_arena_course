@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A short, interactive lesson following one Code Arena Submit from UI to judging.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body>
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 7 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" id="stage-predict" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill" id="stage-trace">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill" id="stage-recall">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">Who has the final say on whether your Submit is allowed?</h2>
+      <p class="section-intro">Choose before reading the path. A guess is useful; getting it wrong just gives us a clue about what to clarify.</p>
+      <div class="quiz-options" role="group" aria-label="Choose the component that enforces match rules" id="quiz-authority">
+        <button type="button" data-answer="toolbar">Editor toolbar</button>
+        <button type="button" data-answer="controller">HTTP controller</button>
+        <button type="button" data-answer="engine">Match engine</button>
+        <button type="button" data-answer="judge">Judge adapter</button>
+      </div>
+      <p class="feedback" id="authority-feedback" aria-live="polite">Pick the component that knows the match phase and player membership.</p>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title" hidden>
+      <p class="kicker">Now follow the request</p>
+      <h2 id="trace-title">One Submit crosses several small boundaries</h2>
+      <p class="section-intro">Follow the links in order. Each source opens at the relevant lines. The UI asks; the server decides; the judge executes.</p>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The editor turns your click into an action</h3>
+            <p><code>EditorToolbar</code> calls its <code>onSubmit</code> callback. <code>CodeWorkspace</code> supplies the current code and language to the transport. The screen starts the request; it does not authorize the match action.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/components/EditorToolbar.tsx#L46">Button callback · EditorToolbar.tsx:46</a>
+              <a href="../../../frontend/src/components/CodeWorkspace.tsx#L88">Current code → transport · CodeWorkspace.tsx:88</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>The live transport sends an HTTP request</h3>
+            <p><code>ArenaTransport</code> defines what <code>submit()</code> means to the UI. The live <code>SocketArenaTransport</code> sends <code>POST /submit</code> and includes stable IDs so a retry can refer to the same logical attempt.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/transport.ts#L84">Transport contract · transport.ts:84</a>
+              <a href="../../../frontend/src/arena/socket.ts#L450">Live adapter · socket.ts:450</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>The HTTP controller checks the request shape</h3>
+            <p><code>GameController</code> gets the signed-in player, checks basic input limits, then forwards the request. It is the front door—not the referee for round state, score, or membership.</p>
+            <div class="source-links"><a href="../../../services/game/src/game/game.controller.ts#L83">Submit route · game.controller.ts:83</a></div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>The application service wires the call onward</h3>
+            <p><code>GameService</code> turns the user ID into a trusted principal and calls <code>ArenaEngine.submit()</code>. It can also trigger a reveal after the accepted result satisfies the reveal condition.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/game.service.ts#L230">Submit forwarding · game.service.ts:230</a>
+              <a href="../../../services/game/src/game/game.service.ts#L145">Configured judge · default is ContainerJudge</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">05</span>
+          <div>
+            <h3>The engine applies the game rules and records the attempt</h3>
+            <p>Under the match lock, <code>ArenaEngine</code> checks membership, phase, time, language, and (for 2v2) the current team-ready document. It records a pending submission before asking for a verdict. That makes game authority separate from the UI.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L511">Submit checks · engine.ts:511</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L607">Pending record · engine.ts:607</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L669">Hand off for evaluation · engine.ts:669</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">06</span>
+          <div>
+            <h3>The orchestrator owns evaluation work; the judge owns execution</h3>
+            <p><code>EvaluationOrchestrator</code> claims the pending evaluation so retries do not create duplicate work. It calls the <code>GameJudge</code> contract. The default <code>ContainerJudge</code> runs the hidden tests in a restricted Docker container; Judge0 is an optional configured adapter.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L172">Claim and evaluate · evaluation-orchestration.ts:172</a>
+              <a href="../../../packages/arena-game/src/judge.ts#L107">Judge contract · judge.ts:107</a>
+              <a href="../../../packages/arena-game/src/container-judge.ts#L221">Container judge · container-judge.ts:221</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <aside class="concept-note mt-1">
+        <h3>Keep these three jobs separate</h3>
+        <p><strong>Transport:</strong> deliver an action. <strong>ArenaEngine:</strong> decide whether the action is legal and change match state. <strong>Judge:</strong> run untrusted code and return verdicts. The test below uses a fake judge to check engine behavior, so it is not itself proof of Docker security.</p>
+        <p class="mt-1"><strong>Browser source:</strong> the Playwright file describes a two-client 1v1 duel at four viewport widths. It is linked as source, not as a pass from this lesson update.</p>
+        <p class="source-links"><a href="../../../frontend/e2e/live-1v1.spec.ts#L61">Two-client live 1v1 browser journey source · live-1v1.spec.ts:61</a></p>
+        <p class="source-links"><a href="../../../packages/arena-game/test/submit-path.test.ts#L6">Submit behavior tests · submit-path.test.ts:6</a> <a href="../../../packages/arena-game/test/judge-security.test.ts#L15">Separate sandbox tests · judge-security.test.ts:15</a></p>
+      </aside>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title" hidden>
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">The controller accepts the request shape, but the round is already closed. Who rejects Submit?</h2>
+      <p class="section-intro">This is the useful distinction: receiving a request is not the same as deciding whether a game action is legal.</p>
+      <div class="quiz-options" role="group" aria-label="Choose the component that rejects an action in a closed round" id="quiz-phase">
+        <button type="button" data-answer="ui">UI button</button>
+        <button type="button" data-answer="route">HTTP route</button>
+        <button type="button" data-answer="engine">Match engine</button>
+        <button type="button" data-answer="judge">Judge adapter</button>
+      </div>
+      <p class="feedback" id="phase-feedback" aria-live="polite">Hint: which component has the current round phase?</p>
+      <div class="card mt-1" id="recall-model" hidden>
+        <h3>The path, from memory:</h3>
+        <p><code>EditorToolbar → CodeWorkspace → live transport → GameController → GameService → ArenaEngine → EvaluationOrchestrator → GameJudge</code></p>
+        <p>The engine enforces the match rules; the judge only runs the program. In this version, ContainerJudge is the default implementation, and Judge0 can be selected by configuration.</p>
+        <p class="mt-1"><a href="../../../packages/arena-game/test/submit-path.test.ts#L6">Read the behavior contract in the Submit tests</a> · <a href="../source-map.html">Find any file or test in the full source map</a></p>
+      </div>
+      <div class="button-row mt-1" id="self-check-row" hidden>
+        <button type="button" id="self-check">I can retell the path from memory</button>
+        <button type="button" class="secondary-button" id="reset-progress">Reset this lesson on this browser</button>
+      </div>
+      <p class="feedback" id="saved-feedback" aria-live="polite" hidden></p>
+    </section>
+
+    <section class="section">
+      <h2>Why this is a good first slice</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3>For your rewrite</h3>
+          <p>You do not need to recreate these class names. First preserve the observable contract: a valid player can submit at the right time; an invalid action is rejected; accepted code is evaluated once; the result is returned without leaking hidden tests.</p>
+        </article>
+        <article class="card">
+          <h3>For this course</h3>
+          <p>CodeTour gives you editor navigation; the source map tells you what is still uncovered; these short lessons give you a chance to predict, inspect, and explain one real behavior. A green test in this repository is evidence about this implementation—not automatic proof that a separate rewrite matches.</p>
+        </article>
+      </div>
+    </section>
+
+    <p class="nav-row">Start of the course · <a href="0002-reveal-cutoff.html">Next: Lesson 2, Reveal cutoff →</a></p>
+
+    <footer class="footer-note">
+      <p>Need a slower walkthrough? Ask your teacher a follow-up and name the source file or line that feels confusing. For the TypeScript contract idea, read the official <a href="https://www.typescriptlang.org/docs/handbook/2/objects.html">Handbook section on object types</a>; for implementation-bearing classes, see <a href="https://www.typescriptlang.org/docs/handbook/2/classes.html">classes</a>.</p>
+      <p class="mt-1">Source snapshot <code>{{SNAPSHOT_ID}}</code>. The self-check is a memory aid, not an exam sign-off or a claim of 42-module compliance.</p>
+    </footer>
+  </main>
+  <script>
+    (() => {
+      const storageKey = "code-arena-learning:0001-follow-one-submit";
+      const buttons = document.querySelectorAll("#quiz-authority button");
+      const phaseButtons = document.querySelectorAll("#quiz-phase button");
+      const authorityFeedback = document.getElementById("authority-feedback");
+      const phaseFeedback = document.getElementById("phase-feedback");
+      const trace = document.getElementById("trace");
+      const recall = document.getElementById("recall");
+      const recallModel = document.getElementById("recall-model");
+      const selfCheckRow = document.getElementById("self-check-row");
+      const savedFeedback = document.getElementById("saved-feedback");
+      let progress = { opened: true, authorityCorrect: false, phaseCorrect: false, selfCheckComplete: false };
+
+      const save = () => {
+        try {
+          localStorage.setItem(storageKey, JSON.stringify(progress));
+        } catch {
+          savedFeedback.hidden = false;
+          savedFeedback.dataset.kind = "hint";
+          savedFeedback.textContent = "This browser did not allow local progress storage. The lesson still works; just tell your teacher what you remember.";
+        }
+      };
+
+      try {
+        const prior = JSON.parse(localStorage.getItem(storageKey) ?? "null");
+        if (prior && typeof prior === "object") progress = { ...progress, ...prior, opened: true };
+      } catch {
+        // The page remains usable when storage is unavailable (for example, some file:// contexts).
+      }
+      save();
+
+      const showCorrect = (feedback, text) => {
+        feedback.dataset.kind = "correct";
+        feedback.textContent = text;
+      };
+      const showHint = (feedback, text) => {
+        feedback.dataset.kind = "hint";
+        feedback.textContent = text;
+      };
+      const restore = () => {
+        if (progress.authorityCorrect) {
+          showCorrect(authorityFeedback, "Exactly. ArenaEngine knows the current match state, checks whether this player may act, and owns the domain decision. The route and judge have narrower jobs.");
+          trace.hidden = false;
+          recall.hidden = false;
+          document.getElementById("stage-predict").removeAttribute("aria-current");
+          document.getElementById("stage-trace").setAttribute("aria-current", "step");
+        }
+        if (progress.phaseCorrect) {
+          showCorrect(phaseFeedback, "Right. ArenaEngine sees the closed round and rejects the action before the judge is asked to run code.");
+          recallModel.hidden = false;
+          selfCheckRow.hidden = false;
+          document.getElementById("stage-trace").removeAttribute("aria-current");
+          document.getElementById("stage-recall").setAttribute("aria-current", "step");
+        }
+        if (progress.selfCheckComplete) {
+          savedFeedback.hidden = false;
+          savedFeedback.dataset.kind = "correct";
+          savedFeedback.textContent = "Saved on this browser as self-checked. This is not proof of mastery; tell your teacher the path in your own words next time.";
+        }
+      };
+
+      for (const button of buttons) {
+        button.addEventListener("click", () => {
+          if (button.dataset.answer === "engine") {
+            progress.authorityCorrect = true;
+            save();
+            restore();
+          } else {
+            showHint(authorityFeedback, "Not quite. The toolbar sends a request, the HTTP controller checks basic shape, and the judge runs code. Which layer knows the match phase?");
+          }
+        });
+      }
+
+      for (const button of phaseButtons) {
+        button.addEventListener("click", () => {
+          if (button.dataset.answer === "engine") {
+            progress.phaseCorrect = true;
+            save();
+            restore();
+          } else {
+            showHint(phaseFeedback, "Look for the component that has both the round phase and the player's membership before execution begins.");
+          }
+        });
+      }
+
+      document.getElementById("self-check").addEventListener("click", () => {
+        progress.selfCheckComplete = true;
+        save();
+        restore();
+      });
+
+      document.getElementById("reset-progress").addEventListener("click", () => {
+        progress = { opened: true, authorityCorrect: false, phaseCorrect: false, selfCheckComplete: false };
+        try {
+          localStorage.removeItem(storageKey);
+        } catch {
+          // Reset the visible state even if browser storage is unavailable.
+        }
+        authorityFeedback.textContent = "Pick the component that knows the match phase and player membership.";
+        phaseFeedback.textContent = "Hint: which component has the current round phase?";
+        delete authorityFeedback.dataset.kind;
+        delete phaseFeedback.dataset.kind;
+        trace.hidden = true;
+        recall.hidden = true;
+        recallModel.hidden = true;
+        selfCheckRow.hidden = true;
+        savedFeedback.hidden = true;
+        document.getElementById("stage-predict").setAttribute("aria-current", "step");
+        document.getElementById("stage-trace").removeAttribute("aria-current");
+        document.getElementById("stage-recall").removeAttribute("aria-current");
+        save();
+        buttons[0].focus();
+      });
+
+      restore();
+    })();
+  </script>
+</body>
+</html>

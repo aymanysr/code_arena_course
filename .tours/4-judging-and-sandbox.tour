@@ -1,0 +1,56 @@
+{
+  "$schema": "https://aka.ms/codetour-schema",
+  "title": "4 - Judging and the Sandbox Boundary",
+  "steps": [
+    {
+      "title": "What this tour is about",
+      "description": "Players submit code, so the server must treat that code as untrusted. This tour separates two questions: who decides game rules, and what component runs the player's program?"
+    },
+    {
+      "file": "packages/arena-game/src/judge.ts",
+      "line": 57,
+      "title": "1. Resource limits are part of the request",
+      "description": "JudgeLimits carries bounds for code execution. Limits matter because a program may run forever or consume too many resources. Follow where these values are supplied and enforced; a type definition alone does not enforce a limit."
+    },
+    {
+      "file": "packages/arena-game/src/judge.ts",
+      "line": 108,
+      "title": "2. GameJudge is the replaceable execution seam",
+      "description": "The game depends on the GameJudge contract, not on one provider's API. The judge runs source and returns verdicts; ArenaEngine and EvaluationOrchestrator retain match authority and workflow."
+    },
+    {
+      "file": "services/game/src/game/game.service.ts",
+      "line": 145,
+      "title": "3. Which judge is wired into the service?",
+      "description": "createJudge reads JUDGE_BACKEND. The current default is the container backend; Judge0 is selected explicitly and requires JUDGE0_URL. This is the place to inspect when someone asks which backend this service will actually use."
+    },
+    {
+      "file": "packages/arena-game/src/container-judge.ts",
+      "line": 184,
+      "title": "4. The container execution adapter",
+      "description": "ContainerJudge implements GameJudge. runVisible handles public examples, while evaluateSealed handles hidden groups. Read further into runBatch to see the concrete Docker invocation and the limits passed to it; isolation depends on those runtime settings being applied."
+    },
+    {
+      "file": "packages/arena-game/src/judge0.ts",
+      "line": 91,
+      "title": "5. Judge0 fits behind the same game contract",
+      "description": "Judge0Adapter translates the game's execution request into Judge0's API and translates the response back. It can replace the execution backend, but it does not replace ArenaEngine, scoring, persistence, or reveal rules."
+    },
+    {
+      "file": "packages/arena-game/test/sealing.test.ts",
+      "line": 6,
+      "title": "6. Hidden tests must stay hidden",
+      "description": "This suite checks what clients can observe before reveal. Notice the difference between a useful verdict or score and exposing hidden inputs or expected answers."
+    },
+    {
+      "file": "packages/arena-game/test/judge-security.test.ts",
+      "line": 1,
+      "title": "7. Read security behavior as requirements",
+      "description": "These tests cover security-sensitive execution behavior. They are evidence for specific tested cases, not proof that every possible attack is prevented. When you later change the sandbox, read these tests alongside the actual Docker options."
+    },
+    {
+      "title": "Checkpoint — name the two boundaries",
+      "description": "Who decides whether a player may submit: the judge or ArenaEngine? What does the judge do? Finally, if you were checking sandbox safety, which would you inspect: only the class name, or also the Docker invocation, limits, and security tests? Tour 5 follows stored state and the live team features."
+    }
+  ]
+}

@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trace 2v2 team chat, its process-local history, and the separate lifetimes of chat and collaboration clients.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">A2 sends Alpha a “Ready?” ping. Does A2 become Ready? What will a reconnect recover?</h2>
+      <p class="section-intro">Before opening the code, decide who can see the ping, what game state it can change, whether chat survives a Round change, and whether its server history survives a Game-process restart.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">The ping is a chat entry delivered to Alpha's team room; it does not approve the shared document or mutate Match readiness. Chat belongs to the Match, while the shared document belongs to a Round, so a Round change replaces the collaboration client but preserves chat. The Game server keeps at most 25 recent entries per team room in process memory: reconnect can reload them while that process is alive, but a Game restart loses the server-side history. A page that has not reloaded may still have its own already-received messages in browser memory.</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt>Team room</dt>
+        <dd>A server-authorized Match-and-side channel. Teammates share a room; the opposing side uses another room.</dd>
+        <dt class="mt-1">Chat entry</dt>
+        <dd>A text message or contextual quick ping. A ping labeled “Ready?” is communication—not the gameplay Ready action.</dd>
+        <dt class="mt-1">Process-local history</dt>
+        <dd>Recent messages held in a Game-service memory map. Reconnection can retrieve them from the same process, but this is not database persistence.</dd>
+        <dt class="mt-1">Sidecar lifetime</dt>
+        <dd>A browser-owned client that lives alongside Arena transport. Team chat is Match-scoped; collaborative editing is Round-scoped.</dd>
+      </dl>
+    </section>
+
+    <section class="section" aria-labelledby="trace-title">
+      <p class="kicker">Now follow one team message</p>
+      <h2 id="trace-title">Chat communicates beside the Match; it does not become Match state</h2>
+      <p class="section-intro">Keep three channels and two lifetimes separate: the Game namespace owns Match rules, <code>/collab</code> carries the Round's shared document, and <code>/chat</code> carries Match team messages.</p>
+
+      <ol class="source-steps">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The browser connects to the Game service's chat namespace</h3>
+            <p><code>TeamChatClient</code> opens <code>/chat</code>, waits for authorization, and listens for history, messages, and pings. The shared types distinguish ordinary text from a small set of contextual quick pings. This chat gateway lives in the Game service; it is not the deferred standalone Chat service. As Lesson 9 explains, the current principal is a development-only identity seam—not production login.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/chat.ts#L87">Connect and handle authorization · chat.ts:87</a>
+              <a href="../../../frontend/src/arena/chat.ts#L114">Merge history and live entries · chat.ts:114</a>
+              <a href="../../../packages/arena-model/src/chat.ts#L21">Message, ping, and context types · chat.ts:21</a>
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L28">Game, collaboration, and chat channel split · team-chat.gateway.ts:28</a>
+              <a href="../../../services/game/src/game/socket-auth.ts#L16">Current socket identity is development-only · socket-auth.ts:16</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>The server resolves the member's team room</h3>
+            <p>The gateway derives identity from the trusted socket principal and asks the Game service to resolve the caller's Match membership and team side. It joins the server-derived room before sending any recent history. A stranger or a 1v1 player is not granted a 2v2 team-chat room, and client-supplied sender/side fields are not authoritative.</p>
+            <p class="mt-1">A valid message is trimmed, bounded, associated with the authenticated user and side, added to that room's recent history, then broadcast to that room only. Retry IDs can return the original message ID instead of broadcasting a second copy.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L81">Resolve membership before history or room access · team-chat.gateway.ts:81</a>
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L109">Validate and broadcast using server-owned identity · team-chat.gateway.ts:109</a>
+              <a href="../../../services/game/src/game/team-chat.test.ts#L110">Authorized 2v2 member versus stranger and 1v1 · team-chat.test.ts:110</a>
+              <a href="../../../services/game/src/game/team-chat.test.ts#L144">Four-client test source for Alpha/Beta room isolation · team-chat.test.ts:144</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>A chat event cannot approve code or edit the document</h3>
+            <p>The gateway documents the boundary directly: messages and pings do not call the Arena engine, touch Y.Doc, bump <code>DocumentRevision</code>, or toggle readiness. A “Ready?” ping is just text with a label. The actual Ready action still belongs to the game transport and is checked by the Game rules.</p>
+            <p class="mt-1">The <code>TeamChat</code> component is a separate status-and-message panel. It subscribes to its chat client; the collaborative editor has its own Round-scoped client from Lesson 10.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L37">Chat cannot mutate Match readiness or shared Yjs state · team-chat.gateway.ts:37</a>
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L184">Quick ping is a chat entry · team-chat.gateway.ts:184</a>
+              <a href="../../../services/game/src/game/team-chat.test.ts#L207">Ping does not change authoritative readiness · team-chat.test.ts:207</a>
+              <a href="../../../frontend/src/components/TeamChat.tsx#L84">Separate TeamChat UI region · TeamChat.tsx:84</a>
+              <a href="../../../frontend/src/arena/chat.test.ts#L4">Client duplicate-entry behavior · chat.test.ts:4</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Chat survives a Round transition, but not a Match change</h3>
+            <p>The sidecar manager builds the collaboration key from the Round and its connection config, so a new Round disposes the old collaboration client and makes a fresh one. The chat key uses its config without the Round: the same chat client stays connected. Changing Match/transport identity or disposing Arena disconnects both.</p>
+            <p class="mt-1"><strong>Do not confuse that client lifetime with durable chat history.</strong> On the server, the newest 25 entries per room live in an in-memory <code>Map</code>. A reconnect to the same running Game process can receive them; a process restart clears that map. An already-open browser may still display entries it had received until that client is replaced or the page reloads, but there is no durable history store here.</p>
+            <div class="source-links">
+              <a href="../../../frontend/src/arena/sidecars.ts#L178">Round-sensitive collaboration key and Match chat key · sidecars.ts:178</a>
+              <a href="../../../frontend/src/arena/sidecars.test.ts#L44">Round change keeps chat and replaces collaboration · sidecars.test.ts:44</a>
+              <a href="../../../frontend/src/arena/sidecars.test.ts#L69">Match change disconnects both clients · sidecars.test.ts:69</a>
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L45">The server history is an in-memory Map · team-chat.gateway.ts:45</a>
+              <a href="../../../services/game/src/game/team-chat.gateway.ts#L65">Keep only recent room history · team-chat.gateway.ts:65</a>
+              <a href="../../../services/game/src/game/team-chat.test.ts#L329">Reconnect-history scenario in test source · team-chat.test.ts:329</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="evidence-title">
+      <h2 id="evidence-title">What the tests show—and what they do not</h2>
+      <div class="card">
+        <p><strong>Frontend tests:</strong> the chat-client unit test checks message-ID deduplication and local status; sidecar tests check that a Round swap preserves chat while replacing collaboration, and that Match changes dispose both. Those tests do not open a real socket or prove server history persistence.</p>
+        <p class="mt-1"><strong>Service and browser scenarios:</strong> <code>team-chat.test.ts</code> and <code>live-team-chat.spec.ts</code> contain authorization, four-player team isolation, ping/readiness separation, retry, reconnect-history, and editor/chat coexistence scenarios. They are linked as test source, not as runs from this lesson. The service suite starts a local listener; socket suites in this environment have already failed to bind with <code>listen EPERM</code>, so this suite was not run. Playwright was not run.</p>
+        <p class="mt-1"><strong>Persistence limit:</strong> source shows an in-memory bounded history map and no durable chat-history adapter. The test source restores recent history on reconnect within the running process; it does not establish history recovery after service restart.</p>
+      </div>
+      <div class="source-links mt-1">
+        <a href="../../../services/game/src/game/team-chat.test.ts#L304">Lost-ack retry and reconnect-history test source · team-chat.test.ts:304</a>
+        <a href="../../../frontend/e2e/live-team-chat.spec.ts#L68">Four-client browser scenario source · live-team-chat.spec.ts:68</a>
+        <a href="../../../frontend/e2e/live-team-chat.spec.ts#L187">1v1 chat-absent browser scenario source · live-team-chat.spec.ts:187</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="recall-title">
+      <p class="kicker">Close the source and recall</p>
+      <h2 id="recall-title">What disappears at a Round boundary, and what disappears at a Game restart?</h2>
+      <details class="card">
+        <summary>Hint, then check yourself</summary>
+        <p class="mt-1">Name the owner and lifetime: the shared document client is keyed by Match plus Round; chat client is keyed by Match; server-side recent chat history is a bounded process-memory map. A Match change disposes both browser clients. A Game restart empties the server map, even though an already-open page may still hold entries it previously received.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>In your rewrite, connect four users and show that an Alpha message reaches only Alpha; forge sender/side fields and assert the server derives identity; send a “Ready?” ping and assert gameplay readiness is still false; retry one message ID and assert one teammate-visible entry; then disconnect/reconnect and assert the room's recent history is restored while the process is alive. Separately assert that changing Round replaces only the collaboration client, changing Match disposes both, and restarting the Game loses server-side chat history unless you deliberately add durable storage. Keep a UI click or mock transport separate from server authorization evidence.</p>
+      </article>
+      <p class="nav-row"><a href="0010-team-collaboration.html">← Lesson 10: shared editing and Readiness</a> · <a href="0012-arena-screen.html">Next: Lesson 12, the Arena screen and frontend composition →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. Server chat history is process-local, not durable. Frontend chat/sidecar unit tests can validate local client and lifetime rules; service and browser cases are source references and were not executed for this page.</p>
+    </footer>
+  </main>
+</body>
+</html>

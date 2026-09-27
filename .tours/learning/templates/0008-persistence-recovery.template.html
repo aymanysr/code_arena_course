@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Follow what Match and Evaluation state survives a Game-service restart, and what boot recovery reconstructs.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">The Game service restarts halfway through a Match. What can it pick up again?</h2>
+      <p class="section-intro">Before opening the answer, sort these into “durable record,” “reconstructed at boot,” or “gone with the old process”: the Match score, a pending Submission, socket Presence, and an in-flight JavaScript promise.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">With <code>DATABASE_URL</code> configured and the Postgres volume intact, Match and Submission records are durable. Boot recovery resets Presence to offline and re-drives pending Evaluations. A JavaScript promise/in-flight registry is process-local and is not restored. Without <code>DATABASE_URL</code>, the service builds fresh in-memory stores, so those records are not durable across a restart.</p>
+      </details>
+    </section>
+
+    <section class="section" aria-labelledby="terms-title">
+      <h2 id="terms-title">Key terms</h2>
+      <dl class="card">
+        <dt><code>MatchPersistence</code></dt>
+        <dd>The domain-shaped interface the Arena engine uses to load/save Matches, Submissions, Reveals, and team documents.</dd>
+        <dt class="mt-1">Postgres store</dt>
+        <dd>The configured adapter that saves those records in the database; the Compose stack gives Postgres a named data volume.</dd>
+        <dt class="mt-1">Boot recovery</dt>
+        <dd>Work the Game service awaits after creating its engine and before it starts serving.</dd>
+        <dt class="mt-1">Process-local state</dt>
+        <dd>Memory owned by one running Node.js process, such as an in-flight promise or socket connection.</dd>
+      </dl>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now follow one restart</p>
+      <h2 id="trace-title">The answer depends on which store the Game service actually selects</h2>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>Startup chooses the storage adapter</h3>
+            <p>If <code>DATABASE_URL</code> exists, the service creates <code>PostgresStores</code>, ensures the Game schema, and gives its persistence interface to <code>ArenaEngine</code>. Without the variable, it creates new in-memory Maps. The Compose Game service supplies a database URL; the Compose Postgres service mounts a named volume. The init script creates service databases/roles on first volume initialization; <code>PostgresStores.ensureSchema()</code> creates the Game tables.</p>
+            <p class="mt-1">That means “we use Postgres in Compose” and “a local run has durable storage” are not automatically the same statement. Check the actual process environment.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/game.service.ts#L99">Select Postgres or in-memory stores · game.service.ts:99</a>
+              <a href="../../../packages/arena-game/src/store.ts#L62">In-memory Match and Submission Maps · store.ts:62</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L12">Current Game table definitions · postgres-store.ts:12</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L124">Ensure the Game schema · postgres-store.ts:124</a>
+              <a href="../../../docker-compose.yml#L6">Postgres named volume · docker-compose.yml:6</a>
+              <a href="../../../docker-compose.yml#L50">Compose passes DATABASE_URL to Game · docker-compose.yml:50</a>
+              <a href="../../../infra/postgres/init-db.sh#L1">First-volume role/database bootstrap · init-db.sh:1</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>Postgres stores the current Match record as JSONB</h3>
+            <p>The <code>matches</code> table has an ID plus a <code>data JSONB</code> value. Saving writes the Match record and its Round/side summaries inside a transaction, with an optional revision check. Separate tables hold Submission JSON, published Reveal JSON, and shared team-document state. The existing JSONB shape is left untouched by this course task; this code path is not evidence of arbitrary forward/backward migration compatibility.</p>
+            <p class="mt-1"><code>MatchAuthority</code> serializes a short Match change, stamps its revision, then asks the persistence interface to save it. The storage interface hides which adapter is underneath, but that interface alone does not make the in-memory adapter durable.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/persistence.ts#L22">The MatchPersistence boundary · persistence.ts:22</a>
+              <a href="../../../packages/arena-game/src/match-authority.ts#L41">Serialize Match changes · match-authority.ts:41</a>
+              <a href="../../../packages/arena-game/src/match-authority.ts#L83">Stamp and persist a revision · match-authority.ts:83</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L12">JSONB and relational identities · postgres-store.ts:12</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L278">Transactional Match save and revision guard · postgres-store.ts:278</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L349">Submission rows, including pending status · postgres-store.ts:349</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Before serving, boot recovery repairs what a process cannot carry forward</h3>
+            <p>The Game service awaits <code>engine.recover()</code> before it accepts traffic. Recovery loads known Match IDs, marks their participants offline with a fresh reconnect grace period, repairs transient activity labels, restores an interrupted Reveal when its durable record exists, and then recovers pending Submissions.</p>
+            <p class="mt-1">A pending Submission row is durable work. The Postgres adapter claims it with a database-session advisory lock and commits the terminal Submission plus Match under that claim. If the process and database session disappear, that lock is released; recovery can claim and re-drive the still-pending row using its original IDs. The in-flight promise registry itself is process-local—recovery does not resurrect the old promise.</p>
+            <div class="source-links">
+              <a href="../../../services/game/src/game/game.service.ts#L131">Recovery completes before the service serves · game.service.ts:131</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L1004">Recovery rules for Presence, activity, Reveal, pending work · engine.ts:1004</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L170">Postgres advisory claim lifetime · postgres-store.ts:170</a>
+              <a href="../../../packages/arena-game/src/postgres-store.ts#L232">Commit terminal result and Match state · postgres-store.ts:232</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L39">The local in-flight registry boundary · evaluation-orchestration.ts:39</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>Read each recovery test for the storage it really uses</h3>
+            <p>The reconnect recovery tests exercise recovery logic with in-memory stores shared by test engines; they are useful for the algorithm, but do not prove a database process restart. The Postgres suite creates new engines over the same database and covers a completed retry, an unclaimed pending Submission, a persisted Reveal, and Match clock/count restoration. That is the direct database evidence—when the suite actually runs.</p>
+            <aside class="concept-note mt-1">
+              <h4>Verification status for this workspace</h4>
+              <p>No database suite was run as part of this lesson task, so those cases are not counted as passing here. The persistence test setup may create a test database, and the Postgres restart suite truncates its configured database before running. Only run those suites after confirming that their URL points to a disposable test database. The cited integration-test cases are source references, not new execution evidence.</p>
+            </aside>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/test/persistence.test.ts#L96">Shared persistence contract · persistence.test.ts:96</a>
+              <a href="../../../packages/arena-game/test/reconnect.test.ts#L565">Two-engine in-memory recovery case · reconnect.test.ts:565</a>
+              <a href="../../../packages/arena-game/test/reconnect.test.ts#L605">Interrupted Reveal case in the test harness · reconnect.test.ts:605</a>
+              <a href="../../../packages/arena-game/test/postgres.test.ts#L384">Postgres retry and pending-work restart cases · postgres.test.ts:384</a>
+              <a href="../../../packages/arena-game/test/postgres.test.ts#L436">Postgres Reveal and Match restore cases · postgres.test.ts:436</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="matrix-title">
+      <h2 id="matrix-title">What survives—and what gets rebuilt?</h2>
+      <div class="grid split">
+        <article class="card">
+          <h3>With Postgres configured and its volume intact</h3>
+          <ul>
+            <li>Match/Round state, counted results, and Submission rows are stored.</li>
+            <li>Completed request retries can return their stored outcome.</li>
+            <li>Pending Evaluations can be found and re-driven.</li>
+            <li>Boot sets Presence offline and starts a fresh reconnect grace window.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Not carried across a process restart</h3>
+          <ul>
+            <li>JavaScript in-flight promises and the local orchestration registry.</li>
+            <li>Live sockets; Presence is reconstructed as offline, not restored as online.</li>
+            <li>Any records held only by the in-memory adapter.</li>
+          </ul>
+        </article>
+      </div>
+      <aside class="concept-note mt-1">
+        <p><strong>Boundaries:</strong> this lesson changes no game behavior or database schema. A named volume is not a backup, removing/reinitializing the volume changes the durability story, and the cited code does not establish a migration policy for old JSONB records.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">Why does the service mark every player offline if the Match itself survived?</h2>
+      <p class="section-intro">Answer using the difference between a saved Match fact and a live connection.</p>
+      <details class="card">
+        <summary>Show a useful answer</summary>
+        <p class="mt-1">The database preserves the Match record, but a socket belongs to the old running process and cannot be resumed by reading JSONB. Boot therefore reconstructs a safe Presence state: offline, with a new grace period for reconnect. Likewise, a durable pending Submission may be retried, but its old in-flight promise is gone.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Build a test with a real persistent database: create a Match, save a counted Submission and a pending Evaluation, close the first engine/process, create a fresh engine over the same database, then assert stored scores survive, Presence starts offline, and recovery claims the pending work under its original IDs. Add a concurrent-recovery assertion that only one worker holds the claim, and simulate a crash before commit to document whether the Judge can run again—do not assume exactly-once execution across crashes. Add a separate test showing that the in-memory adapter cannot survive constructing new stores. Do not call a two-engine/shared-Map unit test a database restart test.</p>
+      </article>
+      <p class="nav-row"><a href="0007-judge-boundary.html">← Lesson 7: Judge boundary</a> · <a href="0009-live-connection.html">Next: Lesson 9, live connection and reconnect →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. Current Postgres recovery integration cases are linked for study but were not run in this session. This lesson makes no database-schema or game-behavior change.</p>
+    </footer>
+  </main>
+</body>
+</html>

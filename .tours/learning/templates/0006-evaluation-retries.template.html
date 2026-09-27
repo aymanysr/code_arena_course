@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Learn when a repeated Submit is the same Evaluation, and when reusing its identity is rejected.">
+  <meta name="course-lesson-id" content="{{LESSON_ID}}">
+  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body data-lesson-id="{{LESSON_ID}}">
+  <a class="skip-link" href="#lesson">Skip to the lesson</a>
+  <main class="page" id="lesson">
+    <header class="hero">
+      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
+      <h1>{{LESSON_TITLE}}</h1>
+      <p class="hero-copy">In about 9 minutes: {{LESSON_GOAL}}</p>
+      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <div class="stage-bar" aria-label="Lesson stages">
+        <span class="stage-pill" aria-current="step">1 · Predict</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">2 · Trace</span>
+        <span aria-hidden="true" class="flow-arrow">→</span>
+        <span class="stage-pill">3 · Recall</span>
+      </div>
+    </header>
+
+    <section class="section" aria-labelledby="predict-title">
+      <p class="kicker">First, make a prediction</p>
+      <h2 id="predict-title">The network drops after Submit. If the client sends the same IDs again, should the judge run a second time?</h2>
+      <p class="section-intro">A retry should not accidentally become a second attempt—but reusing an ID for changed code must not rewrite the first request.</p>
+      <details class="card">
+        <summary>Check your prediction</summary>
+        <p class="mt-1">It is the same logical Evaluation only when the IDs and the immutable submission identity still match. A conflicting payload using an old Evaluation ID is rejected. A genuinely new Submit gets new IDs.</p>
+      </details>
+    </section>
+
+    <section class="section" id="trace" aria-labelledby="trace-title">
+      <p class="kicker">Now follow the identity</p>
+      <h2 id="trace-title">An Evaluation ID names work; the rest of the fields prove which work it means</h2>
+      <ol class="flow-list">
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">01</span>
+          <div>
+            <h3>The engine binds an ID to a specific submission</h3>
+            <p>If callers omit them, the engine makes a <code>submissionId</code> and an <code>evaluationId</code>. It also computes a hash of the submitted source. To accept a reused <code>evaluationId</code>, it compares Match, Round, side, submission ID, problem version, language, source hash, and (for a shared team document) document revision.</p>
+            <p class="mt-1">So “same Evaluation” means more than “same button was clicked.” Same ID + changed code is a conflict, not permission to change the accepted work.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/engine.ts#L544">Create IDs and compare in-flight identity · engine.ts:544</a>
+              <a href="../../../packages/arena-game/src/engine.ts#L579">Compare the durable row and recover the terminal result · engine.ts:579</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L22">Fields in EvaluationIdentity · evaluation-orchestration.ts:22</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L48">Same IDs and same data make one attempt · submit-path.test.ts:48</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">02</span>
+          <div>
+            <h3>Concurrent retries attach to the accepted work</h3>
+            <p>The in-flight registry is explicitly process-local: while one request is evaluating, a matching retry can wait for that same completion. Durable claim acquisition is a separate persistence contract. The orchestrator claims before invoking the Judge and releases the claim after evaluation/commit; this is why “the local map exists” alone is not proof of cross-process safety.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L39">Scope of the in-flight registry · evaluation-orchestration.ts:39</a>
+              <a href="../../../packages/arena-game/src/persistence.ts#L30">Durable persistence and claim contract · persistence.ts:30</a>
+              <a href="../../../packages/arena-game/src/evaluation-orchestration.ts#L172">Acquire a claim, check terminal state, then evaluate · evaluation-orchestration.ts:172</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L69">In-flight duplicate attaches without a second Judge call · submit-path.test.ts:69</a>
+              <a href="../../../packages/arena-game/test/evaluation-orchestration.test.ts#L4">In-process registry ownership tests · evaluation-orchestration.test.ts:4</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">03</span>
+          <div>
+            <h3>Same ID with different data is rejected—even after completion</h3>
+            <p>The tests try changing the code while keeping an in-flight ID, then try reusing a completed ID with a conflicting payload. Both are rejected; the in-flight example shows no second Judge execution. In contrast, a new Submit call creates fresh IDs.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L93">Conflicting in-flight ID is rejected · submit-path.test.ts:93</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L116">Conflicting completed ID is rejected · submit-path.test.ts:116</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L153">A new Submit call gets fresh IDs · submit-path.test.ts:153</a>
+              <a href="../../../packages/arena-game/test/concurrency.test.ts#L29">Separate sides can submit concurrently · concurrency.test.ts:29</a>
+            </div>
+          </div>
+        </li>
+        <li class="source-step">
+          <span class="step-number" aria-hidden="true">04</span>
+          <div>
+            <h3>A Judge failure is not automatically a new contestant verdict</h3>
+            <p>When an in-flight Judge failure occurs, the duplicate waiting on that same request receives the same failure; the test verifies the Judge ran once. Another test shows an infrastructure failure does not replace an earlier counted score. These are specific tested paths—not a promise that every error is safely retryable or that every network retry is recognized.</p>
+            <div class="source-links">
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L135">Replay one in-flight failure to its duplicate · submit-path.test.ts:135</a>
+              <a href="../../../packages/arena-game/test/submit-path.test.ts#L181">Infrastructure failure and counted-result behavior · submit-path.test.ts:181</a>
+              <a href="../../../packages/arena-game/test/match-revision.test.ts#L58">A stale Match write is a separate revision conflict · match-revision.test.ts:58</a>
+            </div>
+          </div>
+        </li>
+      </ol>
+
+      <aside class="concept-note mt-1">
+        <h3>Keep three guarantees separate</h3>
+        <p><strong>Request idempotency:</strong> a matching repeated request does not create duplicate work. <strong>Evaluation claim:</strong> persistence grants one worker ownership of pending work. <strong>Judge:</strong> executes the code and returns a verdict; it does not decide whether an ID is valid. Lesson 8 will trace what the durable store can recover after a process restart.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="recall" aria-labelledby="recall-title">
+      <p class="kicker">Check the model in your head</p>
+      <h2 id="recall-title">A request repeats <code>evaluationId=E7</code>, but its source has changed. Should it attach to the first Judge call?</h2>
+      <p class="section-intro">Before opening the hint, name at least two identity fields besides the Evaluation ID.</p>
+      <details class="card">
+        <summary>Show a useful answer</summary>
+        <p class="mt-1">No. The source hash no longer matches, so the engine rejects reuse of E7 with different submission data. A retry keeps the original IDs and the original payload. A deliberate new attempt gets new IDs and follows the new-submission rules.</p>
+      </details>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Write separate tests for: same IDs + same payload returns the same outcome and invokes the Judge once; same Evaluation ID + changed code is rejected before duplicate work; a new Submit receives fresh IDs; and a Judge infrastructure failure is not converted into a contestant score. Then test persistence claims across two Game instances using the real database before claiming cross-process protection.</p>
+      </article>
+      <p class="nav-row"><a href="0005-problem-editor-run.html">← Lesson 5: Problem and Run</a> · <a href="0007-judge-boundary.html">Next: Lesson 7, the Judge boundary →</a></p>
+    </section>
+
+    <footer class="footer-note">
+      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. In-memory tests demonstrate their asserted retry cases; they do not alone prove PostgreSQL claim behavior, sandbox security, or correctness of a separate rewrite.</p>
+    </footer>
+  </main>
+</body>
+</html>
