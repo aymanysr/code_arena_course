@@ -1,0 +1,950 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Gameplay State Sandbox | Campus Puzzle Race</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --paper: #f3efe5;
+      --surface: #fffdf7;
+      --ink: #18201e;
+      --muted: #5e6864;
+      --line: #b9c0b9;
+      --accent: #18685d;
+      --accent-ink: #ffffff;
+      --blue: #166b8f;
+      --coral: #a84936;
+      --warning: #8a4d08;
+      --danger: #9d2d35;
+      --success: #216e3d;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --paper: #141917;
+        --surface: #1d2421;
+        --ink: #f2f4ec;
+        --muted: #b2bbb5;
+        --line: #55605a;
+        --accent: #69cbbb;
+        --accent-ink: #0e211d;
+        --blue: #67b9dc;
+        --coral: #f08e76;
+        --warning: #ffc166;
+        --danger: #ff929a;
+        --success: #7fd99b;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    button, select { font: inherit; }
+
+    button {
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.45rem;
+      background: var(--surface);
+      color: var(--ink);
+      padding: 0.55rem 0.8rem;
+      cursor: pointer;
+      text-align: start;
+    }
+
+    button:hover { border-color: var(--accent); }
+
+    button:focus-visible,
+    select:focus-visible,
+    summary:focus-visible {
+      outline: 0.2rem solid var(--accent);
+      outline-offset: 0.18rem;
+    }
+
+    button.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+      font-weight: 700;
+    }
+
+    button.danger { border-color: var(--danger); }
+
+    button[aria-pressed="true"] {
+      border-color: var(--accent);
+      box-shadow: inset 0 -0.22rem 0 var(--accent);
+      font-weight: 700;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 10;
+      inset: 0.75rem auto auto 0.75rem;
+      padding: 0.6rem 0.85rem;
+      background: var(--ink);
+      color: var(--paper);
+      transform: translateY(-180%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    header,
+    main,
+    footer {
+      width: min(92rem, calc(100% - 2rem));
+      margin-inline: auto;
+    }
+
+    header { padding-block: 2.25rem 1.25rem; }
+
+    .eyebrow {
+      margin: 0 0 0.35rem;
+      color: var(--accent);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h1, h2, h3, p { margin-block-start: 0; }
+    h1 { max-width: 18ch; margin-block-end: 0.6rem; font-size: clamp(2rem, 6vw, 4.8rem); line-height: 0.95; }
+    h2 { margin-block-end: 0.8rem; font-size: clamp(1.35rem, 2vw, 2rem); }
+    h3 { margin-block-end: 0.55rem; font-size: 1.05rem; }
+    p { max-width: 76ch; }
+
+    .prototype-note {
+      max-width: 80ch;
+      border-inline-start: 0.35rem solid var(--warning);
+      padding: 0.8rem 1rem;
+      background: color-mix(in srgb, var(--warning) 9%, var(--surface));
+    }
+
+    .grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .overview { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .teams { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .controls { grid-template-columns: minmax(16rem, 0.72fr) minmax(20rem, 1.28fr); }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 0.7rem;
+      background: var(--surface);
+      padding: 1rem;
+    }
+
+    section { margin-block: 1rem; }
+
+    .metric dt,
+    .state-list dt {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .metric dd {
+      margin: 0.2rem 0 0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(1.15rem, 2vw, 1.65rem);
+      font-weight: 800;
+    }
+
+    .state-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin: 0;
+    }
+
+    .state-list div { min-width: 0; }
+    .state-list dd { margin: 0.16rem 0 0; overflow-wrap: anywhere; }
+
+    .team-card { border-block-start: 0.42rem solid var(--team-colour); }
+    .team-card h3 { display: flex; justify-content: space-between; gap: 1rem; }
+    .team-card[data-team="blue"] { --team-colour: var(--blue); }
+    .team-card[data-team="coral"] { --team-colour: var(--coral); }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.75rem;
+      border: 1px solid currentColor;
+      border-radius: 99rem;
+      padding: 0.1rem 0.55rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .player-list,
+    .event-list,
+    .walkthrough-steps {
+      margin: 0;
+      padding-inline-start: 1.3rem;
+    }
+
+    .player-list li,
+    .event-list li,
+    .walkthrough-steps li { margin-block: 0.4rem; }
+
+    .player-list .done { color: var(--success); font-weight: 700; }
+    .player-list .offline { color: var(--danger); font-weight: 700; }
+
+    .button-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+
+    .button-grid.wide { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .control-group + .control-group {
+      border-block-start: 1px solid var(--line);
+      margin-block-start: 1rem;
+      padding-block-start: 1rem;
+    }
+
+    label { display: block; margin-block-end: 0.4rem; font-weight: 700; }
+
+    select {
+      width: 100%;
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.45rem;
+      background: var(--surface);
+      color: var(--ink);
+      padding-inline: 0.65rem;
+    }
+
+    .status-message {
+      min-height: 3.25rem;
+      border-inline-start: 0.35rem solid var(--accent);
+      padding: 0.75rem 0.9rem;
+      background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+      font-weight: 650;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-block-end: 1rem;
+    }
+
+    [role="tabpanel"][hidden] { display: none; }
+
+    .step-button { width: 100%; }
+    .step-button.complete { border-color: var(--success); color: var(--success); }
+    .step-button.current { border-color: var(--accent); font-weight: 800; }
+
+    details { margin-block-start: 1rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    pre {
+      max-height: 28rem;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 0.45rem;
+      padding: 1rem;
+      background: var(--paper);
+      color: var(--ink);
+      font-size: 0.78rem;
+      white-space: pre-wrap;
+    }
+
+    footer {
+      padding-block: 1rem 3rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 64rem) {
+      .overview { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .controls { grid-template-columns: 1fr; }
+      .button-grid.wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 43rem) {
+      .teams,
+      .overview,
+      .state-list,
+      .button-grid,
+      .button-grid.wide { grid-template-columns: 1fr; }
+      header, main, footer { width: min(100% - 1rem, 92rem); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to sandbox</a>
+
+  <header>
+    <p class="eyebrow">Prototype · Gameplay logic</p>
+    <h1>Campus Puzzle Race state sandbox</h1>
+    <p class="prototype-note"><strong>Question:</strong> Does the proposed match state hold together when two teams contribute through private roles, submit answers, trigger cooldowns, buy hints, disconnect, and race through a finish delay?</p>
+    <p><strong>Throwaway boundary:</strong> this file is an experiment, not team-approved implementation. It stores nothing, calls no services, and changes no project decision.</p>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section aria-labelledby="match-heading">
+      <h2 id="match-heading">Current match</h2>
+      <div class="grid overview" id="match-overview"></div>
+      <div class="status-message" id="announcement" aria-live="polite" aria-atomic="true"></div>
+    </section>
+
+    <section aria-labelledby="teams-heading">
+      <h2 id="teams-heading">Team state</h2>
+      <div class="grid teams" id="team-state"></div>
+    </section>
+
+    <section class="grid controls" aria-labelledby="controls-heading">
+      <div class="panel">
+        <h2 id="controls-heading">Free play</h2>
+        <p>Buttons stay available so illegal transitions can be tested. The sandbox will reject them and explain why.</p>
+
+        <div class="control-group">
+          <h3>Lobby and clock</h3>
+          <div class="button-grid">
+            <button type="button" data-action="SET_MODE" data-size="2">Use 2v2</button>
+            <button type="button" data-action="SET_MODE" data-size="3">Use 3v3</button>
+            <button type="button" data-action="READY_ALL">Ready all players</button>
+            <button type="button" class="primary" data-action="START_MATCH">Start match</button>
+            <button type="button" data-action="TICK" data-seconds="15">Advance 15 seconds</button>
+            <button type="button" data-action="TICK" data-seconds="30">Advance 30 seconds</button>
+            <button type="button" class="danger" data-action="RESET">Reset sandbox</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label for="active-team">Team for the actions below</label>
+          <select id="active-team">
+            <option value="blue">Blue team</option>
+            <option value="coral">Coral team</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <h3>Role contributions</h3>
+          <div class="button-grid" id="contribution-buttons"></div>
+        </div>
+
+        <div class="control-group">
+          <h3>Hints and connection</h3>
+          <div class="button-grid">
+            <button type="button" data-action="REQUEST_HINT" data-player="0">Player 1 requests hint</button>
+            <button type="button" data-action="CONFIRM_HINT" data-player="1">Player 2 confirms hint</button>
+            <button type="button" data-action="CONFIRM_HINT" data-player="0">Requester tries own confirmation</button>
+            <button type="button" data-action="DISCONNECT" data-player="0">Disconnect player 1</button>
+            <button type="button" data-action="RECONNECT" data-player="0">Reconnect player 1</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <h3>Submissions</h3>
+          <div class="button-grid">
+            <button type="button" data-action="SUBMIT" data-answer="wrong">Submit wrong answer</button>
+            <button type="button" class="primary" data-action="SUBMIT" data-answer="correct">Submit correct answer</button>
+            <button type="button" data-action="REPLAY_SUBMISSION">Replay last request ID</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Guided walkthroughs</h2>
+        <p>Choose a scenario, then press its steps in order. Each scenario starts from a clean state.</p>
+        <div class="tabs" role="tablist" aria-label="Gameplay scenarios" id="scenario-tabs"></div>
+        <div id="scenario-panels"></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="events-heading">
+      <h2 id="events-heading">Recent events</h2>
+      <ol class="event-list" id="event-list"></ol>
+      <details>
+        <summary>Developer view: complete in-memory state</summary>
+        <pre id="raw-state"></pre>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    Prototype only · no persistence · no network · reload or press “Reset sandbox” to start over.
+  </footer>
+
+  <script>
+    "use strict";
+
+    const STAGES = [
+      "Loop tracing",
+      "String / character reasoning",
+      "Array-function repair"
+    ];
+
+    const ROLE_SETS = {
+      2: ["Code reader", "Answer builder"],
+      3: ["Code reader", "Input keeper", "Answer builder"]
+    };
+
+    const TEAM_NAMES = {
+      blue: "Blue team",
+      coral: "Coral team"
+    };
+
+    function makeTeam(id, size) {
+      return {
+        id,
+        name: TEAM_NAMES[id],
+        currentStage: 0,
+        players: ROLE_SETS[size].map((role, index) => ({
+          id: `${id}-${index + 1}`,
+          name: `Player ${index + 1}`,
+          role,
+          ready: false,
+          connected: true,
+          contributed: false
+        })),
+        failuresThisStage: 0,
+        cooldownUntil: 0,
+        hintsUsed: [0, 0, 0],
+        hintRequest: null,
+        finishDelay: 0,
+        solvedAt: null,
+        eligibleAt: null,
+        lastSubmissionId: null,
+        submissionResults: {}
+      };
+    }
+
+    function makeInitialState(size = 2) {
+      return {
+        phase: "lobby",
+        teamSize: size,
+        elapsed: 0,
+        deadline: 15 * 60,
+        result: null,
+        nextRequestNumber: 1,
+        teams: {
+          blue: makeTeam("blue", size),
+          coral: makeTeam("coral", size)
+        },
+        lastEvent: "Sandbox ready. Choose a mode and ready the lobby.",
+        events: ["Sandbox ready. Choose a mode and ready the lobby."]
+      };
+    }
+
+    function copy(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function record(state, message) {
+      state.lastEvent = message;
+      state.events.unshift(message);
+      state.events = state.events.slice(0, 20);
+      return state;
+    }
+
+    function reject(state, message) {
+      return record(state, `Rejected: ${message}`);
+    }
+
+    function allReady(state) {
+      return Object.values(state.teams).every((team) =>
+        team.players.length === state.teamSize && team.players.every((player) => player.ready)
+      );
+    }
+
+    function allContributed(team) {
+      return team.players.every((player) => player.contributed);
+    }
+
+    function cooldownSeconds(state, team) {
+      return Math.max(0, team.cooldownUntil - state.elapsed);
+    }
+
+    function resetStageWork(team) {
+      team.players.forEach((player) => { player.contributed = false; });
+      team.failuresThisStage = 0;
+      team.cooldownUntil = 0;
+      team.hintRequest = null;
+    }
+
+    function settleMatch(state) {
+      if (state.result) return state;
+
+      const eligible = Object.values(state.teams)
+        .filter((team) => team.eligibleAt !== null && team.eligibleAt <= state.elapsed && team.eligibleAt < state.deadline)
+        .sort((a, b) => a.eligibleAt - b.eligibleAt);
+
+      if (eligible.length === 2 && eligible[0].eligibleAt === eligible[1].eligibleAt) {
+        state.phase = "finished";
+        state.result = { type: "draw", reason: "equal eligibility times" };
+        return record(state, `Match ended in a draw at ${formatTime(eligible[0].eligibleAt)}.`);
+      }
+
+      if (eligible.length > 0) {
+        state.phase = "finished";
+        state.result = { type: "winner", teamId: eligible[0].id };
+        return record(state, `${eligible[0].name} won at ${formatTime(eligible[0].eligibleAt)}.`);
+      }
+
+      if (state.elapsed >= state.deadline) {
+        state.phase = "finished";
+        state.result = { type: "draw", reason: "deadline reached" };
+        return record(state, "Match ended in a draw because the deadline was reached.");
+      }
+
+      return state;
+    }
+
+    function reduce(previousState, action) {
+      if (action.type === "RESET") return makeInitialState(previousState.teamSize);
+
+      const state = copy(previousState);
+
+      if (action.type === "SET_MODE") {
+        if (state.phase !== "lobby") return reject(state, "team size can change only in the lobby.");
+        return record(makeInitialState(action.size), `Lobby changed to ${action.size}v${action.size}.`);
+      }
+
+      if (action.type === "READY_ALL") {
+        if (state.phase !== "lobby") return reject(state, "readiness is a lobby action.");
+        Object.values(state.teams).forEach((team) => team.players.forEach((player) => { player.ready = true; }));
+        return record(state, "Every player is ready.");
+      }
+
+      if (action.type === "START_MATCH") {
+        if (state.phase !== "lobby") return reject(state, "the match has already left the lobby.");
+        if (!allReady(state)) return reject(state, "both teams must be full and ready.");
+        state.phase = "running";
+        return record(state, "Match started. The 15-minute server clock is running.");
+      }
+
+      if (action.type === "TICK") {
+        if (state.phase !== "running") return reject(state, "time advances only during a running match.");
+        state.elapsed = Math.min(state.deadline, state.elapsed + action.seconds);
+        record(state, `Server clock advanced by ${action.seconds} seconds.`);
+        return settleMatch(state);
+      }
+
+      if (state.phase !== "running") {
+        return reject(state, "team actions require a running match.");
+      }
+
+      const team = state.teams[action.teamId];
+      if (!team) return reject(state, "the selected team does not exist.");
+      if (team.solvedAt !== null) return reject(state, `${team.name} has already solved every stage.`);
+
+      if (action.type === "CONTRIBUTE") {
+        const player = team.players[action.playerIndex];
+        if (!player) return reject(state, "that role does not exist in this mode.");
+        if (!player.connected) return reject(state, `${player.name} is disconnected; the private role stays reserved.`);
+        if (player.contributed) return reject(state, `${player.name}'s ${player.role} contribution is already recorded.`);
+        player.contributed = true;
+        return record(state, `${team.name}: ${player.name} completed the ${player.role} contribution.`);
+      }
+
+      if (action.type === "DISCONNECT") {
+        const player = team.players[action.playerIndex];
+        if (!player) return reject(state, "that player does not exist in this mode.");
+        if (!player.connected) return reject(state, `${player.name} is already disconnected.`);
+        player.connected = false;
+        return record(state, `${team.name}: ${player.name} disconnected; role and progress remain reserved.`);
+      }
+
+      if (action.type === "RECONNECT") {
+        const player = team.players[action.playerIndex];
+        if (!player) return reject(state, "that player does not exist in this mode.");
+        if (player.connected) return reject(state, `${player.name} is already connected.`);
+        player.connected = true;
+        return record(state, `${team.name}: ${player.name} reconnected to the same role and state.`);
+      }
+
+      if (action.type === "REQUEST_HINT") {
+        const player = team.players[action.playerIndex];
+        if (!player || !player.connected) return reject(state, "only a connected teammate can request a hint.");
+        if (team.hintRequest) return reject(state, "a hint request is already waiting for confirmation.");
+        if (team.hintsUsed[team.currentStage] >= 2) return reject(state, "this stage has no hints left.");
+        team.hintRequest = { requestedBy: action.playerIndex, number: team.hintsUsed[team.currentStage] + 1 };
+        return record(state, `${team.name}: ${player.name} requested hint ${team.hintRequest.number}; another teammate must confirm.`);
+      }
+
+      if (action.type === "CONFIRM_HINT") {
+        const player = team.players[action.playerIndex];
+        if (!team.hintRequest) return reject(state, "there is no pending hint request.");
+        if (!player || !player.connected) return reject(state, "only a connected teammate can confirm.");
+        if (team.hintRequest.requestedBy === action.playerIndex) return reject(state, "the requester cannot confirm their own hint.");
+        const hintNumber = team.hintRequest.number;
+        team.hintsUsed[team.currentStage] += 1;
+        team.finishDelay += 30;
+        team.hintRequest = null;
+        return record(state, `${team.name}: ${player.name} confirmed hint ${hintNumber}. Finish delay is now ${team.finishDelay} seconds.`);
+      }
+
+      if (action.type === "SUBMIT") {
+        const requestId = action.requestId;
+        if (team.submissionResults[requestId]) {
+          team.lastSubmissionId = requestId;
+          return record(state, `${team.name}: duplicate ${requestId} returned its original “${team.submissionResults[requestId]}” result; no second penalty applied.`);
+        }
+        if (!allContributed(team)) return reject(state, `${team.name} still needs every role contribution.`);
+        if (cooldownSeconds(state, team) > 0) return reject(state, `${team.name} has ${cooldownSeconds(state, team)} seconds of retry cooldown left.`);
+
+        team.lastSubmissionId = requestId;
+
+        if (action.answer === "wrong") {
+          team.failuresThisStage += 1;
+          const penalty = [15, 30, 60, 90][Math.min(team.failuresThisStage - 1, 3)];
+          team.cooldownUntil = state.elapsed + penalty;
+          team.submissionResults[requestId] = `wrong; ${penalty}s cooldown`;
+          return record(state, `${team.name}: wrong answer. Failure trace returned; retry cooldown is ${penalty} seconds.`);
+        }
+
+        team.submissionResults[requestId] = "correct";
+        const completedStage = team.currentStage;
+        if (completedStage < STAGES.length - 1) {
+          team.currentStage += 1;
+          resetStageWork(team);
+          return record(state, `${team.name} passed ${STAGES[completedStage]} and unlocked ${STAGES[team.currentStage]}.`);
+        }
+
+        team.solvedAt = state.elapsed;
+        team.eligibleAt = state.elapsed + team.finishDelay;
+        record(state, `${team.name} solved the final stage at ${formatTime(team.solvedAt)}; eligibility is ${formatTime(team.eligibleAt)} after hint delay.`);
+        return settleMatch(state);
+      }
+
+      return reject(state, `unknown action “${action.type}”.`);
+    }
+
+    function formatTime(totalSeconds) {
+      const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+      const seconds = Math.floor(totalSeconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${seconds}`;
+    }
+
+    function resultLabel(state) {
+      if (!state.result) return "Not decided";
+      if (state.result.type === "draw") return `Draw — ${state.result.reason}`;
+      return `${TEAM_NAMES[state.result.teamId]} wins`;
+    }
+
+    let state = makeInitialState();
+    let selectedScenario = "happy";
+    let scenarioProgress = {};
+
+    const scenarios = [
+      {
+        id: "happy",
+        name: "Clean win",
+        description: "Blue completes all role work and passes the three stages without penalties.",
+        steps: [
+          ["Ready both teams", { type: "READY_ALL" }],
+          ["Start the match", { type: "START_MATCH" }],
+          ["Stage 1: code reader contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 0 }],
+          ["Stage 1: answer builder contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 1 }],
+          ["Pass stage 1", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-happy-1" }],
+          ["Stage 2: code reader contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 0 }],
+          ["Stage 2: answer builder contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 1 }],
+          ["Pass stage 2", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-happy-2" }],
+          ["Stage 3: code reader contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 0 }],
+          ["Stage 3: answer builder contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 1 }],
+          ["Pass stage 3 and win", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-happy-3" }]
+        ]
+      },
+      {
+        id: "cooldown",
+        name: "Failure cooldown",
+        description: "A wrong answer produces a trace and blocks a distinct resubmission, while a replayed request ID stays idempotent.",
+        steps: [
+          ["Ready both teams", { type: "READY_ALL" }],
+          ["Start the match", { type: "START_MATCH" }],
+          ["Code reader contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 0 }],
+          ["Answer builder contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 1 }],
+          ["Submit a wrong answer", { type: "SUBMIT", teamId: "blue", answer: "wrong", requestId: "walk-cooldown-wrong" }],
+          ["Replay the same request ID", { type: "SUBMIT", teamId: "blue", answer: "wrong", requestId: "walk-cooldown-wrong" }],
+          ["Try a new correct submission too early", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-cooldown-early" }],
+          ["Advance through the 15-second cooldown", { type: "TICK", seconds: 15 }],
+          ["Submit correctly", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-cooldown-correct" }]
+        ]
+      },
+      {
+        id: "hint",
+        name: "Hint delay",
+        description: "A teammate confirms the hint, Blue solves the room, then waits 30 seconds before becoming eligible to win.",
+        steps: [
+          ["Ready both teams", { type: "READY_ALL" }],
+          ["Start the match", { type: "START_MATCH" }],
+          ["Player 1 requests a hint", { type: "REQUEST_HINT", teamId: "blue", playerIndex: 0 }],
+          ["Requester tries to self-confirm", { type: "CONFIRM_HINT", teamId: "blue", playerIndex: 0 }],
+          ["Player 2 confirms", { type: "CONFIRM_HINT", teamId: "blue", playerIndex: 1 }],
+          ["Stage 1 contributions", { type: "BATCH_CONTRIBUTE", teamId: "blue" }],
+          ["Pass stage 1", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-hint-1" }],
+          ["Stage 2 contributions", { type: "BATCH_CONTRIBUTE", teamId: "blue" }],
+          ["Pass stage 2", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-hint-2" }],
+          ["Stage 3 contributions", { type: "BATCH_CONTRIBUTE", teamId: "blue" }],
+          ["Solve the final stage", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-hint-3" }],
+          ["Advance the 30-second finish delay", { type: "TICK", seconds: 30 }]
+        ]
+      },
+      {
+        id: "disconnect",
+        name: "Reserved role",
+        description: "In 3v3, a disconnected private role is not transferred. The stage remains blocked until that player returns and contributes.",
+        mode: 3,
+        steps: [
+          ["Ready both teams", { type: "READY_ALL" }],
+          ["Start the match", { type: "START_MATCH" }],
+          ["Disconnect Blue player 3", { type: "DISCONNECT", teamId: "blue", playerIndex: 2 }],
+          ["Player 1 contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 0 }],
+          ["Player 2 contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 1 }],
+          ["Try to submit without player 3", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-disconnect-early" }],
+          ["Reconnect player 3", { type: "RECONNECT", teamId: "blue", playerIndex: 2 }],
+          ["Player 3 contributes", { type: "CONTRIBUTE", teamId: "blue", playerIndex: 2 }],
+          ["Submit the complete answer", { type: "SUBMIT", teamId: "blue", answer: "correct", requestId: "walk-disconnect-correct" }]
+        ]
+      }
+    ];
+
+    function dispatch(action) {
+      if (action.type === "BATCH_CONTRIBUTE") {
+        const team = state.teams[action.teamId];
+        team.players.forEach((_, playerIndex) => {
+          state = reduce(state, { type: "CONTRIBUTE", teamId: action.teamId, playerIndex });
+        });
+      } else {
+        state = reduce(state, action);
+      }
+      render();
+    }
+
+    function actionFromButton(button) {
+      const action = { type: button.dataset.action };
+      const teamId = document.querySelector("#active-team").value;
+
+      if (["CONTRIBUTE", "REQUEST_HINT", "CONFIRM_HINT", "DISCONNECT", "RECONNECT", "SUBMIT", "REPLAY_SUBMISSION"].includes(action.type)) {
+        action.teamId = teamId;
+      }
+      if (button.dataset.player !== undefined) action.playerIndex = Number(button.dataset.player);
+      if (button.dataset.seconds) action.seconds = Number(button.dataset.seconds);
+      if (button.dataset.size) action.size = Number(button.dataset.size);
+      if (button.dataset.answer) action.answer = button.dataset.answer;
+
+      if (action.type === "SUBMIT") {
+        action.requestId = `free-${state.nextRequestNumber}`;
+        state.nextRequestNumber += 1;
+      }
+
+      if (action.type === "REPLAY_SUBMISSION") {
+        const team = state.teams[teamId];
+        if (!team.lastSubmissionId) {
+          state = reject(copy(state), `${team.name} has no submission request to replay.`);
+          render();
+          return null;
+        }
+        const stored = team.submissionResults[team.lastSubmissionId] || "";
+        return {
+          type: "SUBMIT",
+          teamId,
+          requestId: team.lastSubmissionId,
+          answer: stored === "correct" ? "correct" : "wrong"
+        };
+      }
+
+      return action;
+    }
+
+    function renderOverview() {
+      const metrics = [
+        ["Phase", state.phase],
+        ["Mode", `${state.teamSize}v${state.teamSize}`],
+        ["Server clock", `${formatTime(state.elapsed)} / 15:00`],
+        ["Result", resultLabel(state)]
+      ];
+      document.querySelector("#match-overview").innerHTML = metrics.map(([label, value]) => `
+        <dl class="panel metric">
+          <dt>${label}</dt>
+          <dd>${value}</dd>
+        </dl>
+      `).join("");
+      document.querySelector("#announcement").textContent = state.lastEvent;
+    }
+
+    function renderTeams() {
+      document.querySelector("#team-state").innerHTML = Object.values(state.teams).map((team) => {
+        const stageDone = team.currentStage >= STAGES.length || team.solvedAt !== null;
+        const stageLabel = stageDone ? "All stages solved" : `${team.currentStage + 1}/3 · ${STAGES[team.currentStage]}`;
+        const hintText = team.hintRequest
+          ? `Hint ${team.hintRequest.number} awaiting another teammate`
+          : `${team.hintsUsed[team.currentStage] || 0}/2 used on current stage`;
+        const cooldown = cooldownSeconds(state, team);
+        const players = team.players.map((player) => {
+          const classes = [player.contributed ? "done" : "", player.connected ? "" : "offline"].filter(Boolean).join(" ");
+          const connection = player.connected ? "connected" : "disconnected";
+          const contribution = player.contributed ? "contribution recorded" : "contribution missing";
+          return `<li class="${classes}"><strong>${player.name}</strong> — ${player.role}; ${connection}; ${contribution}</li>`;
+        }).join("");
+
+        return `
+          <article class="panel team-card" data-team="${team.id}">
+            <h3>${team.name}<span class="pill">${stageLabel}</span></h3>
+            <dl class="state-list">
+              <div><dt>Stage status</dt><dd>${allContributed(team) ? "Ready to submit" : "Waiting for role work"}</dd></div>
+              <div><dt>Retry cooldown</dt><dd>${cooldown ? `${cooldown}s remaining` : "Clear"}</dd></div>
+              <div><dt>Hints</dt><dd>${hintText}</dd></div>
+              <div><dt>Finish delay</dt><dd>${team.finishDelay}s</dd></div>
+              <div><dt>Failures this stage</dt><dd>${team.failuresThisStage}</dd></div>
+              <div><dt>Eligibility</dt><dd>${team.eligibleAt === null ? "Not solved" : formatTime(team.eligibleAt)}</dd></div>
+            </dl>
+            <h3>Reserved roles</h3>
+            <ul class="player-list">${players}</ul>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderContributionButtons() {
+      const teamId = document.querySelector("#active-team").value;
+      const team = state.teams[teamId];
+      document.querySelector("#contribution-buttons").innerHTML = team.players.map((player, playerIndex) => `
+        <button type="button" data-action="CONTRIBUTE" data-player="${playerIndex}">${player.name}: record ${player.role}</button>
+      `).join("");
+    }
+
+    function renderScenarios() {
+      const tabs = document.querySelector("#scenario-tabs");
+      const panels = document.querySelector("#scenario-panels");
+
+      tabs.innerHTML = scenarios.map((scenario, index) => `
+        <button
+          type="button"
+          role="tab"
+          id="tab-${scenario.id}"
+          aria-controls="panel-${scenario.id}"
+          aria-selected="${scenario.id === selectedScenario}"
+          tabindex="${scenario.id === selectedScenario ? 0 : -1}"
+          data-scenario="${scenario.id}"
+        >${scenario.name}</button>
+      `).join("");
+
+      panels.innerHTML = scenarios.map((scenario) => {
+        const progress = scenarioProgress[scenario.id] || 0;
+        const steps = scenario.steps.map(([label], stepIndex) => {
+          const statusClass = stepIndex < progress ? "complete" : stepIndex === progress ? "current" : "";
+          const prefix = stepIndex < progress ? "Done: " : stepIndex === progress ? "Next: " : "Later: ";
+          return `<li><button type="button" class="step-button ${statusClass}" data-scenario-step="${scenario.id}" data-step="${stepIndex}">${prefix}${label}</button></li>`;
+        }).join("");
+        return `
+          <div
+            role="tabpanel"
+            id="panel-${scenario.id}"
+            aria-labelledby="tab-${scenario.id}"
+            ${scenario.id === selectedScenario ? "" : "hidden"}
+          >
+            <p>${scenario.description}</p>
+            <button type="button" data-reset-scenario="${scenario.id}">Restart this walkthrough</button>
+            <ol class="walkthrough-steps">${steps}</ol>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function renderEvents() {
+      document.querySelector("#event-list").innerHTML = state.events.map((event) => `<li>${event}</li>`).join("");
+      document.querySelector("#raw-state").textContent = JSON.stringify(state, null, 2);
+    }
+
+    function render() {
+      renderOverview();
+      renderTeams();
+      renderContributionButtons();
+      renderScenarios();
+      renderEvents();
+    }
+
+    document.addEventListener("click", (event) => {
+      const actionButton = event.target.closest("button[data-action]");
+      if (actionButton) {
+        const action = actionFromButton(actionButton);
+        if (action) dispatch(action);
+        return;
+      }
+
+      const tab = event.target.closest("button[data-scenario]");
+      if (tab) {
+        selectedScenario = tab.dataset.scenario;
+        renderScenarios();
+        document.querySelector(`#tab-${selectedScenario}`).focus();
+        return;
+      }
+
+      const resetButton = event.target.closest("button[data-reset-scenario]");
+      if (resetButton) {
+        const scenario = scenarios.find((item) => item.id === resetButton.dataset.resetScenario);
+        scenarioProgress[scenario.id] = 0;
+        state = makeInitialState(scenario.mode || 2);
+        render();
+        return;
+      }
+
+      const stepButton = event.target.closest("button[data-scenario-step]");
+      if (stepButton) {
+        const scenario = scenarios.find((item) => item.id === stepButton.dataset.scenarioStep);
+        const stepIndex = Number(stepButton.dataset.step);
+        const currentProgress = scenarioProgress[scenario.id] || 0;
+
+        if (stepIndex === 0 && currentProgress === 0 && state.events.length > 1) {
+          state = makeInitialState(scenario.mode || 2);
+        }
+
+        if (stepIndex !== currentProgress) {
+          state = reject(copy(state), `follow “${scenario.name}” in order; the highlighted step is next.`);
+          render();
+          return;
+        }
+
+        const action = copy(scenario.steps[stepIndex][1]);
+        dispatch(action);
+        scenarioProgress[scenario.id] = stepIndex + 1;
+        renderScenarios();
+      }
+    });
+
+    document.querySelector("#active-team").addEventListener("change", renderContributionButtons);
+
+    document.querySelector("#scenario-tabs").addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const ids = scenarios.map((scenario) => scenario.id);
+      let index = ids.indexOf(selectedScenario);
+      if (event.key === "ArrowRight") index = (index + 1) % ids.length;
+      if (event.key === "ArrowLeft") index = (index - 1 + ids.length) % ids.length;
+      if (event.key === "Home") index = 0;
+      if (event.key === "End") index = ids.length - 1;
+      selectedScenario = ids[index];
+      renderScenarios();
+      document.querySelector(`#tab-${selectedScenario}`).focus();
+    });
+
+    render();
+  </script>
+</body>
+</html>

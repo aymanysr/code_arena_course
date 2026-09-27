@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Home Prototype | Campus Puzzle Race</title>
+  <!-- THROWAWAY PROTOTYPE: Can a signed-in player start or join a Lobby and see online friends? -->
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      --bg:#07100d; --surface:#0d1a16; --surface-2:#13231e; --line:#315044;
+      --ink:#e4efe9; --muted:#9ab1a6; --accent:#c8f36a; --accent-ink:#102008;
+      --blue:#8dd8ff; --warning:#f6cb6f; --focus:#fff; --safe:clamp(0.85rem,3vw,3rem); }
+    *{box-sizing:border-box} html{min-inline-size:20rem;background:var(--bg)}
+    body{min-block-size:100dvh;margin:0;background:var(--bg);color:var(--ink)}
+    button,a,input{font:inherit} button{cursor:pointer}
+    :where(a,button,input,[tabindex="-1"]):focus-visible{outline:0.2rem solid var(--focus);outline-offset:0.2rem}
+    .skip-link{position:fixed;z-index:10;inset:0.75rem auto auto 0.75rem;display:inline-flex;align-items:center;min-block-size:3rem;padding-inline:0.9rem;translate:0 -180%;background:#fff;color:#101010;font-weight:800}
+    .skip-link:focus{translate:0}
+    .prototype-flag{inline-size:fit-content;margin-inline:auto;border-radius:0 0 0.45rem 0.45rem;padding:0.3rem 0.75rem;background:var(--warning);color:#221c08;font:800 0.875rem/1.2 ui-monospace,monospace;letter-spacing:0.08em;text-transform:uppercase}
+    .visually-hidden{position:absolute!important;clip-path:inset(50%)!important;overflow:hidden!important;inline-size:1px!important;block-size:1px!important;margin:-1px!important;padding:0!important;border:0!important;white-space:nowrap!important}
+    .eyebrow{margin:0;color:var(--muted);font:800 0.875rem/1.25 ui-monospace,monospace;letter-spacing:0.1em;text-transform:uppercase}
+    main{min-block-size:100dvh;padding:0 var(--safe) 2rem} .shell{max-inline-size:70rem;margin-inline:auto}
+    .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end;padding-block:clamp(1.5rem,5vw,3rem) 1.25rem;border-block-end:1px solid var(--line)}
+    h1{margin:0.25rem 0 0;font-size:clamp(2rem,5vw,3.8rem);letter-spacing:-0.04em;line-height:1}
+    .intro{max-inline-size:68ch;color:var(--muted);line-height:1.55}
+    .scenario-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center;margin-block:1rem;padding:0.8rem;border:1px solid var(--line);background:var(--surface)}
+    .scenario-buttons{display:flex;flex-wrap:wrap;gap:0.5rem}
+    .control,.action-link{display:inline-flex;align-items:center;justify-content:center;min-block-size:3rem;min-inline-size:3rem;border:1px solid var(--line);border-radius:0.38rem;padding:0.65rem 0.85rem;background:transparent;color:var(--ink);font-weight:800;text-decoration:none}
+    .control[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,var(--surface));color:var(--accent)}
+    .control.primary{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+    .grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,0.8fr);gap:1rem}
+    .panel{border:1px solid var(--line);background:var(--surface)} .panel-head{padding:1rem 1rem 0} .panel-body{padding:1rem;display:grid;gap:0.8rem}
+    h2{margin:0;font-size:1.4rem} ul{margin:0;padding:0;list-style:none;display:grid;gap:0.6rem}
+    li.member{display:grid;grid-template-columns:2.5rem minmax(0,1fr) auto;gap:0.6rem;align-items:center;border:1px solid var(--line);padding:0.6rem;background:var(--surface-2)}
+    .avatar{display:grid;place-items:center;width:2.5rem;height:2.5rem;border-radius:50%;background:#1d3027;font-weight:900}
+    .hint{margin:0;color:var(--muted);font-size:0.9375rem;line-height:1.5}
+    input{min-block-size:3rem;border:1px solid var(--line);border-radius:0.38rem;background:#050a08;color:var(--ink);padding:0.65rem 0.8rem;width:100%}
+    label{display:grid;gap:0.3rem;font-weight:700}
+    .bottom-actions{display:flex;flex-wrap:wrap;gap:0.65rem;margin-block:1rem 0}
+    footer{color:var(--muted);font-size:0.875rem}
+    dialog{inline-size:min(42rem,calc(100% - 2rem));border:1px solid var(--line);border-radius:0.5rem;background:var(--surface);color:var(--ink);padding:0}
+    dialog::backdrop{background:rgb(0 0 0/0.72)} dialog form{display:grid;gap:0.8rem;padding:1rem}
+    dialog pre{max-block-size:50dvh;overflow:auto;background:#050a08;border:1px solid var(--line);padding:0.9rem;white-space:pre-wrap;font-size:0.875rem}
+    @media (max-width:46rem){.topbar,.scenario-bar,.grid{grid-template-columns:1fr}.scenario-buttons{display:grid;grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to Home details</a>
+  <div class="prototype-flag">Prototype · fake state</div>
+  <main id="content" tabindex="-1"><div id="app"></div></main>
+  <p class="visually-hidden" id="live-status" aria-live="polite" aria-atomic="true"></p>
+  <dialog id="state-dialog" aria-labelledby="state-title">
+    <form method="dialog"><p class="eyebrow">Prototype inspector</p><h2 id="state-title">Current fake Home state</h2><pre tabindex="0"><code id="state-output"></code></pre><div><button class="control" value="close">Close</button></div></form>
+  </dialog>
+  <script>
+    "use strict";
+    const scenarios = ["empty", "friends", "create", "join"];
+    function snapshot(s) {
+      const base = { scenario: s, player: "Aimane", inviteCode: "C42-7K9", lobbyCreated: false,
+        friends: [{ name: "Saad", online: true }, { name: "Amal", online: true }, { name: "Nora", online: false }],
+        lastEvent: "" };
+      if (s === "empty") return { ...base, friends: [], lastEvent: "Signed-in Home with no friends yet (simulated)." };
+      if (s === "friends") return { ...base, lastEvent: "Home shows online friends from the Core service (simulated)." };
+      if (s === "create") return { ...base, lobbyCreated: true, lastEvent: "Lobby created. Invitation code is not auth. Game service owns the Lobby (simulated)." };
+      return { ...base, lastEvent: "Join a Lobby with an invitation code. Full or started Lobby rejects the join (simulated)." };
+    }
+    function requested() { const c = new URLSearchParams(location.search).get("scenario"); return scenarios.includes(c) ? c : "friends"; }
+    let state = snapshot(requested());
+    const app = document.querySelector("#app");
+    const live = document.querySelector("#live-status");
+    const dlg = document.querySelector("#state-dialog");
+    const out = document.querySelector("#state-output");
+    window.__HOME_STATE__ = () => structuredClone(state);
+    function render(opts = {}) {
+      const online = state.friends.filter(f => f.online).length;
+      app.innerHTML = `<div class="shell">
+        <header class="topbar"><div><p class="eyebrow">Home · signed-in start</p><h1>Welcome, ${state.player}</h1></div><div><span class="eyebrow">Online friends</span><br><strong>${online} online</strong></div></header>
+        <p class="intro">This test view shows the start point after sign-in. Create a Lobby or join with an invitation code. The invitation code names the Lobby. It does not prove who you are.</p>
+        <nav class="scenario-bar" aria-label="Home scenarios"><div class="scenario-buttons">${scenarios.map(s => `<button class="control" type="button" data-scenario="${s}" aria-pressed="${state.scenario === s}">${s}</button>`).join("")}</div><button class="control" type="button" id="show-state">Inspect state</button></nav>
+        <div class="grid">
+          <section class="panel" aria-labelledby="lobby-title"><div class="panel-head"><p class="eyebrow">Lobby actions · Game service owns</p><h2 id="lobby-title">Start or join a Match</h2></div>
+          <div class="panel-body">
+            <div><button class="control primary" type="button" data-action="create">Create private Lobby</button></div>
+            ${state.lobbyCreated ? `<p class="hint"><strong>Invitation code: ${state.inviteCode}.</strong> Share it with friends. The code is not a password.</p>` : ""}
+            <form id="join-form"><label>Invitation code<input name="code" maxlength="12" placeholder="e.g. C42-7K9" autocomplete="off"></label><div><button class="control" type="submit">Join Lobby</button></div></form>
+            <p class="hint">Full or started Lobby rejects new joins with clear feedback. The server enforces this, not this page.</p>
+          </div></section>
+          <section class="panel" aria-labelledby="friends-title"><div class="panel-head"><p class="eyebrow">Friends · Core service owns</p><h2 id="friends-title">Online friends</h2></div>
+          <div class="panel-body">${state.friends.length === 0 ? `<p class="hint">No friends yet. Add friends from the Profile view.</p>` : `<ul>${state.friends.map(f => `<li class="member"><span class="avatar">${f.name.charAt(0)}</span><span><strong>${f.name}</strong><br><small>${f.online ? "Online ●" : "Offline ○"}</small></span><span>${f.online ? "Invite" : "—"}</span></li>`).join("")}</ul>`}
+          </div></section>
+        </div>
+        <div class="bottom-actions"><a class="action-link" href="03-lobby.html?variant=A">Open Lobby test view</a><a class="action-link" href="07-profile.html">Open Profile test view</a><a class="action-link" href="00-journey.html">Open journey map</a></div>
+        <footer>Test view only. No network. Real presence, Lobby create, and Lobby join need production services.</footer>
+      </div>`;
+      out.textContent = JSON.stringify(state, null, 2);
+      live.textContent = state.lastEvent;
+      if (opts.focusSelector) app.querySelector(opts.focusSelector)?.focus();
+    }
+    function choose(s) { const p = new URLSearchParams(location.search); p.set("scenario", s); history.pushState(null, "", `${location.pathname}?${p}`); state = snapshot(s); render({ focusSelector: `[data-scenario="${s}"]` }); }
+    app.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-scenario]"); if (b) { choose(b.dataset.scenario); return; }
+      if (e.target.closest("#show-state")) dlg.showModal();
+      if (e.target.closest('[data-action="create"]')) { state.lobbyCreated = true; state.lastEvent = "Private Lobby created with code " + state.inviteCode + " (simulated)."; render(); }
+    });
+    app.addEventListener("submit", (e) => {
+      if (!e.target.closest("#join-form")) return; e.preventDefault();
+      const code = new FormData(e.target).get("code");
+      state.lastEvent = code ? `Join request sent for code ${code} (simulated). Server decides.` : "Enter an invitation code first.";
+      render();
+    });
+    addEventListener("popstate", () => { state = snapshot(requested()); render(); });
+    render();
+  </script>
+</body>
+</html>

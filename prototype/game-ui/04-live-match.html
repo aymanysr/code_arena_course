@@ -1,0 +1,2196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Active Match UI Prototype | Campus Puzzle Race</title>
+  <!-- UI spike: Which information hierarchy makes a role-based multiplayer puzzle easiest to understand during a timed match? Three variants, switchable with ?variant=A|B|C. -->
+  <style>
+    :root {
+      color-scheme: dark;
+      --safe: clamp(0.75rem, 3.5vw, 3.5rem);
+      --switcher-height: 5.2rem;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { min-width: 20rem; background: #080b0a; }
+
+    body {
+      min-height: 100dvh;
+      margin: 0;
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea { font: inherit; }
+
+    small { font-size: 0.875rem; }
+
+    button { cursor: pointer; }
+
+    :where(button, input, textarea, summary):focus-visible {
+      outline: 0.2rem solid var(--focus, #ffffff);
+      outline-offset: 0.18rem;
+    }
+
+    .skip-link {
+      position: fixed;
+      z-index: 100;
+      inset: 0.75rem auto auto 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      min-height: 3rem;
+      translate: 0 -180%;
+      padding: 0.7rem 1rem;
+      background: #ffffff;
+      color: #111111;
+      font-weight: 800;
+    }
+
+    .skip-link:focus { translate: 0; }
+
+    .prototype-flag {
+      position: fixed;
+      z-index: 20;
+      inset: 0 auto auto 50%;
+      translate: -50% 0;
+      border: 0;
+      border-radius: 0 0 0.45rem 0.45rem;
+      background: #f5d85a;
+      color: #15130b;
+      padding: 0.3rem 0.7rem;
+      font: 800 0.875rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    #app { min-height: 100dvh; }
+
+    .visually-hidden:where(:not(:focus-within, :active)) {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip-path: inset(50%) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+      padding: 0 !important;
+    }
+
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .num { font-variant-numeric: tabular-nums; }
+
+    .eyebrow {
+      margin: 0;
+      font: 800 0.875rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: currentColor;
+      margin-inline-end: 0.38rem;
+    }
+
+    .sr-status {
+      position: fixed;
+      inset: auto auto 0 0;
+    }
+
+    /* Shared controls */
+    .answer-list {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.55rem;
+    }
+
+    .answer-btn {
+      min-height: 3.25rem;
+      border: 1px solid currentColor;
+      border-radius: 0.4rem;
+      background: transparent;
+      color: inherit;
+      font-weight: 850;
+    }
+
+    .answer-btn[aria-pressed="true"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .action-btn {
+      min-height: 3rem;
+      border: 1px solid currentColor;
+      border-radius: 0.4rem;
+      background: transparent;
+      color: inherit;
+      padding: 0.65rem 0.9rem;
+      font-weight: 780;
+    }
+
+    .action-btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .action-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.47;
+    }
+
+    .code-block {
+      overflow: auto;
+      margin: 0;
+      border-radius: 0.45rem;
+      padding: clamp(0.9rem, 2vw, 1.5rem);
+      font: 650 clamp(0.875rem, 1.5vw, 1rem)/1.75 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      white-space: pre;
+    }
+
+    .code-block code { font: inherit; }
+
+    .token-key { color: var(--code-key); }
+    .token-num { color: var(--code-num); }
+    .token-comment { color: var(--code-comment); }
+
+    .role-list,
+    .stage-list,
+    .chat-list,
+    .clue-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .chat-list {
+      display: grid;
+      gap: 0.6rem;
+      max-height: 13rem;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+
+    .chat-message {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.5rem;
+      align-items: start;
+      font-size: 0.875rem;
+    }
+
+    .chat-message strong { white-space: nowrap; }
+
+    .chat-form {
+      display: flex;
+      gap: 0.5rem;
+      margin-block-start: 0.75rem;
+    }
+
+    .chat-form input {
+      min-width: 0;
+      flex: 1;
+      min-height: 2.75rem;
+      border: 1px solid currentColor;
+      border-radius: 0.35rem;
+      background: transparent;
+      color: inherit;
+      padding: 0.55rem 0.7rem;
+    }
+
+    .chat-form button {
+      min-width: 2.9rem;
+      border: 1px solid currentColor;
+      border-radius: 0.35rem;
+      background: transparent;
+      color: inherit;
+      font-weight: 900;
+    }
+
+    .progress-track {
+      height: 0.42rem;
+      overflow: hidden;
+      border-radius: 99rem;
+      background: color-mix(in srgb, currentColor 18%, transparent);
+    }
+
+    .progress-fill {
+      width: var(--progress);
+      height: 100%;
+      background: var(--accent);
+    }
+
+    .stack-actions {
+      display: grid;
+      gap: 0.55rem;
+    }
+
+    .match-alert {
+      border-inline-start: 0.25rem solid var(--alert);
+      padding: 0.65rem 0.8rem;
+      background: color-mix(in srgb, var(--alert) 11%, transparent);
+      font-size: 0.875rem;
+    }
+
+    /* Variant A — exam shell (42-inspired simulation, fake grader) */
+    .variant-a {
+      --bg: #050505;
+      --surface: #0b0e13;
+      --surface-2: #11161e;
+      --line: rgb(255 255 255 / 0.09);
+      --line-strong: #2b3c50;
+      --ink: #eaf0f6;
+      --muted: #9dabbf;
+      --accent: #3ed598;
+      --accent-ink: #052015;
+      --amber: #ffb224;
+      --red: #ff6b5e;
+      --cyan: #57d0e6;
+      --paper: #171208;
+      --paper-ink: #f3ead2;
+      --paper-muted: #c8bb9c;
+      --paper-line: #6b5518;
+      --focus: #ffffff;
+      --spring: cubic-bezier(0.32, 0.72, 0, 1);
+      min-height: 100dvh;
+      background:
+        radial-gradient(46rem 26rem at 12% -6%, rgb(255 178 36 / 0.10), transparent 62%),
+        radial-gradient(52rem 30rem at 88% -4%, rgb(62 213 152 / 0.09), transparent 60%),
+        radial-gradient(70rem 40rem at 50% 110%, rgb(87 208 230 / 0.05), transparent 65%),
+        var(--bg);
+      background-attachment: fixed;
+      color: var(--ink);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      padding: max(2.4rem, var(--safe)) var(--safe) 1.5rem;
+    }
+
+    .variant-a h1,
+    .variant-a h2,
+    .variant-a h3 { font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif; letter-spacing: -0.02em; }
+    .variant-a p,
+    .variant-a li,
+    .variant-a dt,
+    .variant-a dd,
+    .variant-a label { font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; }
+    .variant-a button,
+    .variant-a select,
+    .variant-a textarea,
+    .variant-a .eyebrow,
+    .variant-a .mono,
+    .variant-a .contract-table,
+    .variant-a .check-list,
+    .variant-a .exam-meta-grid dd,
+    .variant-a #component-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+    .exam-shell {
+      display: grid;
+      gap: 0.75rem;
+      width: min(105rem, 100%);
+      min-height: calc(100dvh - 4rem);
+      margin-inline: auto;
+    }
+
+    .exam-status {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 1rem;
+      align-items: start;
+      border: 1px solid var(--line);
+      border-radius: 1.4rem;
+      background: linear-gradient(180deg, rgb(255 255 255 / 0.035), transparent 40%), var(--surface);
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.07),
+        0 30px 70px -48px rgb(0 0 0 / 0.85);
+      padding: 1.4rem 1.5rem;
+    }
+
+    .exam-status h1 {
+      margin: 0.2rem 0 0.3rem;
+      font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+      letter-spacing: 0.02em;
+    }
+
+    .exam-status .eyebrow { color: var(--accent); }
+    .exam-meta { margin: 0.3rem 0 0; color: var(--muted); font-size: 0.875rem; }
+
+    .variant-a .journey-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 2.75rem;
+      margin-block-start: 0.65rem;
+      border: 1px solid var(--accent);
+      border-radius: 0.15rem;
+      padding: 0.65rem 0.85rem;
+      color: var(--accent);
+      font-weight: 800;
+      text-decoration: none;
+    }
+
+    .variant-a .journey-link:hover { background: rgb(53 224 101 / 0.15); }
+
+    .exam-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin: 0;
+    }
+
+    .exam-meta-grid > div {
+      border: 1px solid var(--line);
+      padding: 0.55rem 0.65rem;
+    }
+
+    .exam-meta-grid dt { color: var(--muted); font-size: 0.875rem; text-transform: uppercase; }
+    .exam-meta-grid dd { margin: 0.15rem 0 0; font-size: 1.1rem; font-weight: 800; }
+
+    .exam-progress {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      border: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .exam-stage {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem;
+      align-items: center;
+      padding: 0.65rem 0.8rem;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .exam-stage + .exam-stage { border-inline-start: 1px solid var(--line); }
+    .exam-stage.active { background: var(--surface-2); color: var(--ink); }
+    .exam-stage.done { color: var(--accent); }
+    .exam-stage-index { color: var(--accent); font-weight: 900; }
+
+    .variant-a .exam-grid {
+      display: grid;
+      grid-template-columns: minmax(18rem, 0.9fr) minmax(28rem, 1.5fr) minmax(18rem, 0.85fr);
+      grid-template-areas:
+        "subject tabs team"
+        "subject editor team"
+        "local integration team";
+      gap: 0.9rem;
+      border: 0;
+      background: transparent;
+    }
+
+    .exam-subject { grid-area: subject; }
+    .component-tabs { grid-area: tabs; }
+    .exam-editor { grid-area: editor; }
+    .exam-team { grid-area: team; }
+    .exam-local-terminal { grid-area: local; }
+    .exam-integration-terminal { grid-area: integration; }
+
+    .exam-subject,
+    .component-tabs,
+    .exam-editor,
+    .exam-team,
+    .exam-local-terminal,
+    .exam-integration-terminal {
+      min-width: 0;
+      padding: clamp(1.25rem, 2vw, 1.9rem);
+      background: linear-gradient(180deg, rgb(255 255 255 / 0.035), transparent 38%), var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 1.4rem;
+      box-shadow:
+        inset 0 1px 0 rgb(255 255 255 / 0.07),
+        0 30px 70px -48px rgb(0 0 0 / 0.85);
+    }
+
+    /* Station identity lives in the eyebrow chips, not in edge bars. */
+    .exam-subject .eyebrow { border-color: var(--amber); color: var(--amber); }
+    .component-tabs .eyebrow, .exam-editor .eyebrow { border-color: var(--cyan); }
+    .exam-local-terminal .eyebrow { border-color: #b79cff; }
+    .exam-integration-terminal .eyebrow { border-color: var(--accent); }
+    .exam-team .eyebrow { border-color: var(--muted); }
+    .variant-a .exam-grid .eyebrow::before {
+      content: "";
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: currentColor;
+      flex: none;
+    }
+
+    /* Warm manifest: same warm-vs-cool identity, dark luminance for night eyes. */
+    .exam-subject {
+      background: var(--paper);
+      color: var(--paper-ink);
+      border-color: var(--paper-line);
+    }
+    .exam-subject .eyebrow { color: var(--amber); border-color: var(--paper-line); background: rgb(255 178 36 / 0.08); }
+    .variant-a .exam-grid .exam-subject .contract-table th,
+    .variant-a .exam-grid .exam-subject .contract-table td { border-block-start-color: var(--paper-line); }
+
+    /* Section eyebrows become micro tags so scanning lands on verbs, not walls. */
+    .variant-a .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.05);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.06);
+      padding: 0.35rem 0.8rem;
+      margin-block-end: 0.9rem;
+      font-size: 0.875rem;
+      letter-spacing: 0.14em;
+    }
+    .exam-subject .eyebrow { background: rgb(27 30 25 / 0.07); border-color: #cfc6b1; }
+
+    .exam-subject h2,
+    .exam-editor h2,
+    .exam-team h2,
+    .exam-local-terminal h2,
+    .exam-integration-terminal h2 { margin: 0.35rem 0 0.5rem; font-size: 1.3rem; font-weight: 800; line-height: 1.15; }
+    .variant-a .exam-grid h2 + p.mono, .variant-a .exam-grid h2 + p { color: var(--muted); font-size: 0.9rem; max-width: 62ch; line-height: 1.55; }
+    .exam-subject h2 + p, .exam-subject h2 + .mono { color: var(--paper-muted); }
+    /* Paper overrides must beat the generic grid-ink rule below in specificity. */
+    .variant-a .exam-grid .exam-subject h2 + p,
+    .variant-a .exam-grid .exam-subject h2 + .mono,
+    .variant-a .exam-grid .exam-subject p.mono,
+    .variant-a .exam-grid .exam-subject .exam-reveal { color: var(--paper-muted); }
+    .variant-a .exam-grid .exam-subject p,
+    .variant-a .exam-grid .exam-subject li { color: var(--paper-ink); }
+
+    .component-tabs {
+      display: flex;
+      gap: 0.55rem;
+      overflow-x: auto;
+    }
+
+    .component-tabs .action-btn { flex: 1 0 auto; white-space: nowrap; }
+
+    /* Prose rhythm: the old wall had 0.875rem everywhere with no measure. */
+    .variant-a .exam-grid p { line-height: 1.6; max-width: 68ch; }
+    .variant-a .exam-grid li { line-height: 1.55; }
+    .exam-subject p { font-size: 0.92rem; }
+    .exam-editor p.mono { font-size: 0.9rem; color: var(--muted); }
+
+    .exam-opponent {
+      grid-column: 1 / -1;
+      margin: 0;
+      border-block-start: 1px solid var(--line);
+      padding: 0.65rem 0 0;
+      font-size: 0.875rem;
+    }
+
+    .exam-reveal { color: var(--accent); font-size: 0.875rem; }
+
+    .contract-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 0.875rem; }
+    .contract-table caption { text-align: start; }
+    .contract-table th, .contract-table td { border-block-start: 1px solid var(--line); padding: 0.55rem 0.4rem; text-align: start; vertical-align: top; overflow-wrap: anywhere; }
+
+    .exam-editor p.mono { overflow-wrap: anywhere; }
+
+    .exam-subject h2,
+    .exam-editor h2,
+    .exam-team h2,
+    .exam-local-terminal h2,
+    .exam-integration-terminal h2 { margin: 0.3rem 0 0.8rem; font-size: 1.05rem; }
+
+    .exam-subject h3,
+    .exam-local-terminal h3,
+    .exam-integration-terminal h3 { margin: 1rem 0 0.4rem; font-size: 0.95rem; }
+
+    .exam-subject ul { margin: 0.4rem 0; padding-inline-start: 1.2rem; font-size: 0.875rem; }
+    .exam-subject p { font-size: 0.875rem; }
+
+    .subject-meta { display: grid; gap: 0.4rem; margin: 0 0 0.8rem; font-size: 0.875rem; }
+    .subject-meta > div { display: grid; gap: 0.1rem; border-block-end: 1px solid var(--line); padding-block-end: 0.4rem; }
+    .subject-meta dt { color: var(--muted); text-transform: uppercase; font-size: 0.875rem; }
+    .subject-meta dd { margin: 0; }
+
+    .exam-flow { border: 1px solid var(--line); padding: 0.6rem; font-size: 0.875rem; }
+
+    .variant-a label { display: block; margin-block: 0.6rem 0.3rem; font-weight: 800; font-size: 0.875rem; }
+    .variant-a .inline-label { display: inline-flex; align-items: center; margin: 0; }
+    .exam-hint-line, .exam-note { color: var(--muted); font-size: 0.875rem; }
+
+    #component-code {
+      width: 100%;
+      min-height: 22rem;
+      max-height: 32rem;
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 0.15rem;
+      background: #000000;
+      color: var(--ink);
+      padding: 0.8rem;
+      font-size: 0.875rem;
+      line-height: 1.7;
+      white-space: pre;
+    }
+
+    #component-code:disabled { border-style: dashed; color: var(--muted); }
+
+    #team-case-input {
+      min-width: 0;
+      flex: 1;
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.15rem;
+      background: #000000;
+      color: var(--ink);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.875rem;
+    }
+
+    .variant-a select {
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 0.15rem;
+      background: #000000;
+      color: var(--ink);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.875rem;
+    }
+
+    .variant-a .action-btn {
+      min-height: 2.75rem;
+      border: 1px solid var(--line-strong, var(--line));
+      border-radius: 999px;
+      background: rgb(255 255 255 / 0.04);
+      box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.07);
+      color: var(--ink);
+      font-size: 0.875rem;
+      padding-inline: 1.1rem;
+      transition: transform 320ms var(--spring), background-color 320ms var(--spring), border-color 320ms var(--spring), box-shadow 320ms var(--spring);
+    }
+    .variant-a .action-btn:hover { transform: translateY(-1px); border-color: var(--accent); }
+    .variant-a .action-btn:active { transform: scale(0.98); }
+
+    /* Island send button: the arrow never sits naked. */
+    .variant-a .chat-form button {
+      border-radius: 50%;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--accent-ink);
+      font-weight: 900;
+      transition: transform 320ms var(--spring), background-color 320ms var(--spring);
+    }
+    .variant-a .chat-form button:hover { transform: translateY(-1px) scale(1.04); }
+    .variant-a .chat-form button:active { transform: scale(0.96); }
+
+    /* Entry choreography: transform + opacity only, never layout props. */
+    @media (prefers-reduced-motion: no-preference) {
+      .variant-a .exam-grid > * { animation: exam-rise 760ms var(--spring) both; }
+      .variant-a .exam-grid > *:nth-child(2) { animation-delay: 70ms; }
+      .variant-a .exam-grid > *:nth-child(3) { animation-delay: 140ms; }
+      .variant-a .exam-grid > *:nth-child(4) { animation-delay: 210ms; }
+      .variant-a .exam-grid > *:nth-child(5) { animation-delay: 280ms; }
+      .variant-a .exam-grid > *:nth-child(6) { animation-delay: 350ms; }
+      @keyframes exam-rise {
+        from { opacity: 0; transform: translateY(1rem); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    }
+
+    .variant-a .action-btn.primary {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .exam-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      align-items: center;
+      margin-block: 0.7rem;
+    }
+
+    .variant-a .role-list { display: grid; gap: 0.6rem; font-size: 0.875rem; }
+    .variant-a .role-list small { color: var(--muted); font-size: 0.875rem; }
+
+    .variant-a .chat-list { font-size: 0.875rem; }
+    .variant-a .chat-form input {
+      min-height: 2.75rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding-inline: 1rem;
+      font-size: 0.875rem;
+    }
+
+    .variant-a .chat-form button {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border: 1px solid var(--accent);
+      border-radius: 50%;
+      background: var(--accent);
+      color: var(--accent-ink);
+    }
+
+    .check-list { display: grid; gap: 0.6rem; margin: 0.7rem 0; padding: 0; list-style: none; }
+    .check-list > li { border: 1px solid var(--line); border-radius: 0.7rem; background: rgb(255 255 255 / 0.03); padding: 0.65rem 0.75rem; font-size: 0.875rem; }
+    .check-row-head { display: flex; justify-content: space-between; gap: 0.6rem; align-items: center; }
+    .check-io, .check-detail { margin: 0.35rem 0 0; font-size: 0.875rem; }
+    .check-detail { color: var(--muted); }
+
+    .check-status { border: 1px solid currentColor; padding: 0.2rem 0.5rem; font-weight: 900; font-size: 0.875rem; }
+    .check-status.is-idle { color: var(--muted); }
+    .check-status.is-pending { color: var(--amber); }
+    .check-status.is-passed { color: var(--accent); }
+    .check-status.is-failed { color: var(--red); }
+    .check-status.is-blocked { color: var(--amber); }
+
+    .exam-trace {
+      border: 1px solid var(--red);
+      border-inline-start-width: 0.25rem;
+      padding: 0.65rem 0.8rem;
+      font-size: 0.875rem;
+    }
+
+    .exam-trace h3 { color: var(--red); }
+
+    .exam-swap { border: 1px dashed var(--line); padding: 0.8rem; margin-block-start: 0.8rem; font-size: 0.875rem; }
+    .exam-swap h3 { color: var(--accent); }
+
+    /* Variant B — focus workspace */
+    .variant-b {
+      --bg: #ece9df;
+      --surface: #f8f5eb;
+      --ink: #1f2623;
+      --muted: #66706a;
+      --line: #aeb4ad;
+      --accent: #2258dd;
+      --accent-ink: #ffffff;
+      --alert: #b13d2f;
+      --focus: #2258dd;
+      --code-key: #663dc4;
+      --code-num: #a9481d;
+      --code-comment: #75827a;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--ink);
+      padding: max(2.8rem, var(--safe)) var(--safe) calc(var(--switcher-height) + 2rem);
+    }
+
+    .b-shell {
+      width: min(88rem, 100%);
+      margin-inline: auto;
+    }
+
+    .b-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      padding-block-end: 1.1rem;
+      border-block-end: 1px solid var(--line);
+    }
+
+    .b-header h1 { margin: 0.25rem 0 0; font: 500 clamp(1.25rem, 3vw, 2.4rem)/1.1 Georgia, serif; }
+    .b-clock { text-align: center; }
+    .b-clock strong { display: block; font: 800 clamp(1.7rem, 4vw, 3rem)/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .b-team { text-align: end; }
+
+    .b-progress {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin-block: 1rem 2rem;
+    }
+
+    .b-step { display: grid; grid-template-columns: auto 1fr; gap: 0.55rem; align-items: center; color: var(--muted); }
+    .b-step::before { content: ""; width: 0.75rem; height: 0.75rem; border: 1px solid currentColor; border-radius: 50%; }
+    .b-step.active { color: var(--accent); font-weight: 800; }
+    .b-step.active::before { background: var(--accent); box-shadow: inset 0 0 0 0.15rem var(--bg); }
+
+    .b-focus-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.36fr);
+      gap: clamp(1rem, 4vw, 4rem);
+    }
+
+    .b-main h2 {
+      max-width: 18ch;
+      margin: 0 0 0.7rem;
+      font: 500 clamp(2rem, 5vw, 4.8rem)/0.95 Georgia, serif;
+      letter-spacing: -0.045em;
+    }
+
+    .b-main > p { max-width: 58ch; color: var(--muted); }
+    .variant-b .code-block { margin-block: 1.5rem; border-block: 1px solid var(--line); border-radius: 0; background: transparent; padding-inline: 0; }
+
+    .b-answer-area { max-width: 48rem; }
+    .b-answer-area h3 { margin: 0 0 0.6rem; font-size: 0.95rem; }
+    .b-action-row { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-block-start: 0.75rem; }
+
+    .b-aside {
+      display: grid;
+      align-content: start;
+      gap: 0.7rem;
+    }
+
+    .b-aside details {
+      border-block-start: 1px solid var(--line);
+      padding-block: 0.8rem;
+    }
+
+    .b-aside summary { cursor: pointer; font-weight: 850; min-height: 2.75rem; }
+    .b-aside details p { color: var(--muted); font-size: 0.9rem; }
+
+    .b-role-banner {
+      border: 1px solid var(--ink);
+      padding: 1rem;
+    }
+
+    .b-role-banner strong { display: block; margin-block: 0.25rem; font: 500 1.55rem/1.1 Georgia, serif; }
+    .b-role-banner p { margin: 0; color: var(--muted); font-size: 0.875rem; }
+
+    .b-cooldown { padding: 0.9rem; background: var(--ink); color: var(--bg); }
+
+    /* Variant C — team board */
+    .variant-c {
+      --bg: #17130f;
+      --surface: #201b16;
+      --surface-2: #2a231c;
+      --ink: #fff3df;
+      --muted: #b9a995;
+      --line: #5b4d3e;
+      --accent: #ff7148;
+      --accent-ink: #1b0c07;
+      --secondary: #65e2d2;
+      --alert: #ffca64;
+      --focus: #65e2d2;
+      --code-key: #65e2d2;
+      --code-num: #ffca64;
+      --code-comment: #9e8c79;
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--ink);
+      padding: max(2.4rem, var(--safe)) var(--safe) calc(var(--switcher-height) + 1.5rem);
+    }
+
+    .c-shell { width: min(100rem, 100%); margin-inline: auto; }
+
+    .c-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 1rem;
+      align-items: end;
+      margin-block-end: 1rem;
+    }
+
+    .c-header h1 { margin: 0.15rem 0 0; font-size: clamp(1.5rem, 4vw, 3.5rem); letter-spacing: -0.045em; }
+    .c-clock { text-align: end; }
+    .c-clock strong { display: block; color: var(--secondary); font: 900 clamp(2rem, 5vw, 4rem)/0.85 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .c-scoreboard {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      border-block: 1px solid var(--line);
+      padding-block: 0.8rem;
+    }
+
+    .c-scoreboard div { display: flex; align-items: center; gap: 0.65rem; }
+    .c-scoreboard div:last-child { justify-content: end; }
+    .c-scoreboard strong { font-size: 1.15rem; }
+    .c-versus { color: var(--muted); font: 800 0.875rem/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+    .c-board {
+      display: grid;
+      grid-template-columns: minmax(15rem, 0.72fr) minmax(25rem, 1.55fr);
+      gap: 1rem;
+      margin-block-start: 1rem;
+    }
+
+    .c-team-rail { display: grid; gap: 0.75rem; align-content: start; }
+    .c-member {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.75rem;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 0.75rem;
+    }
+
+    .c-avatar {
+      display: grid;
+      place-items: center;
+      width: 2.5rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--secondary);
+      color: #08221f;
+      font-weight: 900;
+    }
+
+    .c-member small { display: block; color: var(--muted); }
+    .c-check { color: var(--secondary); font-weight: 900; }
+
+    .c-private {
+      border: 1px solid var(--accent);
+      background: color-mix(in srgb, var(--accent) 9%, var(--surface));
+      padding: 1rem;
+    }
+
+    .c-private strong { display: block; margin-block: 0.25rem 0.5rem; font-size: 1.15rem; }
+    .c-private p { margin: 0; color: var(--muted); font-size: 0.875rem; }
+
+    .c-mission {
+      display: grid;
+      grid-template-rows: auto auto auto;
+      gap: 0.85rem;
+    }
+
+    .c-mission-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 1rem;
+      align-items: start;
+      border: 1px solid var(--line);
+      background: var(--surface);
+      padding: 1rem;
+    }
+
+    .c-mission-head h2 { margin: 0.2rem 0 0; font-size: clamp(1.4rem, 3vw, 2.5rem); }
+    .c-stage-chip { border: 1px solid var(--accent); color: var(--accent); padding: 0.35rem 0.55rem; font-weight: 850; }
+
+    .c-work-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(14rem, 0.65fr);
+      gap: 0.85rem;
+    }
+
+    .variant-c .code-block { min-height: 18rem; border: 1px solid var(--line); background: #0f0c09; }
+    .c-answer-panel { border: 1px solid var(--line); background: var(--surface); padding: 0.85rem; }
+    .c-answer-panel .answer-list { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-block: 0.7rem; }
+    .c-answer-panel .stack-actions { margin-block-start: 0.7rem; }
+
+    .c-bottom {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(17rem, 0.5fr);
+      gap: 0.85rem;
+    }
+
+    .c-chat,
+    .c-events { border: 1px solid var(--line); background: var(--surface); padding: 0.85rem; }
+    .c-chat h3, .c-events h3 { margin: 0 0 0.6rem; font-size: 0.9rem; }
+
+    /* Prototype switcher */
+    .prototype-switcher {
+      position: static;
+      display: grid;
+      grid-template-columns: auto minmax(11rem, auto) auto auto;
+      align-items: center;
+      gap: 0.35rem;
+      max-width: calc(100% - 1rem);
+      margin: 3.5rem auto 0.75rem;
+      border: 1px solid #626b67;
+      border-radius: 99rem;
+      background: #111614;
+      color: #f5f7f3;
+      box-shadow: 0 0.8rem 2.5rem rgb(0 0 0 / 0.35);
+      padding: 0.35rem;
+    }
+
+    .prototype-switcher button {
+      min-width: 2.75rem;
+      min-height: 2.75rem;
+      border: 0;
+      border-radius: 99rem;
+      background: transparent;
+      color: inherit;
+      font-weight: 850;
+      text-align: center;
+    }
+
+    .prototype-switcher button:hover { background: #28312d; }
+    .switcher-label { padding-inline: 0.5rem; text-align: center; }
+    .switcher-label strong { display: block; font-size: 0.875rem; }
+    .switcher-label small { color: #aeb9b3; font-size: 0.875rem; }
+    .switcher-state { border-inline-start: 1px solid #4d5652 !important; border-radius: 0 99rem 99rem 0 !important; padding-inline: 0.85rem; font-size: 0.875rem; }
+
+    /* Dialogs */
+    dialog {
+      width: min(32rem, calc(100% - 2rem));
+      border: 1px solid #8f948f;
+      border-radius: 0.65rem;
+      background: #f5f2e8;
+      color: #1d2522;
+      padding: 1.2rem;
+    }
+
+    dialog::backdrop { background: rgb(0 0 0 / 0.7); }
+    dialog h2 { margin-block-start: 0; }
+    dialog .dialog-actions { display: flex; justify-content: end; gap: 0.6rem; margin-block-start: 1rem; }
+    dialog button { min-height: 2.8rem; border: 1px solid #303834; border-radius: 0.35rem; background: transparent; color: inherit; padding: 0.55rem 0.8rem; font-weight: 750; }
+    dialog button[value="confirm"] { background: #1d2522; color: #ffffff; }
+    #state-output { max-height: 24rem; overflow: auto; border: 1px solid #b6bbb6; padding: 0.7rem; font-size: 0.875rem; white-space: pre-wrap; }
+
+    @media (max-width: 70rem) {
+      .variant-a .exam-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-areas:
+          "subject editor"
+          "tabs tabs"
+          "team team"
+          "local integration";
+      }
+      .exam-team { border-inline-start: 0; border-block-start: 1px solid var(--line); }
+      .b-focus-grid { grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.42fr); gap: 1.5rem; }
+      .c-board { grid-template-columns: 1fr; }
+      .c-team-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .c-private { grid-column: 1 / -1; }
+    }
+
+    @media (max-width: 48rem) {
+      .prototype-flag { inset-inline-start: var(--safe); translate: 0; }
+      .exam-status { grid-template-columns: 1fr; }
+      .exam-progress { overflow-x: auto; grid-template-columns: repeat(3, minmax(10rem, 1fr)); }
+      .variant-a .exam-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "subject"
+          "tabs"
+          "editor"
+          "team"
+          "local"
+          "integration";
+      }
+      .exam-local-terminal { border-inline-end: 0; }
+      .exam-meta-grid { grid-template-columns: 1fr 1fr; }
+      .b-header { grid-template-columns: 1fr auto; }
+      .b-team { display: none; }
+      .b-focus-grid, .c-work-grid, .c-bottom { grid-template-columns: 1fr; }
+      .b-aside { grid-row: 1; }
+      .b-main h2 { font-size: clamp(2rem, 11vw, 4rem); }
+      .c-team-rail { grid-template-columns: 1fr; }
+      .c-header { grid-template-columns: 1fr auto; }
+      .c-scoreboard { grid-template-columns: 1fr 1fr; }
+      .c-scoreboard .c-versus { display: none; }
+      .prototype-switcher { grid-template-columns: auto minmax(0, 1fr) auto auto; width: calc(100% - 1rem); }
+      .switcher-label small { display: block; font-size: 0.75rem; }
+      .switcher-state { grid-column: auto; border-inline-start: 1px solid #4d5652 !important; border-block-start: 0 !important; border-radius: 0 99rem 99rem 0 !important; padding-inline: 0.6rem; }
+      .answer-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .action-btn,
+      .answer-btn,
+      .prototype-switcher button { transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease, translate 120ms ease; }
+      .action-btn:active,
+      .answer-btn:active { translate: 0 0.08rem; }
+    }
+
+    @media (prefers-contrast: more) {
+      :root { --focus: #ffffff; }
+      .action-btn, .answer-btn, .variant-a .exam-grid, .c-member, .c-mission-head { border-width: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#game-ui">Skip to match</a>
+  <div class="prototype-flag">UI prototype · fake state · historical puzzle-race (superseded 2026-09-23; production match is Code Arena per 09-arena.html)</div>
+  <nav class="prototype-switcher" aria-label="Prototype variants">
+    <button type="button" id="previous-variant" aria-label="Previous UI variant">←</button>
+    <div class="switcher-label">
+      <strong id="variant-name">A — Exam shell</strong>
+      <small id="selected-direction">Selected direction · Exam shell (historical puzzle-race prototype, superseded 2026-09-23)</small>
+    </div>
+    <button type="button" id="next-variant" aria-label="Next UI variant">→</button>
+    <button type="button" class="switcher-state" id="show-state">State</button>
+  </nav>
+  <main id="game-ui" tabindex="-1">
+    <div id="app"></div>
+  </main>
+  <p class="visually-hidden sr-status" id="live-status" aria-live="polite" aria-atomic="true"></p>
+
+  <dialog id="hint-dialog" aria-labelledby="hint-title">
+    <form method="dialog">
+      <p class="eyebrow">Team action</p>
+      <h2 id="hint-title">Request hint 1?</h2>
+      <p id="hint-how">A different teammate must confirm it. If accepted, the hint adds <strong>30 seconds</strong> to your finish delay.</p>
+      <div class="dialog-actions">
+        <button value="cancel">Cancel</button>
+        <button value="confirm">Ask teammate</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="state-dialog" aria-labelledby="state-title">
+    <form method="dialog">
+      <p class="eyebrow">Prototype inspector</p>
+      <h2 id="state-title">Current fake match state</h2>
+      <pre id="state-output" tabindex="0"><code></code></pre>
+      <div class="dialog-actions">
+        <button value="close">Close</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    // Equal-coding-role prototype catalogue (original subject, throwaway simulation).
+    // Two team sizes receive separately authored decompositions of packet_router.
+    const TEAM_MEMBERS = {
+      2: { sequence: "Aimane", stateful: "Saad" },
+      3: { sequence: "Aimane", search: "Yasmine", stateful: "Saad" }
+    };
+
+    const STYLE_NAMES = {
+      sequence: "Sequence transformation",
+      search: "Deterministic search",
+      stateful: "Stateful constraints"
+    };
+
+    const PIPELINES = {
+      2: [
+        {
+          roleId: "sequence",
+          id: "routing-interpreter",
+          name: "Routing Interpreter",
+          file: "routing_interpreter.c",
+          signature: "int interpret_routes(const int *frames, int frame_count, const t_link *links, int link_count, t_request *requests)",
+          starterCode: `int interpret_routes(const int *frames, int frame_count, const t_link *links, int link_count, t_request *requests)
+{
+    /* TODO: decode each frame, then choose the next hop. */
+    return 0;
+}`,
+          inputContract: "Decimal frames plus four-node weighted links",
+          outputContract: "Valid normalized requests carrying a deterministic next hop",
+          whyRequired: "The Queue Scheduler can only order deliveries from interpreted requests; without this output there is nothing to schedule.",
+          publicMarkers: [
+            { label: "for (", pattern: /for\s*\(/ },
+            { label: "checksum", pattern: /checksum/ },
+            { label: "best_cost", pattern: /best_cost/ },
+            { label: "next_hop", pattern: /next_hop/ }
+          ],
+          hiddenMarkers: [
+            { label: "frame < 0", pattern: /frame\s*<\s*0/ },
+            { label: "source == destination", pattern: /source\s*==\s*destination/ }
+          ]
+        },
+        {
+          roleId: "stateful",
+          id: "queue-scheduler",
+          name: "Queue Scheduler",
+          file: "queue_scheduler.c",
+          signature: "int schedule_deliveries(const t_request *requests, int request_count, const int *capacity, t_delivery *deliveries)",
+          starterCode: `int schedule_deliveries(const t_request *requests, int request_count, const int *capacity, t_delivery *deliveries)
+{
+    /* TODO: order deliveries, then respect the tick limit. */
+    return 0;
+}`,
+          inputContract: "Interpreted requests plus per-tick link capacity",
+          outputContract: "Deliveries ordered by priority without exceeding capacity",
+          whyRequired: "This stage produces the final team result: late or over-capacity deliveries fail the whole pipeline.",
+          publicMarkers: [
+            { label: "for (", pattern: /for\s*\(/ },
+            { label: "priority", pattern: /priority/ },
+            { label: "capacity", pattern: /capacity/ },
+            { label: "tick", pattern: /tick/ }
+          ],
+          hiddenMarkers: [
+            { label: "capacity == 0", pattern: /capacity\s*==\s*0/ },
+            { label: "request_count == 0", pattern: /request_count\s*==\s*0/ }
+          ]
+        }
+      ],
+      3: [
+        {
+          roleId: "sequence",
+          id: "packet-decoder",
+          name: "Packet Decoder",
+          file: "packet_decoder.c",
+          signature: "int decode_packets(const int *frames, int frame_count, t_packet *packets)",
+          starterCode: `int decode_packets(const int *frames, int frame_count, t_packet *packets)
+{
+    /* TODO: validate each frame, then store the packet. */
+    return 0;
+}`,
+          inputContract: "Decimal frames",
+          outputContract: "Valid normalized packets; malformed frames are rejected",
+          whyRequired: "Route planning starts from decoded packets; malformed frames must never reach the planner.",
+          publicMarkers: [
+            { label: "for (", pattern: /for\s*\(/ },
+            { label: "source", pattern: /source/ },
+            { label: "destination", pattern: /destination/ },
+            { label: "checksum", pattern: /checksum/ }
+          ],
+          hiddenMarkers: [
+            { label: "frame < 0", pattern: /frame\s*<\s*0/ },
+            { label: "packet_count == 0", pattern: /packet_count\s*==\s*0/ }
+          ]
+        },
+        {
+          roleId: "search",
+          id: "route-planner",
+          name: "Route Planner",
+          file: "route_planner.c",
+          signature: "int plan_routes(const t_packet *packets, int packet_count, const t_link *links, int link_count, t_route *routes)",
+          starterCode: `int plan_routes(const t_packet *packets, int packet_count, const t_link *links, int link_count, t_route *routes)
+{
+    /* TODO: pick the cheapest route, then break ties. */
+    return 0;
+}`,
+          inputContract: "Decoded packets plus four-node weighted links",
+          outputContract: "Minimum-cost routes using the lower next hop on ties",
+          whyRequired: "Congestion control defers or drops planned routes; without planned routes there is nothing to dispatch.",
+          publicMarkers: [
+            { label: "for (", pattern: /for\s*\(/ },
+            { label: "best_cost", pattern: /best_cost/ },
+            { label: "next_hop", pattern: /next_hop/ },
+            { label: "tie", pattern: /tie/ }
+          ],
+          hiddenMarkers: [
+            { label: "source == destination", pattern: /source\s*==\s*destination/ },
+            { label: "link_count == 0", pattern: /link_count\s*==\s*0/ }
+          ]
+        },
+        {
+          roleId: "stateful",
+          id: "congestion-controller",
+          name: "Congestion Controller",
+          file: "congestion_controller.c",
+          signature: "int control_congestion(const t_route *routes, int route_count, const int *capacity, t_delivery *deliveries)",
+          starterCode: `int control_congestion(const t_route *routes, int route_count, const int *capacity, t_delivery *deliveries)
+{
+    /* TODO: order by priority, then defer or drop extras. */
+    return 0;
+}`,
+          inputContract: "Planned routes plus per-tick link capacity",
+          outputContract: "Priority-ordered deliveries, deferrals, or drops within capacity",
+          whyRequired: "This stage produces the final team result: late or over-capacity deliveries fail the whole pipeline.",
+          publicMarkers: [
+            { label: "for (", pattern: /for\s*\(/ },
+            { label: "priority", pattern: /priority/ },
+            { label: "capacity", pattern: /capacity/ },
+            { label: "tick", pattern: /tick/ }
+          ],
+          hiddenMarkers: [
+            { label: "capacity == 0", pattern: /capacity\s*==\s*0/ },
+            { label: "route_count == 0", pattern: /route_count\s*==\s*0/ }
+          ]
+        }
+      ]
+    };
+
+    const variants = [
+      { key: "A", name: "Exam shell" },
+      { key: "B", name: "Focus workspace" },
+      { key: "C", name: "Team board" }
+    ];
+
+    function createExamState(search = location.search) {
+      const params = new URLSearchParams(search);
+      const teamSize = params.get("teamSize") === "3" ? 3 : 2;
+      const definitions = PIPELINES[teamSize];
+      const requestedRole = params.get("role");
+      const activeRole = definitions.some((item) => item.roleId === requestedRole)
+        ? requestedRole
+        : definitions[0].roleId;
+      const components = definitions.map((definition) => ({
+        roleId: definition.roleId,
+        id: definition.id,
+        name: definition.name,
+        file: definition.file,
+        signature: definition.signature,
+        starterCode: definition.starterCode,
+        publicMarkers: definition.publicMarkers,
+        hiddenMarkers: definition.hiddenMarkers,
+        inputContract: definition.inputContract,
+        outputContract: definition.outputContract,
+        whyRequired: definition.whyRequired,
+        owner: TEAM_MEMBERS[teamSize][definition.roleId],
+        connected: true,
+        code: definition.starterCode,
+        revision: 1,
+        compileStatus: "idle",
+        localStatus: "idle",
+        integrationStatus: "idle",
+        diagnostics: []
+      }));
+      return {
+        phase: "active",
+        teamSize,
+        activeRole,
+        selectedRole: activeRole,
+        subjectVisible: true,
+        opponent: { completedComponents: 0, totalComponents: components.length, submitted: false },
+        components,
+        integration: { status: "idle", detail: "Not run", revisionKey: "" },
+        teamCases: [],
+        submissions: [],
+        hint: { status: "idle", requestedBy: null }
+      };
+    }
+
+    const initialState = {
+      stage: 1,
+      totalStages: 3,
+      remainingSeconds: 582,
+      selectedAnswer: null,
+      correctAnswer: "16",
+      contributions: [
+        { player: "Aimane", role: "Code reader", ready: true },
+        { player: "Saad", role: "Answer builder", ready: false }
+      ],
+      sharedClue: false,
+      hintsUsed: 0,
+      finishDelay: 0,
+      cooldown: 0,
+      trace: null,
+      lastEvent: "Subject revealed. All component stations are active.",
+      messages: [],
+      exam: createExamState(typeof location !== "undefined" ? location.search : "")
+    };
+
+    function createStore(seed) {
+      let state = structuredClone(seed);
+      const subscribers = new Set();
+
+      return {
+        getState: () => state,
+        update(mutator, eventText) {
+          const next = structuredClone(state);
+          mutator(next);
+          if (eventText) next.lastEvent = eventText;
+          state = next;
+          subscribers.forEach((subscriber) => subscriber(state));
+        },
+        updateSilently(mutator) {
+          const next = structuredClone(state);
+          mutator(next);
+          state = next;
+        },
+        subscribe(subscriber) {
+          subscribers.add(subscriber);
+          return () => subscribers.delete(subscriber);
+        }
+      };
+    }
+
+    const store = createStore(initialState);
+    const uiState = { chatOpen: false, selectedComponent: store.getState().exam.components.find((item) => item.roleId === store.getState().exam.activeRole)?.id || null };
+    window.__MATCH_STATE__ = () => structuredClone(store.getState());
+
+    function syncExamFromUrl() {
+      // Rebuild the throwaway exam slice from the lobby handoff query contract.
+      store.updateSilently((next) => { next.exam = createExamState(location.search); });
+      const exam = store.getState().exam;
+      const active = exam.components.find((item) => item.roleId === exam.activeRole);
+      uiState.selectedComponent = active ? active.id : null;
+    }
+    const app = document.querySelector("#app");
+    const liveStatus = document.querySelector("#live-status");
+    const hintDialog = document.querySelector("#hint-dialog");
+    const stateDialog = document.querySelector("#state-dialog");
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60).toString().padStart(2, "0");
+      const rest = (seconds % 60).toString().padStart(2, "0");
+      return `${minutes}:${rest}`;
+    }
+
+    function currentVariant() {
+      const requested = new URLSearchParams(location.search).get("variant")?.toUpperCase();
+      return variants.some((variant) => variant.key === requested) ? requested : "A";
+    }
+
+    function activeComponent(state) {
+      return state.exam.components.find((item) => item.roleId === state.exam.activeRole) || null;
+    }
+
+    function displayedComponent(state) {
+      return state.exam.components.find((item) => item.id === uiState.selectedComponent)
+        || activeComponent(state);
+    }
+
+    function componentDefinition(roleId, teamSize) {
+      const size = teamSize === 3 ? 3 : 2;
+      return PIPELINES[size].find((item) => item.roleId === roleId) || null;
+    }
+
+    function canSubmit(state) {
+      if (state.exam.phase !== "active" || state.cooldown > 0) return false;
+      if (state.exam.integration.status !== "passed") return false;
+      const currentKey = state.exam.components.map((item) => `${item.roleId}:${item.revision}`).join("|");
+      return currentKey === state.exam.integration.revisionKey;
+    }
+
+    function submitBlockReason(state) {
+      if (state.exam.phase !== "active") return "Submission is closed: the subject is finished.";
+      if (state.cooldown > 0) return `Submission blocked: retry cooldown has ${state.cooldown}s left.`;
+      if (state.exam.integration.status !== "passed") return "Submission blocked: run integration until the pipeline contracts connect.";
+      return "Submission blocked: code changed since the last green integration; integrate again.";
+    }
+
+    function codeMarkup() {
+      return `<span class="token-key">int</span> sum = <span class="token-num">0</span>;
+<span class="token-key">for</span> (<span class="token-key">int</span> i = <span class="token-num">1</span>; i &lt;= <span class="token-num">4</span>; i++) {
+    <span class="token-key">if</span> (i % <span class="token-num">2</span> == <span class="token-num">0</span>)
+        sum += i * <span class="token-num">2</span>;
+    <span class="token-key">else</span>
+        sum += i;
+}
+<span class="token-comment">// What is the final value of sum?</span>`;
+    }
+
+    function answerButtons(state) {
+      return ["12", "14", "16", "18"].map((answer) => `
+        <button type="button" class="answer-btn" data-action="answer" data-value="${answer}" aria-pressed="${state.selectedAnswer === answer}">${answer}</button>
+      `).join("");
+    }
+
+    function chatMarkup(state) {
+      return `
+        <ul class="chat-list" aria-label="Recent team messages">
+          ${state.messages.slice(-4).map((message) => `
+            <li class="chat-message"><strong>${escapeHtml(message.author)}</strong><span>${escapeHtml(message.body)}</span></li>
+          `).join("")}
+        </ul>
+        <form class="chat-form" data-chat-form>
+          <label class="visually-hidden" for="team-message">Team message</label>
+          <input id="team-message" name="message" maxlength="120" placeholder="Message team…" autocomplete="off">
+          <button type="submit" aria-label="Send team message">↗</button>
+        </form>
+      `;
+    }
+
+    function alertMarkup(state) {
+      if (state.trace) return `<div class="match-alert"><strong>Failure trace:</strong> ${escapeHtml(state.trace)}</div>`;
+      return `<div class="match-alert"><strong>Latest:</strong> ${escapeHtml(state.lastEvent)}</div>`;
+    }
+
+    function submitLabel(state) {
+      if (state.cooldown > 0) return `Cooldown · ${state.cooldown}s`;
+      return "Submit answer";
+    }
+
+    function statusLabel(status) {
+      return String(status).toUpperCase();
+    }
+
+    function subjectMarkup(state) {
+      const exam = state.exam;
+      const rows = exam.components.map((item) => `
+        <tr><td><strong>${escapeHtml(item.name)}</strong><br><small class="mono">${escapeHtml(item.file)}</small></td><td>${escapeHtml(item.inputContract)}</td><td>${escapeHtml(item.outputContract)}</td></tr>`).join("");
+      return `
+        <p class="eyebrow">Subject · original prototype exercise</p>
+        <h2 id="subject-title">packet_router</h2>
+        <p>Frames use four decimal digits SDPC:</p>
+        <ul>
+          <li>S: source node 0..3</li>
+          <li>D: destination node 0..3</li>
+          <li>P: priority 0..9, higher first</li>
+          <li>C: checksum, valid when (S + D + P) % 10 == C</li>
+        </ul>
+        <p>The network has four nodes. Routes minimize total link cost. Equal-cost routes choose the lower next-hop node. During dispatch, higher-priority packets go first; a link cannot exceed its per-tick capacity.</p>
+        <p><strong>Public example:</strong> <span class="mono">frame 0314 is valid because (0 + 3 + 1) % 10 == 4</span></p>
+        <p><span class="mono">equal routes 0-1-3 and 0-2-3 choose 0-1-3</span></p>
+        <h3>Pipeline contract</h3>
+        <table class="contract-table"><caption class="visually-hidden">Component input and output contracts</caption>
+          <thead><tr><th scope="col">Component</th><th scope="col">Input contract</th><th scope="col">Output contract</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <p>Both teams receive identical style cards and mappings.</p>
+        <p>Prototype hypothesis: each component targets a comparable workload. Balance is not proven without playtesting.</p>
+        <p>Generated stubs provide shared types and upstream return values during local work. Stubs are simulated contract fixtures, not compiled support code.</p>`;
+    }
+
+    function tabsMarkup(state, displayed) {
+      return state.exam.components.map((item) => `
+        <button type="button" class="action-btn" data-action="select-tab" data-component="${item.id}" aria-pressed="${item.id === displayed.id}">${escapeHtml(item.name)} · ${escapeHtml(item.file)}</button>`).join("");
+    }
+
+    function editorMarkup(state, displayed) {
+      const exam = state.exam;
+      const canEdit = displayed.roleId === exam.activeRole && displayed.connected && exam.phase === "active";
+      return `
+        <p class="eyebrow">Work surface · owner-only editing</p>
+        <h2 id="editor-title">Component editor</h2>
+        <p><strong>${escapeHtml(displayed.file)}</strong> · owner ${escapeHtml(displayed.owner)}${displayed.connected ? "" : " · RESERVED · OFFLINE"}</p>
+        <p class="mono">${escapeHtml(displayed.signature)}</p>
+        <dl class="subject-meta">
+          <div><dt>Input contract</dt><dd>${escapeHtml(displayed.inputContract)}</dd></div>
+          <div><dt>Output contract</dt><dd>${escapeHtml(displayed.outputContract)}</dd></div>
+        </dl>
+        <p>${escapeHtml(displayed.whyRequired)}</p>
+        <label for="component-code">${escapeHtml(displayed.file)} editor</label>
+        ${canEdit
+          ? `<p class="exam-hint-line">Editable: you are viewing as ${escapeHtml(displayed.owner)} (${escapeHtml(displayed.name)}). Editing resets local and integration readiness.</p>`
+          : `<p class="exam-hint-line">Read-only teammate file. Only ${escapeHtml(displayed.owner)} may edit ${escapeHtml(displayed.file)}.</p>`}
+        <textarea id="component-code" class="mono" rows="16" spellcheck="false" autocomplete="off" autocapitalize="off" ${canEdit ? "" : "disabled"}>${escapeHtml(displayed.code)}</textarea>
+        <p>Revision <span class="num" data-exam="revision">${displayed.revision}</span> · Compile <strong data-exam="compile-state">${statusLabel(displayed.compileStatus)}</strong> · Local <strong data-exam="local-state">${statusLabel(displayed.localStatus)}</strong> · Integration <strong data-exam="component-integration-state">${statusLabel(displayed.integrationStatus)}</strong></p>`;
+    }
+
+    function teamMarkup(state) {
+      const exam = state.exam;
+      const rows = exam.components.map((item) => `
+        <li><strong>${escapeHtml(item.owner)} — ${escapeHtml(item.name)}${item.roleId === exam.activeRole ? " (you, current)" : ""}</strong><br><small>${escapeHtml(item.file)} · ${item.connected ? "Online" : "RESERVED · OFFLINE"} · compile ${statusLabel(item.compileStatus)} · local ${statusLabel(item.localStatus)}</small></li>`).join("");
+      const viewButtons = exam.components.map((item) => `
+        <button type="button" class="action-btn" data-action="select-role" data-role="${item.roleId}" aria-pressed="${item.roleId === exam.activeRole}">View as ${escapeHtml(item.name)}</button>`).join("");
+      const connectionButtons = exam.components.map((item) => `
+        <button type="button" class="action-btn" data-action="toggle-connection" data-role="${item.roleId}">Toggle ${escapeHtml(item.owner)} connection</button>`).join("");
+      return `
+        <p class="eyebrow">Team station</p>
+        <h2 id="team-title">Team status</h2>
+        <ul class="role-list">${rows}</ul>
+        <div class="exam-action-row">${viewButtons}</div>
+        <div class="exam-action-row">${connectionButtons}</div>
+        <p class="exam-note">Prototype-only view switch. Ownership stays locked during the subject; a voluntary swap could only happen before a future subject, not implemented here.</p>
+        <div>
+          <p class="eyebrow">Team chat</p>
+          ${chatMarkup(state)}
+        </div>`;
+    }
+
+    function localTerminalMarkup(state) {
+      const exam = state.exam;
+      const active = activeComponent(state);
+      const rows = exam.components.map((item) => `
+        <li data-check-row="${item.id}">
+          <div class="check-row-head"><strong>${escapeHtml(item.name)}</strong><span class="check-status is-${item.localStatus}" data-check-status>${statusLabel(item.localStatus)}</span></div>
+          <p class="check-io mono">compile ${statusLabel(item.compileStatus)} · revision ${item.revision}</p>
+          ${item.diagnostics.map((line) => `<p class="check-detail" data-check-detail>${escapeHtml(line)}</p>`).join("") || `<p class="check-detail" data-check-detail>Not run</p>`}
+        </li>`).join("");
+      const cases = exam.teamCases.length
+        ? exam.teamCases.map((item) => `<li>${escapeHtml(item.input)}</li>`).join("")
+        : `<li>None yet — the public example only.</li>`;
+      return `
+        <p class="eyebrow">Simulated local work · penalty-free</p>
+        <h2 id="local-title">Local terminal</h2>
+        <p><strong>Simulated checks only.</strong> The recognizer strips comments, looks for disclosed surface markers, never compiles or executes C, and cannot prove correctness. Submitted text stays in this page's memory only.</p>
+        <div class="exam-action-row">
+          <button type="button" class="action-btn" data-action="run-local-check">Run local check (${escapeHtml(active ? active.name : "")})</button>
+        </div>
+        <ol class="check-list">${rows}</ol>
+        <h3>Team-authored inputs</h3>
+        <ul data-exam="team-cases">${cases}</ul>
+        <p data-exam="local-inspected">Inspected: the disclosed public example (frame 0314) plus ${exam.teamCases.length} team case(s).</p>`;
+    }
+
+    function integrationTerminalMarkup(state) {
+      const exam = state.exam;
+      const cases = exam.teamCases.length
+        ? exam.teamCases.map((item) => `<li>${escapeHtml(item.input)}</li>`).join("")
+        : `<li>None yet — the public example only.</li>`;
+      const history = exam.submissions.length
+        ? exam.submissions.map((item) => `<li>Attempt ${item.attempt}: ${item.status.toUpperCase()}${item.category ? ` · ${escapeHtml(item.category)}` : ""}</li>`).join("")
+        : `<li>No submissions yet.</li>`;
+      return `
+        <p class="eyebrow">Shared pipeline · penalty-free until submission</p>
+        <h2 id="integration-title">Integration terminal</h2>
+        <label for="team-case-input">Team-authored input</label>
+        <div class="exam-action-row">
+          <input id="team-case-input" name="case" maxlength="120" autocomplete="off" placeholder="frames=0314,0325; capacity=1">
+          <button type="button" class="action-btn" data-action="add-team-case">Add team case</button>
+        </div>
+        <p class="exam-note" data-exam="case-error" hidden>Team case cannot be empty.</p>
+        <div class="exam-action-row">
+          <button type="button" class="action-btn" data-action="run-integration">Run integration</button>
+          <button type="button" class="action-btn primary" data-action="exam-submit" data-exam="submit" ${canSubmit(state) ? "" : "disabled"}>Submit team</button>
+          ${state.cooldown > 0 ? `<button type="button" class="action-btn" data-action="advance-cooldown">Advance cooldown</button>` : ""}
+          <button type="button" class="action-btn" data-action="hint">Hint · +30s</button>
+        </div>
+        <p data-exam="integration-status"><strong>Integration:</strong> ${statusLabel(exam.integration.status)} — ${escapeHtml(exam.integration.detail)}</p>
+        <p class="exam-note">A green integration checks the disclosed public example plus every stored team-authored input. Local checks and integration never penalize; only an explicit hidden submission can fail.</p>
+        <h3>Stored team cases</h3>
+        <ul data-exam="integration-cases">${cases}</ul>
+        <h3>Submission history</h3>
+        <ul data-exam="submission-history">${history}</ul>
+        ${state.trace ? `
+        <div class="exam-trace">
+          <h3 id="failure-trace-title" tabindex="-1">Failure trace (simulated)</h3>
+          <p>${escapeHtml(state.trace)}</p>
+        </div>` : ""}
+        ${exam.hint.status === "waiting" ? `<p data-exam="hint-status"><strong>Hint request:</strong> WAITING FOR TEAMMATE CONFIRMATION (requested by ${escapeHtml(exam.hint.requestedBy || "a teammate")}). Nothing is charged until the other teammate confirms.</p>
+        <div class="exam-action-row">
+          <button type="button" class="action-btn primary" data-action="confirm-hint">Confirm hint (teammate)</button>
+          <button type="button" class="action-btn" data-action="withdraw-hint">Withdraw hint request</button>
+        </div>` : ""}
+        ${exam.phase === "finished" ? `
+        <section aria-labelledby="completion-title">
+          <h3 id="completion-title" tabindex="-1">SUBJECT COMPLETE</h3>
+          <p>The hidden evaluation passed. A future subject — not implemented here — could offer a voluntary role swap.</p>
+        </section>` : `<p class="exam-note">${escapeHtml(submitBlockReason(state))}</p>`}
+        <p data-exam="latest"><strong>Latest:</strong> ${escapeHtml(state.lastEvent)}</p>`;
+    }
+
+    function renderVariantA(state) {
+      const exam = state.exam;
+      const active = activeComponent(state);
+      const displayed = displayedComponent(state);
+
+      return `
+        <div class="variant-a" data-exam-shell data-team-size="${exam.teamSize}">
+          <div class="exam-shell">
+            <header class="exam-status">
+              <div>
+                <p class="eyebrow">42-INSPIRED SIMULATION · FAKE GRADER</p>
+                <h1>Exam shell · packet_router</h1>
+                <p class="exam-meta">Room 01 · Team workstation · prototype only, not an official 42 product</p>
+                <p class="exam-reveal"><strong>Reveal:</strong> ${escapeHtml(`${STYLE_NAMES[exam.activeRole]} → ${active.name}`)}</p>
+                <p><strong>EXPLORATION ONLY — NOT PRODUCTION CODE EXECUTION</strong></p>
+                <div class="exam-action-row">
+                  <a class="journey-link" href="00-journey.html">Journey map</a>
+                  <button type="button" class="action-btn" data-action="show-state">Inspect fake state</button>
+                </div>
+              </div>
+              <dl class="exam-meta-grid">
+                <div><dt>Match clock</dt><dd class="num mono">${formatTime(state.remainingSeconds)}</dd></div>
+                <div><dt>Team size</dt><dd class="num mono">${exam.teamSize}v${exam.teamSize}</dd></div>
+                <div><dt>Finish delay</dt><dd class="num mono">+${state.finishDelay}s</dd></div>
+                <div><dt>Retry</dt><dd class="num mono">${state.cooldown > 0 ? `${state.cooldown}s cooldown` : "Ready"}</dd></div>
+              </dl>
+              <p class="exam-opponent" data-exam="opponent"><strong>Opponent:</strong> Opponent components ${exam.opponent.completedComponents}/${exam.opponent.totalComponents} · ${exam.opponent.submitted ? "Submitted" : "Submission hidden"}</p>
+            </header>
+
+            <div class="exam-grid">
+              <section class="exam-subject" aria-labelledby="subject-title">
+                ${subjectMarkup(state)}
+              </section>
+
+              <nav class="component-tabs" aria-label="Team coding stations">
+                ${tabsMarkup(state, displayed)}
+              </nav>
+
+              <section class="exam-editor" aria-labelledby="editor-title">
+                ${editorMarkup(state, displayed)}
+              </section>
+
+              <aside class="exam-team" aria-labelledby="team-title">
+                ${teamMarkup(state)}
+              </aside>
+
+              <section class="exam-local-terminal" aria-labelledby="local-title">
+                ${localTerminalMarkup(state)}
+              </section>
+
+              <section class="exam-integration-terminal" aria-labelledby="integration-title">
+                ${integrationTerminalMarkup(state)}
+              </section>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVariantB(state) {
+      return `
+        <div class="variant-b">
+          <div class="b-shell">
+            <header class="b-header">
+              <div><p class="eyebrow">Campus lockdown · Room 01</p><h1>Loop trace</h1></div>
+              <div class="b-clock"><span class="eyebrow">Time left</span><strong class="num">${formatTime(state.remainingSeconds)}</strong></div>
+              <div class="b-team"><p class="eyebrow">Blue team</p><strong>Stage 1 of 3</strong></div>
+            </header>
+
+            <ol class="b-progress stage-list" aria-label="Room progress">
+              <li class="b-step active">Trace the loop</li>
+              <li class="b-step">Map the string</li>
+              <li class="b-step">Repair the array</li>
+            </ol>
+
+            <div class="b-focus-grid">
+              <section class="b-main" aria-labelledby="b-challenge-title">
+                <p class="eyebrow">Your current problem</p>
+                <h2 id="b-challenge-title">Find the final value of <span class="mono">sum</span>.</h2>
+                <p>You hold the code. Saad holds the answer builder. Share what matters, then both of you lock your contribution.</p>
+                <pre class="code-block" tabindex="0"><code>${codeMarkup()}</code></pre>
+                <div class="b-answer-area">
+                  ${alertMarkup(state)}
+                  <h3>Choose the team answer</h3>
+                  <div class="answer-list">${answerButtons(state)}</div>
+                  <div class="b-action-row">
+                    <button type="button" class="action-btn primary" data-action="submit" ${state.cooldown > 0 ? "disabled" : ""}>${submitLabel(state)}</button>
+                    <button type="button" class="action-btn" data-action="contribute" data-player="1" ${state.contributions[1].ready ? "disabled" : ""}>${state.contributions[1].ready ? "Output locked ✓" : "Lock output"}</button>
+                    <button type="button" class="action-btn" data-action="hint">Request hint · +30s</button>
+                    ${state.cooldown ? `<button type="button" class="action-btn" data-action="advance-cooldown">Advance 15s</button>` : ""}
+                  </div>
+                </div>
+              </section>
+
+              <aside class="b-aside" aria-label="Supporting match information">
+                <div class="b-role-banner">
+                  <p class="eyebrow">Private role</p><strong>Code reader</strong>
+                  <p>Even values are doubled. The loop includes 4.</p>
+                  <button type="button" class="action-btn" data-action="share-clue" ${state.sharedClue ? "disabled" : ""}>${state.sharedClue ? "Shared ✓" : "Share clue"}</button>
+                </div>
+                ${state.cooldown ? `<div class="b-cooldown"><p class="eyebrow">Retry blocked</p><strong>${state.cooldown} seconds remaining</strong></div>` : ""}
+                <details open>
+                  <summary>Role readiness · ${state.contributions.filter((item) => item.ready).length}/2</summary>
+                  <p>${state.contributions.map((item) => `${item.player}: ${item.ready ? "locked" : "waiting"}`).join(" · ")}</p>
+                </details>
+                <details data-panel="chat" ${uiState.chatOpen ? "open" : ""}>
+                  <summary>Team chat · ${state.messages.length}</summary>
+                  ${chatMarkup(state)}
+                </details>
+                <details>
+                  <summary>Race penalties</summary>
+                  <p>${state.hintsUsed} hints used · +${state.finishDelay}s finish delay · ${state.cooldown}s retry cooldown.</p>
+                </details>
+              </aside>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVariantC(state) {
+      const readyCount = state.contributions.filter((item) => item.ready).length;
+      return `
+        <div class="variant-c">
+          <div class="c-shell">
+            <header class="c-header">
+              <div><p class="eyebrow">Competitive co-op · Room 01</p><h1>Campus access controller</h1></div>
+              <div class="c-clock"><span class="eyebrow">Time left</span><strong class="num">${formatTime(state.remainingSeconds)}</strong></div>
+            </header>
+
+            <div class="c-scoreboard" aria-label="Race score">
+              <div><span class="status-dot"></span><strong>Blue team</strong><span>Stage 1</span></div>
+              <span class="c-versus">LIVE RACE</span>
+              <div><span>Lobby trace</span><strong>Coral team</strong><span class="status-dot"></span></div>
+            </div>
+
+            <div class="c-board">
+              <aside class="c-team-rail" aria-label="Blue team roles">
+                ${state.contributions.map((item, index) => `
+                  <article class="c-member">
+                    <span class="c-avatar" aria-hidden="true">${item.player.charAt(0)}</span>
+                    <div><strong>${item.player}</strong><small>${item.role}</small></div>
+                    <span class="c-check">${item.ready ? "Ready ✓" : "Waiting"}</span>
+                  </article>
+                `).join("")}
+                <div class="c-private">
+                  <p class="eyebrow">Only you can see this</p>
+                  <strong>Your private clue</strong>
+                  <p>The loop includes 4. Even values are doubled before adding.</p>
+                  <button type="button" class="action-btn" data-action="share-clue" ${state.sharedClue ? "disabled" : ""}>${state.sharedClue ? "Clue shared ✓" : "Share a safe clue"}</button>
+                </div>
+              </aside>
+
+              <section class="c-mission" aria-labelledby="c-challenge-title">
+                <header class="c-mission-head">
+                  <div><p class="eyebrow">Current mission</p><h2 id="c-challenge-title">Trace the loop and assemble the output</h2></div>
+                  <span class="c-stage-chip">1 / 3</span>
+                </header>
+                <div class="c-work-grid">
+                  <pre class="code-block" tabindex="0"><code>${codeMarkup()}</code></pre>
+                  <div class="c-answer-panel">
+                    <p class="eyebrow">Team answer</p>
+                    <strong>${readyCount}/2 role contributions locked</strong>
+                    <div class="progress-track" aria-hidden="true"><div class="progress-fill" style="--progress: ${readyCount * 50}%"></div></div>
+                    <div class="answer-list">${answerButtons(state)}</div>
+                    ${alertMarkup(state)}
+                    <div class="stack-actions">
+                      <button type="button" class="action-btn" data-action="contribute" data-player="1" ${state.contributions[1].ready ? "disabled" : ""}>${state.contributions[1].ready ? "Output locked ✓" : "Lock output contribution"}</button>
+                      <button type="button" class="action-btn primary" data-action="submit" ${state.cooldown > 0 ? "disabled" : ""}>${submitLabel(state)}</button>
+                      <button type="button" class="action-btn" data-action="hint">Hint · +30 seconds</button>
+                      ${state.cooldown ? `<button type="button" class="action-btn" data-action="advance-cooldown">Advance cooldown</button>` : ""}
+                    </div>
+                  </div>
+                </div>
+                <div class="c-bottom">
+                  <div class="c-chat"><h3>Team channel</h3>${chatMarkup(state)}</div>
+                  <div class="c-events"><h3>Match state</h3><p>${escapeHtml(state.lastEvent)}</p><p><strong>Hints:</strong> ${state.hintsUsed}/2<br><strong>Finish delay:</strong> +${state.finishDelay}s<br><strong>Retry:</strong> ${state.cooldown ? `${state.cooldown}s` : "Ready"}</p></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    const renderers = { A: renderVariantA, B: renderVariantB, C: renderVariantC };
+
+    function render(state) {
+      const variant = currentVariant();
+      app.innerHTML = renderers[variant](state);
+      const meta = variants.find((item) => item.key === variant);
+      document.querySelector("#variant-name").textContent = `${meta.key} — ${meta.name}`;
+      document.querySelector("#selected-direction").textContent = variant === "A"
+        ? "Selected direction · Exam shell (historical puzzle-race prototype, superseded 2026-09-23)"
+        : "Historical alternative · Use ← → when not typing";
+      document.title = `${meta.name} | Campus Puzzle Race UI Prototype`;
+      document.querySelector("#state-output code").textContent = JSON.stringify(state, null, 2);
+      liveStatus.textContent = state.lastEvent;
+    }
+
+    function setVariant(key) {
+      const params = new URLSearchParams(location.search);
+      params.set("variant", key);
+      history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+      render(store.getState());
+    }
+
+    function cycleVariant(direction) {
+      const index = variants.findIndex((variant) => variant.key === currentVariant());
+      const nextIndex = (index + direction + variants.length) % variants.length;
+      setVariant(variants[nextIndex].key);
+    }
+
+    function focusById(id) {
+      const target = document.getElementById(id);
+      if (target) target.focus();
+    }
+
+    // Shared transition helpers so Variant A and the historical B/C flows
+    // apply the same hint and cooldown mechanics.
+    function chargeHint(next) {
+      next.hintsUsed += 1;
+      next.finishDelay += 30;
+    }
+
+    function advanceCooldownClock(next) {
+      next.remainingSeconds = Math.max(0, next.remainingSeconds - next.cooldown);
+      next.cooldown = 0;
+    }
+
+    function componentOwnerName(state, roleId) {
+      const found = state.exam.components.find((item) => item.roleId === roleId);
+      return found ? found.owner : roleId;
+    }
+
+    // Disclosed fake recognizer for the single original subject. It strips
+    // comments, looks for disclosed surface markers, never compiles or
+    // executes C, and cannot prove correctness. Editor contents are only
+    // inspected as text and stay in page memory.
+    function stripComments(source) {
+      return source.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/.*$/gm, " ");
+    }
+    function inspectComponent(component) {
+      const source = stripComments(component.code);
+      const compiled = source.includes(component.signature) && /return\s+[^;]+;/.test(source);
+      const missing = component.publicMarkers
+        .filter((marker) => !marker.pattern.test(source))
+        .map((marker) => marker.label);
+      return { compiled, passed: compiled && missing.length === 0, missing };
+    }
+
+    function invalidateAfterEdit(next, roleId) {
+      const component = next.exam.components.find((item) => item.roleId === roleId);
+      component.compileStatus = "idle";
+      component.localStatus = "idle";
+      component.integrationStatus = "idle";
+      component.diagnostics = [];
+      next.exam.integration = { status: "idle", detail: "Code changed; integrate again", revisionKey: "" };
+      next.trace = null;
+    }
+
+    function runLocalCheck(roleId) {
+      // Exploring controls is not a submission (CONTEXT.md): local checks
+      // report diagnostics only. Failure traces and retry cooldowns come
+      // exclusively from an explicit hidden submission.
+      const state = store.getState();
+      const component = state.exam.components.find((item) => item.roleId === roleId);
+      if (!component) return;
+      if (state.exam.phase !== "active") {
+        store.update(() => {}, "Local check rejected: the subject is finished.");
+        return;
+      }
+      if (roleId !== state.exam.activeRole) {
+        store.update(() => {}, `Local check rejected: only ${component.owner} runs the ${component.name} check. Switch View as first.`);
+        return;
+      }
+      if (!component.connected) {
+        store.update(() => {}, `Local check rejected: ${component.owner}'s station is offline and reserved.`);
+        return;
+      }
+      const result = inspectComponent(component);
+      const inspected = `Inspected the disclosed public example (frame 0314) plus ${state.exam.teamCases.length} team-authored input(s). Neither input executes C code.`;
+      store.update((next) => {
+        const target = next.exam.components.find((item) => item.roleId === roleId);
+        if (!result.compiled) {
+          target.compileStatus = "failed";
+          target.localStatus = "idle";
+          target.diagnostics = [`SIMULATED trace: ${target.name} does not carry its required signature and return. ${inspected} SIMULATED only; nothing was compiled or executed.`];
+        } else {
+          target.compileStatus = "passed";
+          if (result.passed) {
+            target.localStatus = "passed";
+            target.diagnostics = [`SIMULATED pass: ${target.name} recognized every disclosed surface marker. ${inspected} SIMULATED only; nothing was compiled or executed.`];
+          } else {
+            target.localStatus = "failed";
+            target.diagnostics = [`SIMULATED trace: ${target.name} is missing ${result.missing.join(", ")}. ${inspected} SIMULATED only; nothing was compiled or executed.`];
+          }
+        }
+      }, result.passed
+        ? `Simulated local check passed for ${component.name}. No penalty; only a hidden submission can fail.`
+        : `Simulated local check finished for ${component.name}. Diagnostics only — no trace and no cooldown.`);
+    }
+
+    function runIntegration() {
+      const state = store.getState();
+      const exam = state.exam;
+      if (exam.phase !== "active") {
+        store.update(() => {}, "Integration rejected: the subject is finished.");
+        return;
+      }
+      const notCompiled = exam.components.filter((item) => item.compileStatus !== "passed");
+      if (notCompiled.length > 0) {
+        store.update((next) => {
+          next.exam.integration = { status: "blocked", detail: "BLOCKED — compile every component", revisionKey: "" };
+          for (const item of next.exam.components) {
+            item.integrationStatus = item.compileStatus === "passed" ? "idle" : "blocked";
+          }
+        }, "Integration blocked: every component must compile first. No penalty.");
+        return;
+      }
+      const mismatch = exam.components.find((item) => item.localStatus !== "passed");
+      if (mismatch) {
+        store.update((next) => {
+          next.exam.integration = { status: "failed", detail: `SIMULATED contract mismatch — inspect the ${mismatch.name} contract`, revisionKey: "" };
+          for (const item of next.exam.components) {
+            item.integrationStatus = item.roleId === mismatch.roleId ? "failed" : "idle";
+          }
+        }, `Integration finished with a simulated contract mismatch at the ${mismatch.name} contract. No penalty; no player is blamed.`);
+        return;
+      }
+      const key = exam.components.map((item) => `${item.roleId}:${item.revision}`).join("|");
+      const count = exam.teamCases.length;
+      store.update((next) => {
+        next.exam.integration = { status: "passed", detail: `PASSED — pipeline contracts connected; public example plus ${count} team case(s) inspected.`, revisionKey: key };
+        for (const item of next.exam.components) {
+          item.integrationStatus = "passed";
+        }
+      }, `Integration passed: pipeline contracts connected; public example plus ${count} team case(s) inspected. No penalty.`);
+    }
+
+    function handleExamAction(action, element) {
+      if (action === "show-state") {
+        stateDialog.showModal();
+        return true;
+      }
+      if (action === "select-tab") {
+        const id = element.dataset.component;
+        if (store.getState().exam.components.some((item) => item.id === id)) {
+          uiState.selectedComponent = id;
+          render(store.getState());
+        }
+        return true;
+      }
+      if (action === "select-role") {
+        const exam = store.getState().exam;
+        const target = exam.components.find((item) => item.roleId === element.dataset.role);
+        if (!target) {
+          store.update(() => {}, "View rejected: that style is not part of this team size.");
+          return true;
+        }
+        uiState.selectedComponent = target.id;
+        store.update((next) => {
+          next.exam.activeRole = target.roleId;
+          next.exam.selectedRole = target.roleId;
+        }, `Viewing as ${target.name} (${target.owner}). Prototype-only view; no authorization exists.`);
+        const params = new URLSearchParams(location.search);
+        params.set("variant", "A");
+        params.set("teamSize", String(store.getState().exam.teamSize));
+        params.set("role", target.roleId);
+        history.replaceState(null, "", `${location.pathname}?${params.toString()}`);
+        return true;
+      }
+
+      if (action === "run-local-check") {
+        runLocalCheck(store.getState().exam.activeRole);
+        return true;
+      }
+
+      if (action === "add-team-case") {
+        const field = document.querySelector("#team-case-input");
+        const value = (field ? field.value : "").trim();
+        const error = document.querySelector('[data-exam="case-error"]');
+        if (!value) {
+          if (error) error.hidden = false;
+          store.update(() => {}, "Team case rejected: enter a non-empty input first.");
+          return true;
+        }
+        if (error) error.hidden = true;
+        store.update((next) => {
+          next.exam.teamCases.push({ id: `case-${next.exam.teamCases.length + 1}`, input: value });
+          for (const item of next.exam.components) {
+            item.localStatus = "idle";
+            item.integrationStatus = "idle";
+            item.diagnostics = [];
+          }
+          next.exam.integration = { status: "idle", detail: "New team case added; integrate again", revisionKey: "" };
+        }, "Team case stored. Local and integration readiness cleared; clocks and penalties unchanged.");
+        return true;
+      }
+
+      if (action === "run-integration") {
+        runIntegration();
+        return true;
+      }
+
+      if (action === "exam-submit") {
+        const state = store.getState();
+        if (!canSubmit(state)) {
+          store.update(() => {}, submitBlockReason(state));
+          return true;
+        }
+        // Deliberately disclosed fake hidden evaluation over comment-stripped
+        // source. Only this explicit submission may create a Failure trace
+        // and a retry cooldown.
+        const lacking = state.exam.components.filter((component) => {
+          const source = stripComments(component.code);
+          return component.hiddenMarkers.some((marker) => !marker.pattern.test(source));
+        });
+        if (lacking.length > 0) {
+          store.update((next) => {
+            next.exam.submissions.push({ attempt: next.exam.submissions.length + 1, status: "failed", category: "wrong output" });
+            next.cooldown = 15;
+            next.trace = "SIMULATED hidden evaluation: FAILED — the team result diverges on undisclosed inputs (wrong output). No hidden detail is revealed. SIMULATED only; nothing was compiled or executed.";
+          }, "Hidden submission failed. A simulated Failure trace was returned and resubmission is blocked for 15 seconds.");
+          focusById("failure-trace-title");
+          return true;
+        }
+        store.update((next) => {
+          next.exam.submissions.push({ attempt: next.exam.submissions.length + 1, status: "passed", category: null });
+          next.exam.phase = "finished";
+          next.trace = null;
+        }, "Hidden submission passed. The subject is complete.");
+        focusById("completion-title");
+        return true;
+      }
+
+      if (action === "toggle-connection") {
+        const roleId = element.dataset.role;
+        const component = store.getState().exam.components.find((item) => item.roleId === roleId);
+        if (!component) {
+          store.update(() => {}, "Connection toggle rejected: unknown station.");
+          return true;
+        }
+        const wasConnected = component.connected;
+        store.update((next) => {
+          next.exam.components.find((item) => item.roleId === roleId).connected = !wasConnected;
+        }, wasConnected
+          ? `${component.owner} disconnected. The ${component.name} station is reserved; ownership and source are unchanged.`
+          : `${component.owner} reconnected. The ${component.name} station and its source are restored unchanged.`);
+        return true;
+      }
+
+      if (action === "confirm-hint" || action === "withdraw-hint") {
+        const state = store.getState();
+        if (state.exam.hint.status !== "waiting") {
+          store.update(() => {}, "Hint action rejected: no hint request is waiting.");
+          return true;
+        }
+        if (action === "withdraw-hint") {
+          store.update((next) => { next.exam.hint = { status: "idle", requestedBy: null }; },
+            "Hint request withdrawn. Nothing was charged.");
+          return true;
+        }
+        const confirmer = componentOwnerName(state, state.exam.activeRole);
+        if (confirmer === state.exam.hint.requestedBy) {
+          store.update(() => {}, "Hint confirm rejected: the requester cannot confirm their own hint. Switch View as to the other teammate.");
+          return true;
+        }
+        store.update((next) => {
+          chargeHint(next);
+          next.exam.hint = { status: "confirmed", requestedBy: null };
+          next.messages.push({ author: "System", body: `Hint confirmed by ${confirmer}.` });
+        }, `Hint confirmed by ${confirmer}. +30s finish delay; checks are still simulated and nothing auto-passes.`);
+        return true;
+      }
+
+      return false;
+    }
+
+    function handleAction(action, element) {
+      if (currentVariant() === "A" && handleExamAction(action, element)) return;
+      if (action === "answer") {
+        store.update((state) => { state.selectedAnswer = element.dataset.value; }, `Team answer selected: ${element.dataset.value}.`);
+        return;
+      }
+
+      if (action === "share-clue") {
+        store.update((state) => {
+          state.sharedClue = true;
+          state.messages.push({ author: "Aimane", body: "Safe clue: even values are doubled; the loop includes 4." });
+        }, "A safe clue was shared with the team.");
+        return;
+      }
+
+      if (action === "contribute") {
+        const index = Number(element.dataset.player);
+        store.update((state) => { state.contributions[index].ready = true; }, `${store.getState().contributions[index].player} locked the ${store.getState().contributions[index].role} contribution.`);
+        return;
+      }
+
+      if (action === "hint") {
+        const how = document.querySelector("#hint-how");
+        if (how) {
+          how.textContent = currentVariant() === "A"
+            ? "This records a request only. The other teammate must confirm it in the integration terminal below; nothing is charged until then."
+            : "Legacy simulation: accepting this immediately records a confirmed Hint and adds 30 seconds to the finish delay.";
+        }
+        hintDialog.showModal();
+        return;
+      }
+
+      if (action === "advance-cooldown") {
+        store.update((state) => {
+          advanceCooldownClock(state);
+        }, "Retry cooldown cleared; the match clock kept running.");
+        return;
+      }
+
+      if (action === "submit") {
+        const state = store.getState();
+        if (!state.contributions.every((item) => item.ready)) {
+          store.update(() => {}, "Submission blocked: every role must lock a contribution.");
+          return;
+        }
+        if (!state.selectedAnswer) {
+          store.update(() => {}, "Submission blocked: select an answer first.");
+          return;
+        }
+        if (state.selectedAnswer !== state.correctAnswer) {
+          store.update((next) => {
+            next.cooldown = 15;
+            next.trace = "The result diverges after i = 2. Recheck the even branch.";
+          }, "Wrong answer. A failure trace was returned and retry is blocked for 15 seconds.");
+          return;
+        }
+        store.update((next) => {
+          next.stage = 2;
+          next.trace = null;
+          next.selectedAnswer = null;
+          next.contributions.forEach((item) => { item.ready = false; });
+        }, "Stage 1 passed. String / character reasoning unlocked.");
+      }
+    }
+
+    function patchComponentAfterEdit(component) {
+      // Keep the textarea (and cursor) intact: patch only small status nodes.
+      const revision = document.querySelector('[data-exam="revision"]');
+      if (revision) revision.textContent = String(component.revision);
+      const compile = document.querySelector('[data-exam="compile-state"]');
+      if (compile) compile.textContent = "IDLE";
+      const local = document.querySelector('[data-exam="local-state"]');
+      if (local) local.textContent = "IDLE";
+      const integrated = document.querySelector('[data-exam="component-integration-state"]');
+      if (integrated) integrated.textContent = "IDLE";
+      const row = document.querySelector(`[data-check-row="${component.id}"]`);
+      if (row) {
+        const status = row.querySelector("[data-check-status]");
+        if (status) {
+          status.textContent = "IDLE";
+          status.className = "check-status is-idle";
+        }
+        row.querySelectorAll("[data-check-detail]").forEach((detail) => {
+          detail.textContent = "Code changed; run again";
+        });
+      }
+      const integration = document.querySelector('[data-exam="integration-status"]');
+      if (integration) integration.innerHTML = "<strong>Integration:</strong> IDLE — Code changed; integrate again";
+      const submit = document.querySelector('[data-exam="submit"]');
+      if (submit) submit.disabled = true;
+      const staleTrace = document.querySelector(".exam-trace");
+      if (staleTrace) staleTrace.remove();
+      const latest = document.querySelector('[data-exam="latest"]');
+      if (latest) latest.innerHTML = `<strong>Latest:</strong> ${escapeHtml(store.getState().lastEvent)}`;
+      liveStatus.textContent = store.getState().lastEvent;
+    }
+
+    app.addEventListener("input", (event) => {
+      if (event.target && event.target.id === "component-code") {
+        if (currentVariant() !== "A") return;
+        const state = store.getState();
+        const displayed = displayedComponent(state);
+        if (!displayed || displayed.roleId !== state.exam.activeRole || !displayed.connected) return;
+        if (state.exam.phase !== "active") return;
+        const value = event.target.value;
+        store.updateSilently((next) => {
+          const target = next.exam.components.find((item) => item.id === displayed.id);
+          target.code = value;
+          target.revision += 1;
+          invalidateAfterEdit(next, target.roleId);
+          next.lastEvent = `${target.file} edited. Local and integration readiness cleared; run again.`;
+        });
+        patchComponentAfterEdit(store.getState().exam.components.find((item) => item.id === displayed.id));
+      }
+    });
+
+    app.addEventListener("click", (event) => {
+      const trigger = event.target.closest("[data-action]");
+      if (!trigger) return;
+      handleAction(trigger.dataset.action, trigger);
+    });
+
+    app.addEventListener("submit", (event) => {
+      const form = event.target.closest("[data-chat-form]");
+      if (!form) return;
+      event.preventDefault();
+      const input = form.elements.message;
+      const message = input.value.trim();
+      if (!message) return;
+      store.update((state) => { state.messages.push({ author: "You", body: message }); }, "Team message sent.");
+    });
+
+    app.addEventListener("toggle", (event) => {
+      if (event.target.matches('details[data-panel="chat"]')) {
+        uiState.chatOpen = event.target.open;
+      }
+    }, true);
+
+    hintDialog.addEventListener("close", () => {
+      if (hintDialog.returnValue !== "confirm") return;
+      if (currentVariant() === "A") {
+        // Step 1 of 2: record the request. Charging happens only when the
+        // other teammate confirms in the evaluator (confirm-hint).
+        if (store.getState().exam.hint.status === "waiting") {
+          store.update(() => {}, "Hint request is already waiting for teammate confirmation.");
+          return;
+        }
+        const requester = componentOwnerName(store.getState(), store.getState().exam.activeRole);
+        store.update((state) => {
+          state.exam.hint = { status: "waiting", requestedBy: requester };
+          state.messages.push({ author: requester, body: "Hint requested; waiting for teammate confirmation." });
+        }, `Hint requested by ${requester}. WAITING FOR TEAMMATE CONFIRMATION — nothing charged yet.`);
+        return;
+      }
+      store.update((state) => {
+        chargeHint(state);
+        state.messages.push({ author: "System", body: "Legacy Hint accepted immediately." });
+      }, "Legacy Hint accepted immediately. +30s finish delay.");
+    });
+
+    document.querySelector("#previous-variant").addEventListener("click", () => cycleVariant(-1));
+    document.querySelector("#next-variant").addEventListener("click", () => cycleVariant(1));
+    document.querySelector("#show-state").addEventListener("click", () => stateDialog.showModal());
+
+    addEventListener("keydown", (event) => {
+      const target = event.target;
+      if (target.matches("input, textarea, select, [contenteditable='true']")) return;
+      if (event.key === "ArrowLeft") cycleVariant(-1);
+      if (event.key === "ArrowRight") cycleVariant(1);
+    });
+
+    addEventListener("popstate", () => { syncExamFromUrl(); render(store.getState()); });
+    store.subscribe(render);
+    render(store.getState());
+  </script>
+</body>
+</html>

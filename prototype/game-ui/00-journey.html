@@ -136,7 +136,8 @@
   <main class="shell" id="content" tabindex="-1">
     <p class="eyebrow">Campus Puzzle Race · whole-app wayfinding</p>
     <h1>Critical player journey</h1>
-    <p class="lead">A non-production map of the player-facing surfaces needed to move from account access to a Match result. It separates the four checked local prototypes from delivery work that still needs real services and end-to-end proof.</p>
+    <p class="lead">A non-production map of the player-facing surfaces needed to move from account access to a Match result. It separates the eight checked local test views from delivery work that still needs real services and end-to-end proof.</p>
+    <p class="owner-note"><strong>Historical puzzle-race map (superseded 2026-09-23):</strong> the Team Bays / Operations Console / Exam shell selections below were the puzzle-race direction. The production game is <strong>Code Arena</strong> (1v1/2v2 code battles); the frozen interaction reference is <a href="09-arena.html">09-arena.html</a>. This page is kept for reusable wayfinding patterns only.</p>
     <p class="owner-note"><strong>Production transition authority:</strong> the Core service owns account, profile, friend, and 42 OAuth transitions; the Game service owns Lobby, Match, Result, and recovery transitions; delivery documentation owns policy publication. This page makes no production transition.</p>
 
     <nav class="legend" aria-label="Journey status legend">
@@ -153,35 +154,35 @@
       <p class="section-intro">Account access → Home → Lobby → Live match → Result</p>
       <ol class="route-list">
         <li>
-          <article class="journey-card" data-status="planned">
-            <span class="status planned">Production planned</span>
+          <article class="journey-card" data-status="prototype">
+            <span class="status prototype">Prototype available</span>
             <h3>Account access</h3>
-            <p class="card-copy">A secure entry point before any player can join a Lobby.</p>
-            <ul class="requirements"><li>Email/password</li><li>42 OAuth linking</li></ul>
+            <p class="card-copy">Test view for email sign-up, sign-in, explicit 42 link, and 42 outage fallback.</p>
+            <a class="route-link" href="01-account.html">Open account prototype</a>
           </article>
         </li>
         <li>
-          <article class="journey-card" data-status="planned">
-            <span class="status planned">Production planned</span>
+          <article class="journey-card" data-status="prototype">
+            <span class="status prototype">Prototype available</span>
             <h3>Home</h3>
-            <p class="card-copy">The signed-in start surface for choosing the next Team activity.</p>
-            <ul class="requirements"><li>Create/join lobby</li><li>Online friends</li></ul>
+            <p class="card-copy">Signed-in start test view for Lobby create/join and online friends.</p>
+            <a class="route-link" href="02-home.html">Open home prototype</a>
           </article>
         </li>
         <li>
           <article class="journey-card" data-status="prototype">
             <span class="status prototype">Prototype available</span>
             <h3>Lobby</h3>
-            <p class="card-copy">Selected Team Bays direction for Team and Role selection.</p>
-            <a class="route-link" href="lobby.html?variant=A">Open lobby prototype</a>
+            <p class="card-copy">Historical puzzle-race selection · Team Bays direction for Team and Role selection (superseded 2026-09-23).</p>
+            <a class="route-link" href="03-lobby.html?variant=A">Open lobby prototype</a>
           </article>
         </li>
         <li>
           <article class="journey-card" data-status="prototype">
             <span class="status prototype">Prototype available</span>
             <h3>Live match</h3>
-            <p class="card-copy">Selected Operations Console direction for a role-based Match.</p>
-            <a class="route-link" href="index.html?variant=A">Open live match prototype</a>
+            <p class="card-copy">Historical puzzle-race selection · Operations Console direction for a role-based Match (superseded 2026-09-23).</p>
+            <a class="route-link" href="04-live-match.html?variant=A">Open live match prototype</a>
           </article>
         </li>
         <li>
@@ -189,7 +190,7 @@
             <span class="status prototype">Prototype available</span>
             <h3>Result</h3>
             <p class="card-copy">Scenario-led outcome states with fake server-decision evidence.</p>
-            <a class="route-link" href="outcomes.html">Open result prototype</a>
+            <a class="route-link" href="05-outcomes.html">Open result prototype</a>
           </article>
         </li>
       </ol>
@@ -202,19 +203,19 @@
           <span class="status prototype">Prototype available</span>
           <h3>Live match recovery branch</h3>
           <p class="card-copy">A Match interruption can branch to local disconnect, reconnect, restored, or interrupted scenarios. The Game service would own the real recovery transition.</p>
-          <a class="route-link" href="recovery.html">Open recovery prototype</a>
+          <a class="route-link" href="06-recovery.html">Open recovery prototype</a>
         </article>
         <article class="secondary-card">
-          <span class="status planned">Production planned</span>
+          <span class="status prototype">Prototype available</span>
           <h3>Profile &amp; friends</h3>
-          <p class="card-copy">Core-owned identity and social surfaces are required for the planned user modules.</p>
-          <ul class="requirements"><li>Profile</li><li>Avatar</li><li>Friends</li><li>Online status</li></ul>
+          <p class="card-copy">Test view for profile edit, avatar state, friends list, and online status.</p>
+          <a class="route-link" href="07-profile.html">Open profile prototype</a>
         </article>
         <article class="secondary-card">
           <span class="status mandatory">Mandatory delivery</span>
           <h3>Policies</h3>
-          <p class="card-copy">Relevant public pages must be reachable before account access.</p>
-          <ul class="requirements"><li>Privacy Policy</li><li>Terms of Service</li></ul>
+          <p class="card-copy">Draft Privacy Policy and Terms reachable before account access. Final legal review still required.</p>
+          <a class="route-link" href="08-policies.html">Open policies prototype</a>
         </article>
       </div>
     </section>
@@ -237,11 +238,11 @@
     <section class="knowledge" aria-label="Journey evidence boundaries">
       <article class="knowledge-card">
         <h2>What we know</h2>
-        <p>Lobby, Live match, Result, and Recovery have separate local UI prototypes. Their links and route relationships are represented here for desktop and mobile wayfinding.</p>
+        <p>Account access, Home, Lobby, Live match, Result, Recovery, Profile and friends, and Policies have separate local test views. Their links and route relationships are represented here for desktop and mobile wayfinding.</p>
       </article>
       <article class="knowledge-card">
         <h2>What remains</h2>
-        <p>Account access, Home, Profile &amp; friends, Policies, and every production service surface remain unimplemented. Authentication, persistence, concurrent users, WebSockets, and policy content still require production evidence.</p>
+        <p>Every production service surface remains unimplemented. Authentication, persistence, concurrent users, WebSockets, and final policy text still require production evidence.</p>
       </article>
     </section>
 

@@ -417,12 +417,12 @@
 </head>
 <body>
   <a class="skip-link" href="#content">Skip to lobby controls</a>
-  <div class="prototype-flag">Prototype · fake lobby state</div>
+  <div class="prototype-flag">Prototype · fake lobby state · historical puzzle-race (superseded 2026-09-23; production entry is Code Arena per 09-arena.html)</div>
   <nav class="prototype-switcher" aria-label="Lobby prototype variants">
     <button type="button" id="previous-variant" aria-label="Previous lobby variant">←</button>
     <div class="switcher-label" aria-live="polite">
       <strong id="variant-name">A — Team bays</strong>
-      <small id="selected-direction">Selected direction · Team bays</small>
+      <small id="selected-direction">Selected direction · Team bays (historical puzzle-race prototype, superseded 2026-09-23)</small>
     </div>
     <button type="button" id="next-variant" aria-label="Next lobby variant">→</button>
     <button type="button" class="state-button" id="show-state">State</button>
@@ -451,9 +451,9 @@
     ];
 
     const roleCatalog = [
-      { id: "reader", name: "Code reader", short: "Reads private source and extracts safe facts." },
-      { id: "analyst", name: "Input analyst", short: "Tests inputs and identifies the active rule." },
-      { id: "builder", name: "Answer builder", short: "Assembles the shared team submission." }
+      { id: "sequence", name: "Sequence transformation", short: "Decode and normalize ordered data." },
+      { id: "search", name: "Deterministic search", short: "Explore candidates and resolve equal choices predictably.", threePlayerOnly: true },
+      { id: "stateful", name: "Stateful constraints", short: "Track changing limits across ordered events." }
     ];
 
     const initialState = {
@@ -465,8 +465,8 @@
       lastEvent: "Private lobby created. Invite code is not an authentication credential.",
       teams: {
         blue: [
-          { id: "you", name: "Aimane", role: "reader", ready: false, connected: true },
-          { id: "saad", name: "Saad", role: "builder", ready: true, connected: true }
+          { id: "you", name: "Aimane", role: "sequence", ready: false, connected: true },
+          { id: "saad", name: "Saad", role: "stateful", ready: true, connected: true }
         ],
         coral: [
           { id: "amal", name: "Amal", role: null, ready: false, connected: true },
@@ -510,7 +510,9 @@
     }
 
     function activeRoles(state) {
-      return state.matchSize === 2 ? roleCatalog.filter((role) => role.id !== "analyst") : roleCatalog;
+      return state.matchSize === 2
+        ? roleCatalog.filter((role) => !role.threePlayerOnly)
+        : roleCatalog;
     }
 
     function slotsFor(state, teamId) {
@@ -576,7 +578,7 @@
       const occupied = occupiedRoles(state, current.teamId);
       return `<fieldset class="role-list"><legend class="visually-hidden">Choose your role</legend>${activeRoles(state).map((role) => {
         const disabled = occupied.has(role.id);
-        return `<div class="role-option"><input type="radio" name="${prefix}-role" id="${prefix}-${role.id}" value="${role.id}" data-action="choose-role" ${current.member.role === role.id ? "checked" : ""} ${disabled ? "disabled" : ""}><label for="${prefix}-${role.id}"><strong>${escapeHtml(role.name)}</strong><span>${escapeHtml(role.short)}</span></label></div>`;
+        return `<div class="role-option"><input type="radio" name="${prefix}-role" id="${prefix}-${role.id}" value="${role.id}" data-action="choose-role" ${current.member.role === role.id ? "checked" : ""} ${disabled ? "disabled" : ""}><label for="${prefix}-${role.id}"><strong>${escapeHtml(role.name)}</strong><span>${escapeHtml(role.short)}</span><span>Equal expected workload · style describes the kind of coding work, not difficulty or importance.</span></label></div>`;
       }).join("")}</fieldset>`;
     }
 
@@ -589,7 +591,7 @@
 
     function topbarMarkup(state, includeJourneyMap = false) {
       return `<header class="topbar">
-        <div><p class="eyebrow">Room 01 · Campus lockdown</p><h1>Assemble both response teams</h1>${includeJourneyMap ? '<a class="journey-link" href="journey.html">Journey map</a>' : ""}</div>
+        <div><p class="eyebrow">Room 01 · Campus lockdown</p><h1>Assemble both response teams</h1>${includeJourneyMap ? '<a class="journey-link" href="00-journey.html">Journey map</a>' : ""}</div>
         <div class="invite"><p class="eyebrow">Private invite</p><strong class="mono">${escapeHtml(state.inviteCode)}</strong><button class="button" type="button" data-action="copy-code">Copy code</button></div>
         <div class="identity"><p class="eyebrow">Authenticated player</p><strong>Aimane · Host</strong></div>
       </header>`;
@@ -616,7 +618,7 @@
 
     function assignmentPanel(state, prefix) {
       const current = findCurrentPlayer(state);
-      return `<section class="panel" aria-labelledby="${prefix}-assignment-title"><div class="panel-head"><p class="eyebrow">Private assignment</p><h2 id="${prefix}-assignment-title">Your team and role</h2></div><div class="panel-body"><div class="assignment-summary"><div class="summary-stat"><span>Team</span><strong>${current.teamId === "blue" ? "Blue" : "Coral"}</strong></div><div class="summary-stat"><span>Role</span><strong>${escapeHtml(roleName(current.member.role))}</strong></div><div class="summary-stat"><span>Status</span><strong>${current.member.ready ? "Ready ✓" : "Editing"}</strong></div></div>${roleOptionsMarkup(state, prefix)}<div class="actions inline" style="margin-block-start: 0.75rem"><button class="button" type="button" data-action="random-role">Assign an open role</button><button class="button primary" type="button" data-action="toggle-ready" aria-pressed="${current.member.ready}">${current.member.ready ? "Ready ✓ · Edit selection" : "Lock role and mark ready"}</button></div></div></section>`;
+      return `<section class="panel" aria-labelledby="${prefix}-assignment-title"><div class="panel-head"><p class="eyebrow">Programming style</p><h2 id="${prefix}-assignment-title">Your team and style</h2></div><div class="panel-body"><div class="assignment-summary"><div class="summary-stat"><span>Team</span><strong>${current.teamId === "blue" ? "Blue" : "Coral"}</strong></div><div class="summary-stat"><span>Style</span><strong>${escapeHtml(roleName(current.member.role))}</strong></div><div class="summary-stat"><span>Status</span><strong>${current.member.ready ? "Ready ✓" : "Editing"}</strong></div></div><p>Blind assignment: the subject, exact component, function contract, examples, and starter code remain hidden until the match starts. Every style carries equal expected workload.</p>${roleOptionsMarkup(state, prefix)}<div class="actions inline" style="margin-block-start: 0.75rem"><button class="button" type="button" data-action="random-role">Assign an open style</button><button class="button primary" type="button" data-action="toggle-ready" aria-pressed="${current.member.ready}">${current.member.ready ? "Ready ✓ · Edit selection" : "Lock style and mark ready"}</button></div></div></section>`;
     }
 
     function guardrailsPanel() {
@@ -647,11 +649,13 @@
     function renderVariantC(state) {
       const current = findCurrentPlayer(state);
       const step = guidedStep(state);
-      return `<div class="app-shell">${topbarMarkup(state)}${eventMarkup(state)}<div class="layout-c"><ol class="stepper" aria-label="Role assignment progress"><li class="${step === 1 ? "active" : ""}"><strong>1 · Choose team</strong><span>${current.teamId === "blue" ? "Blue" : "Coral"} selected</span></li><li class="${step === 2 ? "active" : ""}"><strong>2 · Choose role</strong><span>${escapeHtml(roleName(current.member.role))}</span></li><li class="${step === 3 ? "active" : ""}"><strong>3 · Confirm</strong><span>${current.member.ready ? "Ready ✓" : "Review and lock"}</span></li></ol><div class="guided-grid"><section class="panel"><div class="panel-head"><p class="eyebrow">Step 1</p><h2>Where will you play?</h2></div><div class="panel-body"><div class="team-choice-grid"><button class="button team-choice" type="button" data-action="choose-team" data-team="blue" aria-pressed="${current.teamId === "blue"}"><strong>Blue team</strong><span>${slotsFor(state, "blue").filter(Boolean).length}/${state.matchSize} joined</span></button><button class="button team-choice" type="button" data-action="choose-team" data-team="coral" aria-pressed="${current.teamId === "coral"}"><strong>Coral team</strong><span>${slotsFor(state, "coral").filter(Boolean).length}/${state.matchSize} joined</span></button></div><div class="guided-role-grid">${activeRoles(state).map((role) => { const unavailable = occupiedRoles(state, current.teamId).has(role.id); return `<button class="button team-choice" type="button" data-action="choose-role-button" data-role="${role.id}" aria-pressed="${current.member.role === role.id}" aria-disabled="${unavailable}"><strong>${escapeHtml(role.name)}</strong><span>${unavailable ? "Occupied on this team" : escapeHtml(role.short)}</span></button>`; }).join("")}</div></div></section><aside class="b-dock" aria-label="Guided confirmation"><section class="panel"><div class="panel-head"><p class="eyebrow">Current selection</p><h2>${current.teamId === "blue" ? "Blue" : "Coral"} · ${escapeHtml(roleName(current.member.role))}</h2></div><div class="panel-body"><p class="start-state">Changing team or role clears readiness so every player explicitly confirms the final assignment.</p><div class="actions"><button class="button" type="button" data-action="random-role">Assign an open role</button><button class="button primary" type="button" data-action="toggle-ready" aria-pressed="${current.member.ready}">${current.member.ready ? "Ready ✓ · Edit selection" : "Confirm role and mark ready"}</button></div></div></section>${formatControl(state)}</aside></div><div style="display:grid; gap:1rem; margin-block-start:1rem">${startPanel(state)}${guardrailsPanel()}</div></div></div>`;
+      return `<div class="app-shell">${topbarMarkup(state)}${eventMarkup(state)}<div class="layout-c"><ol class="stepper" aria-label="Role assignment progress"><li class="${step === 1 ? "active" : ""}"><strong>1 · Choose team</strong><span>${current.teamId === "blue" ? "Blue" : "Coral"} selected</span></li><li class="${step === 2 ? "active" : ""}"><strong>2 · Choose role</strong><span>${escapeHtml(roleName(current.member.role))}</span></li><li class="${step === 3 ? "active" : ""}"><strong>3 · Confirm</strong><span>${current.member.ready ? "Ready ✓" : "Review and lock"}</span></li></ol><div class="guided-grid"><section class="panel"><div class="panel-head"><p class="eyebrow">Step 1</p><h2>Where will you play?</h2></div><div class="panel-body"><div class="team-choice-grid"><button class="button team-choice" type="button" data-action="choose-team" data-team="blue" aria-pressed="${current.teamId === "blue"}"><strong>Blue team</strong><span>${slotsFor(state, "blue").filter(Boolean).length}/${state.matchSize} joined</span></button><button class="button team-choice" type="button" data-action="choose-team" data-team="coral" aria-pressed="${current.teamId === "coral"}"><strong>Coral team</strong><span>${slotsFor(state, "coral").filter(Boolean).length}/${state.matchSize} joined</span></button></div><div class="guided-role-grid">${activeRoles(state).map((role) => { const unavailable = occupiedRoles(state, current.teamId).has(role.id); return `<button class="button team-choice" type="button" data-action="choose-role-button" data-role="${role.id}" aria-pressed="${current.member.role === role.id}" aria-disabled="${unavailable}"><strong>${escapeHtml(role.name)}</strong><span>${unavailable ? "Occupied on this team" : escapeHtml(role.short)}</span><span>Equal expected workload</span></button>`; }).join("")}</div></div></section><aside class="b-dock" aria-label="Guided confirmation"><section class="panel"><div class="panel-head"><p class="eyebrow">Current selection</p><h2>${current.teamId === "blue" ? "Blue" : "Coral"} · ${escapeHtml(roleName(current.member.role))}</h2></div><div class="panel-body"><p class="start-state">Changing team or role clears readiness so every player explicitly confirms the final assignment.</p><div class="actions"><button class="button" type="button" data-action="random-role">Assign an open role</button><button class="button primary" type="button" data-action="toggle-ready" aria-pressed="${current.member.ready}">${current.member.ready ? "Ready ✓ · Edit selection" : "Confirm role and mark ready"}</button></div></div></section>${formatControl(state)}</aside></div><div style="display:grid; gap:1rem; margin-block-start:1rem">${startPanel(state)}${guardrailsPanel()}</div></div></div>`;
     }
 
     function startedMarkup(state) {
-      return `<div class="app-shell">${topbarMarkup(state, true)}${eventMarkup(state)}<section class="panel started-card"><p class="eyebrow">Prototype transition</p><h2>Both teams are deployed.</h2><p>The lobby has produced two equal teams with unique roles and confirmed readiness. In production, the game service would serialize this transition and broadcast the authoritative match snapshot.</p><div class="actions inline"><a class="button primary" href="index.html?variant=A">Open active-match prototype</a><button class="button" type="button" data-action="reset">Reset lobby</button></div></section></div>`;
+      const current = findCurrentPlayer(state);
+      const matchHref = `04-live-match.html?variant=A&teamSize=${state.matchSize}&role=${encodeURIComponent(current.member.role)}`;
+      return `<div class="app-shell">${topbarMarkup(state, true)}${eventMarkup(state)}<section class="panel started-card"><p class="eyebrow">Prototype transition</p><h2>Both teams are deployed.</h2><p>The lobby has produced two equal teams with unique programming styles and confirmed readiness. In production, the game service would serialize this transition and broadcast the authoritative match snapshot.</p><div class="actions inline"><a class="button primary" href="${matchHref}">Open active-match prototype</a><button class="button" type="button" data-action="reset">Reset lobby</button></div></section></div>`;
     }
 
     const renderers = { A: renderVariantA, B: renderVariantB, C: renderVariantC };
@@ -662,7 +666,7 @@
       const meta = variants.find((item) => item.key === variant);
       document.querySelector("#variant-name").textContent = `${meta.key} — ${meta.name}`;
       document.querySelector("#selected-direction").textContent = variant === "A"
-        ? "Selected direction · Team bays"
+        ? "Selected direction · Team bays (historical puzzle-race prototype, superseded 2026-09-23)"
         : "Historical alternative · Use ← → when not selecting";
       document.title = `${meta.name} Lobby Prototype | Campus Puzzle Race`;
       stateOutput.textContent = JSON.stringify({ ...state, derived: readiness(state) }, null, 2);
@@ -784,7 +788,7 @@
           store.update(() => {}, "Start rejected: both teams must be full, uniquely assigned, connected, and ready.");
           return;
         }
-        focusAfterRender = 'a[href="journey.html"]';
+        focusAfterRender = 'a[href="00-journey.html"]';
         store.update((state) => { state.started = true; }, "Match transition accepted once by the authoritative game service (simulated)." );
         return;
       }

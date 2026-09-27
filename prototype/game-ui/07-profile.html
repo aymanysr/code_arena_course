@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Profile and Friends Prototype | Campus Puzzle Race</title>
+  <!-- THROWAWAY PROTOTYPE: Can a player view and edit a profile, use an avatar, and manage friends with online status? -->
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      --bg:#07100d; --surface:#0d1a16; --surface-2:#13231e; --line:#315044;
+      --ink:#e4efe9; --muted:#9ab1a6; --accent:#c8f36a; --accent-ink:#102008;
+      --blue:#8dd8ff; --warning:#f6cb6f; --focus:#fff; --safe:clamp(0.85rem,3vw,3rem); }
+    *{box-sizing:border-box} html{min-inline-size:20rem;background:var(--bg)}
+    body{min-block-size:100dvh;margin:0;background:var(--bg);color:var(--ink)}
+    button,a,input,textarea{font:inherit} button{cursor:pointer}
+    :where(a,button,input,textarea,[tabindex="-1"]):focus-visible{outline:0.2rem solid var(--focus);outline-offset:0.2rem}
+    .skip-link{position:fixed;z-index:10;inset:0.75rem auto auto 0.75rem;display:inline-flex;align-items:center;min-block-size:3rem;padding-inline:0.9rem;translate:0 -180%;background:#fff;color:#101010;font-weight:800}
+    .skip-link:focus{translate:0}
+    .prototype-flag{inline-size:fit-content;margin-inline:auto;border-radius:0 0 0.45rem 0.45rem;padding:0.3rem 0.75rem;background:var(--warning);color:#221c08;font:800 0.875rem/1.2 ui-monospace,monospace;letter-spacing:0.08em;text-transform:uppercase}
+    .visually-hidden{position:absolute!important;clip-path:inset(50%)!important;overflow:hidden!important;inline-size:1px!important;block-size:1px!important;margin:-1px!important;padding:0!important;border:0!important;white-space:nowrap!important}
+    .eyebrow{margin:0;color:var(--muted);font:800 0.875rem/1.25 ui-monospace,monospace;letter-spacing:0.1em;text-transform:uppercase}
+    main{min-block-size:100dvh;padding:0 var(--safe) 2rem} .shell{max-inline-size:70rem;margin-inline:auto}
+    .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:end;padding-block:clamp(1.5rem,5vw,3rem) 1.25rem;border-block-end:1px solid var(--line)}
+    h1{margin:0.25rem 0 0;font-size:clamp(2rem,5vw,3.8rem);letter-spacing:-0.04em;line-height:1}
+    .intro{max-inline-size:70ch;color:var(--muted);line-height:1.55}
+    .scenario-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:1rem;align-items:center;margin-block:1rem;padding:0.8rem;border:1px solid var(--line);background:var(--surface)}
+    .scenario-buttons{display:flex;flex-wrap:wrap;gap:0.5rem}
+    .control,.action-link{display:inline-flex;align-items:center;justify-content:center;min-block-size:3rem;min-inline-size:3rem;border:1px solid var(--line);border-radius:0.38rem;padding:0.65rem 0.85rem;background:transparent;color:var(--ink);font-weight:800;text-decoration:none}
+    .control[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,var(--surface));color:var(--accent)}
+    .control.primary{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+    .grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem}
+    .panel{border:1px solid var(--line);background:var(--surface)} .panel-head{padding:1rem 1rem 0} .panel-body{padding:1rem;display:grid;gap:0.8rem}
+    h2{margin:0;font-size:1.4rem} label{display:grid;gap:0.3rem;font-weight:700}
+    input,textarea{min-block-size:3rem;border:1px solid var(--line);border-radius:0.38rem;background:#050a08;color:var(--ink);padding:0.65rem 0.8rem;width:100%}
+    ul{margin:0;padding:0;list-style:none;display:grid;gap:0.6rem}
+    li.member{display:grid;grid-template-columns:2.5rem minmax(0,1fr) auto;gap:0.6rem;align-items:center;border:1px solid var(--line);padding:0.6rem;background:var(--surface-2)}
+    .avatar{display:grid;place-items:center;width:2.5rem;height:2.5rem;border-radius:50%;background:#1d3027;font-weight:900}
+    .hint{margin:0;color:var(--muted);font-size:0.9375rem;line-height:1.5}
+    .bottom-actions{display:flex;flex-wrap:wrap;gap:0.65rem;margin-block:1rem 0}
+    footer{color:var(--muted);font-size:0.875rem}
+    dialog{inline-size:min(42rem,calc(100% - 2rem));border:1px solid var(--line);border-radius:0.5rem;background:var(--surface);color:var(--ink);padding:0}
+    dialog::backdrop{background:rgb(0 0 0/0.72)} dialog form{display:grid;gap:0.8rem;padding:1rem}
+    dialog pre{max-block-size:50dvh;overflow:auto;background:#050a08;border:1px solid var(--line);padding:0.9rem;white-space:pre-wrap;font-size:0.875rem}
+    @media (max-width:46rem){.topbar,.scenario-bar,.grid{grid-template-columns:1fr}.scenario-buttons{display:grid;grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to profile details</a>
+  <div class="prototype-flag">Prototype · fake state</div>
+  <main id="content" tabindex="-1"><div id="app"></div></main>
+  <p class="visually-hidden" id="live-status" aria-live="polite" aria-atomic="true"></p>
+  <dialog id="state-dialog" aria-labelledby="state-title">
+    <form method="dialog"><p class="eyebrow">Prototype inspector</p><h2 id="state-title">Current fake profile state</h2><pre tabindex="0"><code id="state-output"></code></pre><div><button class="control" value="close">Close</button></div></form>
+  </dialog>
+  <script>
+    "use strict";
+    const scenarios = ["view", "edit", "avatar", "friends"];
+    function snapshot(s) {
+      return { scenario: s, name: "Aimane", bio: "Code reader. Loves loop traces.",
+        avatar: s === "avatar" ? "custom" : "default",
+        friends: [{ name: "Saad", online: true }, { name: "Amal", online: true }, { name: "Nora", online: false }],
+        lastEvent: "Profile test view ready. Core service owns this data (simulated)." };
+    }
+    function requested() { const c = new URLSearchParams(location.search).get("scenario"); return scenarios.includes(c) ? c : "view"; }
+    let state = snapshot(requested());
+    const app = document.querySelector("#app");
+    const live = document.querySelector("#live-status");
+    const dlg = document.querySelector("#state-dialog");
+    const out = document.querySelector("#state-output");
+    window.__PROFILE_STATE__ = () => structuredClone(state);
+    function render(opts = {}) {
+      app.innerHTML = `<div class="shell">
+        <header class="topbar"><div><p class="eyebrow">Profile and friends · Core service owns</p><h1>${state.name}</h1></div><div><span class="eyebrow">Avatar</span><br><strong>${state.avatar === "default" ? "Default ●" : "Custom ●"}</strong></div></header>
+        <p class="intro">This test view shows a profile page, avatar state, and friends with online status. It supports the user modules. It proves no server function.</p>
+        <nav class="scenario-bar" aria-label="Profile scenarios"><div class="scenario-buttons">${scenarios.map(s => `<button class="control" type="button" data-scenario="${s}" aria-pressed="${state.scenario === s}">${s}</button>`).join("")}</div><button class="control" type="button" id="show-state">Inspect state</button></nav>
+        <div class="grid">
+          <section class="panel" aria-labelledby="profile-title"><div class="panel-head"><p class="eyebrow">Profile page</p><h2 id="profile-title">Your information</h2></div>
+          <div class="panel-body">
+            <p class="hint"><strong>${state.name}.</strong> ${state.bio}</p>
+            <form id="profile-form"><label>Display name<input name="name" value="${state.name}" maxlength="40" required></label><label>Bio<textarea name="bio" maxlength="160" rows="2">${state.bio}</textarea></label><div><button class="control primary" type="submit">Save profile</button></div></form>
+            <div><button class="control" type="button" data-action="avatar">Use ${state.avatar === "default" ? "custom" : "default"} avatar (simulated)</button></div>
+            <p class="hint">Avatar rule: default avatar shows until a valid upload passes checks. Server sets a safe file name. Bad files do not replace the current image.</p>
+          </div></section>
+          <section class="panel" aria-labelledby="friends-title"><div class="panel-head"><p class="eyebrow">Friends · online status</p><h2 id="friends-title">Friends list</h2></div>
+          <div class="panel-body"><ul>${state.friends.map((f, i) => `<li class="member"><span class="avatar">${f.name.charAt(0)}</span><span><strong>${f.name}</strong><br><small>${f.online ? "Online ●" : "Offline ○"}</small></span><span><button class="control" type="button" data-action="remove" data-index="${i}">Remove</button></span></li>`).join("")}</ul>
+          <form id="add-form"><label>Add friend by name<input name="friend" maxlength="40" placeholder="e.g. Yasmine" required></label><div><button class="control" type="submit">Add friend</button></div></form>
+          </div></section>
+        </div>
+        <div class="bottom-actions"><a class="action-link" href="02-home.html">Back to Home</a><a class="action-link" href="00-journey.html">Open journey map</a></div>
+        <footer>Test view only. No network. Real edit, upload, and friend changes need Core service checks.</footer>
+      </div>`;
+      out.textContent = JSON.stringify(state, null, 2);
+      live.textContent = state.lastEvent;
+      if (opts.focusSelector) app.querySelector(opts.focusSelector)?.focus();
+    }
+    function choose(s) { const p = new URLSearchParams(location.search); p.set("scenario", s); history.pushState(null, "", `${location.pathname}?${p}`); state = snapshot(s); render({ focusSelector: `[data-scenario="${s}"]` }); }
+    app.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-scenario]"); if (b) { choose(b.dataset.scenario); return; }
+      if (e.target.closest("#show-state")) dlg.showModal();
+      const av = e.target.closest('[data-action="avatar"]'); if (av) { state.avatar = state.avatar === "default" ? "custom" : "default"; state.lastEvent = "Avatar set to " + state.avatar + " (simulated)."; render(); return; }
+      const rm = e.target.closest('[data-action="remove"]'); if (rm) { const n = state.friends[Number(rm.dataset.index)].name; state.friends.splice(Number(rm.dataset.index), 1); state.lastEvent = n + " removed from friends (simulated)."; render(); }
+    });
+    app.addEventListener("submit", (e) => {
+      if (e.target.closest("#profile-form")) { e.preventDefault(); const fd = new FormData(e.target); state.name = String(fd.get("name") || state.name); state.bio = String(fd.get("bio") || ""); state.lastEvent = "Profile saved locally (simulated). Server validation still required."; render(); return; }
+      if (e.target.closest("#add-form")) { e.preventDefault(); const v = String(new FormData(e.target).get("friend") || "").trim(); if (!v) return; state.friends.push({ name: v, online: true }); state.lastEvent = v + " added to friends (simulated)."; render(); }
+    });
+    addEventListener("popstate", () => { state = snapshot(requested()); render(); });
+    render();
+  </script>
+</body>
+</html>

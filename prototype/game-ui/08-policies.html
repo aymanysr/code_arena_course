@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Policies Prototype | Code Arena</title>
+  <!-- THROWAWAY PROTOTYPE: Are Privacy Policy and Terms reachable before login, with relevant Code Arena content and no placeholder? -->
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+      --bg:#07100d; --surface:#0d1a16; --surface-2:#13231e; --line:#315044;
+      --ink:#e4efe9; --muted:#9ab1a6; --accent:#c8f36a; --accent-ink:#102008;
+      --warning:#f6cb6f; --focus:#fff; --safe:clamp(0.85rem,3vw,3rem); }
+    *{box-sizing:border-box} html{min-inline-size:20rem;background:var(--bg)}
+    body{min-block-size:100dvh;margin:0;background:var(--bg);color:var(--ink)}
+    button,a{font:inherit} button{cursor:pointer}
+    :where(a,button,[tabindex="-1"]):focus-visible{outline:0.2rem solid var(--focus);outline-offset:0.2rem}
+    .skip-link{position:fixed;z-index:10;inset:0.75rem auto auto 0.75rem;display:inline-flex;align-items:center;min-block-size:3rem;padding-inline:0.9rem;translate:0 -180%;background:#fff;color:#101010;font-weight:800}
+    .skip-link:focus{translate:0}
+    .prototype-flag{inline-size:fit-content;margin-inline:auto;border-radius:0 0 0.45rem 0.45rem;padding:0.3rem 0.75rem;background:var(--warning);color:#221c08;font:800 0.875rem/1.2 ui-monospace,monospace;letter-spacing:0.08em;text-transform:uppercase}
+    .visually-hidden{position:absolute!important;clip-path:inset(50%)!important;overflow:hidden!important;inline-size:1px!important;block-size:1px!important;margin:-1px!important;padding:0!important;border:0!important;white-space:nowrap!important}
+    .eyebrow{margin:0;color:var(--muted);font:800 0.875rem/1.25 ui-monospace,monospace;letter-spacing:0.1em;text-transform:uppercase}
+    main{min-block-size:100dvh;padding:0 var(--safe) 2rem} .shell{max-inline-size:70rem;margin-inline:auto}
+    .topbar{padding-block:clamp(1.5rem,5vw,3rem) 1.25rem;border-block-end:1px solid var(--line)}
+    h1{margin:0.25rem 0 0;font-size:clamp(2rem,5vw,3.8rem);letter-spacing:-0.04em;line-height:1;max-inline-size:16ch}
+    .intro{max-inline-size:72ch;color:var(--muted);line-height:1.55}
+    .doc-bar{display:flex;flex-wrap:wrap;gap:0.5rem;margin-block:1rem;padding:0.8rem;border:1px solid var(--line);background:var(--surface)}
+    .control,.action-link{display:inline-flex;align-items:center;justify-content:center;min-block-size:3rem;min-inline-size:3rem;border:1px solid var(--line);border-radius:0.38rem;padding:0.65rem 0.85rem;background:transparent;color:var(--ink);font-weight:800;text-decoration:none}
+    .control[aria-pressed="true"]{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 15%,var(--surface));color:var(--accent)}
+    .panel{border:1px solid var(--line);background:var(--surface);margin-block-end:1rem}
+    .panel-body{padding:1rem;line-height:1.6;color:var(--muted)}
+    .panel-body h2,.panel-body h3{color:var(--ink)} .panel-body h2{margin:0 0 0.6rem;font-size:1.5rem} .panel-body h3{margin:1.2rem 0 0.4rem;font-size:1.1rem}
+    .panel-body p,.panel-body li{font-size:0.975rem} .panel-body ul{padding-inline-start:1.2rem}
+    .bottom-actions{display:flex;flex-wrap:wrap;gap:0.65rem;margin-block:1rem 0}
+    footer{border-block-start:1px solid var(--line);padding-block-start:1rem;color:var(--muted);font-size:0.875rem}
+    footer nav{display:flex;flex-wrap:wrap;gap:0.5rem 1rem;margin-block-end:0.6rem}
+    footer nav a{display:inline-flex;align-items:center;min-block-size:3rem}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#content">Skip to policy text</a>
+  <div class="prototype-flag">Prototype · fake state</div>
+  <main id="content" tabindex="-1"><div id="app"></div></main>
+  <p class="visually-hidden" id="live-status" aria-live="polite" aria-atomic="true"></p>
+  <script>
+    "use strict";
+    function requested() { const c = new URLSearchParams(location.search).get("doc"); return c === "terms" ? "terms" : "privacy"; }
+    let doc = requested();
+    const app = document.querySelector("#app");
+    const live = document.querySelector("#live-status");
+    window.__POLICIES_STATE__ = () => structuredClone({ doc });
+    function render(focusDoc) {
+      const isPrivacy = doc === "privacy";
+      app.innerHTML = `<div class="shell">
+        <header class="topbar"><p class="eyebrow">Mandatory delivery · before login · docs owner</p><h1>${isPrivacy ? "Privacy Policy" : "Terms of Service"} — Code Arena</h1></header>
+        <p class="intro">This test view checks placement and scope: policy pages must be easy to reach before account access, hold relevant content, and hold no placeholder text. Final legal text still needs review.</p>
+        <nav class="doc-bar" aria-label="Policy documents">
+          <button class="control" type="button" data-doc="privacy" aria-pressed="${isPrivacy}">Privacy Policy</button>
+          <button class="control" type="button" data-doc="terms" aria-pressed="${!isPrivacy}">Terms of Service</button>
+        </nav>
+        ${isPrivacy ? `
+        <article class="panel" aria-labelledby="privacy-title"><div class="panel-body">
+          <h2 id="privacy-title" tabindex="-1">Privacy Policy (draft content for test)</h2>
+          <p><strong>What we store:</strong> account name and email, password hash with salt, 42 link ID, profile name and bio, avatar file, friends list and online status, Lobby and Match records, side and team membership, round state and problem rotation, Run records against visible examples, Submission records with request IDs, hidden-suite group results, and 2v2 team messages and quick pings.</p>
+          <h3>Why we store it</h3><ul><li>Run sign-up and sign-in, and protect accounts.</li><li>Run a Lobby, form sides (1v1 players or 2v2 teams), and run a timed Match with round rotation and readiness reset.</li><li>Check Runs against visible examples only, judge each Submission in the sealed hidden suite, and disclose per-round percentages plus the group breakdown at reveal.</li><li>Keep 2v2 team chat and pings inside the correct side only; 1v1 has no chat.</li></ul>
+          <h3>What we do not do</h3><ul><li>No sale of personal data. No ads. No tracking across sites.</li><li>No exposure of opponent code, hidden tests, or scores before the reveal.</li><li>No execution of player code outside the sandboxed judging component.</li></ul>
+          <h3>Keep time and rights</h3><p>We keep Match records for results and fair-play checks. You can ask to view, fix, or delete your account data. Ask the team contact in the final README. Deletion removes profile and friends data; past Match result lines may stay in anonymized form.</p>
+        </div></article>` : `
+        <article class="panel" aria-labelledby="terms-title"><div class="panel-body">
+          <h2 id="terms-title" tabindex="-1">Terms of Service (draft content for test)</h2>
+          <p><strong>Service:</strong> Code Arena. Two sides (two players in 1v1, two two-player teams in 2v2) solve the same sequence of programming problems under time pressure. Each round rotates to a new problem; Runs check visible examples only and Submissions are judged against the sealed hidden suite.</p>
+          <h3>Accounts</h3><ul><li>You must register with a valid email and password, or link 42 with explicit confirm while signed in.</li><li>You keep your login secret. One account per player.</li><li>The invitation code names a Lobby. It is not auth.</li></ul>
+          <h3>Fair play</h3><ul><li>No automation, no exploit of problem content, no access to the other side, another Match, hidden tests, or opponent code.</li><li>Each Submission needs a fresh request ID. Duplicate sends return the first result.</li><li>Submitting again replaces your current scored result for this round. Runs never touch the hidden suite and never change the score.</li><li>A Match result is the sum of round scores (0–100 per round, equal weight); tied totals break by scoring-submission time, then fewer submissions, then a draw. The 30:00 match clock is display only; the server decides outcomes.</li></ul>
+          <h3>Content and conduct</h3><p>2v2 team messages and pings stay inside the side. Hate, harassment, or explicit content leads to removal. Avatar uploads must be valid images; the server sets safe names and can reject bad files.</p>
+          <h3>Availability</h3><p>We aim for stable play but give no uptime promise in this test stage. A disconnected player's place stays reserved until match end with re-authenticated resume; there are no forfeits in the first release. An unrecoverable restart marks the Match interrupted with no win or loss.</p>
+        </div></article>`}
+        <div class="bottom-actions"><a class="action-link" href="01-account.html">Back to Account access</a><a class="action-link" href="00-journey.html">Open journey map</a></div>
+        <footer><nav aria-label="Policy links"><a href="08-policies.html?doc=privacy">Privacy Policy</a><a href="08-policies.html?doc=terms">Terms of Service</a><a href="01-account.html">Account access</a><a href="00-journey.html">Journey map</a></nav>Test view only. Draft text for layout and scope checks. Not final legal advice. Production needs footer links on every page and final review.</footer>
+      </div>`;
+      document.title = `${isPrivacy ? "Privacy Policy" : "Terms of Service"} Prototype | Code Arena`;
+      live.textContent = isPrivacy ? "Privacy Policy shown." : "Terms of Service shown.";
+      if (focusDoc) app.querySelector(`[data-doc="${focusDoc}"]`)?.focus();
+    }
+    function choose(d, focus) { const p = new URLSearchParams(location.search); p.set("doc", d); history.pushState(null, "", `${location.pathname}?${p}`); doc = d; render(focus ? d : null); }
+    app.addEventListener("click", (e) => { const b = e.target.closest("[data-doc]"); if (b) choose(b.dataset.doc, true); });
+    addEventListener("popstate", () => { doc = requested(); render(); });
+    render();
+  </script>
+</body>
+</html>

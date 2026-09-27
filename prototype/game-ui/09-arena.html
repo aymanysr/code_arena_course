@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Code Arena · 1v1 / 2v2 Prototype</title>
+  <!-- UI-only prototype: static + stateful frontend with mocked match data.
+       No WebSockets, no judging, no matchmaking. Realtime/judge wiring is a
+       later phase behind adapters (see MatchAdapter / PresenceAdapter below). -->
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f5;
+      --surface: #ffffff;
+      --surface-2: #eef1f0;
+      --line: #dde2e0;
+      --line-strong: #c2cbc7;
+      --ink: #1b2422;
+      --muted: #5d6a66;
+      --accent: #0e7c6b;
+      --accent-ink: #ffffff;
+      --accent-soft: #e3f0ec;
+      --danger: #b3261e;
+      --danger-soft: #fbeae9;
+      --amber: #8a5a00;
+      --amber-soft: #fef4e0;
+      --violet: #5b54c7;
+      --violet-soft: #ecebf9;
+      --radius: 6px;
+      --focus: #0e7c6b;
+      --safe: clamp(0.75rem, 3vw, 1.5rem);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 20rem; background: var(--bg); }
+    body { margin: 0; min-height: 100dvh; color: var(--ink); font-size: 0.875rem; line-height: 1.55; }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    :where(button, input, select, textarea, summary, a):focus-visible {
+      outline: 2px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .skip-link {
+      position: fixed; z-index: 100; inset: 0.75rem auto auto 0.75rem;
+      display: inline-flex; align-items: center; min-height: 2.75rem;
+      translate: 0 -200%; padding: 0.6rem 1rem;
+      background: var(--ink); color: #fff; font-weight: 700; text-decoration: none;
+      border-radius: var(--radius);
+    }
+    .skip-link:focus { translate: 0; }
+    .prototype-flag {
+      position: fixed; z-index: 30; inset: 0 auto auto 50%; translate: -50% 0;
+      background: #f5d85a; color: #15130b; border: 0; border-radius: 0 0 6px 6px;
+      padding: 0.3rem 0.7rem;
+      font: 700 0.75rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .num { font-variant-numeric: tabular-nums; }
+    .visually-hidden:where(:not(:focus-within, :active)) {
+      position: absolute !important; width: 1px !important; height: 1px !important;
+      margin: -1px !important; overflow: hidden !important; clip-path: inset(50%) !important;
+      white-space: nowrap !important; border: 0 !important; padding: 0 !important;
+    }
+    .eyebrow {
+      margin: 0 0 0.5rem; font: 700 0.75rem/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+    }
+    .status-dot { display: inline-block; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: currentColor; margin-inline-end: 0.4rem; flex: none; }
+
+    /* Arena header */
+    .arena-header {
+      position: sticky; top: 0; z-index: 20;
+      background: var(--surface); border-block-end: 1px solid var(--line);
+    }
+    .arena-header-inner {
+      display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+      max-width: 110rem; margin-inline: auto; padding: 0.6rem var(--safe);
+    }
+    .brand { font-weight: 900; letter-spacing: 0.04em; font-size: 1rem; }
+    .brand span { color: var(--accent); }
+    .mode-chip {
+      border: 1px solid var(--line-strong); border-radius: 999px;
+      padding: 0.2rem 0.6rem; font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.75rem; font-weight: 700; background: var(--surface-2);
+    }
+    .mode-chip.is-2v2 { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+    .header-meta { display: flex; align-items: center; gap: 0.75rem; margin-inline-start: auto; flex-wrap: wrap; }
+    .timer { font-family: ui-monospace, Menlo, monospace; font-weight: 800; font-size: 1rem; }
+    .back-btn, .leave-btn {
+      min-height: 2.75rem; border: 1px solid var(--line-strong); border-radius: var(--radius);
+      background: var(--surface); color: var(--ink); padding: 0.5rem 0.8rem;
+      font-weight: 700; text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .leave-btn { color: var(--danger); border-color: var(--danger); background: var(--surface); }
+    .leave-btn:hover { background: var(--danger-soft); }
+
+    /* Shell grid: problem | editor | match, tests bottom-center */
+    .arena-wrap { max-width: 110rem; margin-inline: auto; padding: 0.9rem var(--safe) 2rem; }
+    .mode-switch { display: flex; gap: 0.5rem; align-items: center; margin-block-end: 0.75rem; flex-wrap: wrap; }
+    .mode-switch a {
+      border: 1px solid var(--line-strong); border-radius: var(--radius);
+      padding: 0.5rem 0.8rem; min-height: 2.75rem; display: inline-flex; align-items: center;
+      text-decoration: none; color: var(--ink); font-weight: 700; background: var(--surface);
+    }
+    .mode-switch a[aria-current="page"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+    .arena-shell {
+      display: grid; gap: 0.75rem; align-items: start;
+      grid-template-columns: minmax(17rem, 0.9fr) minmax(30rem, 1.5fr) minmax(17rem, 0.85fr);
+      grid-template-areas: "problem editor match" "problem tests match";
+    }
+    .p-problem { grid-area: problem; }
+    .p-editor { grid-area: editor; }
+    .p-tests { grid-area: tests; }
+    .p-match { grid-area: match; }
+    .panel {
+      background: var(--surface); border: 1px solid var(--line);
+      border-radius: var(--radius); padding: 0.9rem;
+      box-shadow: 0 1px 2px rgb(16 24 22 / 0.06);
+      min-width: 0;
+    }
+    .panel h2 { margin: 0.1rem 0 0.5rem; font-size: 1.05rem; letter-spacing: -0.01em; }
+    .panel h3 { margin: 0.9rem 0 0.4rem; font-size: 0.9rem; }
+
+    .difficulty { border-radius: 999px; padding: 0.15rem 0.55rem; font-size: 0.75rem; font-weight: 800; }
+    .difficulty.easy { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+    .difficulty.medium { background: var(--amber-soft); color: var(--amber); border: 1px solid var(--amber); }
+    .tag-list { display: flex; gap: 0.35rem; flex-wrap: wrap; margin: 0.5rem 0; padding: 0; list-style: none; }
+    .tag-list li { border: 1px solid var(--line); border-radius: 4px; background: var(--surface-2); padding: 0.1rem 0.45rem; font-size: 0.75rem; }
+    .example {
+      border: 1px solid var(--line); border-radius: var(--radius);
+      background: var(--surface-2); padding: 0.55rem 0.65rem; margin-block: 0.5rem;
+    }
+    .example p { margin: 0.15rem 0; }
+    .constraints { margin: 0.4rem 0; padding-inline-start: 1.2rem; }
+    details.hints { border: 1px solid var(--line); border-radius: var(--radius); padding: 0.5rem 0.65rem; margin-block-start: 0.6rem; }
+    details.hints summary { cursor: pointer; min-height: 2.75rem; font-weight: 700; color: var(--amber); }
+
+    /* Editor */
+    .editor-toolbar { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-block: 0.5rem 0.6rem; }
+    .editor-toolbar select {
+      min-height: 2.75rem; border: 1px solid var(--line-strong); border-radius: var(--radius);
+      background: var(--surface); padding: 0.4rem 0.6rem;
+    }
+    .btn {
+      min-height: 2.75rem; border: 1px solid var(--line-strong); border-radius: var(--radius);
+      background: var(--surface); color: var(--ink); padding: 0.5rem 0.9rem; font-weight: 700;
+    }
+    .btn:hover { border-color: var(--ink); }
+    .btn:disabled { cursor: not-allowed; opacity: 0.65; background: var(--surface-2); color: var(--muted); border-color: var(--line-strong); }
+    .btn-primary:disabled { background: var(--surface-2); border-color: var(--line-strong); color: var(--muted); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+    .btn-primary:hover { border-color: var(--accent); }
+    .btn-run { color: var(--accent); border-color: var(--accent); background: var(--surface); }
+    .font-group { display: inline-flex; align-items: center; gap: 0.25rem; }
+    .font-group .btn { padding-inline: 0.6rem; }
+    .editor-meta { color: var(--muted); font-size: 0.75rem; }
+    .presence-bar { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.5rem; padding: 0; list-style: none; font-size: 0.75rem; }
+    .presence-bar li { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 0.2rem 0.6rem; background: var(--surface-2); }
+    .presence-bar li.you { background: var(--accent-soft); border-color: var(--accent); }
+    .presence-bar li.mate { background: var(--violet-soft); border-color: var(--violet); }
+    .editor-wrap { position: relative; }
+    #arena-code {
+      width: 100%; min-height: 22rem; max-height: 34rem; resize: vertical;
+      border: 1px solid var(--line-strong); border-radius: var(--radius);
+      background: #fbfcfb; color: var(--ink); padding: 0.7rem 0.7rem 0.7rem 2.6rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: var(--code-size, 0.875rem); line-height: 1.7; white-space: pre;
+    }
+    .line-nums {
+      position: absolute; inset: 1px auto 1px 1px; width: 2rem; padding-block: 0.7rem;
+      border-inline-end: 1px solid var(--line); color: var(--muted);
+      font-family: ui-monospace, Menlo, monospace; font-size: var(--code-size, 0.875rem);
+      line-height: 1.7; text-align: end; padding-inline-end: 0.4rem; user-select: none;
+      background: var(--surface-2); border-radius: var(--radius) 0 0 var(--radius); overflow: hidden;
+    }
+    .remote-cursor {
+      position: absolute; width: 2px; border-radius: 1px; pointer-events: none;
+      font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; font-weight: 800;
+    }
+    .remote-cursor.yassine { background: var(--accent); inset-block: 5.2rem 9rem; inset-inline-start: 52%; }
+    .remote-cursor.teammate { background: var(--violet); inset-block: 9.5rem 6rem; inset-inline-start: 60%; }
+    .remote-cursor span {
+      position: absolute; inset-block-start: -1.3rem; inset-inline-start: 2px; white-space: nowrap;
+      color: #fff; border-radius: 3px; padding: 0.1rem 0.4rem;
+    }
+    .remote-cursor.yassine span { background: var(--accent); }
+    .remote-cursor.teammate span { background: var(--violet); }
+
+    /* Tests */
+    .tabs { display: flex; gap: 0.5rem; border-block-end: 1px solid var(--line); margin-block-end: 0.6rem; }
+    .tabs button {
+      border: 0; border-block-end: 2px solid transparent; background: transparent;
+      min-height: 2.75rem; padding: 0.5rem 0.6rem; font-weight: 700; color: var(--muted);
+    }
+    .tabs button[aria-selected="true"] { color: var(--accent); border-block-end-color: var(--accent); }
+    .test-row {
+      display: grid; grid-template-columns: auto 1fr; gap: 0.15rem 0.6rem;
+      border: 1px solid var(--line); border-radius: var(--radius); padding: 0.55rem 0.65rem; margin-block: 0.45rem;
+    }
+    .test-badge {
+      width: 1.4rem; height: 1.4rem; border-radius: 50%; display: inline-grid; place-items: center;
+      border: 1px solid currentColor; font-weight: 900; font-size: 0.75rem; margin-block-start: 0.1rem;
+    }
+    .test-badge.pass { color: var(--accent); background: var(--accent-soft); }
+    .test-badge.fail { color: var(--danger); background: var(--danger-soft); }
+    .test-badge.idle { color: var(--muted); }
+    .test-badge.running { color: var(--amber); background: var(--amber-soft); }
+    .test-detail { margin: 0; color: var(--muted); }
+    .pass-summary { margin-inline-start: auto; color: var(--accent); font-weight: 800; }
+
+    /* Match panel */
+    .duel-card, .team-card { border: 1px solid var(--line); border-radius: var(--radius); padding: 0.6rem 0.7rem; margin-block: 0.5rem; }
+    .team-card.you { background: var(--accent-soft); border-color: var(--accent); }
+    .team-card.opp { background: #fdf1f0; border-color: #e5b8b4; }
+    .player-row { display: flex; align-items: center; gap: 0.55rem; padding-block: 0.3rem; }
+    .avatar {
+      width: 2rem; height: 2rem; border-radius: 50%; flex: none;
+      display: inline-grid; place-items: center; font-weight: 900;
+      background: var(--surface-2); border: 1px solid var(--line-strong);
+    }
+    .vs { text-align: center; font-weight: 900; margin-block: 0.35rem; letter-spacing: 0.08em; }
+    .info-dl { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 0.75rem; margin: 0; }
+    .info-dl dt { color: var(--muted); }
+    .info-dl dd { margin: 0; text-align: end; }
+    .event-log { margin: 0.4rem 0 0; padding: 0; list-style: none; }
+    .event-log li { display: flex; gap: 0.6rem; padding-block: 0.2rem; border-block-start: 1px solid var(--line); }
+    .event-log time { color: var(--muted); }
+    .ready-row { display: flex; align-items: center; gap: 0.5rem; padding-block: 0.25rem; }
+    .ready-yes { color: var(--accent); font-weight: 800; }
+    .ready-no { color: var(--danger); font-weight: 800; }
+    .chat-list { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; max-height: 10rem; overflow: auto; }
+    .chat-form { display: flex; gap: 0.4rem; margin-block-start: 0.5rem; }
+    .chat-form input {
+      flex: 1; min-width: 0; min-height: 2.75rem; border: 1px solid var(--line-strong);
+      border-radius: var(--radius); padding: 0.5rem 0.65rem; background: var(--surface);
+    }
+    .ping-grid { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-block-start: 0.5rem; }
+    .ping-grid button {
+      min-height: 2.5rem; border: 1px solid var(--line-strong); border-radius: 999px;
+      background: var(--surface); padding: 0.3rem 0.65rem; font-size: 0.75rem; font-weight: 700;
+    }
+
+    /* Phase / reveal */
+    .phase-banner {
+      border: 1px solid var(--line-strong); border-radius: var(--radius);
+      background: var(--surface); padding: 0.7rem 0.9rem; margin-block-end: 0.75rem;
+      display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+    }
+    .reveal { border: 1px solid var(--accent); border-radius: var(--radius); background: var(--surface); padding: 0.9rem; margin-block-start: 0.75rem; }
+    .reveal-scores { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; text-align: center; margin-block: 0.6rem; }
+    .reveal-scores strong { display: block; font-size: 1.8rem; }
+    .score-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .score-table th, .score-table td { border-block-start: 1px solid var(--line); padding: 0.45rem 0.4rem; text-align: start; }
+    .score-table td.num, .score-table th.num { text-align: end; }
+    .collapse-toggle { display: none; }
+
+    @media (max-width: 70rem) {
+      .arena-shell { grid-template-columns: 1fr 1fr; grid-template-areas: "problem editor" "tests tests" "match match"; }
+    }
+    @media (max-width: 48rem) {
+      .arena-shell { grid-template-columns: 1fr; grid-template-areas: "editor" "tests" "problem" "match"; }
+      .collapse-toggle { display: inline-flex; }
+      .panel.is-collapsed .collapsible { display: none; }
+    }
+    @media (prefers-contrast: more) {
+      .panel, .btn, .duel-card, .team-card, .test-row { border-width: 2px; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#arena-main">Skip to arena</a>
+  <div class="prototype-flag">UI prototype · mocked match data</div>
+  <header class="arena-header">
+    <div class="arena-header-inner" id="arena-header"></div>
+  </header>
+  <div class="arena-wrap">
+    <h1 id="arena-title" class="visually-hidden">Code Arena match</h1>
+    <nav class="mode-switch" aria-label="Arena mode">
+      <a id="link-1v1" href="09-arena.html?mode=1v1">1v1 · private duel</a>
+      <a id="link-2v2" href="09-arena.html?mode=2v2">2v2 · team battle</a>
+      <span class="editor-meta mono" id="phase-eyebrow"></span>
+    </nav>
+    <div id="phase-slot"></div>
+    <main id="arena-main" tabindex="-1">
+      <div class="arena-shell" id="app"></div>
+      <div id="reveal-slot"></div>
+    </main>
+    <p><a href="00-journey.html">Journey map</a> · <a href="04-live-match.html?variant=A">Live match prototype</a> · Mocked UI only; no realtime, judging, or matchmaking in this phase.</p>
+  </div>
+  <p class="visually-hidden" id="live-status" aria-live="polite" aria-atomic="true"></p>
+
+  <dialog id="leave-dialog" aria-labelledby="leave-title">
+    <form method="dialog">
+      <p class="eyebrow">Leave match</p>
+      <h2 id="leave-title">Leave this match?</h2>
+      <p>The mock clock keeps running in a real match. Leaving here only closes this UI prototype.</p>
+      <div style="display:flex;justify-content:end;gap:.5rem;margin-block-start:1rem">
+        <button class="btn" value="cancel">Stay</button>
+        <button class="btn" value="confirm" id="leave-confirm">Leave</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script>
+    "use strict";
+
+    /* ============ Typed domain model (explicit, no scattered booleans) ============
+       Later phases reuse these shapes; WS/judge/matchmaking map onto them. */
+
+    /** @typedef {"1v1"|"2v2"} MatchMode */
+    /** @typedef {"MATCH_FOUND"|"ROUND_INTRO"|"CODING"|"RUNNING_TESTS"|"SUBMITTED"|"EVALUATING"|"SCORE_REVEAL"|"ROUND_COMPLETE"|"MATCH_COMPLETE"} MatchPhase */
+    /** @typedef {"coding"|"running"|"submitted"|"evaluating"|"locked"|"disconnected"} PlayerStatus */
+    /** @typedef {{name:string, weight:number, earned:number}} TestGroupResult */
+
+    const MatchPhases = Object.freeze(["MATCH_FOUND","ROUND_INTRO","CODING","RUNNING_TESTS","SUBMITTED","EVALUATING","SCORE_REVEAL","ROUND_COMPLETE","MATCH_COMPLETE"]);
+    const STATUS_LABEL = Object.freeze({ coding: "Coding", running: "Running", submitted: "Submitted", evaluating: "Evaluating", locked: "Locked in", disconnected: "Disconnected" });
+
+    const PROBLEMS = {
+      "backspace-compare": {
+        id: "backspace-compare", title: "Backspace String Compare",
+        difficulty: "Easy", tags: ["String","Stack","Simulation"],
+        description: "You are given two strings that may contain the character '#', which means 'backspace': it deletes the character before it (if any). Simulate typing both strings, and decide whether the final results are equal.",
+        examples: [
+          { label: "Example 1", input: 's = "ab#c", t = "ad#c"', output: "true", explanation: 'Both strings become "ac".' },
+          { label: "Example 2", input: 's = "ab##", t = "c#d#"', output: "true", explanation: 'Both strings become "" (empty string).' },
+          { label: "Example 3", input: 's = "a#c", t = "b"', output: "false", explanation: 's becomes "c" while t stays "b".' }
+        ],
+        constraints: ["0 <= s.length, t.length <= 200", "s and t consist only of lowercase English letters and the character '#'." ],
+        hints: ["Simulate from the end with two pointers to use O(1) extra space."],
+        timeLimit: "30 minutes", memoryLimit: "256 MB",
+        starter: { "C++": '#include <vector>\n#include <string>\nusing namespace std;\n\nclass Solution {\npublic:\n    bool backspaceCompare(string s, string t) {\n        // Write your code here\n        return false;\n    }\n};',
+          "Python": 'class Solution:\n    def backspaceCompare(self, s: str, t: str) -> bool:\n        # Write your code here\n        return False',
+          "C": '#include <stdbool.h>\n\nbool backspaceCompare(char* s, char* t) {\n    // Write your code here\n    return false;\n}' }
+      },
+      "two-sum": {
+        id: "two-sum", title: "Two Sum",
+        difficulty: "Easy", tags: ["Array","Hash Table"],
+        description: "Given an array of integers nums and an integer target, return indices of the two numbers such that they add up to target. You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+        examples: [
+          { label: "Example 1", input: 'nums = [2,7,11,15], target = 9', output: "[0,1]", explanation: "Because nums[0] + nums[1] == 9, we return [0, 1]." },
+          { label: "Example 2", input: 'nums = [3,2,4], target = 6', output: "[1,2]", explanation: "nums[1] + nums[2] == 6." },
+          { label: "Example 3", input: 'nums = [3,3], target = 6', output: "[0,1]", explanation: "Same value, different indices." }
+        ],
+        constraints: ["2 <= nums.length <= 10^4", "-10^9 <= nums[i] <= 10^9", "Only one valid answer exists."],
+        hints: ["A hash map of value to index finds the complement in one pass."],
+        timeLimit: "30 minutes", memoryLimit: "256 MB",
+        starter: { "C++": '#include <vector>\nusing namespace std;\n\nclass Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        // Write your code here\n        return {};\n    }\n};',
+          "Python": 'class Solution:\n    def twoSum(self, nums: list[int], target: int) -> list[int]:\n        # Write your code here\n        return []',
+          "C": '#include <stdlib.h>\n\nint* twoSum(int* nums, int n, int target, int* returnSize) {\n    // Write your code here\n    return NULL;\n}' }
+      },
+      "islands": {
+        id: "islands", title: "Number of Islands",
+        difficulty: "Medium", tags: ["Array","DFS","BFS","Graph"],
+        description: "Given an m x n 2D grid map of '1's (land) and '0's (water), return the number of islands. An island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically.",
+        examples: [
+          { label: "Example 1", input: 'grid = [["1","1","0","0","0"],...]', output: "3", explanation: "Three separate land masses." },
+          { label: "Example 2", input: 'grid = [["1","0","1","1","0"],...]', output: "4", explanation: "Four islands with mixed shapes." }
+        ],
+        constraints: ["m == grid.length", "n == grid[i].length", "1 <= m, n <= 300", "grid[i][j] is '0' or '1'."],
+        hints: ["Flood-fill with DFS/BFS and mark visited.", "Count each time you start a new flood-fill."],
+        timeLimit: "30 minutes", memoryLimit: "256 MB",
+        starter: { "Python": 'class Solution:\n    def numIslands(self, grid: list[list[str]]) -> int:\n        # Yassine is editing...\n        m, n = len(grid), len(grid[0])\n        visited = set()\n\n        def dfs(r, c):\n            # Teammate is here...\n            pass\n\n        return 0',
+          "C++": 'class Solution {\npublic:\n    int numIslands(vector<vector<char>>& grid) {\n        // Write your code here\n        return 0;\n    }\n};',
+          "C": 'int numIslands(char** grid, int m, int n) {\n    // Write your code here\n    return 0;\n}' }
+      }
+    };
+
+    /* Active problem is derived from rounds: state.rounds[state.round - 1].
+       Single source of truth for round -> problem mapping. */
+    function activeProblemId(state) {
+      const r = state.rounds && state.rounds[state.round - 1];
+      return r ? r.problemId : state.problemId;
+    }
+    function activeProblem(state) { return PROBLEMS[activeProblemId(state)]; }
+
+    /* ============ Mocked match fixtures (UI phase only) ============ */
+    /** Visible examples only. All start idle: no green checks before Run. */
+    function mockTests(problemId) {
+      if (problemId === "islands") {
+        return [
+          { id: "ex1", label: "Example 1", input: 'grid = [["1","1","0",...]]', expected: "3", output: null, status: "idle", ms: null },
+          { id: "ex2", label: "Example 2", input: 'grid = [["1","0","1",...]]', expected: "4", output: null, status: "idle", ms: null }
+        ];
+      }
+      if (problemId === "two-sum") {
+        return [
+          { id: "ex1", label: "Example 1", input: 'nums = [2,7,11,15], target = 9', expected: "[0,1]", output: null, status: "idle", ms: null },
+          { id: "ex2", label: "Example 2", input: 'nums = [3,2,4], target = 6', expected: "[1,2]", output: null, status: "idle", ms: null },
+          { id: "ex3", label: "Example 3", input: 'nums = [3,3], target = 6', expected: "[0,1]", output: null, status: "idle", ms: null }
+        ];
+      }
+      return [
+        { id: "ex1", label: "Example 1", input: 's = "ab#c", t = "ad#c"', expected: "true", output: null, status: "idle", ms: null },
+        { id: "ex2", label: "Example 2", input: 's = "ab##", t = "c#d#"', expected: "true", output: null, status: "idle", ms: null },
+        { id: "ex3", label: "Example 3", input: 's = "a#c", t = "b"', expected: "false", output: null, status: "idle", ms: null }
+      ];
+    }
+
+    function createMockMatch(mode) {
+      const is2v2 = mode === "2v2";
+      // Explicit 3-round rotation. Active problem derives from rounds[round - 1].
+      const rounds = [
+        { problemId: "backspace-compare" },
+        { problemId: "islands" },
+        { problemId: "two-sum" }
+      ];
+      const problemId = rounds[0].problemId;
+      const p = PROBLEMS[problemId];
+      return {
+        mode, phase: "ROUND_INTRO", round: 1, totalRounds: 3,
+        remainingSeconds: is2v2 ? 28 * 60 + 42 : 23 * 60 + 17,
+        rounds, problemId,
+        editor: { language: is2v2 ? "Python" : "C++", fontSize: 14, code: p.starter[is2v2 ? "Python" : "C++"], revision: 1 },
+        testTab: "examples", customInput: "", testResults: mockTests(problemId), testRuns: 0,
+        // 1v1 duel
+        you: { name: "You", status: "coding", submissions: 2, score: null },
+        opponent: { name: "Alex", status: "coding", submissions: 1, score: null },
+        // 2v2 teams (one shared solution per team).
+        // status is the gameplay source of truth; presence is connectivity only.
+        alpha: { name: "Team Alpha", submissions: 2, score: null, members: [
+          { name: "Yassine (You)", status: "coding", presence: "online" },
+          { name: "Teammate", status: "coding", presence: "online" } ] },
+        beta: { name: "Team Beta", submissions: 1, score: null, members: [
+          { name: "Player 3", status: "coding", presence: "online" },
+          { name: "Player 4", status: "coding", presence: "online" } ] },
+        // Readiness is UI-only mock state, reset every round. Starts false/false.
+        ready: { you: false, mate: false },
+        reveal: null, // {groups: TestGroupResult[], leftScore, rightScore}
+        matchScores: { left: 0, right: 0 },
+        eventLog: is2v2
+          ? [{ t: "28:42", msg: "Match found · Team Alpha vs Team Beta" }, { t: "28:40", msg: "Shared editor ready" }]
+          : [{ t: "23:15", msg: "Match started" }, { t: "23:15", msg: "You joined" }, { t: "23:14", msg: "Alex joined" }],
+        chat: is2v2 ? [{ author: "Teammate", body: "I will take the visited set." }] : []
+      };
+    }
+
+    /* ============ Adapters (mock now; WS/judge/matchmaking plug in later) ============
+       Presentational render functions below never call timers/network directly. */
+    const MatchAdapter = {
+      /** Visible examples/custom tests only. Never touches hidden groups.
+          Mocked execution: idle -> passed with output + runtime. */
+      runVisibleTests(state) {
+        return new Promise((resolve) => {
+          setTimeout(() => resolve(state.testResults.map((r, i) => ({
+            ...r, output: r.expected, status: "passed", ms: 2 + i
+          }))), 700);
+        });
+      },
+      /** Hidden competitive suite. Returns group breakdown + scores; UI reveals only in SCORE_REVEAL. */
+      submitHiddenSuite(state) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            const groups = [
+              { name: "Basic", weight: 20, earned: 20 },
+              { name: "Standard", weight: 20, earned: 20 },
+              { name: "Edge cases", weight: 20, earned: 20 },
+              { name: "Stress / large input", weight: 20, earned: state.mode === "1v1" ? 20 : 20 },
+              { name: "Adversarial", weight: 20, earned: state.mode === "1v1" ? 20 : 20 }
+            ];
+            // Mock opponent/team-beta imperfection to make reveal readable.
+            const leftScore = 100;
+            const rightScore = state.mode === "1v1" ? 78 : 80;
+            const rightGroups = groups.map((g, i) => ({ ...g, earned: i >= 3 ? (state.mode === "1v1" ? 9 : 10) : 20 }));
+            resolve({ groups, rightGroups, leftScore, rightScore });
+          }, 1200);
+        });
+      }
+    };
+    const PresenceAdapter = {
+      // No-op in UI phase; later: subscribe to teammate cursor/ready events.
+      note() { return "mock-presence"; }
+    };
+
+    /* ============ Store (same tiny pattern as 04-live-match.html) ============ */
+    function createStore(seed) {
+      let state = structuredClone(seed);
+      const subs = new Set();
+      return {
+        getState: () => state,
+        set(next, eventText) {
+          state = next;
+          if (eventText) {
+            state.eventLog = [...state.eventLog, { t: formatClockShort(state.remainingSeconds), msg: eventText }].slice(-8);
+          }
+          subs.forEach((fn) => fn(state));
+        },
+        update(mutator, eventText) {
+          const next = structuredClone(state);
+          mutator(next);
+          this.set(next, eventText);
+        },
+        updateSilently(mutator) {
+          const next = structuredClone(state);
+          mutator(next);
+          state = next;
+        },
+        subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }
+      };
+    }
+
+    function modeFromUrl() {
+      const m = new URLSearchParams(location.search).get("mode");
+      return m === "2v2" ? "2v2" : "1v1";
+    }
+
+    const store = createStore(createMockMatch(modeFromUrl()));
+    window.__ARENA_STATE__ = () => structuredClone(store.getState());
+
+    const app = document.getElementById("app");
+    const headerEl = document.getElementById("arena-header");
+    const phaseSlot = document.getElementById("phase-slot");
+    const revealSlot = document.getElementById("reveal-slot");
+    const liveStatus = document.getElementById("live-status");
+    const leaveDialog = document.getElementById("leave-dialog");
+    const ui = { collapsed: { problem: false, match: false } };
+
+    function escapeHtml(v) {
+      return String(v).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+    function formatClock(s) {
+      const m = Math.floor(s / 60).toString().padStart(2, "0");
+      return `${m}:${(s % 60).toString().padStart(2, "0")}`;
+    }
+    function formatClockShort(s) { return formatClock(s).slice(0, 5); }
+
+    /* ============ Reusable components (shared ArenaShell composition) ============ */
+
+    function ArenaHeader(state) {
+      const p = activeProblem(state);
+      return `
+        <a class="back-btn" href="00-journey.html" aria-label="Back to journey map">←</a>
+        <span class="brand">CODE <span>ARENA</span></span>
+        <span class="mode-chip ${state.mode === "2v2" ? "is-2v2" : ""}" aria-label="Mode">${state.mode === "2v2" ? "2v2" : "1v1"}</span>
+        <span class="mono editor-meta">Round ${state.round} / ${state.totalRounds} · ${escapeHtml(p.title)}</span>
+        <span class="header-meta">
+          <span class="timer num" data-arena="timer" role="timer" aria-label="Match countdown">${formatClock(state.remainingSeconds)}</span>
+          <button type="button" class="leave-btn" data-action="leave">Leave Match</button>
+        </span>`;
+    }
+
+    function ProblemPanel(state) {
+      const p = activeProblem(state);
+      const examples = p.examples.map((e) => ProblemExample(e)).join("");
+      return `
+      <section class="panel p-problem ${ui.collapsed.problem ? "is-collapsed" : ""}" aria-labelledby="problem-title">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <p class="eyebrow" style="margin:0"># Problem</p>
+          <button type="button" class="btn collapse-toggle" data-action="toggle-panel" data-panel="problem" aria-expanded="${!ui.collapsed.problem}">Collapse</button>
+        </div>
+        <div class="collapsible">
+          <h2 id="problem-title">${escapeHtml(p.title)} <span class="difficulty ${p.difficulty === "Easy" ? "easy" : "medium"}">${p.difficulty}</span></h2>
+          <ul class="tag-list" aria-label="Topic tags">${p.tags.map((t) => `<li>${escapeHtml(t)}</li>`).join("")}</ul>
+          <p>${escapeHtml(p.description)}</p>
+          ${examples}
+          <h3>Constraints</h3>
+          <ul class="constraints mono">${p.constraints.map((c) => `<li>${escapeHtml(c)}</li>`).join("")}</ul>
+          <details class="hints">
+            <summary>Hints (${p.hints.length})</summary>
+            <ul>${p.hints.map((h) => `<li>${escapeHtml(h)}</li>`).join("")}</ul>
+          </details>
+        </div>
+      </section>`;
+    }
+
+    function ProblemExample(e) {
+      return `
+        <div class="example">
+          <p><strong>${escapeHtml(e.label)}</strong></p>
+          <p class="mono">Input: ${escapeHtml(e.input)}</p>
+          <p class="mono">Output: ${escapeHtml(e.output)}</p>
+          <p>Explanation: ${escapeHtml(e.explanation)}</p>
+        </div>`;
+    }
+
+    /* Editor seam: CodeEditor() owns all textarea rendering so a future
+       Monaco/CodeMirror swap only replaces this function + handleEditorInput().
+       All state flows via store.editor.code / revision / language. */
+    function CodeEditor(state, editable) {
+      const lines = state.editor.code.split("\n").length;
+      const nums = Array.from({ length: lines }, (_, i) => i + 1).join("<br>");
+      const isTeam = state.mode === "2v2";
+      return `
+        <div class="editor-wrap">
+          <div class="line-nums" aria-hidden="true">${nums}</div>
+          <label class="visually-hidden" for="arena-code">Code editor, ${escapeHtml(state.editor.language)}</label>
+          <textarea id="arena-code" class="mono" rows="16" spellcheck="false" autocomplete="off" autocapitalize="off"
+            style="--code-size:${state.editor.fontSize / 16}rem" ${editable ? "" : "readonly"}>${escapeHtml(state.editor.code)}</textarea>
+          ${isTeam ? `
+            <div class="remote-cursor yassine" aria-hidden="true"><span>Yassine (mocked)</span></div>
+            <div class="remote-cursor teammate" aria-hidden="true"><span>Teammate (mocked)</span></div>` : ""}
+        </div>`;
+    }
+
+    function CodeWorkspace(state) {
+      const isTeam = state.mode === "2v2";
+      // Only CODING allows editing. Every other phase is read-only so that
+      // Start round has real meaning and submit/evaluate locks the editor.
+      const editable = state.phase === "CODING";
+      return `
+      <section class="panel p-editor" aria-labelledby="editor-title">
+        <p class="eyebrow"># Editor${isTeam ? " · Team Alpha" : ""}</p>
+        <h2 id="editor-title">${isTeam ? "Shared workspace" : "Your private editor"}</h2>
+        ${isTeam ? TeamPresence() : `<p class="editor-meta">Private duel editor. Your opponent never sees this code.</p>`}
+        ${EditorToolbar(state)}
+        ${CodeEditor(state, editable)}
+        <p class="editor-meta mono">Revision <span data-arena="revision">${state.editor.revision}</span> · ${escapeHtml(state.editor.language)} · ${isTeam ? "shared document · teammate cursors are read-only labels (mocked)" : "independent private document"}</p>
+      </section>`;
+    }
+
+    function EditorToolbar(state) {
+      const isTeam = state.mode === "2v2";
+      // Interaction rules: only CODING enables Run/Submit. ROUND_INTRO shows the
+      // editor but keeps actions disabled until Start round. RUNNING_TESTS and
+      // SUBMITTED/EVALUATING/SCORE_REVEAL keep everything disabled.
+      const canRun = state.phase === "CODING";
+      const bothReady = state.ready.you && state.ready.mate;
+      const canSubmit = state.phase === "CODING" && (!isTeam || bothReady);
+      const editingLocked = state.phase !== "CODING";
+      const submitHint = !isTeam ? ""
+        : bothReady ? "Both teammates ready — you can submit."
+        : "Waiting for teammate readiness — mark both ready to enable Submit.";
+      return `
+        <div class="editor-toolbar" role="toolbar" aria-label="Editor actions">
+          <label class="visually-hidden" for="arena-lang">Language</label>
+          <select id="arena-lang" data-action-change="language" ${editingLocked ? "disabled" : ""}>
+            ${["C++","Python","C"].map((l) => `<option ${l === state.editor.language ? "selected" : ""}>${l}</option>`).join("")}
+          </select>
+          <span class="font-group" role="group" aria-label="Font size">
+            <button type="button" class="btn" data-action="font-dec" aria-label="Decrease font size">A-</button>
+            <span class="mono editor-meta num">${state.editor.fontSize}</span>
+            <button type="button" class="btn" data-action="font-inc" aria-label="Increase font size">A+</button>
+          </span>
+          <button type="button" class="btn" data-action="reset-code" ${editingLocked ? "disabled" : ""}>Reset</button>
+          <span style="flex:1"></span>
+          <button type="button" class="btn btn-run" data-action="run" ${canRun ? "" : "disabled"}>Run</button>
+          <button type="button" class="btn btn-primary" data-action="submit" data-arena="submit" ${canSubmit ? "" : "disabled"}${isTeam ? ' aria-describedby="submit-hint"' : ""}>${isTeam ? "Submit Team Solution" : "Submit"}</button>
+        </div>
+        <p class="editor-meta">Run = neutral check on visible examples only. Submit = primary teal action on the hidden suite.${state.phase === "ROUND_INTRO" ? " Round intro — press Start round to enable Run and Submit." : ""}</p>
+        ${isTeam ? `<p class="editor-meta" id="submit-hint" role="status">${escapeHtml(submitHint)}</p>` : ""}`;
+    }
+
+    function TeamPresence() {
+      PresenceAdapter.note();
+      return `
+        <ul class="presence-bar" aria-label="Teammate presence (connectivity only)">
+          <li class="you"><span class="status-dot" style="color:var(--accent)"></span>You · Online</li>
+          <li class="mate"><span class="status-dot" style="color:var(--violet)"></span>Teammate · Online</li>
+        </ul>
+        <p class="editor-meta">EDITOR · TEAM ALPHA · Shared workspace. Opposing team code is never visible. Gameplay status is shown in the match panel.</p>`;
+    }
+
+    function TestPanel(state) {
+      const passed = state.testResults.filter((r) => r.status === "passed").length;
+      const total = state.testResults.length;
+      const allIdle = state.testResults.every((r) => r.status === "idle");
+      const isRunning = state.phase === "RUNNING_TESTS";
+      const summary = allIdle && !isRunning
+        ? `<span class="pass-summary mono num" data-arena="pass-summary">○ Not run (0 / ${total})</span>`
+        : `<span class="pass-summary mono num" data-arena="pass-summary">✓ ${passed} / ${total} passed</span>`;
+      const rows = state.testResults.map((r) => TestCaseRow(r)).join("");
+      const canRun = state.phase === "CODING";
+      return `
+      <section class="panel p-tests" aria-labelledby="tests-title">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <p class="eyebrow" style="margin:0"># Tests</p>
+          ${summary}
+        </div>
+        <h2 id="tests-title">Test runner</h2>
+        ${isRunning ? `<p role="status"><strong>Running examples…</strong> <span class="editor-meta mono">visible tests only, hidden suite stays sealed</span></p>` : ""}
+        <div class="tabs" role="tablist" aria-label="Test views">
+          <button type="button" role="tab" aria-selected="${state.testTab === "examples"}" data-action="tab-examples">Examples (${total})</button>
+          <button type="button" role="tab" aria-selected="${state.testTab === "custom"}" data-action="tab-custom">Custom Input</button>
+        </div>
+        ${state.testTab === "examples" ? `<div>${rows}</div>` : `
+          <div>
+            <label for="custom-input"><strong>Custom input</strong></label>
+            <div class="chat-form">
+              <input id="custom-input" data-custom-input value="${escapeHtml(state.customInput)}" placeholder='s = "ab#c", t = "ad#c"' autocomplete="off">
+              <button type="button" class="btn btn-run" data-action="run" ${canRun ? "" : "disabled"}>Run this input</button>
+            </div>
+            <p class="editor-meta">Custom runs evaluate visible behavior only; hidden groups stay sealed until Submit.</p>
+          </div>`}
+        <p class="editor-meta">Hidden competitive tests are never shown during active play.</p>
+      </section>`;
+    }
+
+    function TestCaseRow(r) {
+      const status = r.status || (r.passed ? "passed" : "failed");
+      const badge = status === "passed" ? "pass" : status === "failed" ? "fail" : status === "running" ? "running" : "idle";
+      const icon = status === "passed" ? "✓" : status === "failed" ? "!" : status === "running" ? "…" : "○";
+      const label = status === "passed" ? "Passed" : status === "failed" ? "Failed" : status === "running" ? "Running…" : "Not run";
+      const outputText = (status === "passed" || status === "failed") && r.output != null ? escapeHtml(r.output) : "—";
+      const msText = r.ms != null ? `${r.ms} ms` : "—";
+      return `
+        <article class="test-row">
+          <span class="test-badge ${badge}" aria-hidden="true">${icon}</span>
+          <div>
+            <p style="margin:0"><strong>${escapeHtml(r.label)}</strong> <span class="mono editor-meta">${escapeHtml(r.input)}</span></p>
+            <p class="test-detail mono">Expected: ${escapeHtml(r.expected)} · Output: ${outputText} · ${msText} · ${label}</p>
+          </div>
+        </article>`;
+    }
+
+    function MatchPanel(state) {
+      return state.mode === "1v1" ? DuelPanel(state) : TeamPanel(state);
+    }
+
+    function PlayerStatusRow(name, initial, status, submissions, scoreVisible, scoreText) {
+      const submitted = status === "submitted" || status === "evaluating";
+      return `
+        <div class="player-row">
+          <span class="avatar" aria-hidden="true">${escapeHtml(initial)}</span>
+          <div style="flex:1;min-width:0">
+            <strong>${escapeHtml(name)}</strong><br>
+            <small><span class="status-dot" style="color:${submitted ? "var(--amber)" : "var(--accent)"}"></span>${STATUS_LABEL[status]}${status === "coding" ? "…" : ""}</small>
+          </div>
+          <small class="mono editor-meta">${scoreVisible ? scoreText : `${submissions} submission${submissions === 1 ? "" : "s"}`}</small>
+        </div>`;
+    }
+
+    function DuelPanel(state) {
+      const revealed = state.phase === "SCORE_REVEAL" || state.phase === "ROUND_COMPLETE" || state.phase === "MATCH_COMPLETE";
+      const p = activeProblem(state);
+      return `
+      <aside class="panel p-match ${ui.collapsed.match ? "is-collapsed" : ""}" aria-labelledby="match-title">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <p class="eyebrow" style="margin:0"># Match</p>
+          <button type="button" class="btn collapse-toggle" data-action="toggle-panel" data-panel="match" aria-expanded="${!ui.collapsed.match}">Collapse</button>
+        </div>
+        <h2 id="match-title">1v1 duel</h2>
+        <div class="collapsible">
+          <div class="duel-card">
+            ${PlayerStatusRow("You", "Y", state.you.status, state.you.submissions, revealed, state.reveal ? state.reveal.leftScore + "%" : "")}
+          </div>
+          <div class="vs" aria-hidden="true">VS</div>
+          <div class="duel-card">
+            ${PlayerStatusRow(state.opponent.name, "A", state.opponent.status, state.opponent.submissions, revealed, state.reveal ? state.reveal.rightScore + "%" : "")}
+          </div>
+          <p class="editor-meta">No chat in 1v1 · pure competition · opponent code never exposed.</p>
+          <h3>Problem info</h3>
+          <dl class="info-dl mono">
+            <dt>Problem</dt><dd>${escapeHtml(p.title)}</dd>
+            <dt>Time limit</dt><dd>${escapeHtml(p.timeLimit)}</dd>
+            <dt>Memory limit</dt><dd>${escapeHtml(p.memoryLimit)}</dd>
+            <dt>Submissions</dt><dd>Unlimited</dd>
+            <dt>Scoring</dt><dd>0–100% on hidden tests</dd>
+          </dl>
+          ${EventLog(state)}
+        </div>
+      </aside>`;
+    }
+
+    function TeamMemberRow(m) {
+      // status is the gameplay source of truth; presence is connectivity only.
+      const label = STATUS_LABEL[m.status] || m.status;
+      const presence = m.presence ? ` · ${m.presence}` : "";
+      return `
+              <div class="player-row">
+                <span class="avatar" aria-hidden="true">${escapeHtml(m.name.charAt(0))}</span>
+                <div style="flex:1"><strong>${escapeHtml(m.name)}</strong><br><small><span class="status-dot" style="color:var(--accent)"></span>${escapeHtml(label)}${escapeHtml(presence)}</small></div>
+              </div>`;
+    }
+
+    function TeamPanel(state) {
+      const revealed = state.phase === "SCORE_REVEAL" || state.phase === "ROUND_COMPLETE" || state.phase === "MATCH_COMPLETE";
+      return `
+      <aside class="panel p-match ${ui.collapsed.match ? "is-collapsed" : ""}" aria-labelledby="match-title">
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <p class="eyebrow" style="margin:0"># Match</p>
+          <button type="button" class="btn collapse-toggle" data-action="toggle-panel" data-panel="match" aria-expanded="${!ui.collapsed.match}">Collapse</button>
+        </div>
+        <h2 id="match-title">2v2 team battle</h2>
+        <div class="collapsible">
+          <div class="team-card you">
+            <p class="eyebrow" style="margin:0">Your team · Team Alpha (you)</p>
+            ${state.alpha.members.map((m) => TeamMemberRow(m)).join("")}
+            <p class="mono editor-meta" style="text-align:end;margin:.2rem 0 0">Team submissions<br><strong style="font-size:1.4rem;color:var(--ink)">${state.alpha.submissions}</strong></p>
+            ${revealed && state.reveal ? `<p style="text-align:end;margin:0"><strong>Team score: ${state.reveal.leftScore}%</strong></p>` : ""}
+          </div>
+          <div class="vs" aria-hidden="true">VS</div>
+          <div class="team-card opp">
+            <p class="eyebrow" style="margin:0">Team Beta</p>
+            ${state.beta.members.map((m) => TeamMemberRow(m)).join("")}
+            <p class="mono editor-meta" style="text-align:end;margin:.2rem 0 0">Team submissions<br><strong style="font-size:1.4rem;color:var(--ink)">${state.beta.submissions}</strong></p>
+            ${revealed && state.reveal ? `<p style="text-align:end;margin:0"><strong>Team score: ${state.reveal.rightScore}%</strong></p>` : ""}
+          </div>
+          ${ReadyState(state)}
+          <p class="editor-meta">Submit via the editor toolbar when both teammates are Ready. One shared Team Alpha score.</p>
+          ${TeamChat(state)}
+          ${EventLog(state)}
+        </div>
+      </aside>`;
+    }
+
+    function ReadyState(state) {
+      const locked = state.phase !== "CODING" && state.phase !== "ROUND_INTRO";
+      return `
+        <section aria-labelledby="ready-title">
+          <h3 id="ready-title">Team status</h3>
+          <div class="ready-row"><span style="flex:1">You</span>${state.ready.you ? '<span class="ready-yes">Ready ✓</span>' : '<span class="ready-no">Not ready</span>'}<button type="button" class="btn" data-action="toggle-ready-you" ${locked ? "disabled" : ""}>${state.ready.you ? "Unmark" : "Mark ready"}</button></div>
+          <div class="ready-row"><span style="flex:1">Teammate</span>${state.ready.mate ? '<span class="ready-yes">Ready ✓</span>' : '<span class="ready-no">Not ready</span>'}<button type="button" class="btn" data-action="toggle-ready-mate" ${locked ? "disabled" : ""}>Simulate toggle</button></div>
+        </section>`;
+    }
+
+    function TeamChat(state) {
+      return `
+        <section aria-labelledby="chat-title">
+          <h3 id="chat-title">Team chat</h3>
+          <ul class="chat-list" aria-label="Team messages">
+            ${state.chat.slice(-5).map((m) => `<li><strong>${escapeHtml(m.author)}:</strong> ${escapeHtml(m.body)}</li>`).join("") || "<li>No messages yet.</li>"}
+          </ul>
+          <form class="chat-form" data-chat-form>
+            <label class="visually-hidden" for="team-message">Team message</label>
+            <input id="team-message" name="message" maxlength="120" placeholder="Type a message to your team…" autocomplete="off">
+            <button type="submit" class="btn" aria-label="Send team message">›</button>
+          </form>
+          <div class="ping-grid" aria-label="Quick pings">
+            ${["Check edge case","Run this input","Review complexity","Ready?"].map((q) => `<button type="button" data-action="ping" data-value="${escapeHtml(q)}">${escapeHtml(q)}</button>`).join("")}
+          </div>
+        </section>`;
+    }
+
+    function EventLog(state) {
+      return `
+        <section aria-labelledby="log-title-${state.mode}">
+          <h3 id="log-title-${state.mode}">Event log</h3>
+          <ul class="event-log mono">
+            ${state.eventLog.slice(-5).map((e) => `<li><time class="num">${escapeHtml(e.t)}</time><span>${escapeHtml(e.msg)}</span></li>`).join("")}
+          </ul>
+        </section>`;
+    }
+
+    function PhaseBanner(state) {
+      const map = {
+        MATCH_FOUND: "Match found. Review the problem while the round prepares.",
+        ROUND_INTRO: `Round ${state.round} intro. Press Start round when ready (mock).`,
+        CODING: `Coding · Round ${state.round} of ${state.totalRounds}. Run checks visible tests; Submit runs the hidden suite.`,
+        RUNNING_TESTS: "Running visible tests… (mock, no hidden detail)",
+        SUBMITTED: "Solution locked in. Waiting for evaluation…",
+        EVALUATING: "Evaluating on the hidden suite… scores stay sealed.",
+        SCORE_REVEAL: "Scores revealed. Review group breakdown below.",
+        ROUND_COMPLETE: "Round complete. Advance when ready.",
+        MATCH_COMPLETE: "Match complete. Final result below."
+      };
+      const showStart = state.phase === "MATCH_FOUND" || state.phase === "ROUND_INTRO";
+      const showNext = state.phase === "ROUND_COMPLETE";
+      return `
+        <div class="phase-banner" role="status">
+          <span class="mode-chip ${state.mode === "2v2" ? "is-2v2" : ""}">${state.mode}</span>
+          <strong>${escapeHtml(state.phase.replaceAll("_", " "))}</strong>
+          <span>${escapeHtml(map[state.phase] || "")}</span>
+          <span style="flex:1"></span>
+          ${showStart ? `<button type="button" class="btn btn-primary" data-action="start">Start round</button>` : ""}
+          ${showNext ? `<button type="button" class="btn btn-primary" data-action="next-round">${state.round >= state.totalRounds ? "Finish match" : "Next round"}</button>` : ""}
+        </div>`;
+    }
+
+    function RoundScoreReveal(state) {
+      if (!state.reveal || (state.phase !== "SCORE_REVEAL" && state.phase !== "ROUND_COMPLETE" && state.phase !== "MATCH_COMPLETE")) return "";
+      const r = state.reveal;
+      const leftName = state.mode === "1v1" ? "YOU" : "TEAM ALPHA";
+      const rightName = state.mode === "1v1" ? escapeHtml(state.opponent.name.toUpperCase()) : "TEAM BETA";
+      const rows = r.groups.map((g, i) => `
+        <tr><td>${escapeHtml(g.name)}</td><td class="num">${g.earned} / ${g.weight}</td><td class="num">${r.rightGroups[i].earned} / ${r.rightGroups[i].weight}</td></tr>`).join("");
+      return `
+        <section class="reveal" aria-labelledby="reveal-title" tabindex="-1" id="reveal-section">
+          <p class="eyebrow">Round ${state.round} complete</p>
+          <h2 id="reveal-title">${state.phase === "MATCH_COMPLETE" ? "Match result" : `Round ${state.round} result`}</h2>
+          <div class="reveal-scores">
+            <div><span class="eyebrow">${leftName}</span><strong class="num">${r.leftScore}%</strong><span class="mono editor-meta">match ${state.matchScores.left}–${state.matchScores.right}</span></div>
+            <div><span class="eyebrow">${rightName}</span><strong class="num">${r.rightScore}%</strong><span class="mono editor-meta">hidden groups only</span></div>
+          </div>
+          <table class="score-table">
+            <caption class="visually-hidden">Hidden test group breakdown</caption>
+            <thead><tr><th scope="col">Group</th><th scope="col" class="num">${leftName}</th><th scope="col" class="num">${rightName}</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <p class="editor-meta">Visible runner never decides this score; only the sealed hidden suite does (mocked ${r.leftScore}/${r.rightScore}).</p>
+          ${state.phase === "SCORE_REVEAL" ? `<button type="button" class="btn btn-primary" data-action="next-round">${state.round >= state.totalRounds ? "Finish match" : `Next round`}</button>` : ""}
+        </section>`;
+    }
+
+    function MatchResult(state) {
+      if (state.phase !== "MATCH_COMPLETE" || !state.reveal) return "";
+      const win = state.matchScores.left > state.matchScores.right ? "You win the match" : state.matchScores.left < state.matchScores.right ? "Opponent wins the match" : "Match drawn";
+      return `<div class="phase-banner" role="status"><strong>${escapeHtml(win)} · ${state.matchScores.left}–${state.matchScores.right}</strong><span style="flex:1"></span><a class="btn" href="05-outcomes.html">Outcomes prototype</a></div>`;
+    }
+
+    function ArenaShell(state) {
+      return `${ProblemPanel(state)}${CodeWorkspace(state)}${TestPanel(state)}${MatchPanel(state)}`;
+    }
+
+    /* ============ Render + interactions ============ */
+    function render(state) {
+      document.title = `Code Arena · ${state.mode} Round ${state.round}/${state.totalRounds} | Prototype`;
+      const titleEl = document.getElementById("arena-title");
+      if (titleEl) titleEl.textContent = `Code Arena · ${state.mode === "2v2" ? "2v2 team battle" : "1v1 private duel"} · Round ${state.round} of ${state.totalRounds}`;
+      headerEl.innerHTML = ArenaHeader(state);
+      document.getElementById("link-1v1").setAttribute("aria-current", state.mode === "1v1" ? "page" : "false");
+      document.getElementById("link-2v2").setAttribute("aria-current", state.mode === "2v2" ? "page" : "false");
+      document.getElementById("phase-eyebrow").textContent = `phase: ${state.phase}`;
+      phaseSlot.innerHTML = PhaseBanner(state) + MatchResult(state);
+      app.innerHTML = ArenaShell(state);
+      revealSlot.innerHTML = RoundScoreReveal(state);
+      liveStatus.textContent = state.eventLog.length ? state.eventLog[state.eventLog.length - 1].msg : state.phase;
+    }
+
+    function patchTimer(seconds) {
+      const el = document.querySelector('[data-arena="timer"]');
+      if (el) el.textContent = formatClock(seconds);
+    }
+
+    async function doRun() {
+      const s0 = store.getState();
+      if (s0.phase !== "CODING") return;
+      const custom = document.querySelector("[data-custom-input]");
+      if (custom) store.updateSilently((n) => { n.customInput = custom.value; });
+      store.update((n) => {
+        n.phase = "RUNNING_TESTS";
+        n.testResults = n.testResults.map((r) => ({ ...r, status: "running" }));
+        if (n.mode === "1v1") n.you.status = "running";
+        else { n.alpha.members[0].status = "running"; }
+      }, "Run started on visible examples.");
+      render(store.getState());
+      const results = await MatchAdapter.runVisibleTests(store.getState());
+      store.update((n) => {
+        n.phase = "CODING";
+        n.testResults = results;
+        n.testRuns += 1;
+        if (n.mode === "1v1") n.you.status = "coding";
+        else { n.alpha.members[0].status = "coding"; }
+      }, `Run finished: ${results.filter((r) => r.status === "passed").length}/${results.length} visible passed.`);
+    }
+
+    async function doSubmit() {
+      const s0 = store.getState();
+      // Only CODING may trigger a submit. ROUND_INTRO keeps Submit disabled
+      // so Start round has real meaning.
+      if (s0.phase !== "CODING") return;
+      if (s0.mode === "2v2" && !(s0.ready.you && s0.ready.mate)) {
+        store.update(() => {}, "Team submit blocked (mock): both teammates must mark Ready.");
+        return;
+      }
+      store.update((n) => {
+        n.phase = "SUBMITTED";
+        if (n.mode === "1v1") { n.you.status = "submitted"; n.opponent.status = "submitted"; }
+        else {
+          n.alpha.members.forEach((m) => { m.status = "submitted"; });
+          n.beta.members.forEach((m) => { m.status = "submitted"; });
+        }
+      }, s0.mode === "2v2" ? "Team solution locked in." : "You submitted. Opponent also submitted (mock).");
+      render(store.getState());
+      await new Promise((r) => setTimeout(r, 500));
+      store.update((n) => {
+        n.phase = "EVALUATING";
+        if (n.mode === "1v1") { n.you.status = "evaluating"; n.opponent.status = "evaluating"; }
+        else {
+          n.alpha.members.forEach((m) => { m.status = "evaluating"; });
+          n.beta.members.forEach((m) => { m.status = "evaluating"; });
+        }
+      }, "Evaluating on hidden suite…");
+      render(store.getState());
+      const res = await MatchAdapter.submitHiddenSuite(store.getState());
+      store.update((n) => {
+        n.phase = "SCORE_REVEAL";
+        n.reveal = { groups: res.groups, rightGroups: res.rightGroups, leftScore: res.leftScore, rightScore: res.rightScore };
+        if (n.mode === "1v1") {
+          n.you.status = "locked"; n.you.submissions += 1; n.you.score = res.leftScore;
+          n.opponent.status = "locked"; n.opponent.submissions += 1; n.opponent.score = res.rightScore;
+          if (res.leftScore > res.rightScore) n.matchScores.left += 1;
+          else if (res.rightScore > res.leftScore) n.matchScores.right += 1;
+        } else {
+          n.alpha.submissions += 1; n.alpha.score = res.leftScore;
+          n.beta.submissions += 1; n.beta.score = res.rightScore;
+          n.alpha.members.forEach((m) => { m.status = "locked"; });
+          n.beta.members.forEach((m) => { m.status = "locked"; });
+          if (res.leftScore > res.rightScore) n.matchScores.left += 1;
+          else if (res.rightScore > res.leftScore) n.matchScores.right += 1;
+        }
+      }, "Scores revealed.");
+      const sec = document.getElementById("reveal-section");
+      if (sec) sec.focus();
+    }
+
+    function nextRoundState(n) {
+      // Next round selects the next rounds[] problem, resets round-specific
+      // state (editor starter, visible tests, readiness, reveal, statuses),
+      // and keeps the overall match score.
+      const nextProblemId = n.rounds[n.round].problemId;
+      n.phase = "ROUND_INTRO"; n.round += 1; n.reveal = null;
+      n.problemId = nextProblemId;
+      n.remainingSeconds = n.mode === "2v2" ? 28 * 60 + 42 : 23 * 60 + 17;
+      n.testResults = mockTests(nextProblemId);
+      n.testRuns = 0; n.customInput = ""; n.testTab = "examples";
+      const starterMap = PROBLEMS[nextProblemId].starter;
+      if (!starterMap[n.editor.language]) {
+        n.editor.language = starterMap.Python ? "Python" : Object.keys(starterMap)[0];
+      }
+      n.editor.code = starterMap[n.editor.language];
+      n.editor.revision += 1;
+      n.ready.you = false; n.ready.mate = false;
+      if (n.mode === "1v1") { n.you.status = "coding"; n.opponent.status = "coding"; n.you.score = null; n.opponent.score = null; }
+      else {
+        n.alpha.members.forEach((m) => { m.status = "coding"; });
+        n.beta.members.forEach((m) => { m.status = "coding"; });
+        n.alpha.score = null; n.beta.score = null;
+      }
+    }
+
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-action]");
+      if (!btn) return;
+      const a = btn.dataset.action;
+      if (a === "leave") { leaveDialog.showModal(); }
+      else if (a === "toggle-panel") {
+        const p = btn.dataset.panel;
+        ui.collapsed[p] = !ui.collapsed[p];
+        render(store.getState());
+      }
+      else if (a === "start") {
+        const s = store.getState();
+        if (s.phase !== "ROUND_INTRO" && s.phase !== "MATCH_FOUND") return;
+        store.update((n) => { n.phase = "CODING"; }, "Round started. Coding…");
+      }
+      else if (a === "run") { doRun(); }
+      else if (a === "submit") { doSubmit(); }
+      else if (a === "next-round") {
+        const s = store.getState();
+        if (s.round >= s.totalRounds) { store.update((n) => { n.phase = "MATCH_COMPLETE"; }, "Match complete."); }
+        else {
+          store.update((n) => { nextRoundState(n); }, "Next round intro.");
+        }
+      }
+      else if (a === "reset-code") {
+        if (store.getState().phase !== "CODING") return;
+        const pid = activeProblemId(store.getState());
+        const p = PROBLEMS[pid];
+        store.update((n) => { n.editor.code = p.starter[n.editor.language]; n.editor.revision += 1; }, "Editor reset to starter.");
+      }
+      else if (a === "font-inc") { store.update((n) => { n.editor.fontSize = Math.min(20, n.editor.fontSize + 1); }); }
+      else if (a === "font-dec") { store.update((n) => { n.editor.fontSize = Math.max(12, n.editor.fontSize - 1); }); }
+      else if (a === "tab-examples") { store.updateSilently((n) => { n.testTab = "examples"; }); render(store.getState()); }
+      else if (a === "tab-custom") { store.updateSilently((n) => { n.testTab = "custom"; }); render(store.getState()); }
+      else if (a === "toggle-ready-you") {
+        const s = store.getState();
+        if (s.phase !== "CODING" && s.phase !== "ROUND_INTRO") return;
+        store.update((n) => { n.ready.you = !n.ready.you; }, s.ready.you ? "You unmarked ready." : "You marked ready.");
+      }
+      else if (a === "toggle-ready-mate") {
+        const s = store.getState();
+        if (s.phase !== "CODING" && s.phase !== "ROUND_INTRO") return;
+        store.update((n) => { n.ready.mate = !n.ready.mate; }, "Teammate readiness simulated.");
+      }
+      else if (a === "ping") {
+        const v = btn.dataset.value;
+        store.update((n) => { n.chat.push({ author: "You", body: v }); }, `Quick ping sent: ${v}.`);
+      }
+    });
+
+    app.addEventListener("change", (e) => {
+      const t = e.target.closest("[data-action-change]");
+      if (!t) return;
+      if (t.dataset.actionChange === "language") {
+        if (store.getState().phase !== "CODING") return;
+        const lang = t.value;
+        const pid = activeProblemId(store.getState());
+        const p = PROBLEMS[pid];
+        store.update((n) => { n.editor.language = lang; n.editor.code = p.starter[lang] || n.editor.code; n.editor.revision += 1; }, `Language switched to ${lang}; starter restored.`);
+      }
+    });
+
+    // Single editor input seam for the future Monaco/CodeMirror swap.
+    function handleEditorInput(value) {
+      if (store.getState().phase !== "CODING") return;
+      store.updateSilently((n) => { n.editor.code = value; n.editor.revision += 1; });
+    }
+
+    app.addEventListener("input", (e) => {
+      if (e.target && e.target.id === "arena-code") {
+        const v = e.target.value;
+        handleEditorInput(v);
+        const rev = document.querySelector('[data-arena="revision"]');
+        if (rev) rev.textContent = String(store.getState().editor.revision);
+        const nums = document.querySelector(".line-nums");
+        if (nums) nums.innerHTML = Array.from({ length: v.split("\n").length }, (_, i) => i + 1).join("<br>");
+      }
+      if (e.target && e.target.hasAttribute("data-custom-input")) {
+        const v = e.target.value;
+        store.updateSilently((n) => { n.customInput = v; });
+      }
+    });
+
+    app.addEventListener("submit", (e) => {
+      const f = e.target.closest("[data-chat-form]");
+      if (!f) return;
+      e.preventDefault();
+      const input = f.elements.message;
+      const msg = input.value.trim();
+      if (!msg) return;
+      store.update((n) => { n.chat.push({ author: "You", body: msg }); }, "Team message sent.");
+    });
+
+    document.getElementById("link-1v1").addEventListener("click", (e) => {
+      e.preventDefault();
+      history.replaceState(null, "", "09-arena.html?mode=1v1");
+      store.set(createMockMatch("1v1"), "Switched to 1v1 private duel (mock).");
+    });
+    document.getElementById("link-2v2").addEventListener("click", (e) => {
+      e.preventDefault();
+      history.replaceState(null, "", "09-arena.html?mode=2v2");
+      store.set(createMockMatch("2v2"), "Switched to 2v2 team battle (mock).");
+    });
+
+    // Mock clock: ticks only; never triggers judging. Patched in place to keep editor focus.
+    setInterval(() => {
+      const s = store.getState();
+      if (["CODING","RUNNING_TESTS","SUBMITTED","EVALUATING"].includes(s.phase) && s.remainingSeconds > 0) {
+        store.updateSilently((n) => { n.remainingSeconds -= 1; });
+        patchTimer(store.getState().remainingSeconds);
+      }
+    }, 1000);
+
+    store.subscribe(render);
+    render(store.getState());
+  </script>
+</body>
+</html>
