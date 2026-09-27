@@ -1107,6 +1107,40 @@
   }
 }
 
+@layer components {
+  .build-path-list {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 72ch;
+    padding-inline-start: 1.5rem;
+  }
+
+  .build-path-list > li {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.55rem;
+    background: var(--surface);
+  }
+
+  .build-path-list h3 {
+    margin-block-end: 0.4rem;
+  }
+
+  .build-path-list p + p {
+    margin-block-start: 0.45rem;
+  }
+
+  .build-path-list a,
+  #orientation .section a {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding-inline: 0.65rem;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1121,43 +1155,202 @@
     <div class="course-home-intro">
       <p class="eyebrow">A guided route through this exact codebase</p>
       <h1>Understand the game, one behavior at a time.</h1>
-      <p class="course-home-lede">Start with one player action. Follow the code that owns its rule, then inspect the test that supports the explanation.</p>
-      <p class="course-start"><a class="primary-button" data-course-start href="lessons/0001-follow-one-submit.html">Start Lesson 1 <span aria-hidden="true">→</span></a></p>
+      <p class="course-home-lede">First find the right folders and run commands in your teammate's repo. Then build one small game rule at a time and use this codebase to trace the behavior.</p>
+      <p class="course-start"><a class="primary-button" data-course-start href="lessons/0000-before-lesson-one.html">Start with the map <span aria-hidden="true">→</span></a></p>
       <p class="quiet course-home-snapshot" data-course-snapshot><span class="status status-current">Snapshot internally consistent</span> <span>Source snapshot <code>4edc506dd9158d21</code></span></p>
       <p class="quiet course-home-note">A self-check can guide study; it is not proof of mastery.</p>
     </div>
-    <div class="course-batches" id="course-batches" aria-label="Learning path">
+    <section class="section" id="build-path" aria-labelledby="build-path-title">
+      <h2 id="build-path-title">What to build, and why this order</h2>
+      <p class="section-intro">Read the steps from top to bottom. Each step uses something made earlier. The paths are examples from this repo; find the matching owner in your teammate's repo before creating files.</p>
+      <ol class="build-path-list"><li data-build-step="find-homes"><h3>Find the homes</h3><p><strong>Why now:</strong> First find where this repo keeps rules and tests. That way you add files beside the code that owns them.</p><p><strong>Needs:</strong> No earlier build step</p><p><strong>Create:</strong> Write down the game package, test folder, frontend app, service route, storage module, and run commands.</p><p><strong>Place:</strong> Use the paths that already exist in your teammate&#39;s repo. If it looks like this repo, inspect packages/, services/, and frontend/ first.</p><p><strong>Pattern:</strong> Keep each rule, route, test, and data file near its current owner.</p><p><strong>Check:</strong> You can name the test command and folder where a Match rule test should go.</p><p>Read: <a href="lessons/0013-running-the-project.html">Lesson 13</a></p></li>
+<li data-build-step="match-core"><h3>Make a small Match core</h3><p><strong>Why now:</strong> Submit needs a Match, an active Round, a player, a phase, and a clock.</p><p><strong>Needs:</strong> Find the homes</p><p><strong>Create:</strong> Create Match and Round state, legal phase changes, score rules, a fixed clock, and a fake Judge test helper.</p><p><strong>Place:</strong> Use the existing game-rules package. In a similar layout, create packages/arena-game/src/match-rules.ts and packages/arena-game/test/match-rules.test.ts.</p><p><strong>Pattern:</strong> Keep phase and score choices in a pure rule module. Pass in the clock and fake Judge result in tests.</p><p><strong>Check:</strong> A fixed-clock test starts a Match and Round, then rejects an action in the wrong phase.</p><p>Read: <a href="lessons/0003-rounds-and-final-score.html">Lesson 3</a></p></li>
+<li data-build-step="player-problem-run"><h3>Give a player a Problem and Run</h3><p><strong>Why now:</strong> A player and visible Problem must exist before code can be checked or submitted.</p><p><strong>Needs:</strong> Make a small Match core</p><p><strong>Create:</strong> Add basic Match entry, one checked Problem, and a Run that returns example feedback without changing the score.</p><p><strong>Place:</strong> In a similar layout, put Match entry near packages/arena-game/src/lobby.ts and its test near packages/arena-game/test/lobby.test.ts. Put Problem data under packages/problem-bank/problems/.</p><p><strong>Pattern:</strong> Keep Problem data separate from Match rules. Run returns visible feedback and does not change the score.</p><p><strong>Check:</strong> An admitted player can Run visible examples. A visitor is rejected, and no Run changes the score.</p><p>Read: <a href="lessons/0004-lobby-to-match.html">Lesson 4</a> · <a href="lessons/0005-problem-editor-run.html">Lesson 5</a></p></li>
+<li data-build-step="submit-reveal"><h3>Add Submission and Reveal</h3><p><strong>Why now:</strong> Now the game can decide when code may enter hidden tests and when its score can be shown.</p><p><strong>Needs:</strong> Give a player a Problem and Run</p><p><strong>Create:</strong> Add Submit, a pending receipt, retry identity, a fake-Judge result, the deadline cutoff, score update, and Reveal.</p><p><strong>Place:</strong> In a similar layout, extend packages/arena-game/src/engine.ts and add a test in packages/arena-game/test/submit-path.test.ts. Use the Judge interface your repo already has.</p><p><strong>Pattern:</strong> Game rules decide if Submit is legal, storage records acceptance, and the Judge runs code. Use the same request ID for a retry.</p><p><strong>Check:</strong> A valid Submit is judged once. Submit after Round close is rejected. Hidden results appear only at Reveal.</p><p>Read: <a href="lessons/0001-follow-one-submit.html">Lesson 1</a> · <a href="lessons/0002-reveal-cutoff.html">Lesson 2</a> · <a href="lessons/0006-evaluation-retries.html">Lesson 6</a> · <a href="lessons/0007-judge-boundary.html">Lesson 7</a></p></li>
+<li data-build-step="persistence"><h3>Save accepted Match state</h3><p><strong>Why now:</strong> Reconnect and restart need to recover saved Submissions and Reveals.</p><p><strong>Needs:</strong> Add Submission and Reveal</p><p><strong>Create:</strong> Add one Match storage contract, an in-memory version, then a database adapter and restart tests.</p><p><strong>Place:</strong> In a similar layout, extend packages/arena-game/src/persistence.ts and packages/arena-game/test/persistence.test.ts, then use the existing database adapter.</p><p><strong>Pattern:</strong> Test one storage contract with memory and the real database. Reject writes based on an old revision.</p><p><strong>Check:</strong> After restart, the same accepted Submission and Reveal are loaded. An old write cannot replace newer state.</p><p>Read: <a href="lessons/0008-persistence-recovery.html">Lesson 8</a></p></li>
+<li data-build-step="connect-players"><h3>Connect players to the rules</h3><p><strong>Why now:</strong> The screen should send commands and show the Match state owned by the server.</p><p><strong>Needs:</strong> Save accepted Match state</p><p><strong>Create:</strong> Add a service route, transport, basic Arena screen, and reconnect snapshot behavior.</p><p><strong>Place:</strong> In a similar layout, find the game service under services/game/src/game/, transport under frontend/src/arena/transport.ts, and screen under frontend/src/components/. Test each at its boundary.</p><p><strong>Pattern:</strong> The screen sends commands and shows server state. Transport handles delivery and reconnect.</p><p><strong>Check:</strong> Two browser clients see the same saved Match. After reconnect, the client loads its current state.</p><p>Read: <a href="lessons/0009-live-connection.html">Lesson 9</a> · <a href="lessons/0012-arena-screen.html">Lesson 12</a></p></li>
+<li data-build-step="team-play"><h3>Add two-player teams</h3><p><strong>Why now:</strong> Shared editing and Ready checks need Match rules, storage, and live messages first.</p><p><strong>Needs:</strong> Connect players to the rules</p><p><strong>Create:</strong> Add 2v2 teams, a shared revision, Readiness reset after edits, team-only chat, and reconnect tests.</p><p><strong>Place:</strong> In a similar layout, extend packages/arena-game/src/team-collaboration.ts and its test. Keep clients in frontend/src/arena/collab.ts and chat.ts.</p><p><strong>Pattern:</strong> Game rules own Readiness and revision. Collaboration and chat clients deliver team-scoped updates.</p><p><strong>Check:</strong> Four users stay separated by team. An edit clears both Readiness approvals.</p><p>Read: <a href="lessons/0010-team-collaboration.html">Lesson 10</a> · <a href="lessons/0011-team-chat.html">Lesson 11</a></p></li>
+<li data-build-step="real-boundaries"><h3>Check the real boundaries</h3><p><strong>Why now:</strong> Fake tests do not prove PostgreSQL, Docker isolation, or real browser behavior.</p><p><strong>Needs:</strong> Add two-player teams</p><p><strong>Create:</strong> Run equivalent database, Judge security, and two-client browser checks in your teammate&#39;s repo. Record checks that could not run separately.</p><p><strong>Place:</strong> Use the existing database, Judge, and browser test folders. In a similar layout, inspect packages/arena-game/test/judge-security.test.ts and frontend/e2e/.</p><p><strong>Pattern:</strong> Keep fake, database, Docker, and real-browser evidence separate. Record the command and result for each.</p><p><strong>Check:</strong> Mark PASS only after the matching test runs in your teammate&#39;s repo and passes.</p><p>Read: <a href="lessons/0014-rewrite-with-tests.html">Lesson 14</a></p></li></ol>
+    </section>
+    <div class="course-batches" id="course-batches" aria-label="Trace lessons">
       <section class="course-batch" aria-labelledby="course-batch-1-title">
       <h2 id="course-batch-1-title">Follow one Match</h2>
       <p class="course-batch-description">Start from player actions and trace what the game decides.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0001-submit-journey" href="lessons/0001-follow-one-submit.html"><span class="course-lesson-number" aria-hidden="true">01</span><span class="course-lesson-copy">Lesson 1: A click is a request. The Match engine decides what it means.</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0002-reveal-cutoff" href="lessons/0002-reveal-cutoff.html"><span class="course-lesson-number" aria-hidden="true">02</span><span class="course-lesson-copy">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0003-rounds-and-final-score" href="lessons/0003-rounds-and-final-score.html"><span class="course-lesson-number" aria-hidden="true">03</span><span class="course-lesson-copy">Lesson 3: What resets each Round—and what decides the Match?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0004-lobby-to-match" href="lessons/0004-lobby-to-match.html"><span class="course-lesson-number" aria-hidden="true">04</span><span class="course-lesson-copy">Lesson 4: The Lobby gathers players; Game creates the Match</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0005-problem-editor-run" href="lessons/0005-problem-editor-run.html"><span class="course-lesson-number" aria-hidden="true">05</span><span class="course-lesson-copy">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0001-submit-journey" href="lessons/0001-follow-one-submit.html"><span class="course-lesson-number" aria-hidden="true">01</span><span class="course-lesson-copy">Lesson 1: A click is a request. The Match engine decides what it means.</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0001-submit-journey">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0002-reveal-cutoff" href="lessons/0002-reveal-cutoff.html"><span class="course-lesson-number" aria-hidden="true">02</span><span class="course-lesson-copy">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0002-reveal-cutoff">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0003-rounds-and-final-score" href="lessons/0003-rounds-and-final-score.html"><span class="course-lesson-number" aria-hidden="true">03</span><span class="course-lesson-copy">Lesson 3: What resets each Round—and what decides the Match?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0003-rounds-and-final-score">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0004-lobby-to-match" href="lessons/0004-lobby-to-match.html"><span class="course-lesson-number" aria-hidden="true">04</span><span class="course-lesson-copy">Lesson 4: The Lobby gathers players; Game creates the Match</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0004-lobby-to-match">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0005-problem-editor-run" href="lessons/0005-problem-editor-run.html"><span class="course-lesson-number" aria-hidden="true">05</span><span class="course-lesson-copy">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0005-problem-editor-run">Not started</span></p></li></ol>
     </section>
 <section class="course-batch" aria-labelledby="course-batch-2-title">
       <h2 id="course-batch-2-title">Understand the boundaries</h2>
       <p class="course-batch-description">See which layer owns each responsibility and where the evidence stops.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0006-evaluation-retries" href="lessons/0006-evaluation-retries.html"><span class="course-lesson-number" aria-hidden="true">06</span><span class="course-lesson-copy">Lesson 6: A retry is the same Evaluation only when its identity matches</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0007-judge-boundary" href="lessons/0007-judge-boundary.html"><span class="course-lesson-number" aria-hidden="true">07</span><span class="course-lesson-copy">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0008-persistence-recovery" href="lessons/0008-persistence-recovery.html"><span class="course-lesson-number" aria-hidden="true">08</span><span class="course-lesson-copy">Lesson 8: What survives when the Game service restarts?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0006-evaluation-retries" href="lessons/0006-evaluation-retries.html"><span class="course-lesson-number" aria-hidden="true">06</span><span class="course-lesson-copy">Lesson 6: A retry is the same Evaluation only when its identity matches</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0006-evaluation-retries">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0007-judge-boundary" href="lessons/0007-judge-boundary.html"><span class="course-lesson-number" aria-hidden="true">07</span><span class="course-lesson-copy">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0007-judge-boundary">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0008-persistence-recovery" href="lessons/0008-persistence-recovery.html"><span class="course-lesson-number" aria-hidden="true">08</span><span class="course-lesson-copy">Lesson 8: What survives when the Game service restarts?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0008-persistence-recovery">Not started</span></p></li></ol>
     </section>
 <section class="course-batch" aria-labelledby="course-batch-3-title">
       <h2 id="course-batch-3-title">Follow live multiplayer behavior</h2>
       <p class="course-batch-description">Trace reconnect, shared work, chat, and the Arena screen.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0009-live-connection" href="lessons/0009-live-connection.html"><span class="course-lesson-number" aria-hidden="true">09</span><span class="course-lesson-copy">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0010-team-collaboration" href="lessons/0010-team-collaboration.html"><span class="course-lesson-number" aria-hidden="true">10</span><span class="course-lesson-copy">Lesson 10: An edit changes the revision—and resets both Ready approvals</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0011-team-chat" href="lessons/0011-team-chat.html"><span class="course-lesson-number" aria-hidden="true">11</span><span class="course-lesson-copy">Lesson 11: Team chat is a side channel—not editor state or Match state</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0012-arena-screen" href="lessons/0012-arena-screen.html"><span class="course-lesson-number" aria-hidden="true">12</span><span class="course-lesson-copy">Lesson 12: The Arena screen is a view of Match state—not another game engine</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0009-live-connection" href="lessons/0009-live-connection.html"><span class="course-lesson-number" aria-hidden="true">09</span><span class="course-lesson-copy">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0009-live-connection">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0010-team-collaboration" href="lessons/0010-team-collaboration.html"><span class="course-lesson-number" aria-hidden="true">10</span><span class="course-lesson-copy">Lesson 10: An edit changes the revision—and resets both Ready approvals</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0010-team-collaboration">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0011-team-chat" href="lessons/0011-team-chat.html"><span class="course-lesson-number" aria-hidden="true">11</span><span class="course-lesson-copy">Lesson 11: Team chat is a side channel—not editor state or Match state</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0011-team-chat">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0012-arena-screen" href="lessons/0012-arena-screen.html"><span class="course-lesson-number" aria-hidden="true">12</span><span class="course-lesson-copy">Lesson 12: The Arena screen is a view of Match state—not another game engine</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0012-arena-screen">Not started</span></p></li></ol>
     </section>
 <section class="course-batch" aria-labelledby="course-batch-4-title">
       <h2 id="course-batch-4-title">Operate and rebuild the reference</h2>
       <p class="course-batch-description">Run the project, read its evidence, and define parity gates for a rewrite.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0013-running-the-project" href="lessons/0013-running-the-project.html"><span class="course-lesson-number" aria-hidden="true">13</span><span class="course-lesson-copy">Lesson 13: The local play script and Compose stack are not the same thing</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0014-rewrite-with-tests" href="lessons/0014-rewrite-with-tests.html"><span class="course-lesson-number" aria-hidden="true">14</span><span class="course-lesson-copy">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0013-running-the-project" href="lessons/0013-running-the-project.html"><span class="course-lesson-number" aria-hidden="true">13</span><span class="course-lesson-copy">Lesson 13: The local play script and Compose stack are not the same thing</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0013-running-the-project">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0014-rewrite-with-tests" href="lessons/0014-rewrite-with-tests.html"><span class="course-lesson-number" aria-hidden="true">14</span><span class="course-lesson-copy">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0014-rewrite-with-tests">Not started</span></p></li></ol>
     </section>
     </div>
   </main>
+  <p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>
+<script type="module">
+export const COURSE_ACTIVITY_KEY = "code-arena-learning:activity:v1";
+
+const ACTIVITY_STATUSES = new Set(["started", "self-check-recorded"]);
+
+const emptyActivity = () => ({ version: 1, lastLessonId: null, lessons: {} });
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function readCourseActivity(storage, validLessonIds = []) {
+  if (!storage || typeof storage.getItem !== "function") return emptyActivity();
+
+  let raw;
+  try {
+    raw = storage.getItem(COURSE_ACTIVITY_KEY);
+  } catch {
+    return emptyActivity();
+  }
+  if (raw === null || raw === undefined || raw === "") return emptyActivity();
+
+  try {
+    const parsed = JSON.parse(raw);
+    const validIds = new Set(validLessonIds);
+    if (!isRecord(parsed) || parsed.version !== 1 || !isRecord(parsed.lessons)) return emptyActivity();
+    if (parsed.lastLessonId !== null && (typeof parsed.lastLessonId !== "string" || !validIds.has(parsed.lastLessonId))) {
+      return emptyActivity();
+    }
+
+    const lessons = {};
+    for (const [lessonId, status] of Object.entries(parsed.lessons)) {
+      if (!validIds.has(lessonId) || !ACTIVITY_STATUSES.has(status)) return emptyActivity();
+      lessons[lessonId] = status;
+    }
+    if (parsed.lastLessonId !== null && !Object.hasOwn(lessons, parsed.lastLessonId)) return emptyActivity();
+    return { version: 1, lastLessonId: parsed.lastLessonId, lessons };
+  } catch {
+    return emptyActivity();
+  }
+}
+
+export function writeCourseActivity(storage, activity) {
+  if (!storage || typeof storage.setItem !== "function") return false;
+  try {
+    storage.setItem(COURSE_ACTIVITY_KEY, JSON.stringify(activity));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function markLessonActivity(activity, lessonId, status) {
+  if (typeof lessonId !== "string" || lessonId.length === 0 || !ACTIVITY_STATUSES.has(status)) return activity;
+  const lessons = { ...(isRecord(activity?.lessons) ? activity.lessons : {}) };
+  const prior = lessons[lessonId];
+  lessons[lessonId] = prior === "self-check-recorded" && status === "started"
+    ? prior
+    : status;
+  return { version: 1, lastLessonId: lessonId, lessons };
+}
+
+export function resolveContinueLesson(activity, orderedLessons = []) {
+  const ordered = [...orderedLessons].sort((left, right) => left.order - right.order);
+  const lastLesson = ordered.find((lesson) => lesson.id === activity?.lastLessonId);
+  if (lastLesson && ACTIVITY_STATUSES.has(activity?.lessons?.[lastLesson.id])) return lastLesson;
+  return ordered[0] ?? null;
+}
+
+function activityLabel(status) {
+  if (status === "self-check-recorded") return "Self-check recorded";
+  if (status === "started") return "Started";
+  return "Not started";
+}
+
+function encodePath(output) {
+  return String(output).split("/").map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+export function installCourseActivity(root, storage, orderedLessons = []) {
+  const validLessons = [...orderedLessons]
+    .filter((lesson) => typeof lesson?.id === "string" && Number.isSafeInteger(lesson.order))
+    .sort((left, right) => left.order - right.order);
+  const validIds = validLessons.map(({ id }) => id);
+  const query = (selector) => root?.querySelector?.(selector) ?? null;
+  const queryAll = (selector) => [...(root?.querySelectorAll?.(selector) ?? [])];
+  const unavailableTarget = query("[data-course-storage-unavailable]");
+
+  const showUnavailable = () => {
+    if (!unavailableTarget) return;
+    unavailableTarget.hidden = false;
+    unavailableTarget.textContent = "This browser blocked local progress storage. The course still works; lesson links, predictions, and source previews remain available.";
+  };
+
+  let storageAvailable = Boolean(storage && typeof storage.getItem === "function" && typeof storage.setItem === "function");
+  if (storageAvailable) {
+    try {
+      storage.getItem(COURSE_ACTIVITY_KEY);
+    } catch {
+      storageAvailable = false;
+    }
+  }
+  if (!storageAvailable) showUnavailable();
+
+  let activity = readCourseActivity(storage, validIds);
+  const save = (nextActivity) => {
+    activity = nextActivity;
+    if (!writeCourseActivity(storage, activity)) showUnavailable();
+  };
+
+  const startLink = query("[data-course-start]");
+  if (startLink) {
+    const continueLesson = resolveContinueLesson(activity, validLessons);
+    if (continueLesson && activity.lastLessonId === continueLesson.id && activity.lessons[continueLesson.id]) {
+      startLink.href = encodePath(continueLesson.output);
+      startLink.textContent = `Continue Lesson ${continueLesson.order}`;
+    }
+    for (const statusTarget of queryAll("[data-course-activity-status]")) {
+      const status = activity.lessons[statusTarget.dataset.courseActivityStatus];
+      statusTarget.textContent = activityLabel(status);
+    }
+  }
+
+  const bodyLessonId = root?.body?.dataset?.courseLesson ?? query("[data-course-lesson]")?.dataset?.courseLesson;
+  if (bodyLessonId && validIds.includes(bodyLessonId)) {
+    save(markLessonActivity(activity, bodyLessonId, "started"));
+    for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+      statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+    }
+    for (const selfCheck of queryAll("[data-course-self-check]")) {
+      selfCheck.addEventListener("click", () => {
+        save(markLessonActivity(activity, bodyLessonId, "self-check-recorded"));
+        for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+          statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+        }
+      });
+    }
+  }
+
+  return { activity, storageAvailable };
+}
+const courseLessons = [{"id":"0001-submit-journey","order":1,"output":"lessons/0001-follow-one-submit.html"},{"id":"0002-reveal-cutoff","order":2,"output":"lessons/0002-reveal-cutoff.html"},{"id":"0003-rounds-and-final-score","order":3,"output":"lessons/0003-rounds-and-final-score.html"},{"id":"0004-lobby-to-match","order":4,"output":"lessons/0004-lobby-to-match.html"},{"id":"0005-problem-editor-run","order":5,"output":"lessons/0005-problem-editor-run.html"},{"id":"0006-evaluation-retries","order":6,"output":"lessons/0006-evaluation-retries.html"},{"id":"0007-judge-boundary","order":7,"output":"lessons/0007-judge-boundary.html"},{"id":"0008-persistence-recovery","order":8,"output":"lessons/0008-persistence-recovery.html"},{"id":"0009-live-connection","order":9,"output":"lessons/0009-live-connection.html"},{"id":"0010-team-collaboration","order":10,"output":"lessons/0010-team-collaboration.html"},{"id":"0011-team-chat","order":11,"output":"lessons/0011-team-chat.html"},{"id":"0012-arena-screen","order":12,"output":"lessons/0012-arena-screen.html"},{"id":"0013-running-the-project","order":13,"output":"lessons/0013-running-the-project.html"},{"id":"0014-rewrite-with-tests","order":14,"output":"lessons/0014-rewrite-with-tests.html"}];
+let courseStorage = null;
+try { courseStorage = globalThis.localStorage ?? null; } catch {}
+installCourseActivity(document, courseStorage, courseLessons);
+</script>
 </body>
 </html>

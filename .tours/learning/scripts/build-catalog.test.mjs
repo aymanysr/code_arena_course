@@ -466,6 +466,10 @@ test("renders catalog lessons and carries a validated optional build path", asyn
       path.join(learningDir, "templates/source-map.template.html"),
       await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8"),
     );
+    await writeFile(
+      path.join(learningDir, "templates/0000-before-lesson-one.template.html"),
+      await readFile(new URL("../templates/0000-before-lesson-one.template.html", import.meta.url), "utf8"),
+    );
     const firstTemplate = "<!doctype html><html><head><title>{{LESSON_TITLE}}</title><!-- INLINE_COURSE_STYLES --></head><body data-lesson-id=\"{{LESSON_ID}}\"><main><h1>{{LESSON_TITLE}}</h1><p>{{LESSON_GOAL}}</p><p>Lesson {{LESSON_ORDER}}</p><p>{{LESSON_FRESHNESS}}</p><p>{{SNAPSHOT_ID}}</p><a href=\"../../../src/engine.ts#L1\">source</a></main></body></html>";
     const secondTemplate = "<!doctype html><html><head><title>{{LESSON_TITLE}}</title><!-- INLINE_COURSE_STYLES --></head><body data-lesson-id=\"{{LESSON_ID}}\"><article><h1>{{LESSON_TITLE}}</h1><p>{{LESSON_GOAL}}</p><p>Lesson {{LESSON_ORDER}}</p><p>{{LESSON_FRESHNESS}}</p><p>{{SNAPSHOT_ID}}</p><a href=\"../../../src/engine.ts#L1\">source</a></article></body></html>";
     await writeFile(path.join(learningDir, "templates/first.html"), firstTemplate);
@@ -1919,4 +1923,21 @@ test("keeps refreshed gameplay lessons on current source anchors", async () => {
       assert.ok(template.includes(`../../../${sourcePath}#L${line}`), `${lessonId} links ${sourcePath}:${line}`);
     }
   }
+});
+
+test("renders orientation before the fourteen trace lessons", async () => {
+  const repoRoot = process.cwd();
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const learningPath = JSON.parse(await readFile(path.join(learningDir, "learning-path.json"), "utf8"));
+  const rendered = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, { tours: [], learningPath });
+  const home = rendered.files.get(path.join(learningDir, "index.html"));
+  const orientation = rendered.files.get(path.join(learningDir, "lessons/0000-before-lesson-one.html"));
+  assert.match(home, /data-course-start href="lessons\/0000-before-lesson-one.html">Start with the map/);
+  assert.match(home, /id="build-path"/);
+  assert.equal((home.match(/data-build-step=/g) ?? []).length, 8);
+  assert.equal((home.match(/data-lesson-link=/g) ?? []).length, 14);
+  assert.match(orientation, /Find the homes/);
+  assert.match(orientation, /packages\/arena-game\/src/);
+  assert.match(orientation, /fixed clock/);
 });

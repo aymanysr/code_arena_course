@@ -1019,6 +1019,42 @@ function renderCourseBatches(data) {
   }).join("\n");
 }
 
+function renderBuildPathSteps(pathModel, lessons) {
+  const lessonsById = new Map(lessons.map((lesson) => [lesson.id, lesson]));
+  const stepsById = new Map(pathModel.steps.map((step) => [step.id, step]));
+  const items = pathModel.steps.map((step) => {
+    const links = step.lessonIds.map((id) => {
+      const lesson = lessonsById.get(id);
+      const href = lesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/");
+      return '<a href="' + html(href) + '">Lesson ' + lesson.order + '</a>';
+    }).join(" · ");
+    const needs = step.requires.length
+      ? step.requires.map((id) => stepsById.get(id).title).join(", ")
+      : "No earlier build step";
+    return '<li data-build-step="' + html(step.id) + '"><h3>' + html(step.title) +
+      '</h3><p><strong>Why now:</strong> ' + html(step.why) +
+      '</p><p><strong>Needs:</strong> ' + html(needs) +
+      '</p><p><strong>Create:</strong> ' + html(step.deliverable) +
+      '</p><p><strong>Place:</strong> ' + html(step.placement) +
+      '</p><p><strong>Pattern:</strong> ' + html(step.pattern) +
+      '</p><p><strong>Check:</strong> ' + html(step.check) +
+      '</p><p>Read: ' + links + '</p></li>';
+  });
+  return '<ol class="build-path-list">' + items.join("\n") + "</ol>";
+}
+
+function renderOrientationTemplate(template, stylesheet, pathModel) {
+  const first = pathModel.steps[0];
+  const firstStep = '<aside class="concept-note" data-first-build-step="' + html(first.id) +
+    '"><h2>Step 1: ' + html(first.title) +
+    '</h2><p>' + html(first.why) + '</p><p><strong>Place it:</strong> ' +
+    html(first.placement) + '</p><p><strong>Check:</strong> ' + html(first.check) + '</p></aside>';
+  return template
+    .replace("<!-- INLINE_COURSE_STYLES -->", "<style>\n" + stylesheet + "\n</style>")
+    .replace("{{ORIENTATION_TITLE}}", html(pathModel.orientation.title))
+    .replace("<!-- ORIENTATION_FIRST_STEP -->", firstStep);
+}
+
 function renderCourseActivityRuntime(activityRuntimeSource, orderedLessons, currentOutput) {
   if (typeof activityRuntimeSource !== "string" || activityRuntimeSource.trim() === "") return "";
   const runtimeLessons = orderedLessons.map((lesson) => ({
@@ -1063,13 +1099,20 @@ export function renderCourseHomeTemplate(template, stylesheet, data, activityRun
   const orderedLessons = [...(data.lessons ?? [])].sort((left, right) => left.order - right.order);
   const replacements = {
     "<!-- INLINE_COURSE_STYLES -->": `<style>\n${stylesheet}\n</style>`,
-    "{{FIRST_LESSON_URL}}": firstLesson
-      ? html(firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/"))
-      : "#course-batches",
-    "{{FIRST_LESSON_ACTION}}": firstLesson ? `Start Lesson ${firstLesson.order}` : "Browse lessons",
+    "{{FIRST_LESSON_URL}}": data.learningPath
+      ? html(data.learningPath.orientation.output.split("/").map((segment) => encodeURIComponent(segment)).join("/"))
+      : firstLesson
+        ? html(firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/"))
+        : "#course-batches",
+    "{{FIRST_LESSON_ACTION}}": data.learningPath
+      ? "Start with the map"
+      : firstLesson ? `Start Lesson ${firstLesson.order}` : "Browse lessons",
     "{{SNAPSHOT_STATUS}}": html(status.label),
     "{{SNAPSHOT_STATUS_CLASS}}": html(status.className),
     "{{SNAPSHOT_ID}}": html(data.snapshotId),
+    "<!-- BUILD_PATH_STEPS -->": data.learningPath
+      ? renderBuildPathSteps(data.learningPath, data.lessons)
+      : "",
     "<!-- COURSE_BATCHES -->": renderCourseBatches(data),
   };
   let result = template;
@@ -1316,6 +1359,13 @@ export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, o
   if (data.batches.length) {
     const homeTemplate = await readFile(path.join(learningDir, "templates/course-home.template.html"), "utf8");
     files.set(path.join(learningDir, "index.html"), renderCourseHomeTemplate(homeTemplate, stylesheet, data, activityRuntimeSource));
+  }
+  if (data.learningPath) {
+    const orientationTemplate = await readFile(path.join(learningDir, "templates/0000-before-lesson-one.template.html"), "utf8");
+    files.set(
+      path.join(learningDir, data.learningPath.orientation.output),
+      renderOrientationTemplate(orientationTemplate, stylesheet, data.learningPath),
+    );
   }
   files.set(path.join(learningDir, "source-map.html"), catalog);
   const orderedLessons = [...data.lessons].sort((left, right) => left.order - right.order);

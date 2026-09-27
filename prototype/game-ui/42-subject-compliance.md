@@ -1,9 +1,9 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-27 (Match deadline, Lobby, event-convergence, and source-linked course review; module rows intentionally unchanged — team sign-off required)
+Last reviewed: 2026-09-27 (Match deadline, Lobby, event-convergence, course lessons, and orientation/build-path review; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
-Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus the source-linked learning-course review for Lessons 1–14. Lesson 11's current chat sources were reviewed and required no refresh. Course content and focused tests do not change a subject-module claim.
+Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus the source-linked learning-course review for Lessons 1–14 and its new orientation and build-order map. Lesson 11's current chat sources were reviewed and required no refresh. Course content and focused tests do not change a subject-module claim.
 
 PIVOT 2026-09-23: the production game is Code Arena (1v1/2v2 code battles) and `09-arena.html` is frozen as its approved interaction reference (see `.scratch/ft-transcendence-wayfinder/decisions-2026-09-23.md` and `.scratch/code-arena/spec.md`). The campus puzzle-race direction, its role/stage/clue mechanics, and the puzzle-specific prototypes below are historical evidence, not the production path. `CONTEXT.md` now carries the Code Arena glossary.
 
@@ -115,6 +115,7 @@ demonstrations but do not complete their full subject criteria.
   was available; local Game and judge-worker HTTP fixtures could not bind
   `127.0.0.1` (`EPERM`). Those checks are not recorded as passing evidence. No
   subject-module status row or point claim changes in this slice.
+- Course orientation and the eight-step build map (2026-09-27) show dependency order and conditional example paths. They tell learners to find the current owners in a teammate repo and write their own equivalent code. They add no production behavior or module evidence; status rows remain unchanged.
 
 ## Status key
 
