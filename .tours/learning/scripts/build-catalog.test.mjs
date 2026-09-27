@@ -8,13 +8,15 @@ import test from "node:test";
 import { auditCourseOrder, auditTemplateLinks, buildCatalogData, missingLessonReviews, renderCatalogTemplate, renderLessonTemplate } from "./build-catalog.mjs";
 
 let renderCatalogOutputs;
+let renderCourseHomeTemplate;
 let acceptReviewedSnapshot;
 let writeRenderedOutputs;
 let formatAuditReport;
 try {
-  ({ renderCatalogOutputs, acceptReviewedSnapshot, writeRenderedOutputs, formatAuditReport } = await import("./build-catalog.mjs"));
+  ({ renderCatalogOutputs, renderCourseHomeTemplate, acceptReviewedSnapshot, writeRenderedOutputs, formatAuditReport } = await import("./build-catalog.mjs"));
 } catch {
   renderCatalogOutputs = null;
+  renderCourseHomeTemplate = null;
   acceptReviewedSnapshot = null;
   writeRenderedOutputs = null;
   formatAuditReport = null;
@@ -35,9 +37,10 @@ function lessonRecord({
   return { id, order, title, goal, template, output, references };
 }
 
-function makeCoverageMap({ roots = [], files = [], excluded = [], lessons = [], supportingFiles = [] } = {}) {
+function makeCoverageMap({ version = 1, batches, roots = [], files = [], excluded = [], lessons = [], supportingFiles = [] } = {}) {
   return {
-    version: 1,
+    version,
+    ...(batches === undefined ? {} : { batches }),
     scope: {
       roots: roots.map((item) => typeof item === "string" ? { path: item, area: item } : item),
       files,
@@ -287,6 +290,130 @@ test("validates unique lesson metadata, existing templates, support records, and
     assert.equal(invalidAnchor.invalidReferences[0].startLine, 0);
   } finally {
     await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("validates catalog batches against every lesson in lesson order", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-batches-"));
+  const learningDir = path.join(tempRoot, ".tours/learning");
+  try {
+    await mkdir(path.join(learningDir, "templates"), { recursive: true });
+    await writeFile(path.join(learningDir, "templates/lesson.html"), "<h1>{{LESSON_TITLE}}</h1>");
+    const lessons = [1, 2, 3].map((order) => lessonRecord({
+      id: `lesson-${order}`,
+      order,
+      title: `Lesson ${order}`,
+      template: "templates/lesson.html",
+      output: `lessons/lesson-${order}.html`,
+    }));
+    const firstBatch = {
+      id: "start-here",
+      order: 1,
+      title: "Start here",
+      description: "Follow the player path.",
+      lessonIds: ["lesson-1", "lesson-2"],
+    };
+    const secondBatch = {
+      id: "next-boundary",
+      order: 2,
+      title: "Next boundary",
+      description: "Trace the next responsibility.",
+      lessonIds: ["lesson-3"],
+    };
+    const map = (batches) => makeCoverageMap({ version: 2, lessons, batches });
+    const build = (batches) => buildCatalogData({
+      repoRoot: tempRoot,
+      learningDir,
+      coverageMap: map(batches),
+      tours: [],
+    });
+
+    await assert.rejects(build([
+      firstBatch,
+      { ...secondBatch, id: firstBatch.id },
+    ]), /duplicate.*batch id|batch id.*duplicate/i);
+    await assert.rejects(build([
+      firstBatch,
+      { ...secondBatch, order: firstBatch.order },
+    ]), /duplicate.*batch order|batch order.*duplicate/i);
+    await assert.rejects(build([
+      { ...firstBatch, lessonIds: ["lesson-1", "unknown-lesson"] },
+      secondBatch,
+    ]), /unknown lesson.*unknown-lesson|unknown-lesson.*lesson/i);
+    await assert.rejects(build([
+      firstBatch,
+      { ...secondBatch, lessonIds: ["lesson-2", "lesson-3"] },
+    ]), /lesson-2.*more than one batch|more than one batch.*lesson-2/i);
+    await assert.rejects(build([
+      { ...firstBatch, lessonIds: ["lesson-1"] },
+      secondBatch,
+    ]), /omit(?:s)? lesson.*lesson-2|lesson-2.*omitted/i);
+    await assert.rejects(build([
+      { ...firstBatch, lessonIds: ["lesson-2", "lesson-1"] },
+      secondBatch,
+    ]), /flattened batch order.*lesson order|lesson order.*flattened batch order/i);
+
+    const data = await build([firstBatch, secondBatch]);
+    assert.deepEqual(data.batches, [firstBatch, secondBatch]);
+    assert.deepEqual(data.batches.flatMap(({ lessonIds }) => lessonIds), ["lesson-1", "lesson-2", "lesson-3"]);
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
+  }
+});
+
+test("renders a catalog-owned Course Home with a Lesson 1 fallback and visible batch links", async () => {
+  const tempRoot = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-home-"));
+  const repoRoot = path.join(tempRoot, "repo");
+  const learningDir = path.join(repoRoot, ".tours/learning");
+  try {
+    await mkdir(path.join(learningDir, "assets"), { recursive: true });
+    await mkdir(path.join(learningDir, "templates"), { recursive: true });
+    await mkdir(path.join(learningDir, "lessons"), { recursive: true });
+    await writeFile(path.join(learningDir, "assets/course.css"), ".course-home { color: inherit; }\n");
+    await writeFile(path.join(learningDir, "templates/source-map.template.html"), "<!doctype html><title>Source map</title><body>Map</body>");
+    await writeFile(path.join(learningDir, "templates/lesson.html"), "<!doctype html><title>{{LESSON_TITLE}}</title><body><h1>{{LESSON_TITLE}}</h1></body>");
+    await writeFile(path.join(learningDir, "templates/course-home.template.html"), [
+      "<!doctype html>",
+      "<html lang=\"en\"><head><title>Learn Code Arena</title><!-- INLINE_COURSE_STYLES --></head><body>",
+      "<a class=\"skip-link\" href=\"#course\">Skip to the course</a>",
+      "<header class=\"course-header\"><nav aria-label=\"Course\"><a aria-current=\"page\" href=\"index.html\">Learn</a><a href=\"source-map.html\">Explore code</a></nav></header>",
+      "<main class=\"page course-home\" id=\"course\" tabindex=\"-1\">",
+      "<p class=\"eyebrow\">A guided route through this exact codebase</p><h1>Understand the game, one behavior at a time.</h1>",
+      "<a class=\"primary-button\" data-course-start href=\"{{FIRST_LESSON_URL}}\">{{FIRST_LESSON_ACTION}}</a>",
+      "<p class=\"quiet\" data-course-snapshot><span class=\"status {{SNAPSHOT_STATUS_CLASS}}\">{{SNAPSHOT_STATUS}}</span> <span>Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>",
+      "<p data-course-activity>Activity stays on this browser and is not a mastery score.</p>",
+      "<!-- COURSE_BATCHES -->",
+      "</main></body></html>",
+    ].join("\n"));
+    const first = lessonRecord({ id: "lesson-1", order: 1, title: "Read the request", template: "templates/lesson.html", output: "lessons/lesson-1.html" });
+    const second = lessonRecord({ id: "lesson-2", order: 2, title: "Check the rule", template: "templates/lesson.html", output: "lessons/lesson-2.html" });
+    const third = lessonRecord({ id: "lesson-3", order: 3, title: "Inspect the verdict", template: "templates/lesson.html", output: "lessons/lesson-3.html" });
+    const rendered = await renderCatalogOutputs(repoRoot, learningDir, makeCoverageMap({
+      version: 2,
+      lessons: [third, second, first],
+      batches: [
+        { id: "start-here", order: 1, title: "Start here", description: "Follow one action.", lessonIds: [first.id, second.id] },
+        { id: "next-boundary", order: 2, title: "Next boundary", description: "See what happens after.", lessonIds: [third.id] },
+      ],
+    }), { tours: [] });
+    const home = rendered.files.get(path.join(learningDir, "index.html"));
+
+    assert.equal(typeof renderCourseHomeTemplate, "function", "renderCourseHomeTemplate must be available for generated pages");
+    assert.ok(home, "renderCatalogOutputs must include the Course Home");
+    assert.equal((home.match(/class=\"primary-button\"/g) ?? []).length, 1);
+    assert.match(home, /data-course-start href=\"lessons\/lesson-1\.html\">Start Lesson 1/);
+    assert.match(home, /href=\"source-map\.html\">Explore code<\/a>/);
+    assert.match(home, /class=\"quiet\" data-course-snapshot/);
+    assert.match(home, /<h2[^>]*>Start here<\/h2>[\s\S]*?<h2[^>]*>Next boundary<\/h2>/);
+    assert.doesNotMatch(home, /<summary[^>]*>[\s\S]*?<h[1-6]\b/);
+    for (const [lessonId, href] of [["lesson-1", "lesson-1.html"], ["lesson-2", "lesson-2.html"], ["lesson-3", "lesson-3.html"]]) {
+      assert.match(home, new RegExp(`<a[^>]+data-lesson-link=\"${lessonId}\"[^>]+href=\"lessons/${href}\"`));
+    }
+    assert.doesNotMatch(home, /data-lesson-link=\"(?:lesson-1|lesson-2|lesson-3)\"[^>]*disabled/);
+    assert.ok(home.indexOf("lesson-1.html") < home.indexOf("lesson-2.html"));
+    assert.ok(home.indexOf("lesson-2.html") < home.indexOf("lesson-3.html"));
+  } finally {
+    await rm(tempRoot, { recursive: true, force: true });
   }
 });
 

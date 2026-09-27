@@ -446,12 +446,12 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 - Consumes: catalog schema version 2 and current lesson freshness.
 - Produces: validated `batches`, `renderCourseHomeTemplate()`, and generated `.tours/learning/index.html`.
 
-- [ ] **Step 1: Add failing schema tests.** Cover duplicate batch ID/order, unknown lesson, duplicated lesson across batches, omitted lesson, and flattened batch order differing from lesson `order`.
-- [ ] **Step 2: Add a failing Course Home render test.** Use two batches and three lessons. Assert one primary link, four-state-independent lesson links, batch headings outside disclosure summaries, a quiet snapshot status, and an `Explore code` link to `source-map.html`.
-- [ ] **Step 3: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: FAIL because version 2 and Course Home rendering do not exist.
-- [ ] **Step 4: Implement schema version 2 validation.** Normalize batches only after all lessons are validated, then require every lesson exactly once and preserve the flattened order.
-- [ ] **Step 5: Implement `renderCourseHomeTemplate()`.** Render semantic `<section>` elements with `<h2>` batch headings and ordered lesson lists. Use a single primary anchor with `data-course-start`; JavaScript may change its text/href to Continue, but its authored fallback must start Lesson 1.
-- [ ] **Step 6: Add the Course Home template.** Include:
+- [x] **Step 1: Add failing schema tests.** Cover duplicate batch ID/order, unknown lesson, duplicated lesson across batches, omitted lesson, and flattened batch order differing from lesson `order`.
+- [x] **Step 2: Add a failing Course Home render test.** Use two batches and three lessons. Assert one primary link, four-state-independent lesson links, batch headings outside disclosure summaries, a quiet snapshot status, and an `Explore code` link to `source-map.html`.
+- [x] **Step 3: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: FAIL because version 2 and Course Home rendering do not exist.
+- [x] **Step 4: Implement schema version 2 validation.** Normalize batches only after all lessons are validated, then require every lesson exactly once and preserve the flattened order.
+- [x] **Step 5: Implement `renderCourseHomeTemplate()`.** Render semantic `<section>` elements with `<h2>` batch headings and ordered lesson lists. Use a single primary anchor with `data-course-start`; JavaScript may change its text/href to Continue, but its authored fallback must start Lesson 1.
+- [x] **Step 6: Add the Course Home template.** Include:
 
 ```html
 <a class="skip-link" href="#course">Skip to the course</a>
@@ -467,10 +467,10 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 </main>
 ```
 
-- [ ] **Step 7: Generate Course Home with the catalog outputs.** Make `renderCatalogOutputs()` return `index.html`, `source-map.html`, and every lesson page in one output map so `--check` detects home drift.
-- [ ] **Step 8: Style the page in the shared CSS.** Use the existing theme tokens, one reading column for descriptions, a responsive batch grid, visible focus, 44-pixel controls, and no headings inside `<summary>`.
-- [ ] **Step 9: Update the Playwright fixture and run tests.** Run `node --test .tours/learning/scripts/build-catalog.test.mjs .tours/learning/scripts/source-preview.test.mjs`. Expected: PASS, including local-file source previews.
-- [ ] **Step 10: Commit.** Commit `feat(course): add learner course home`.
+- [x] **Step 7: Generate Course Home with the catalog outputs.** Make `renderCatalogOutputs()` return `index.html`, `source-map.html`, and every lesson page in one output map so `--check` detects home drift.
+- [x] **Step 8: Style the page in the shared CSS.** Use the existing theme tokens, one reading column for descriptions, a responsive batch grid, visible focus, 44-pixel controls, and no headings inside `<summary>`.
+- [x] **Step 9: Update the Playwright fixture and run tests.** Run `node --test .tours/learning/scripts/build-catalog.test.mjs .tours/learning/scripts/source-preview.test.mjs`. Expected: PASS, including local-file source previews.
+- [x] **Step 10: Commit.** Commit `feat(course): add learner course home`.
 
 ### Task 8: Add safe activity and consistent generated lesson navigation
 

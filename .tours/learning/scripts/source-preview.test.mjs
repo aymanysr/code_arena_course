@@ -6,17 +6,19 @@ import path from "node:path";
 import test, { after, before } from "node:test";
 import { pathToFileURL } from "node:url";
 import { chromium } from "playwright";
-import { buildCatalogData, renderCatalogTemplate, renderLessonTemplate } from "./build-catalog.mjs";
+import { renderCatalogOutputs, renderLessonTemplate } from "./build-catalog.mjs";
 
 const filePath = "packages/arena-game/src/engine.ts";
 let browser;
 let fixtureDirectory;
 let mapUrl;
+let homeUrl;
 let lessonUrl;
 let prototypeUrl;
 let server;
 let serverUrl;
 let serverMapUrl;
+let serverHomeUrl;
 let prototypeAvailable = false;
 
 before(async () => {
@@ -27,6 +29,7 @@ before(async () => {
   }
   fixtureDirectory = await mkdtemp(path.join(os.tmpdir(), "code-arena-source-preview-"));
   mapUrl = pathToFileURL(path.join(fixtureDirectory, "source-map.html")).href;
+  homeUrl = pathToFileURL(path.join(fixtureDirectory, "index.html")).href;
   lessonUrl = pathToFileURL(path.join(fixtureDirectory, "lessons/0001-first.html")).href;
   prototypeUrl = pathToFileURL(path.join(fixtureDirectory, ".scratch/learning-platform-ux-prototype.html")).href;
   await mkdir(path.join(fixtureDirectory, "packages/arena-game/src"), { recursive: true });
@@ -34,6 +37,8 @@ before(async () => {
   await mkdir(path.join(fixtureDirectory, ".tours/learning"), { recursive: true });
   await mkdir(path.join(fixtureDirectory, ".scratch"), { recursive: true });
   await mkdir(path.join(fixtureDirectory, "templates"), { recursive: true });
+  await mkdir(path.join(fixtureDirectory, "assets"), { recursive: true });
+  await mkdir(path.join(fixtureDirectory, "lessons"), { recursive: true });
   const source = Array.from({ length: 40 }, (_, index) => index === 19
     ? `const line20 = "${"x".repeat(160)}";`
     : `const line${index + 1} = ${index + 1};`).join("\n");
@@ -42,6 +47,7 @@ before(async () => {
   await writeFile(path.join(fixtureDirectory, "templates/second.html"), "Second lesson template.\n");
 
   const template = await readFile(new URL("../templates/source-map.template.html", import.meta.url), "utf8");
+  const homeTemplate = await readFile(new URL("../templates/course-home.template.html", import.meta.url), "utf8");
   const stylesheet = await readFile(new URL("../assets/course.css", import.meta.url), "utf8");
   let prototype;
   try {
@@ -74,13 +80,22 @@ before(async () => {
     },
   ];
   const coverageMap = {
-    version: 1,
+    version: 2,
     scope: { roots: [{ path: "packages", area: "Game" }], files: [], excluded: [] },
+    batches: [
+      { id: "start-here", order: 1, title: "Start here", description: "Follow the player path.", lessonIds: ["0001-first"] },
+      { id: "next-step", order: 2, title: "Next step", description: "Check the next behavior.", lessonIds: ["0002-second"] },
+    ],
     lessons,
     supportingFiles: [],
   };
-  const data = await buildCatalogData({ repoRoot: fixtureDirectory, learningDir: fixtureDirectory, coverageMap });
-  const renderedMap = renderCatalogTemplate(template, stylesheet, data, fixtureDirectory);
+  await writeFile(path.join(fixtureDirectory, "templates/course-home.template.html"), homeTemplate);
+  await writeFile(path.join(fixtureDirectory, "templates/source-map.template.html"), template);
+  await writeFile(path.join(fixtureDirectory, "assets/course.css"), stylesheet);
+  const renderedCatalog = await renderCatalogOutputs(fixtureDirectory, fixtureDirectory, coverageMap, { tours: [] });
+  const { data } = renderedCatalog;
+  const renderedMap = renderedCatalog.files.get(path.join(fixtureDirectory, "source-map.html"));
+  const renderedHome = renderedCatalog.files.get(path.join(fixtureDirectory, "index.html"));
   const lessonTemplate = `<!doctype html><html lang="en"><head><!-- INLINE_COURSE_STYLES --></head><body data-lesson-step="2"><main style="min-height: 1800px"><a id="source-link" href="../../../${filePath}#L20">Open source</a><a id="missing-source-link" href="../../../packages/arena-game/src/missing.ts#L1">Missing source</a></main></body></html>`;
   const lessonFiles = data.files.filter((file) => lessons[0].references.some((reference) => reference.path === file.path));
   const renderedLesson = renderLessonTemplate(
@@ -94,6 +109,7 @@ before(async () => {
   );
 
   await writeFile(path.join(fixtureDirectory, "source-map.html"), renderedMap);
+  await writeFile(path.join(fixtureDirectory, "index.html"), renderedHome);
   await writeFile(path.join(fixtureDirectory, ".tours/learning/source-map.html"), renderedMap);
   if (prototypeAvailable) {
     await writeFile(path.join(fixtureDirectory, ".scratch/learning-platform-ux-prototype.html"), prototype);
@@ -115,6 +131,7 @@ before(async () => {
   const serverOrigin = `http://127.0.0.1:${server.address().port}`;
   serverUrl = `${serverOrigin}/lessons/0001-first.html`;
   serverMapUrl = `${serverOrigin}/source-map.html`;
+  serverHomeUrl = `${serverOrigin}/index.html`;
 });
 
 after(async () => {
@@ -360,15 +377,41 @@ test("a source preview cannot redirect its return link outside the project", asy
   assert.equal(page.url(), mapUrl);
 });
 
-test("the course map offers the first lesson and hides the full lesson list", async (t) => {
-  const page = await browser.newPage();
+test("Course Home offers Lesson 1, keeps every lesson link visible, and opens Explore code separately", async (t) => {
+  const page = await browser.newPage({ viewport: { width: 320, height: 800 } });
   page.setDefaultTimeout(2500);
   t.after(() => page.close());
 
-  await page.goto(mapUrl);
+  await page.goto(homeUrl);
 
-  assert.equal(await page.locator("#start-lesson").getAttribute("href"), "lessons/0001-first.html");
+  const start = page.locator("[data-course-start]");
+  assert.equal(await start.textContent(), "Start Lesson 1 →");
+  assert.equal(await start.getAttribute("href"), "lessons/0001-first.html");
+  assert.equal(await page.locator(".course-batch").count(), 2);
+  assert.equal(await page.locator(".course-batch h2").count(), 2);
+  assert.equal(await page.locator(".course-batch summary h2").count(), 0);
+  assert.equal(await page.locator("a[data-lesson-link]").count(), 2);
+  for (const lessonLink of await page.locator("a[data-lesson-link]").all()) {
+    assert.equal(await lessonLink.isVisible(), true);
+    assert.equal(await lessonLink.evaluate((anchor) => anchor.hasAttribute("disabled")), false);
+    assert.ok(await lessonLink.evaluate((anchor) => anchor.getBoundingClientRect().height >= 44));
+  }
+  const layout = await page.evaluate(() => ({
+    viewportWidth: document.documentElement.clientWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+  }));
+  assert.ok(layout.scrollWidth <= layout.viewportWidth, "Course Home fits a 320px viewport");
+  assert.match(await page.locator("[data-course-snapshot]").getAttribute("class"), /quiet/);
+
+  await page.getByRole("link", { name: "Explore code" }).click();
+  assert.ok(new URL(page.url()).pathname.endsWith("/source-map.html"));
   assert.equal(await page.locator("#course-list").evaluate((details) => details.open), false);
+
+  const serverPage = await browser.newPage();
+  t.after(() => serverPage.close());
+  await serverPage.goto(serverHomeUrl);
+  assert.equal(await serverPage.locator("[data-course-start]").getAttribute("href"), "lessons/0001-first.html");
+  assert.equal(await serverPage.locator("a[data-lesson-link]").count(), 2);
 });
 
 test("the learning prototype keeps one lesson step in one reading column", async (t) => {

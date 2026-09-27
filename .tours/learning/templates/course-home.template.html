@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A guided route through the current Code Arena game, its source, and its tests.">
+  <title>Learn Code Arena</title>
+  <!-- INLINE_COURSE_STYLES -->
+</head>
+<body>
+  <a class="skip-link" href="#course">Skip to the course</a>
+  <header class="course-header">
+    <nav aria-label="Course navigation">
+      <a aria-current="page" href="index.html">Learn</a>
+      <a href="source-map.html">Explore code</a>
+    </nav>
+  </header>
+  <main class="page course-home" id="course" tabindex="-1">
+    <div class="course-home-intro">
+      <p class="eyebrow">A guided route through this exact codebase</p>
+      <h1>Understand the game, one behavior at a time.</h1>
+      <p class="course-home-lede">Start with one player action. Follow the code that owns its rule, then inspect the test that supports the explanation.</p>
+      <p class="course-start"><a class="primary-button" data-course-start href="{{FIRST_LESSON_URL}}">{{FIRST_LESSON_ACTION}} <span aria-hidden="true">→</span></a></p>
+      <p class="quiet course-home-snapshot" data-course-snapshot><span class="status {{SNAPSHOT_STATUS_CLASS}}">{{SNAPSHOT_STATUS}}</span> <span>Source snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
+      <p class="quiet course-home-note">A self-check can guide study; it is not proof of mastery.</p>
+    </div>
+    <div class="course-batches" id="course-batches" aria-label="Learning path">
+      <!-- COURSE_BATCHES -->
+    </div>
+  </main>
+</body>
+</html>

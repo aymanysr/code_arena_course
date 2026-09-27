@@ -243,7 +243,7 @@ async function validateCoverageMap(coverageMap, learningDir = LEARNING_DIR) {
   if (!coverageMap || typeof coverageMap !== "object" || Array.isArray(coverageMap)) {
     throw new Error("Coverage map must be an object");
   }
-  if (coverageMap.version !== 1) throw new Error(`Unsupported coverage map version: ${coverageMap.version}`);
+  if (coverageMap.version !== 1 && coverageMap.version !== 2) throw new Error(`Unsupported coverage map version: ${coverageMap.version}`);
   const scope = validateScope(coverageMap.scope);
   if (!Array.isArray(coverageMap.lessons)) throw new Error("Coverage map lessons must be an array");
   if (coverageMap.supportingFiles !== undefined && !Array.isArray(coverageMap.supportingFiles)) {
@@ -296,6 +296,53 @@ async function validateCoverageMap(coverageMap, learningDir = LEARNING_DIR) {
     lessons.push({ ...lesson, id, title, goal, template, output, references });
   }
 
+  let batches = [];
+  if (coverageMap.version === 2) {
+    if (!Array.isArray(coverageMap.batches)) throw new Error("Coverage map batches must be an array");
+    const batchIds = new Set();
+    const batchOrders = new Set();
+    const assignedLessons = new Set();
+    const lessonIdsById = new Set(lessons.map(({ id }) => id));
+    batches = coverageMap.batches.map((batch, index) => {
+      const context = `Batch ${index + 1}`;
+      if (!batch || typeof batch !== "object" || Array.isArray(batch)) throw new Error(`${context} must be an object`);
+      const id = requireText(batch.id, `${context} id`);
+      const title = requireText(batch.title, `Batch ${id} title`);
+      const description = requireText(batch.description, `Batch ${id} description`);
+      if (!Number.isInteger(batch.order) || batch.order < 1) throw new Error(`Batch ${id} order must be a positive integer`);
+      if (batchIds.has(id)) throw new Error(`Duplicate batch id: ${id}`);
+      if (batchOrders.has(batch.order)) throw new Error(`Duplicate batch order: ${batch.order}`);
+      if (!Array.isArray(batch.lessonIds)) throw new Error(`Batch ${id} lessonIds must be an array`);
+      batchIds.add(id);
+      batchOrders.add(batch.order);
+
+      const lessonIds = batch.lessonIds.map((lessonId, lessonIndex) => {
+        const normalizedId = requireText(lessonId, `Batch ${id} lesson ${lessonIndex + 1} id`);
+        if (!lessonIdsById.has(normalizedId)) {
+          throw new Error(`Batch ${id} refers to unknown lesson: ${normalizedId}`);
+        }
+        if (assignedLessons.has(normalizedId)) throw new Error(`Lesson ${normalizedId} appears in more than one batch`);
+        assignedLessons.add(normalizedId);
+        return normalizedId;
+      });
+      return { ...batch, id, order: batch.order, title, description, lessonIds };
+    });
+
+    const omittedLesson = lessons.find(({ id }) => !assignedLessons.has(id));
+    if (omittedLesson) throw new Error(`Batches omit lesson: ${omittedLesson.id}`);
+
+    const orderedBatches = [...batches].sort((left, right) => left.order - right.order);
+    if (orderedBatches.some((batch, index) => batch.order !== index + 1)) {
+      throw new Error("Batch orders must be consecutive starting at 1");
+    }
+    const flattenedLessonIds = orderedBatches.flatMap(({ lessonIds }) => lessonIds);
+    const expectedLessonIds = [...lessons].sort((left, right) => left.order - right.order).map(({ id }) => id);
+    if (JSON.stringify(flattenedLessonIds) !== JSON.stringify(expectedLessonIds)) {
+      throw new Error("Flattened batch order must match lesson order");
+    }
+    batches = orderedBatches;
+  }
+
   const supportingFiles = new Map();
   for (const [index, item] of (coverageMap.supportingFiles ?? []).entries()) {
     if (!item || typeof item !== "object" || Array.isArray(item)) throw new Error(`Support-only record ${index + 1} must be an object`);
@@ -306,7 +353,7 @@ async function validateCoverageMap(coverageMap, learningDir = LEARNING_DIR) {
     supportingFiles.set(filePath, { path: filePath, reason });
   }
 
-  return { scope, lessons, supportingFiles };
+  return { scope, batches, lessons, supportingFiles };
 }
 
 function getReferenceIndex(coverageMap) {
@@ -658,6 +705,7 @@ export async function buildCatalogData({
     invalidTourAnchors,
     tours,
     files,
+    batches: validated.batches,
     lessons: validated.lessons,
     supportingFiles: supporting.map(({ path: filePath, supportReason: reason }) => ({ path: filePath, reason })),
     uncoveredFiles,
@@ -889,16 +937,12 @@ export function renderCatalogTemplate(template, stylesheet, data, repoRoot = REP
   const firstLessonHref = firstLesson
     ? firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/")
     : "#course-list";
-  const status = data.sourceChanges?.length || data.evidenceChanges?.length || data.invalidTourAnchors?.length ||
-    data.summary.stale || data.summary.uncovered || data.summary.missingReferences || data.summary.invalidReferences || data.summary.unclassified ||
-    (data.summary.templateLinkIssues ?? 0) || (data.summary.courseOrderIssues ?? 0)
-    ? "Review needed"
-    : "Snapshot internally consistent";
+  const status = catalogSnapshotStatus(data);
   const replacements = {
     "<!-- INLINE_COURSE_STYLES -->": `<style>\n${stylesheet}\n</style>`,
     "{{SNAPSHOT_ID}}": data.snapshotId,
-    "{{SNAPSHOT_STATUS}}": status,
-    "{{SNAPSHOT_STATUS_CLASS}}": status === "Review needed" ? "status-stale" : "status-current",
+    "{{SNAPSHOT_STATUS}}": status.label,
+    "{{SNAPSHOT_STATUS_CLASS}}": status.className,
     "{{COUNT_TOTAL}}": String(data.summary.total),
     "{{COUNT_CURRENT}}": String(data.summary.currentReferences),
     "{{COUNT_STALE}}": String(data.summary.staleReferences),
@@ -922,6 +966,15 @@ export function renderCatalogTemplate(template, stylesheet, data, repoRoot = REP
   let result = template;
   for (const [needle, replacement] of Object.entries(replacements)) result = result.replaceAll(needle, replacement);
   return result;
+}
+
+function catalogSnapshotStatus(data) {
+  const reviewNeeded = data.sourceChanges?.length || data.evidenceChanges?.length || data.invalidTourAnchors?.length ||
+    data.summary.stale || data.summary.uncovered || data.summary.missingReferences || data.summary.invalidReferences || data.summary.unclassified ||
+    (data.summary.templateLinkIssues ?? 0) || (data.summary.courseOrderIssues ?? 0);
+  return reviewNeeded
+    ? { label: "Review needed", className: "status-stale" }
+    : { label: "Snapshot internally consistent", className: "status-current" };
 }
 
 function lessonFreshness(data, lessonId) {
@@ -953,6 +1006,41 @@ function renderLessonList(data, repoRoot) {
     const href = lesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/");
     return `<li data-lesson-id="${html(lesson.id)}"><a href="${html(href)}">Lesson ${lesson.order}: ${html(lesson.title)}</a><p><span class="status ${statusClass}">${statusLabel}</span></p></li>`;
   }).join("\n");
+}
+
+function renderCourseBatches(data) {
+  const lessonsById = new Map((data.lessons ?? []).map((lesson) => [lesson.id, lesson]));
+  return [...(data.batches ?? [])].sort((left, right) => left.order - right.order).map((batch) => {
+    const lessonItems = batch.lessonIds.map((lessonId) => {
+      const lesson = lessonsById.get(lessonId);
+      const href = lesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/");
+      return `<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="${html(lesson.id)}" href="${html(href)}"><span class="course-lesson-number" aria-hidden="true">${String(lesson.order).padStart(2, "0")}</span><span class="course-lesson-copy">Lesson ${lesson.order}: ${html(lesson.title)}</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>`;
+    }).join("\n");
+    return `<section class="course-batch" aria-labelledby="course-batch-${batch.order}-title">
+      <h2 id="course-batch-${batch.order}-title">${html(batch.title)}</h2>
+      <p class="course-batch-description">${html(batch.description)}</p>
+      <ol class="course-lesson-list">${lessonItems}</ol>
+    </section>`;
+  }).join("\n");
+}
+
+export function renderCourseHomeTemplate(template, stylesheet, data) {
+  const firstLesson = [...(data.lessons ?? [])].sort((left, right) => left.order - right.order)[0];
+  const status = catalogSnapshotStatus(data);
+  const replacements = {
+    "<!-- INLINE_COURSE_STYLES -->": `<style>\n${stylesheet}\n</style>`,
+    "{{FIRST_LESSON_URL}}": firstLesson
+      ? html(firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/"))
+      : "#course-batches",
+    "{{FIRST_LESSON_ACTION}}": firstLesson ? `Start Lesson ${firstLesson.order}` : "Browse lessons",
+    "{{SNAPSHOT_STATUS}}": html(status.label),
+    "{{SNAPSHOT_STATUS_CLASS}}": html(status.className),
+    "{{SNAPSHOT_ID}}": html(data.snapshotId),
+    "<!-- COURSE_BATCHES -->": renderCourseBatches(data),
+  };
+  let result = template;
+  for (const [needle, replacement] of Object.entries(replacements)) result = result.replaceAll(needle, replacement);
+  return result;
 }
 
 export function renderLessonTemplate(template, stylesheet, snapshotId, freshness, lesson = {}, sourceData = { files: [] }, repoRoot = REPO_ROOT) {
@@ -1171,7 +1259,12 @@ export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, o
   const stylesheet = await readFile(path.join(learningDir, "assets/course.css"), "utf8");
   const catalogTemplate = await readFile(path.join(learningDir, "templates/source-map.template.html"), "utf8");
   const catalog = renderCatalogTemplate(catalogTemplate, stylesheet, data, repoRoot);
-  const files = new Map([[path.join(learningDir, "source-map.html"), catalog]]);
+  const files = new Map();
+  if (data.batches.length) {
+    const homeTemplate = await readFile(path.join(learningDir, "templates/course-home.template.html"), "utf8");
+    files.set(path.join(learningDir, "index.html"), renderCourseHomeTemplate(homeTemplate, stylesheet, data));
+  }
+  files.set(path.join(learningDir, "source-map.html"), catalog);
   const orderedLessons = [...data.lessons].sort((left, right) => left.order - right.order);
   for (const lesson of orderedLessons) {
     const lessonTemplate = await readFile(path.join(learningDir, lesson.template), "utf8");

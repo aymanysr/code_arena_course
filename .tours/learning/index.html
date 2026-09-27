@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A guided route through the current Code Arena game, its source, and its tests.">
+  <title>Learn Code Arena</title>
+  <style>
 @layer reset, base, layout, components, utilities;
 
 @layer reset {
@@ -1098,3 +1106,58 @@
     color: HighlightText;
   }
 }
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#course">Skip to the course</a>
+  <header class="course-header">
+    <nav aria-label="Course navigation">
+      <a aria-current="page" href="index.html">Learn</a>
+      <a href="source-map.html">Explore code</a>
+    </nav>
+  </header>
+  <main class="page course-home" id="course" tabindex="-1">
+    <div class="course-home-intro">
+      <p class="eyebrow">A guided route through this exact codebase</p>
+      <h1>Understand the game, one behavior at a time.</h1>
+      <p class="course-home-lede">Start with one player action. Follow the code that owns its rule, then inspect the test that supports the explanation.</p>
+      <p class="course-start"><a class="primary-button" data-course-start href="lessons/0001-follow-one-submit.html">Start Lesson 1 <span aria-hidden="true">→</span></a></p>
+      <p class="quiet course-home-snapshot" data-course-snapshot><span class="status status-current">Snapshot internally consistent</span> <span>Source snapshot <code>4edc506dd9158d21</code></span></p>
+      <p class="quiet course-home-note">A self-check can guide study; it is not proof of mastery.</p>
+    </div>
+    <div class="course-batches" id="course-batches" aria-label="Learning path">
+      <section class="course-batch" aria-labelledby="course-batch-1-title">
+      <h2 id="course-batch-1-title">Follow one Match</h2>
+      <p class="course-batch-description">Start from player actions and trace what the game decides.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0001-submit-journey" href="lessons/0001-follow-one-submit.html"><span class="course-lesson-number" aria-hidden="true">01</span><span class="course-lesson-copy">Lesson 1: A click is a request. The Match engine decides what it means.</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0002-reveal-cutoff" href="lessons/0002-reveal-cutoff.html"><span class="course-lesson-number" aria-hidden="true">02</span><span class="course-lesson-copy">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0003-rounds-and-final-score" href="lessons/0003-rounds-and-final-score.html"><span class="course-lesson-number" aria-hidden="true">03</span><span class="course-lesson-copy">Lesson 3: What resets each Round—and what decides the Match?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0004-lobby-to-match" href="lessons/0004-lobby-to-match.html"><span class="course-lesson-number" aria-hidden="true">04</span><span class="course-lesson-copy">Lesson 4: The Lobby gathers players; Game creates the Match</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0005-problem-editor-run" href="lessons/0005-problem-editor-run.html"><span class="course-lesson-number" aria-hidden="true">05</span><span class="course-lesson-copy">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+    </section>
+<section class="course-batch" aria-labelledby="course-batch-2-title">
+      <h2 id="course-batch-2-title">Understand the boundaries</h2>
+      <p class="course-batch-description">See which layer owns each responsibility and where the evidence stops.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0006-evaluation-retries" href="lessons/0006-evaluation-retries.html"><span class="course-lesson-number" aria-hidden="true">06</span><span class="course-lesson-copy">Lesson 6: A retry is the same Evaluation only when its identity matches</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0007-judge-boundary" href="lessons/0007-judge-boundary.html"><span class="course-lesson-number" aria-hidden="true">07</span><span class="course-lesson-copy">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0008-persistence-recovery" href="lessons/0008-persistence-recovery.html"><span class="course-lesson-number" aria-hidden="true">08</span><span class="course-lesson-copy">Lesson 8: What survives when the Game service restarts?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+    </section>
+<section class="course-batch" aria-labelledby="course-batch-3-title">
+      <h2 id="course-batch-3-title">Follow live multiplayer behavior</h2>
+      <p class="course-batch-description">Trace reconnect, shared work, chat, and the Arena screen.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0009-live-connection" href="lessons/0009-live-connection.html"><span class="course-lesson-number" aria-hidden="true">09</span><span class="course-lesson-copy">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0010-team-collaboration" href="lessons/0010-team-collaboration.html"><span class="course-lesson-number" aria-hidden="true">10</span><span class="course-lesson-copy">Lesson 10: An edit changes the revision—and resets both Ready approvals</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0011-team-chat" href="lessons/0011-team-chat.html"><span class="course-lesson-number" aria-hidden="true">11</span><span class="course-lesson-copy">Lesson 11: Team chat is a side channel—not editor state or Match state</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0012-arena-screen" href="lessons/0012-arena-screen.html"><span class="course-lesson-number" aria-hidden="true">12</span><span class="course-lesson-copy">Lesson 12: The Arena screen is a view of Match state—not another game engine</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+    </section>
+<section class="course-batch" aria-labelledby="course-batch-4-title">
+      <h2 id="course-batch-4-title">Operate and rebuild the reference</h2>
+      <p class="course-batch-description">Run the project, read its evidence, and define parity gates for a rewrite.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0013-running-the-project" href="lessons/0013-running-the-project.html"><span class="course-lesson-number" aria-hidden="true">13</span><span class="course-lesson-copy">Lesson 13: The local play script and Compose stack are not the same thing</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0014-rewrite-with-tests" href="lessons/0014-rewrite-with-tests.html"><span class="course-lesson-number" aria-hidden="true">14</span><span class="course-lesson-copy">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+    </section>
+    </div>
+  </main>
+</body>
+</html>

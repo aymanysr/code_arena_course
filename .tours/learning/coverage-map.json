@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "scope": {
     "roots": [
       { "path": "frontend", "area": "Frontend app, tests, browser journeys, and config" },
@@ -42,6 +42,54 @@
       { "path": "to-questionnaire-team-decisions.md", "reason": "Team planning note, not game implementation." }
     ]
   },
+  "batches": [
+    {
+      "id": "follow-one-match",
+      "order": 1,
+      "title": "Follow one Match",
+      "description": "Start from player actions and trace what the game decides.",
+      "lessonIds": [
+        "0001-submit-journey",
+        "0002-reveal-cutoff",
+        "0003-rounds-and-final-score",
+        "0004-lobby-to-match",
+        "0005-problem-editor-run"
+      ]
+    },
+    {
+      "id": "understand-boundaries",
+      "order": 2,
+      "title": "Understand the boundaries",
+      "description": "See which layer owns each responsibility and where the evidence stops.",
+      "lessonIds": [
+        "0006-evaluation-retries",
+        "0007-judge-boundary",
+        "0008-persistence-recovery"
+      ]
+    },
+    {
+      "id": "live-multiplayer",
+      "order": 3,
+      "title": "Follow live multiplayer behavior",
+      "description": "Trace reconnect, shared work, chat, and the Arena screen.",
+      "lessonIds": [
+        "0009-live-connection",
+        "0010-team-collaboration",
+        "0011-team-chat",
+        "0012-arena-screen"
+      ]
+    },
+    {
+      "id": "operate-and-rebuild",
+      "order": 4,
+      "title": "Operate and rebuild the reference",
+      "description": "Run the project, read its evidence, and define parity gates for a rewrite.",
+      "lessonIds": [
+        "0013-running-the-project",
+        "0014-rewrite-with-tests"
+      ]
+    }
+  ],
   "lessons": [
     {
       "id": "0001-submit-journey",
