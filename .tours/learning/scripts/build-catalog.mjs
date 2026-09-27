@@ -12,6 +12,7 @@ import {
   parseChecksumList,
   parseReferenceSnapshot,
 } from "./reference-audit.mjs";
+import { validateLearningPath } from "./learning-path.mjs";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
@@ -1304,6 +1305,9 @@ export async function acceptReviewedSnapshot({
 
 export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, options = {}) {
   const data = await buildCatalogData({ repoRoot, learningDir, coverageMap, ...options });
+  data.learningPath = options.learningPath === undefined
+    ? null
+    : validateLearningPath(options.learningPath, data.lessons, data.files);
   const stylesheet = await readFile(path.join(learningDir, "assets/course.css"), "utf8");
   const activityRuntimeSource = await readFile(path.join(learningDir, "assets/course-activity.mjs"), "utf8");
   const catalogTemplate = await readFile(path.join(learningDir, "templates/source-map.template.html"), "utf8");
@@ -1343,6 +1347,7 @@ async function main() {
   const repoRoot = REPO_ROOT;
   const learningDir = LEARNING_DIR;
   const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const learningPath = JSON.parse(await readFile(path.join(learningDir, "learning-path.json"), "utf8"));
   const tours = await loadCodeTours(repoRoot);
   const snapshotPath = path.join(learningDir, "reference-snapshot.json");
   let referenceSnapshot;
@@ -1361,7 +1366,7 @@ async function main() {
   } catch (error) {
     if (error?.code !== "ENOENT" || !acceptSnapshot) throw error;
   }
-  const options = { referenceSnapshot, referenceBaseline, tours };
+  const options = { referenceSnapshot, referenceBaseline, tours, learningPath };
   const { data, files } = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, options);
   const { summary } = data;
 
@@ -1385,6 +1390,7 @@ async function main() {
       referenceSnapshot: acceptedSnapshot,
       referenceBaseline: accepted.referenceBaseline,
       tours,
+      learningPath,
     });
     await writeRenderedOutputs(refreshed.files);
     console.log(`Accepted reviewed source snapshot ${accepted.snapshot.snapshotId} (${accepted.snapshot.files.length} files); refreshed ${accepted.checksumCount} checksum inputs.`);

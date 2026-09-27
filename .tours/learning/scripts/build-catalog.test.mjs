@@ -447,7 +447,7 @@ test("renders a catalog-owned Course Home with a Lesson 1 fallback and visible b
   }
 });
 
-test("renders multiple catalog lessons from separate templates with ordered navigation and current source links", async () => {
+test("renders catalog lessons and carries a validated optional build path", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-multi-output-"));
   const repoRoot = path.join(tempRoot, "repo");
   const learningDir = path.join(tempRoot, "learning");
@@ -498,9 +498,22 @@ test("renders multiple catalog lessons from separate templates with ordered navi
 
     assert.equal(typeof renderCatalogOutputs, "function", "renderCatalogOutputs must render every metadata lesson");
     if (typeof renderCatalogOutputs !== "function") return;
+    const learningPath = {
+      version: 1,
+      orientation: { output: "lessons/0000-before-lesson-one.html", title: "Before Lesson 1" },
+      steps: [{
+        id: "inspect-boundary", order: 0, title: "Inspect the boundary",
+        why: "A test makes the boundary visible.", requires: [], lessonIds: ["0001-first"],
+        deliverable: "One observable rule", placement: "Beside its current owner.",
+        pattern: "A focused rule and test.", check: "The test shows the expected result.",
+        sourcePath: "src/engine.ts", testPath: "src/engine.ts",
+      }],
+    };
     const rendered = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, {
       referenceSnapshot: makeReferenceSnapshot(new Map([["src/engine.ts", sha256(source)]])),
+      learningPath,
     });
+    assert.deepEqual(rendered.data.learningPath.steps.map(({ id }) => id), ["inspect-boundary"]);
     const firstPage = rendered.files.get(path.join(learningDir, "lessons/first.html"));
     const secondPage = rendered.files.get(path.join(learningDir, "lessons/second.html"));
     const catalogPage = rendered.files.get(path.join(learningDir, "source-map.html"));

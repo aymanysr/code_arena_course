@@ -1,0 +1,86 @@
+{
+  "version": 1,
+  "orientation": { "output": "lessons/0000-before-lesson-one.html", "title": "Before Lesson 1" },
+  "steps": [
+    {
+      "id": "find-homes", "order": 0, "title": "Find the homes",
+      "why": "First find where this repo keeps rules and tests. That way you add files beside the code that owns them.",
+      "requires": [], "lessonIds": ["0013-running-the-project"],
+      "deliverable": "Write down the game package, test folder, frontend app, service route, storage module, and run commands.",
+      "placement": "Use the paths that already exist in your teammate's repo. If it looks like this repo, inspect packages/, services/, and frontend/ first.",
+      "pattern": "Keep each rule, route, test, and data file near its current owner.",
+      "check": "You can name the test command and folder where a Match rule test should go.",
+      "sourcePath": "package.json", "testPath": "packages/arena-game/test/round-lifecycle.test.ts"
+    },
+    {
+      "id": "match-core", "order": 1, "title": "Make a small Match core",
+      "why": "Submit needs a Match, an active Round, a player, a phase, and a clock.",
+      "requires": ["find-homes"], "lessonIds": ["0003-rounds-and-final-score"],
+      "deliverable": "Create Match and Round state, legal phase changes, score rules, a fixed clock, and a fake Judge test helper.",
+      "placement": "Use the existing game-rules package. In a similar layout, create packages/arena-game/src/match-rules.ts and packages/arena-game/test/match-rules.test.ts.",
+      "pattern": "Keep phase and score choices in a pure rule module. Pass in the clock and fake Judge result in tests.",
+      "check": "A fixed-clock test starts a Match and Round, then rejects an action in the wrong phase.",
+      "sourcePath": "packages/arena-game/src/round-lifecycle.ts", "testPath": "packages/arena-game/test/round-lifecycle.test.ts"
+    },
+    {
+      "id": "player-problem-run", "order": 2, "title": "Give a player a Problem and Run",
+      "why": "A player and visible Problem must exist before code can be checked or submitted.",
+      "requires": ["match-core"], "lessonIds": ["0004-lobby-to-match", "0005-problem-editor-run"],
+      "deliverable": "Add basic Match entry, one checked Problem, and a Run that returns example feedback without changing the score.",
+      "placement": "In a similar layout, put Match entry near packages/arena-game/src/lobby.ts and its test near packages/arena-game/test/lobby.test.ts. Put Problem data under packages/problem-bank/problems/.",
+      "pattern": "Keep Problem data separate from Match rules. Run returns visible feedback and does not change the score.",
+      "check": "An admitted player can Run visible examples. A visitor is rejected, and no Run changes the score.",
+      "sourcePath": "packages/arena-game/src/lobby.ts", "testPath": "packages/arena-game/test/lobby.test.ts"
+    },
+    {
+      "id": "submit-reveal", "order": 3, "title": "Add Submission and Reveal",
+      "why": "Now the game can decide when code may enter hidden tests and when its score can be shown.",
+      "requires": ["player-problem-run"], "lessonIds": ["0001-submit-journey", "0002-reveal-cutoff", "0006-evaluation-retries", "0007-judge-boundary"],
+      "deliverable": "Add Submit, a pending receipt, retry identity, a fake-Judge result, the deadline cutoff, score update, and Reveal.",
+      "placement": "In a similar layout, extend packages/arena-game/src/engine.ts and add a test in packages/arena-game/test/submit-path.test.ts. Use the Judge interface your repo already has.",
+      "pattern": "Game rules decide if Submit is legal, storage records acceptance, and the Judge runs code. Use the same request ID for a retry.",
+      "check": "A valid Submit is judged once. Submit after Round close is rejected. Hidden results appear only at Reveal.",
+      "sourcePath": "packages/arena-game/src/engine.ts", "testPath": "packages/arena-game/test/submit-path.test.ts"
+    },
+    {
+      "id": "persistence", "order": 4, "title": "Save accepted Match state",
+      "why": "Reconnect and restart need to recover saved Submissions and Reveals.",
+      "requires": ["submit-reveal"], "lessonIds": ["0008-persistence-recovery"],
+      "deliverable": "Add one Match storage contract, an in-memory version, then a database adapter and restart tests.",
+      "placement": "In a similar layout, extend packages/arena-game/src/persistence.ts and packages/arena-game/test/persistence.test.ts, then use the existing database adapter.",
+      "pattern": "Test one storage contract with memory and the real database. Reject writes based on an old revision.",
+      "check": "After restart, the same accepted Submission and Reveal are loaded. An old write cannot replace newer state.",
+      "sourcePath": "packages/arena-game/src/persistence.ts", "testPath": "packages/arena-game/test/persistence.test.ts"
+    },
+    {
+      "id": "connect-players", "order": 5, "title": "Connect players to the rules",
+      "why": "The screen should send commands and show the Match state owned by the server.",
+      "requires": ["persistence"], "lessonIds": ["0009-live-connection", "0012-arena-screen"],
+      "deliverable": "Add a service route, transport, basic Arena screen, and reconnect snapshot behavior.",
+      "placement": "In a similar layout, find the game service under services/game/src/game/, transport under frontend/src/arena/transport.ts, and screen under frontend/src/components/. Test each at its boundary.",
+      "pattern": "The screen sends commands and shows server state. Transport handles delivery and reconnect.",
+      "check": "Two browser clients see the same saved Match. After reconnect, the client loads its current state.",
+      "sourcePath": "frontend/src/arena/transport.ts", "testPath": "frontend/test/mock-transport.test.ts"
+    },
+    {
+      "id": "team-play", "order": 6, "title": "Add two-player teams",
+      "why": "Shared editing and Ready checks need Match rules, storage, and live messages first.",
+      "requires": ["connect-players"], "lessonIds": ["0010-team-collaboration", "0011-team-chat"],
+      "deliverable": "Add 2v2 teams, a shared revision, Readiness reset after edits, team-only chat, and reconnect tests.",
+      "placement": "In a similar layout, extend packages/arena-game/src/team-collaboration.ts and its test. Keep clients in frontend/src/arena/collab.ts and chat.ts.",
+      "pattern": "Game rules own Readiness and revision. Collaboration and chat clients deliver team-scoped updates.",
+      "check": "Four users stay separated by team. An edit clears both Readiness approvals.",
+      "sourcePath": "packages/arena-game/src/team-collaboration.ts", "testPath": "packages/arena-game/test/team-collaboration.test.ts"
+    },
+    {
+      "id": "real-boundaries", "order": 7, "title": "Check the real boundaries",
+      "why": "Fake tests do not prove PostgreSQL, Docker isolation, or real browser behavior.",
+      "requires": ["team-play"], "lessonIds": ["0014-rewrite-with-tests"],
+      "deliverable": "Run equivalent database, Judge security, and two-client browser checks in your teammate's repo. Record checks that could not run separately.",
+      "placement": "Use the existing database, Judge, and browser test folders. In a similar layout, inspect packages/arena-game/test/judge-security.test.ts and frontend/e2e/.",
+      "pattern": "Keep fake, database, Docker, and real-browser evidence separate. Record the command and result for each.",
+      "check": "Mark PASS only after the matching test runs in your teammate's repo and passes.",
+      "sourcePath": "packages/arena-game/src/container-judge.ts", "testPath": "packages/arena-game/test/judge-security.test.ts"
+    }
+  ]
+}
