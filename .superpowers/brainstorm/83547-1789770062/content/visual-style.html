@@ -1,0 +1,156 @@
+<style>
+  .direction-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .direction {
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 0.9rem;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 0.8rem 2rem rgba(15, 23, 42, 0.12);
+  }
+  .direction.selected { border-color: #2563eb; }
+  .direction-copy { padding: 1rem 1.1rem 1.15rem; }
+  .direction-copy h3 { margin: 0 0 0.35rem; }
+  .direction-copy p { margin: 0; color: #4b5563; }
+  .screen {
+    min-height: 31rem;
+    padding: 0.85rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .screen * { box-sizing: border-box; }
+  .shell {
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 0.65rem;
+    min-height: 29rem;
+  }
+  .bar, .panel { border: 1px solid currentColor; }
+  .bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.72rem;
+  }
+  .stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.45rem; }
+  .stage { padding: 0.45rem 0.55rem; border: 1px solid currentColor; font-size: 0.68rem; }
+  .workspace { display: grid; grid-template-columns: 0.8fr 1.45fr 0.8fr; gap: 0.55rem; }
+  .panel { padding: 0.7rem; min-width: 0; }
+  .label { font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.72; }
+  .screen h4 { margin: 0.3rem 0 0.6rem; font-size: 0.9rem; }
+  .screen p { font-size: 0.68rem; line-height: 1.5; }
+  .code {
+    margin: 0.65rem 0;
+    padding: 0.7rem;
+    white-space: pre-wrap;
+    font-size: 0.66rem;
+    line-height: 1.55;
+  }
+  .builder { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.35rem; }
+  .choice { border: 1px solid currentColor; padding: 0.55rem 0.25rem; text-align: center; font-size: 0.68rem; }
+  .selected-answer { font-weight: 800; }
+  .status { padding: 0.55rem 0.7rem; font-size: 0.68rem; }
+  .exam-shell { background: #050806; color: #b7f7c7; }
+  .exam-shell .panel, .exam-shell .bar, .exam-shell .stage { border-color: #2e7542; }
+  .exam-shell .active, .exam-shell .selected-answer { background: #b7f7c7; color: #050806; }
+  .exam-shell .code { background: #09120c; color: #e5ffe9; }
+  .exam-shell .status { background: #102918; color: #d9ffe1; }
+  .workstation { background: #0b1016; color: #e7edf4; }
+  .workstation .panel, .workstation .bar, .workstation .stage { border-color: #344554; }
+  .workstation .active, .workstation .selected-answer { background: #4fd1c5; color: #071015; border-color: #4fd1c5; }
+  .workstation .code { background: #111b24; color: #d9e5ef; }
+  .workstation .code strong { color: #74c7ec; }
+  .workstation .status { background: #2b2110; color: #ffd985; }
+  .workstation .private { border-left: 3px solid #74c7ec; }
+  @media (max-width: 900px) {
+    .direction-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<h2>Which 42-inspired Stage 01 direction feels right?</h2>
+<p class="subtitle">Both use a structured answer builder, two Roles, fake state, and original C-fundamentals content. Click one option.</p>
+
+<div class="direction-grid">
+  <div class="direction" data-choice="exam-shell" onclick="toggleSelect(this)">
+    <div class="screen exam-shell">
+      <div class="shell">
+        <div class="bar"><span>42-INSPIRED SIMULATION / ROOM-01</span><strong>09:42</strong></div>
+        <div class="stages">
+          <div class="stage active">01 TRACE / ACTIVE</div>
+          <div class="stage">02 STRING / LOCKED</div>
+          <div class="stage">03 ARRAY / LOCKED</div>
+        </div>
+        <div class="workspace">
+          <section class="panel">
+            <div class="label">Private Role</div>
+            <h4>Code Reader</h4>
+            <p>You can inspect the source. Share one safe Clue card with your Team.</p>
+            <div class="choice">SHARE CLUE</div>
+          </section>
+          <main class="panel">
+            <div class="label">Stage 01 / Subject</div>
+            <h4>Find the final value of sum.</h4>
+            <pre class="code">int sum = 0;
+for (int i = 1; i &lt;= 4; i++) {
+    if (i % 2 == 0) sum += i * 2;
+    else sum += i;
+}</pre>
+            <div class="builder"><div class="choice">14</div><div class="choice selected-answer">16</div><div class="choice">18</div></div>
+          </main>
+          <aside class="panel">
+            <div class="label">Team Channel</div>
+            <h4>Blue Team</h4>
+            <p>Code Reader: ready</p><p>Answer Builder: editing</p>
+            <div class="choice">LOCK ANSWER</div>
+          </aside>
+        </div>
+        <div class="status">machine: READY · checks: 0/4 · retry: AVAILABLE · hint delay: +0s</div>
+      </div>
+    </div>
+    <div class="direction-copy"><h3>A · Exam Shell</h3><p>Closest to a classic terminal: severe, green-on-black, command-line language, minimal visual decoration.</p></div>
+  </div>
+
+  <div class="direction" data-choice="exam-workstation" onclick="toggleSelect(this)">
+    <div class="screen workstation">
+      <div class="shell">
+        <div class="bar"><span>42-INSPIRED / CAMPUS MACHINE CHALLENGE</span><strong>MATCH 09:42</strong></div>
+        <div class="stages">
+          <div class="stage active">01 · Loop trace</div>
+          <div class="stage">02 · String map</div>
+          <div class="stage">03 · Array repair</div>
+        </div>
+        <div class="workspace">
+          <section class="panel private">
+            <div class="label">Private Role</div>
+            <h4>Code Reader</h4>
+            <p>Read the source. Share only the clue that your Team needs.</p>
+            <div class="choice">Share Clue card</div>
+          </section>
+          <main class="panel">
+            <div class="label">Stage 01 / Work Surface</div>
+            <h4>What value leaves the loop?</h4>
+            <pre class="code"><strong>int</strong> sum = 0;
+for (<strong>int</strong> i = 1; i &lt;= 4; i++) {
+    if (i % 2 == 0) sum += i * 2;
+    else sum += i;
+}</pre>
+            <div class="builder"><div class="choice">14</div><div class="choice selected-answer">16</div><div class="choice">18</div></div>
+          </main>
+          <aside class="panel">
+            <div class="label">Team State</div>
+            <h4>Blue Team · 1/2</h4>
+            <p>Code Reader ✓</p><p>Answer Builder editing</p>
+            <div class="choice">Lock contribution</div>
+          </aside>
+        </div>
+        <div class="status">READY TO RUN CHECKS · 4 assertions · no Submission sent</div>
+      </div>
+    </div>
+    <div class="direction-copy"><h3>B · Exam Workstation</h3><p>Recommended: still austere and technical, but clearer for Team Roles, Clue cards, machine feedback, and accessibility.</p></div>
+  </div>
+</div>

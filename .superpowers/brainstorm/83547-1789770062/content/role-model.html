@@ -1,0 +1,73 @@
+<style>
+  .role-options { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1.2rem; margin-top:1.4rem; }
+  .role-option { cursor:pointer; overflow:hidden; border:2px solid transparent; border-radius:.8rem; background:#fff; box-shadow:0 .7rem 1.8rem rgba(15,23,42,.12); }
+  .role-option.selected { border-color:#2563eb; }
+  .copy { padding:.9rem 1rem 1rem; }
+  .copy h3 { margin:0 0 .3rem; }
+  .copy p { margin:0; color:#4b5563; }
+  .shell { min-height:31rem; padding:.7rem; background:#050806; color:#b7f7c7; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .shell * { box-sizing:border-box; }
+  .top,.panel,.console,.control { border:1px solid #2e7542; }
+  .top { display:flex; justify-content:space-between; padding:.5rem .6rem; font-size:.65rem; }
+  .stages { margin:.45rem 0; font-size:.58rem; opacity:.8; }
+  .grid { display:grid; grid-template-columns:.75fr 1.3fr .8fr; grid-template-rows:1fr auto; gap:.48rem; min-height:24rem; }
+  .panel { min-width:0; padding:.6rem; }
+  .label { font-size:.55rem; letter-spacing:.11em; text-transform:uppercase; opacity:.72; }
+  .shell h4 { margin:.25rem 0 .5rem; color:#eaffee; font-size:.8rem; }
+  .shell p,.shell li { font-size:.58rem; line-height:1.48; }
+  .shell ul { margin:.4rem 0; padding-left:1.1rem; }
+  .code { margin:.45rem 0; padding:.55rem; background:#09120c; color:#eaffee; font-size:.54rem; line-height:1.5; white-space:pre-wrap; }
+  .control { margin-top:.38rem; padding:.42rem .48rem; font-size:.56rem; }
+  .primary { background:#b7f7c7; color:#050806; font-weight:800; }
+  .warning { border-color:#a77a27; color:#ffd887; }
+  .role-card { padding:.5rem; background:#0a160d; border-left:3px solid #b7f7c7; }
+  .role-card strong { display:block; margin:.15rem 0 .3rem; color:#eaffee; font-size:.72rem; }
+  .console { grid-column:1/-1; padding:.52rem .6rem; background:#0b180f; font-size:.56rem; }
+  .status-row { display:flex; justify-content:space-between; gap:.5rem; margin:.35rem 0; padding-bottom:.35rem; border-bottom:1px solid #244d31; }
+  @media(max-width:900px){.role-options{grid-template-columns:1fr;}}
+</style>
+
+<h2>What should the Role area mean?</h2>
+<p class="subtitle">The subject is shared in both versions. The difference is whether each player has a distinct Stage job. Click the model that feels more intuitive.</p>
+
+<div class="role-options">
+  <div class="role-option" data-choice="clear-role-station" onclick="toggleSelect(this)">
+    <div class="shell">
+      <div class="top"><span>EXAM SHELL / BLUE TEAM</span><strong>09:42</strong></div>
+      <div class="stages">01 TRACE [ACTIVE] · 02 STRING [LOCKED] · 03 ARRAY [LOCKED]</div>
+      <div class="grid">
+        <section class="panel"><div class="label">Shared subject</div><h4>loop_checksum</h4><p>Compute the final checksum for the supplied values.</p><pre class="code">input: 1 2 3 4
+output: one integer</pre><p>Both players can read the full subject.</p></section>
+        <section class="panel"><div class="label">Code Writer station</div><h4>rendu/solution.c</h4><pre class="code">int solve(int *values)
+{
+    int sum;
+    /* Saad edits here */
+    return (sum);
+}</pre><div class="control">Saad is editing</div><div class="control primary">LOCK CODE</div></section>
+        <aside class="panel"><div class="label">Your Role</div><h4>Test Operator</h4><div class="role-card"><span class="label">Your goal</span><strong>Prove the code against the supplied cases.</strong><p>You control checks and interpret the Failure trace. You do not edit solution.c.</p></div><div class="control">TEST INPUT · 1 2 3 4</div><div class="control primary">RUN SAMPLE CHECK</div><div class="control">SHARE FAILURE TRACE</div><div class="control warning">LOCK TEST REPORT</div></aside>
+        <div class="console">roles: Code Writer EDITING · Test Operator READY · Submission blocked until both Roles lock</div>
+      </div>
+    </div>
+    <div class="copy"><h3>A · Clear Role Stations</h3><p>Recommended. Every Role has a visible goal, specific controls, and a required contribution. Nothing is hidden merely for decoration.</p></div>
+  </div>
+
+  <div class="role-option" data-choice="shared-tools" onclick="toggleSelect(this)">
+    <div class="shell">
+      <div class="top"><span>EXAM SHELL / BLUE TEAM</span><strong>09:42</strong></div>
+      <div class="stages">01 TRACE [ACTIVE] · 02 STRING [LOCKED] · 03 ARRAY [LOCKED]</div>
+      <div class="grid">
+        <section class="panel"><div class="label">Shared subject</div><h4>loop_checksum</h4><p>Compute the final checksum for the supplied values.</p><pre class="code">input: 1 2 3 4
+output: one integer</pre></section>
+        <section class="panel"><div class="label">Shared editor</div><h4>rendu/solution.c</h4><pre class="code">int solve(int *values)
+{
+    int sum;
+    /* either player edits */
+    return (sum);
+}</pre><div class="control">RUN CHECKS</div><div class="control primary">SUBMIT</div></section>
+        <aside class="panel"><div class="label">Team state</div><h4>Blue Team</h4><div class="status-row"><span>Aimane</span><strong>online</strong></div><div class="status-row"><span>Saad</span><strong>editing</strong></div><p>Both players can edit, check, and submit. Roles exist only in the Lobby.</p><div class="control">TEAM CHAT</div><div class="control">HINT · +30s</div></aside>
+        <div class="console">machine: READY · both players share the same tools · no unique Role contribution required</div>
+      </div>
+    </div>
+    <div class="copy"><h3>B · Shared Tools</h3><p>Simpler and closer to solo competitive programming, but it weakens the Role system and can let one player do all the work.</p></div>
+  </div>
+</div>

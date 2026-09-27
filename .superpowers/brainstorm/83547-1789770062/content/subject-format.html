@@ -1,0 +1,67 @@
+<style>
+  .subject-shell { max-width:1100px; margin:1.3rem auto 0; padding:.8rem; border-radius:.7rem; background:#050806; color:#b7f7c7; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; box-shadow:0 1rem 2.5rem rgba(15,23,42,.24); }
+  .subject-shell * { box-sizing:border-box; }
+  .top { display:flex; justify-content:space-between; gap:1rem; padding:.55rem .65rem; border:1px solid #2e7542; font-size:.7rem; }
+  .assignment { display:grid; grid-template-columns:.68fr 1.32fr; gap:.6rem; margin-top:.6rem; }
+  .meta,.statement,.block,.flow { border:1px solid #2e7542; }
+  .meta,.statement { padding:.75rem; }
+  .tag { color:#80d99a; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; }
+  .subject-shell h3 { margin:.3rem 0 .7rem; color:#edfff0; font-size:1rem; }
+  .subject-shell h4 { margin:.65rem 0 .3rem; color:#dfffe6; font-size:.74rem; }
+  .subject-shell p,.subject-shell li,.subject-shell td,.subject-shell th { font-size:.65rem; line-height:1.55; }
+  .meta dl { margin:.7rem 0 0; }
+  .meta dt { margin-top:.6rem; color:#80d99a; font-size:.57rem; text-transform:uppercase; }
+  .meta dd { margin:.15rem 0 0; color:#edfff0; font-size:.68rem; }
+  .code { margin:.4rem 0; padding:.6rem; background:#09120c; color:#edfff0; font-size:.63rem; line-height:1.55; white-space:pre-wrap; }
+  .io { width:100%; border-collapse:collapse; margin-top:.35rem; }
+  .io th,.io td { padding:.38rem .42rem; border:1px solid #2e7542; text-align:left; }
+  .io th { color:#80d99a; }
+  .flow { display:grid; grid-template-columns:repeat(5,1fr); gap:1px; margin-top:.6rem; background:#2e7542; }
+  .step { padding:.55rem .4rem; background:#08100b; text-align:center; font-size:.6rem; }
+  .active { background:#b7f7c7; color:#050806; font-weight:800; }
+  .note { margin:.85rem 0 0; color:#4b5563; text-align:center; }
+  @media(max-width:800px){.assignment{grid-template-columns:1fr}.flow{grid-template-columns:1fr}}
+</style>
+
+<h2>Proposed Stage subject format</h2>
+<p class="subtitle">This is original content. It borrows organization patterns, not questions or solutions, from 42-style assignments and competitive-programming platforms.</p>
+
+<div class="subject-shell">
+  <div class="top"><span>42-INSPIRED SIMULATION / ROOM-01 / STAGE-01</span><strong>SUBJECT OPEN · 09:42</strong></div>
+  <div class="assignment">
+    <aside class="meta">
+      <div class="tag">Assignment card</div>
+      <h3>loop_checksum</h3>
+      <dl>
+        <dt>Expected file</dt><dd>solution.c</dd>
+        <dt>Function</dt><dd>int loop_checksum(const int *values, int size);</dd>
+        <dt>Allowed functions</dt><dd>None</dd>
+        <dt>Difficulty</dt><dd>Stage 01 · Foundation</dd>
+        <dt>Team Roles</dt><dd>Code Writer · Test Operator</dd>
+        <dt>Evaluator</dt><dd>4 simulated checks</dd>
+      </dl>
+    </aside>
+
+    <main class="statement">
+      <div class="tag">Subject</div>
+      <h3>Compute the campus access checksum</h3>
+      <p>The access controller receives a list of positive integers. Read each value in order. Add odd values to the checksum. Add twice each even value. Return the final checksum.</p>
+
+      <h4>Required interface</h4>
+      <pre class="code">int loop_checksum(const int *values, int size);</pre>
+
+      <h4>Constraints</h4>
+      <ul><li><strong>1 ≤ size ≤ 16</strong></li><li>Each value is between 0 and 99.</li><li>The input pointer is valid when size is greater than zero.</li><li>The result fits in a signed int.</li></ul>
+
+      <h4>Examples</h4>
+      <table class="io"><thead><tr><th>Input</th><th>Expected result</th><th>Reason</th></tr></thead><tbody><tr><td>[1, 2, 3, 4]</td><td>16</td><td>1 + 4 + 3 + 8</td></tr><tr><td>[5, 7]</td><td>12</td><td>Both values are odd</td></tr></tbody></table>
+
+      <h4>Stage rule</h4>
+      <p>The Code Writer locks one revision. The Test Operator runs the supplied cases and locks one test report. The Team can send a Submission only after both contributions are locked.</p>
+    </main>
+  </div>
+
+  <div class="flow"><div class="step active">1 · READ SUBJECT</div><div class="step">2 · WRITE CODE</div><div class="step">3 · RUN CHECKS</div><div class="step">4 · LOCK ROLES</div><div class="step">5 · SUBMIT</div></div>
+</div>
+
+<p class="note">Question: does this feel like a serious exam subject while remaining clear enough for a fast 15-minute Match?</p>

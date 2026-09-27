@@ -1,0 +1,102 @@
+<style>
+  .layout-options { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; margin-top:1.4rem; }
+  .layout-card { cursor:pointer; overflow:hidden; border:2px solid transparent; border-radius:.8rem; background:#fff; box-shadow:0 .7rem 1.8rem rgba(15,23,42,.12); }
+  .layout-card.selected { border-color:#2563eb; }
+  .layout-copy { padding:.85rem 1rem 1rem; }
+  .layout-copy h3 { margin:0 0 .3rem; font-size:1rem; }
+  .layout-copy p { margin:0; color:#4b5563; font-size:.84rem; }
+  .shell { min-height:29rem; padding:.65rem; background:#050806; color:#b7f7c7; font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; }
+  .shell * { box-sizing:border-box; }
+  .top, .box, .console { border:1px solid #2e7542; }
+  .top { display:flex; justify-content:space-between; gap:.6rem; padding:.48rem .58rem; font-size:.63rem; }
+  .crumb { margin:.45rem 0; font-size:.58rem; opacity:.75; }
+  .box { min-width:0; padding:.55rem; }
+  .tag { color:#80d99a; font-size:.54rem; letter-spacing:.1em; text-transform:uppercase; }
+  .shell h4 { margin:.22rem 0 .42rem; color:#e6ffeb; font-size:.75rem; }
+  .shell p, .shell li { font-size:.55rem; line-height:1.45; }
+  .shell ul { margin:.35rem 0; padding-left:1rem; }
+  .code { margin:.42rem 0 0; padding:.48rem; background:#09120c; color:#e8ffec; font-size:.52rem; line-height:1.45; white-space:pre-wrap; }
+  .console { padding:.48rem .55rem; background:#0b180f; color:#caffd4; font-size:.54rem; }
+  .button-row { display:flex; flex-wrap:wrap; gap:.32rem; margin-top:.45rem; }
+  .cmd { border:1px solid #4a9c61; padding:.32rem .42rem; font-size:.52rem; }
+  .primary { background:#b7f7c7; color:#050806; font-weight:800; }
+  .split-layout { display:grid; grid-template-columns:.9fr 1.15fr; gap:.45rem; min-height:22rem; }
+  .split-layout .editor { display:grid; grid-template-rows:1fr auto; gap:.45rem; }
+  .stack-layout { display:grid; grid-template-rows:.8fr 1.3fr auto; gap:.45rem; min-height:22rem; }
+  .team-layout { display:grid; grid-template-columns:.72fr 1.3fr .72fr; grid-template-rows:1fr auto; gap:.45rem; min-height:22rem; }
+  .team-layout .console { grid-column:1 / -1; }
+  .role-line { padding:.35rem; margin-top:.32rem; border-left:3px solid #80d99a; background:#0b160e; }
+  @media(max-width:1000px){ .layout-options{grid-template-columns:1fr;} }
+</style>
+
+<h2>How should the Exam Shell arrange the Stage?</h2>
+<p class="subtitle">Each option contains a full subject, editable C area, simulated evaluator, and two Team Roles. Click the layout that feels closest to the game you want.</p>
+
+<div class="layout-options">
+  <div class="layout-card" data-choice="contest-split" onclick="toggleSelect(this)">
+    <div class="shell">
+      <div class="top"><span>ROOM-01 / STAGE-01</span><strong>09:42</strong></div>
+      <div class="crumb">subject / editor / evaluator</div>
+      <div class="split-layout">
+        <section class="box"><div class="tag">Subject</div><h4>loop_checksum</h4><p>Compute the checksum produced by the loop.</p><ul><li>Input: four integers</li><li>Output: one integer</li><li>No undefined C behavior</li></ul><pre class="code">Example
+input: 1 2 3 4
+output: 16</pre></section>
+        <section class="editor"><div class="box"><div class="tag">solution.c</div><pre class="code">int solve(int *values)
+{
+    int sum;
+
+    sum = 0;
+    /* write solution */
+    return (sum);
+}</pre></div><div class="button-row"><span class="cmd">RUN CHECKS</span><span class="cmd primary">SUBMIT</span></div></section>
+      </div>
+      <div class="console">evaluator: READY · code is not executed in this prototype</div>
+    </div>
+    <div class="layout-copy"><h3>A · Contest Split</h3><p>Competitive-platform pattern. The subject and editor stay visible together; Team information moves into a drawer.</p></div>
+  </div>
+
+  <div class="layout-card" data-choice="terminal-stack" onclick="toggleSelect(this)">
+    <div class="shell">
+      <div class="top"><span>EXAM-SHELL / BLUE-TEAM</span><strong>09:42</strong></div>
+      <div class="crumb">$ subject &gt; solve &gt; check &gt; submit</div>
+      <div class="stack-layout">
+        <section class="box"><div class="tag">Current subject</div><h4>Stage 01 · loop_checksum</h4><p>Read four integers. Apply the branch rule. Print the final checksum. Constraints and examples remain visible above the editor.</p></section>
+        <section class="box"><div class="tag">rendu/solution.c</div><pre class="code">int solve(int *values)
+{
+    int sum;
+
+    sum = 0;
+    /* cursor here */
+    return (sum);
+}</pre></section>
+        <div class="console">$ run-checks
+checking format... READY
+checking team contributions... 1/2
+<div class="button-row"><span class="cmd">RUN CHECKS</span><span class="cmd primary">SUBMIT</span></div></div>
+      </div>
+    </div>
+    <div class="layout-copy"><h3>B · Terminal Stack</h3><p>Closest to an exam terminal. Strong sequence and focus, but less room for simultaneous Team information.</p></div>
+  </div>
+
+  <div class="layout-card" data-choice="team-workstation" onclick="toggleSelect(this)">
+    <div class="shell">
+      <div class="top"><span>42-INSPIRED EXAM SHELL / SIMULATION</span><strong>MATCH 09:42</strong></div>
+      <div class="crumb">01 TRACE [ACTIVE] · 02 STRING [LOCKED] · 03 ARRAY [LOCKED]</div>
+      <div class="team-layout">
+        <section class="box"><div class="tag">Subject</div><h4>loop_checksum</h4><p>Compute the final value. Review input, output, constraints, and two examples.</p><pre class="code">input: 1 2 3 4
+output: 16</pre></section>
+        <section class="box"><div class="tag">rendu/solution.c</div><pre class="code">int solve(int *values)
+{
+    int sum;
+
+    sum = 0;
+    /* Code Reader edits here */
+    return (sum);
+}</pre><div class="button-row"><span class="cmd">RUN CHECKS</span><span class="cmd primary">SUBMIT</span></div></section>
+        <aside class="box"><div class="tag">Private Role</div><h4>Code Reader</h4><div class="role-line"><p>Range includes index 3.</p></div><p>Answer Builder: editing</p><div class="cmd">SHARE CLUE CARD</div></aside>
+        <div class="console">machine: READY · checks: 0/4 · roles locked: 1/2 · retry: AVAILABLE · finish delay: +0s</div>
+      </div>
+    </div>
+    <div class="layout-copy"><h3>C · Team Workstation</h3><p>Recommended for this game. It keeps the Exam Shell look while making the subject, editor, Role, Team, and evaluator visible.</p></div>
+  </div>
+</div>

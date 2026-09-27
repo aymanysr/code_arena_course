@@ -17,3 +17,10 @@ Single-context with `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
 Every project artifact and change must adhere to the authoritative requirements in `ft_transcendence.pdf`. Before completing a change, check the relevant mandatory requirements and claimed-module requirements; resolve any conflict in favor of the PDF, and never present planned or prototype behavior as implemented evidence.
 
 After every project change, review `prototype/game-ui/42-subject-compliance.md`. Update it in the same change whenever requirement evidence, scope, module claims, assumptions, or compliance status changed.
+
+### Design system & linter (@shadcn/lint)
+
+The frontend workspace uses `@shadcn/lint` via Oxlint to verify Tailwind design system rules.
+- Run `npm run lint` from root or `npm run lint` inside `frontend/` before completing any UI changes.
+- Configuration and rules are managed in `frontend/.oxlintrc.json`.
+- When styling UI components, always prioritize semantic theme tokens and component variants over arbitrary Tailwind classes or inline styles.

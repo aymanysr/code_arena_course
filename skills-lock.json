@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "graphify": {
+      "source": "graphify-labs/graphify",
+      "sourceType": "github",
+      "skillPath": "graphify/SKILL.md",
+      "computedHash": "a3cfb035efd448be363d37615721c8295d59d3597331fc15698ba331d7b5823e"
+    }
+  }
+}

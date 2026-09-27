@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hybrid Role Model — Exploration Only</title>
+<style>
+  :root{
+    --bg:#0e1116;
+    --panel:#161b22;
+    --panel-2:#1c2330;
+    --line:#2b3444;
+    --text:#e8edf3;
+    --muted:#9aa7b8;
+    --accent:#7fd08c;
+    --accent-2:#7fb3d0;
+    --warn:#e0b56a;
+    --danger:#e08a8a;
+    --radius:10px;
+    --max:1020px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55;
+    font-size:16px;
+  }
+  a{color:var(--accent-2)}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 18px 64px}
+  .banner{
+    margin:0 -18px 0;
+    padding:12px 18px;
+    background:#2a1408;
+    border-bottom:2px solid var(--warn);
+    color:#ffd9a0;
+    font-weight:700;
+    letter-spacing:.02em;
+    text-align:center;
+    font-size:15px;
+  }
+  header.hero{
+    border:1px solid var(--line);
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border-radius:var(--radius);
+    margin-top:18px;
+    padding:22px 20px;
+  }
+  header.hero h1{margin:.1em 0 .2em;font-size:clamp(22px,3.4vw,32px);line-height:1.2}
+  header.hero p{margin:.4em 0;color:var(--muted)}
+  .term{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:#0a0d12;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:1px 6px;
+    font-size:.92em;
+    color:var(--accent);
+    white-space:nowrap;
+  }
+  .shell-label{
+    display:inline-block;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:12.5px;
+    letter-spacing:.08em;
+    color:var(--muted);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px 10px;
+    margin-bottom:10px;
+    text-transform:uppercase;
+  }
+  h2{font-size:21px;margin:34px 0 8px;padding-top:6px}
+  h3{font-size:17px;margin:18px 0 8px}
+  p.lead{color:var(--muted);margin-top:0}
+  .grid{display:grid;gap:14px}
+  @media(min-width:760px){
+    .grid.two{grid-template-columns:1fr 1fr}
+    .grid.three{grid-template-columns:1fr 1fr 1fr}
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+  }
+  .card h3{margin-top:0;display:flex;align-items:center;gap:8px}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none}
+  .dot.green{background:var(--accent)}
+  .dot.blue{background:var(--accent-2)}
+  .dot.amber{background:var(--warn)}
+  .kv{margin:10px 0 0;padding:0;list-style:none;font-size:14.5px}
+  .kv li{margin:8px 0;padding:8px 10px;background:#0d1219;border:1px solid var(--line);border-radius:8px}
+  .kv strong{display:block;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .scenario{
+    background:#0d1219;
+    border:1px dashed var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    font-size:15px;
+  }
+  .timeline{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+  @media(min-width:760px){.timeline{grid-template-columns:repeat(6,1fr)}}
+  .timeline li{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px;
+    font-size:13.5px;
+    position:relative;
+  }
+  .timeline .n{
+    display:inline-block;min-width:24px;height:24px;line-height:24px;text-align:center;
+    border-radius:6px;background:#0a0d12;border:1px solid var(--line);
+    font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--accent);
+    margin-bottom:6px;
+  }
+  .timeline li:not(:last-child)::after{
+    content:"→";
+    position:absolute;right:-13px;top:38%;color:var(--muted);font-weight:700;
+  }
+  @media(max-width:759px){.timeline li:not(:last-child)::after{content:"↓";right:50%;top:auto;bottom:-16px}}
+  table.compare{width:100%;border-collapse:collapse;font-size:14.5px;background:var(--panel)}
+  table.compare th,table.compare td{border:1px solid var(--line);padding:10px;vertical-align:top;text-align:left}
+  table.compare th{background:var(--panel-2)}
+  .table-scroll{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--line)}
+  .table-scroll table.compare{border:0}
+  .demo{
+    background:#0a0d12;
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-top:12px;
+  }
+  .demo-row{display:grid;gap:12px;margin-top:12px}
+  @media(min-width:760px){.demo-row{grid-template-columns:1.2fr 1fr 1fr}}
+  .pane{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+  .pane h3{margin:0 0 8px;font-size:14px}
+  textarea,input[type=text]{
+    width:100%;background:#07090d;color:var(--text);
+    border:1px solid var(--line);border-radius:6px;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:13px;padding:8px;min-height:0;
+  }
+  textarea{min-height:96px;resize:vertical}
+  button{
+    appearance:none;border:1px solid var(--line);border-radius:8px;
+    background:var(--panel-2);color:var(--text);
+    padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;
+    min-height:44px;
+  }
+  button:hover{border-color:var(--accent-2)}
+  button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  button.primary{background:#12351b;border-color:#2c6b3c}
+  button.warn{background:#3a2a12;border-color:#7a5a22}
+  .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+  .log{
+    margin-top:12px;background:#07090d;border:1px solid var(--line);border-radius:8px;
+    padding:10px 12px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;
+    min-height:88px;white-space:pre-wrap;
+  }
+  .owner-pill{
+    display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;
+    background:#12351b;border:1px solid #2c6b3c;color:#bdf0c6;
+    border-radius:999px;padding:3px 10px;font-size:13px;
+  }
+  .note{border-left:3px solid var(--accent-2);padding:6px 12px;color:var(--muted);margin:14px 0}
+  .prompts{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+  .prompts ol{margin:8px 0 0;padding-left:22px}
+  .prompts li{margin:8px 0}
+  footer{margin-top:28px;color:var(--muted);font-size:13.5px}
+  .skip{position:absolute;left:-9999px}
+  .skip:focus{left:12px;top:12px;background:#fff;color:#000;padding:8px 12px;border-radius:6px;z-index:10}
+  @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="banner" role="note">EXPLORATION ONLY — NOT AN APPROVED DESIGN · Simulated brainstorm, not gameplay</div>
+<div class="wrap">
+  <header class="hero">
+    <span class="shell-label">42 exam shell · brainstorm companion</span>
+    <h1>Hybrid role model, explained in one puzzle</h1>
+    <p><strong>One concrete 90-second scenario, shown twice.</strong> A team gets a tiny buggy function and 90 seconds to fix it, prove it with a test, and submit. Nothing here is built, approved, or playable — this page only sketches how work <em>could</em> be split so nobody sits idle.</p>
+    <div class="scenario" aria-label="The shared example puzzle">
+      <strong>The example used everywhere below.</strong><br>
+      Puzzle: <span class="term">sum_even(numbers)</span> should return the sum of the even numbers.<br>
+      Starter code (buggy): <span class="term">total = 0; for n in numbers: total += n; return total</span> — it sums <em>everything</em>.<br>
+      The fix is one condition: only add <span class="term">n</span> when <span class="term">n % 2 == 0</span>. The interesting part is who writes what, who runs what, and who sees what.
+    </div>
+  </header>
+
+  <main id="main">
+    <h2>1 · Two-player flow</h2>
+    <p class="lead">Two roles, one shared 90 seconds. The main editor has a single owner at a time, but the test console never locks — the second player is always doing real work, not watching.</p>
+    <div class="grid two">
+      <section class="card" aria-labelledby="r-driver2">
+        <h3 id="r-driver2"><span class="dot green" aria-hidden="true"></span>Solution Driver (owns the main editor)</h3>
+        <ul class="kv">
+          <li><strong>Types</strong>The candidate fix in the main editor, e.g. adding <span class="term">if n % 2 == 0:</span> around the addition.</li>
+          <li><strong>Clicks</strong><span class="term">Lock edit</span> when ready for a check; <span class="term">Pass editor</span> to hand control over voluntarily; <span class="term">Submit</span> at the end.</li>
+          <li><strong>Sees privately</strong>The editable solution pane plus the shared test results. Cannot silently edit anyone else's test or watch entries.</li>
+          <li><strong>Contributes</strong>The only version of the solution the team can submit. Every revision flows through this editor.</li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="r-partner2">
+        <h3 id="r-partner2"><span class="dot blue" aria-hidden="true"></span>Test &amp; Debug Partner (independent console)</h3>
+        <ul class="kv">
+          <li><strong>Types</strong>A test input and assertion, e.g. input <span class="term">[1, 2, 3, 4]</span>, expects <span class="term">6</span>; plus a breakpoint like <span class="term">line 3: total</span> and a watch like <span class="term">n</span>.</li>
+          <li><strong>Clicks</strong><span class="term">Run test</span> any time, without asking; <span class="term">Add watch</span> to track a variable; <span class="term">Accept editor</span> if the Driver passes control.</li>
+          <li><strong>Sees privately</strong>Their own test console and watch values (e.g. “run 2 failed: got 10, wanted 6”). The Driver sees the same result row, but only the Partner authors the test.</li>
+          <li><strong>Contributes</strong>The proof the fix works — adversarial inputs, expected outputs, and the runtime inspection that explains <em>why</em> it failed.</li>
+        </ul>
+      </section>
+    </div>
+    <p class="note"><strong>Passing, not taking.</strong> Either player can offer the main editor, and the other accepts. Nobody can grab it. In the demo below, try <span class="term">Pass editor control</span> and watch the owner pill change.</p>
+
+    <h2>2 · Three-player flow</h2>
+    <p class="lead">Same puzzle, finer split. Three roles so testing and debugging each get a dedicated owner — but again, only the main editor is single-owner.</p>
+    <div class="grid three">
+      <section class="card" aria-labelledby="r-driver3">
+        <h3 id="r-driver3"><span class="dot green" aria-hidden="true"></span>Solution Driver</h3>
+        <ul class="kv">
+          <li><strong>Types</strong>The candidate solution, same as above.</li>
+          <li><strong>Clicks</strong><span class="term">Lock edit</span>, <span class="term">Pass editor</span>, <span class="term">Submit</span>.</li>
+          <li><strong>Sees privately</strong>Editable solution + shared results feed.</li>
+          <li><strong>Contributes</strong>The submittable fix.</li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="r-test3">
+        <h3 id="r-test3"><span class="dot blue" aria-hidden="true"></span>Test Engineer</h3>
+        <ul class="kv">
+          <li><strong>Types</strong>Adversarial cases: <span class="term">[] → 0</span>, <span class="term">[1,3,5] → 0</span>, <span class="term">[2,4] → 6</span>, and the assertion text.</li>
+          <li><strong>Clicks</strong><span class="term">Run test</span> independently and repeatedly.</li>
+          <li><strong>Sees privately</strong>Their test authoring pane and per-case pass/fail rows.</li>
+          <li><strong>Contributes</strong>Coverage that catches “sums everything” versus “sums evens”.</li>
+        </ul>
+      </section>
+      <section class="card" aria-labelledby="r-debug3">
+        <h3 id="r-debug3"><span class="dot amber" aria-hidden="true"></span>Debug Engineer</h3>
+        <ul class="kv">
+          <li><strong>Types</strong>Breakpoints (<span class="term">pause each loop pass</span>), watches (<span class="term">n</span>, <span class="term">total</span>), and a one-line reading (“<span class="term">total</span> grew on odd <span class="term">n=3</span>, so the filter is missing”).</li>
+          <li><strong>Clicks</strong><span class="term">Add watch</span>, steps through paused state (simulated here).</li>
+          <li><strong>Sees privately</strong>Watch values per loop pass and the breakpoint hit list.</li>
+          <li><strong>Contributes</strong>The explanation that turns a red test into the correct one-line fix.</li>
+        </ul>
+      </section>
+    </div>
+
+    <h2>3 · One shared loop (both team sizes)</h2>
+    <p class="lead">Two players or three, the loop is identical. Concrete pass through the example:</p>
+    <ol class="timeline" aria-label="Shared team loop">
+      <li><span class="n">1</span><br><strong>Write solution.</strong><br>Driver drafts the even-only fix.</li>
+      <li><span class="n">2</span><br><strong>Construct test.</strong><br>Partner / Test Engineer adds <span class="term">[1,2,3,4] → 6</span>.</li>
+      <li><span class="n">3</span><br><strong>Run.</strong><br>Anyone runs; result row appears for all (simulated).</li>
+      <li><span class="n">4</span><br><strong>Inspect state.</strong><br>Debug side reads watches: odd values leaked into <span class="term">total</span>.</li>
+      <li><span class="n">5</span><br><strong>Revise or pass.</strong><br>Driver revises — or passes the editor to whoever sees the fix.</li>
+      <li><span class="n">6</span><br><strong>Submit.</strong><br>Team submits the locked solution + test report.</li>
+    </ol>
+
+    <h2>4 · The one ownership rule</h2>
+    <div class="card">
+      <h3><span class="dot green" aria-hidden="true"></span>Single-owner editor, always-on side consoles</h3>
+      <p style="margin:0">Only the <strong>main solution editor</strong> has one owner at a time. The <strong>test console</strong> and the <strong>debug console</strong> stay independently active for their owners at all times. That is the whole anti-idleness trick:</p>
+      <ul>
+        <li>While the Driver types the fix, the Partner is already writing the failing test.</li>
+        <li>While a test runs, the Debug Engineer is already placing the next watch.</li>
+        <li>Passing the editor never freezes anyone — tests and watches keep working before, during, and after the handoff.</li>
+      </ul>
+    </div>
+
+    <h2>5 · How this differs from the obvious alternatives</h2>
+    <div class="table-scroll">
+      <table class="compare" aria-label="Comparison of collaboration models">
+        <thead>
+          <tr><th scope="col">Model</th><th scope="col">Who does what</th><th scope="col">Failure mode this sketch avoids</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Hybrid (this sketch)</th>
+            <td>One editor owner + independent test / debug consoles; voluntary pass.</td>
+            <td>Nobody waits: every role types, runs, and explains on every loop.</td>
+          </tr>
+          <tr>
+            <th scope="row">One coder + passive helpers</th>
+            <td>One person edits; others watch or shout suggestions.</td>
+            <td>Helpers go passive — no console of their own, nothing to run or inspect.</td>
+          </tr>
+          <tr>
+            <th scope="row">Simultaneous shared editing</th>
+            <td>Everyone types in the same file at once.</td>
+            <td>Cursor collisions and “who broke it?” — tests and inspection get crowded out by edit churn.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>6 · Try the three controls (simulated)</h2>
+    <p class="lead">All behavior below is fake and local to this page — no code is compiled, run, or sent anywhere. It only demonstrates the <em>feel</em> of the three verbs.</p>
+    <div class="demo" aria-label="Simulated hybrid controls demo">
+      <div>Main-editor owner: <span class="owner-pill" id="ownerPill">Solution Driver</span></div>
+      <div class="demo-row">
+        <div class="pane">
+          <h3>Solution editor (single-owner)</h3>
+          <label for="solutionBox" style="font-size:13px;color:var(--muted)">Candidate fix — editable only by the current owner in this sketch</label>
+          <textarea id="solutionBox">total = 0
+for n in numbers:
+    total += n   # BUG: adds odds too
+return total</textarea>
+        </div>
+        <div class="pane">
+          <h3>Test console (always active)</h3>
+          <label for="testInput" style="font-size:13px;color:var(--muted)">Test input → expected</label>
+          <input type="text" id="testInput" value="[1, 2, 3, 4] → 6">
+        </div>
+        <div class="pane">
+          <h3>Debug console (always active)</h3>
+          <label for="watchInput" style="font-size:13px;color:var(--muted)">Watch expression</label>
+          <input type="text" id="watchInput" value="total">
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="primary" id="runBtn">Run test (simulated)</button>
+        <button type="button" id="watchBtn">Add watch (simulated)</button>
+        <button type="button" class="warn" id="passBtn">Pass editor control (simulated)</button>
+      </div>
+      <div class="log" id="demoLog" role="status" aria-live="polite">simulated log ready.
+hint: press “Run test” — the buggy starter fails ([1,2,3,4] gives 10, not 6).
+then “Add watch”, then “Pass editor control”.</div>
+    </div>
+
+    <h2>7 · Three review prompts</h2>
+    <div class="prompts">
+      <ol>
+        <li><strong>Does every role feel active?</strong> Is there any point in the 90 seconds where a role has nothing to type, run, or explain?</li>
+        <li><strong>Would you enjoy each role?</strong> Driver, tester, debugger — which would you pick first, and which would you dread?</li>
+        <li><strong>Should editor ownership rotate automatically or only when passed?</strong> Timer-based rotation, or strictly voluntary handoff?</li>
+      </ol>
+    </div>
+
+    <footer>
+      <p>EXPLORATION ONLY — NOT AN APPROVED DESIGN. This file is a throwaway brainstorm companion under <span class="term">.superpowers/brainstorm/</span>. It implements no gameplay, changes no prototype or production code, and claims no module, requirement, or compliance evidence. Simulated outputs are illustrative fiction.</p>
+    </footer>
+  </main>
+</div>
+<script>
+(function(){
+  "use strict";
+  var owners2 = ["Solution Driver", "Test & Debug Partner"];
+  var owners3 = ["Solution Driver", "Test Engineer", "Debug Engineer"];
+  // Demo cycles through the 3-player roster to show passing works beyond pairs.
+  var roster = owners3.slice();
+  var idx = 0;
+  var runCount = 0;
+  var pill = document.getElementById("ownerPill");
+  var log = document.getElementById("demoLog");
+  var sol = document.getElementById("solutionBox");
+  var testInput = document.getElementById("testInput");
+  var watchInput = document.getElementById("watchInput");
+
+  function say(msg){ log.textContent += "\n" + msg; log.scrollTop = log.scrollHeight; }
+  function looksFixed(){
+    var v = sol.value || "";
+    return v.indexOf("% 2") !== -1 || v.toLowerCase().indexOf("even") !== -1;
+  }
+
+  document.getElementById("runBtn").addEventListener("click", function(){
+    runCount += 1;
+    var t = (testInput.value || "[1,2,3,4] → 6").trim() || "[1,2,3,4] → 6";
+    if (looksFixed()) {
+      say("run " + runCount + " PASS (simulated): " + t + " — fix holds. Ready to revise or submit (in a real game).");
+    } else {
+      say("run " + runCount + " FAIL (simulated): " + t + " — got 10, wanted 6. Odd values leaked into total.");
+    }
+  });
+  document.getElementById("watchBtn").addEventListener("click", function(){
+    var w = (watchInput.value || "total").trim() || "total";
+    // Simulated per-pass values for the shared example.
+    say("watch added (simulated): " + w + " → pass1=1, pass2=3, pass3=6(!), pass4=10 — grows on odds, filter missing.");
+  });
+  document.getElementById("passBtn").addEventListener("click", function(){
+    idx = (idx + 1) % roster.length;
+    pill.textContent = roster[idx];
+    say("editor passed (simulated): new owner → " + roster[idx] + ". Test + debug consoles stayed active; nobody was locked out.");
+  });
+})();
+</script>
+</body>
+</html>
