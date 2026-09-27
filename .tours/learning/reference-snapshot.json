@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-09-26T01:59:30.872Z",
-  "gitHead": "300780acdf34978f1b11c6b53facc1a84c487101",
-  "snapshotId": "94e3592a698707cc",
+  "recordedAt": "2026-09-27T20:51:48.490Z",
+  "gitHead": "44bde4f5e64871959937fa24e938f3c571bac58b",
+  "snapshotId": "4edc506dd9158d21",
   "files": [
     {
       "path": ".env.example",
-      "sha256": "9c301f3ff58d23e16840f35d2797cf1b1c96871a627db1007d7d0e8ceb6b6e42"
+      "sha256": "85568cb3b2051d406c262ff020f59aa5c2369e43f43deff317d66f33e33cac9f"
     },
     {
       "path": ".gitignore",
@@ -18,11 +18,11 @@
     },
     {
       "path": "CONTEXT.md",
-      "sha256": "9cbfb32eec12ff93692750e634c848821537334d232cc68f93d30786cc559864"
+      "sha256": "94fb695bdb9a55d5328412980222ac338124b73bead233604bcdc08bbe9eadf5"
     },
     {
       "path": "docker-compose.yml",
-      "sha256": "aa575a693a548acc23c8151b4e5e2e39a8c2b778531b068dda0736888108bdd9"
+      "sha256": "fe3411434a92baef4f64ebf6807429d9c0d2d964b89016bb42dab6601d846a46"
     },
     {
       "path": "frontend/.oxlintrc.json",
@@ -34,7 +34,7 @@
     },
     {
       "path": "frontend/e2e/live-1v1.spec.ts",
-      "sha256": "f33fe873424e245edd61201e187ab52604938c436d4a4aa883eb738130908b09"
+      "sha256": "2522f55348c60045e2f42d6d91b0eaadd5439f8a05315ff5fde265fc474dc6ec"
     },
     {
       "path": "frontend/e2e/live-2v2.spec.ts",
@@ -46,7 +46,7 @@
     },
     {
       "path": "frontend/e2e/live-lobby.spec.ts",
-      "sha256": "1ce6cf4007cba08e181e8af726df63a99d7b58bb0ce8cbcb3fd9fb6b023e0a81"
+      "sha256": "041ab534dbf1dd96f2e6d44c0d0d2d2f98671e3eee78cb4ac3b58ea358bafa80"
     },
     {
       "path": "frontend/e2e/live-team-chat.spec.ts",
@@ -93,6 +93,14 @@
       "sha256": "ade58191f5078a32f9c9ff68a8403d72bfcabbddeceb1c572dddc7b8168d5169"
     },
     {
+      "path": "frontend/src/arena/lobby-session.test.ts",
+      "sha256": "e1be692714c7302f745b9ea44a00ae2e67b3070622b425da2edf70f6b7a2492e"
+    },
+    {
+      "path": "frontend/src/arena/lobby-session.ts",
+      "sha256": "1b902f9a05106443723895e36ca385c94e214170c544e3e277acdd0336688444"
+    },
+    {
       "path": "frontend/src/arena/lobby.ts",
       "sha256": "dcd52573cdefe9c484c20a7e82152a63157822c90a477d2c3528894af0f38c21"
     },
@@ -137,8 +145,12 @@
       "sha256": "e473d2e72c9a7cbe8169b1d1fa7b154d6528282b95961b4450ffcc61aa98a2d4"
     },
     {
+      "path": "frontend/src/components/ArenaPage.test.tsx",
+      "sha256": "a12d899c473fe99205d7d15a559ed63fa3aee165fe796c1e1cb3ae3fedf528d0"
+    },
+    {
       "path": "frontend/src/components/ArenaPage.tsx",
-      "sha256": "769e36867b102917af350768ad2e2d213abb768a177683696c177664c3e5667f"
+      "sha256": "ad7485a3101ed548db6f1e09c7c07cfd0ba468598262b837aa500a9708dfda5a"
     },
     {
       "path": "frontend/src/components/ArenaWorkspace.tsx",
@@ -166,7 +178,7 @@
     },
     {
       "path": "frontend/src/components/LobbyPage.tsx",
-      "sha256": "a089579c7a5eb050ae4ed256d5ef83d86063a0cf0a3a0bbd34a5a4c80b3b9fa0"
+      "sha256": "211ca97e4fe2df5f2001d5f8fe31c26d774417013cf0b7791222fab5fa5e523d"
     },
     {
       "path": "frontend/src/components/MatchPanel.tsx",
@@ -238,7 +250,7 @@
     },
     {
       "path": "infra/nginx/nginx.conf",
-      "sha256": "c99abb57052517791afe617d407665082b78aba14657563f8fe766f39c971e66"
+      "sha256": "02ed9b05ace32c8cb0be302ad1effac8a25b8ae0b37bfc573e8cb71c89e5c192"
     },
     {
       "path": "infra/postgres/init-db.sh",
@@ -246,7 +258,7 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "52968d33adf44829132f77604f4d438503cf0f2de8eb2dcf61919e0e8f031339"
+      "sha256": "2b5d1efb6e34b5d6b8091cbcefed6a38da4e9f165a5d3e8c0c64be9598e34950"
     },
     {
       "path": "package.json",
@@ -262,15 +274,15 @@
     },
     {
       "path": "packages/arena-game/src/container-judge.ts",
-      "sha256": "6d4414a2f945d2dd972181b5b07412af025e6d4d6f213fb74921d1b30b8d7b24"
+      "sha256": "a5134d213789298d65850338b3f7a688d2b2fa58b61d3cea56936f4626249a60"
     },
     {
       "path": "packages/arena-game/src/engine.ts",
-      "sha256": "db45a671bf32cf54748a846233209b7ece434d90a13aa5102fd9875f798b3efb"
+      "sha256": "087832fbb522edaf2b03401bd671fe5dc1fb3f483d3ef538fa2f9e7d609e75d8"
     },
     {
       "path": "packages/arena-game/src/evaluation-orchestration.ts",
-      "sha256": "f65724ddc5f95d6ba0e484f6a5ef3a6530688e908a4c1da9fb50e33f5fe756b9"
+      "sha256": "919617a64f0efb1a7aa82ac8c87d3e7b4fd5eed1c620255cba21627569ae7257"
     },
     {
       "path": "packages/arena-game/src/evaluation-telemetry.ts",
@@ -282,7 +294,7 @@
     },
     {
       "path": "packages/arena-game/src/index.ts",
-      "sha256": "0924381adcef82945f8aef681870d3d99d2b5c6237697e1cabdecc390bdeff43"
+      "sha256": "64563cb063ec9f8697cb8309fea1196dd4f8a925f0f4f00dd402916e1a437754"
     },
     {
       "path": "packages/arena-game/src/judge.ts",
@@ -298,7 +310,7 @@
     },
     {
       "path": "packages/arena-game/src/match-authority.ts",
-      "sha256": "93b1cd063a3e2ad26f7b5ca1bf3c8a1b92853177c0b8d4a88d0690c909ed864e"
+      "sha256": "d9fd27301de62b4749a0877eda30579a34ce4166dce1fb06e511102a17a01180"
     },
     {
       "path": "packages/arena-game/src/persistence.ts",
@@ -318,7 +330,7 @@
     },
     {
       "path": "packages/arena-game/src/round-lifecycle.ts",
-      "sha256": "c27fc57ad5461fc871746461242015714e80d20cbb04da338b5ac9fe233b11b3"
+      "sha256": "540dcd9d98f788b51ae1ba40da6793a5db606d2533f79e5dcbf9c109c02b1939"
     },
     {
       "path": "packages/arena-game/src/store.ts",
@@ -327,6 +339,10 @@
     {
       "path": "packages/arena-game/src/team-collaboration.ts",
       "sha256": "4c015d3f8bc67dd18904285e62f724e075c15340c5802e2f3ea976feee6743fa"
+    },
+    {
+      "path": "packages/arena-game/src/worker-judge.ts",
+      "sha256": "07f1ae29240e88d1b8dcb3775e8072e530762e561ee14384f00d59d710507fbe"
     },
     {
       "path": "packages/arena-game/test/collab.test.ts",
@@ -341,12 +357,20 @@
       "sha256": "ac9bd646e94505ed7bd7e56652d381f9e19a427e9efa850782d2e39a6810f24b"
     },
     {
+      "path": "packages/arena-game/test/container-judge-trust.test.ts",
+      "sha256": "ee979e815cb733c04f456f39ebc952b76a0c982e1363686a310b75cf59277d7b"
+    },
+    {
       "path": "packages/arena-game/test/container-judge.test.ts",
-      "sha256": "6294232208427b9b385545b91fba39bac419c4bc33ebf2341cd52d55d1f741d1"
+      "sha256": "5b44f858a31398d4ff5088b40340aed420574b70a3a986ecba75a924c809f7e6"
     },
     {
       "path": "packages/arena-game/test/cross-isolation.test.ts",
       "sha256": "e17bb3084b93d480011989a01ca014eb06e92f232a87ae1ac91b13599f1e9256"
+    },
+    {
+      "path": "packages/arena-game/test/deadline-closure.test.ts",
+      "sha256": "b7d55aa7510ae83012f8bc7514497823f13e103b0422a59f957f6a239358c7bf"
     },
     {
       "path": "packages/arena-game/test/evaluation-orchestration.test.ts",
@@ -358,7 +382,7 @@
     },
     {
       "path": "packages/arena-game/test/judge-security.test.ts",
-      "sha256": "8f04f7e2ec1c4d42592beb5ea47d28c6634660f4adb7a986b5decb6fc59606f4"
+      "sha256": "27c9c806734fbc737c1c66802e001309992fcb124bcfa2e8f95b1c162bd695a4"
     },
     {
       "path": "packages/arena-game/test/judge0.test.ts",
@@ -366,7 +390,7 @@
     },
     {
       "path": "packages/arena-game/test/lifecycle-1v1.test.ts",
-      "sha256": "3f92dd6d9c891ec32411b8d10ccb53f273cf9f9a885801d0dbe6e262026975e7"
+      "sha256": "44a36988f2cee62ce508f75b008475aa0e6a7cfb85d3d8027bf0e6c254acd9a0"
     },
     {
       "path": "packages/arena-game/test/lobby-atomic.test.ts",
@@ -385,12 +409,16 @@
       "sha256": "b4896e2a3abf3a2386f446993490e366a5b9e02386269cd38ccc4e481315e54e"
     },
     {
+      "path": "packages/arena-game/test/post-commit-events.test.ts",
+      "sha256": "6f7222074dfe3d880391f02163e512e95ebc9ebfaeb3047ecacfbce92c4565ce"
+    },
+    {
       "path": "packages/arena-game/test/postgres.test.ts",
       "sha256": "e31036a1d6d230d97da44ed1b2f1f4fe294a41372c5f9407f6c8d829cfad84fc"
     },
     {
       "path": "packages/arena-game/test/reconnect.test.ts",
-      "sha256": "83b3e64ca37663b8a468f4e60269c7ef20801d98a361e1bbe12d6aea4317e079"
+      "sha256": "b9b1ded5ce2818b08866f0867e5a973b510bff9f9688c06d1d2c251de034ce02"
     },
     {
       "path": "packages/arena-game/test/round-lifecycle.test.ts",
@@ -427,6 +455,10 @@
     {
       "path": "packages/arena-game/test/team-collaboration.test.ts",
       "sha256": "31cbca736eca06a7484578f68986d42b7160df0203bb4b353ff0fdf67efd7dc5"
+    },
+    {
+      "path": "packages/arena-game/test/worker-judge.test.ts",
+      "sha256": "f1ba308767bd2726822e07c4ff98826624ccbf43b704315f2b45361933ce1229"
     },
     {
       "path": "packages/arena-game/tsconfig.build.json",
@@ -494,7 +526,7 @@
     },
     {
       "path": "packages/arena-model/src/transitions.ts",
-      "sha256": "cedf7f633537937f9cb36fcee70b7358cc7fe1cda92e759b2f5073f3bc0332a3"
+      "sha256": "4e1c7cd743b5f248aef607c25cc15837045b8656d91bff090cb3df7f521dca95"
     },
     {
       "path": "packages/arena-model/test/events.test.ts",
@@ -634,7 +666,15 @@
     },
     {
       "path": "services/game/src/game/game.service.ts",
-      "sha256": "1dc4b7f826c49885f2235e137d625072874d5a9c42a70e51f3a301fd988af892"
+      "sha256": "ec5b310a0670338e9155cc52fb6bbdc0c9fcbe4ab58dd414360b5ac58d055d68"
+    },
+    {
+      "path": "services/game/src/game/judge-factory.test.ts",
+      "sha256": "bcceb7ebdb09f40ec9409cb817cc391f04abf61b657ccaf83f709b5c4e29f3c5"
+    },
+    {
+      "path": "services/game/src/game/judge-factory.ts",
+      "sha256": "f7f945e514758ee58e37060d156f64cd807578e5cd45296bc71910ccb1df3b59"
     },
     {
       "path": "services/game/src/game/lobby.controller.ts",
@@ -662,11 +702,11 @@
     },
     {
       "path": "services/game/src/game/reconnect.test.ts",
-      "sha256": "7c522c0a77659e969912a70fa3bbc6365e6d817cea1c4de367e5b9e38cd50d6c"
+      "sha256": "23476d59ee93d3da1e299a32faf96a113fd1c98da514f28d2b2e1e7034760012"
     },
     {
       "path": "services/game/src/game/service.test.ts",
-      "sha256": "eaba7be6713309f6bbc7c6ba6e3312850735cb3da3cf877e96d39e72a32defce"
+      "sha256": "db7b21e0a2c4757d9769a446710904bceceadcf65f2d831b73113791f5325b98"
     },
     {
       "path": "services/game/src/game/socket-auth.test.ts",
@@ -678,7 +718,7 @@
     },
     {
       "path": "services/game/src/game/team-2v2.test.ts",
-      "sha256": "4680aac0d2619a863ea90d520a75fa1b321de07847b20a1f0c5e986f4bfe903a"
+      "sha256": "c734c516d658dc925ddfd006254043edf393a35b571727252f7eedf36bfc79c9"
     },
     {
       "path": "services/game/src/game/team-chat.gateway.ts",
@@ -701,6 +741,58 @@
       "sha256": "fa0fbb0cef87c6c3a712133cc9d3e69c1f7c6fb9b26c98d2473af39ce2e34982"
     },
     {
+      "path": "services/judge-worker/Dockerfile",
+      "sha256": "32f057518e9523e92eaecd03c67afa825da8d274feb566ee22837329bb2682f0"
+    },
+    {
+      "path": "services/judge-worker/docker-entrypoint.sh",
+      "sha256": "bb641c4c5166f48d675856c1fdc573ff73f8e4f58dec2b778d4c69006afde7c2"
+    },
+    {
+      "path": "services/judge-worker/package.json",
+      "sha256": "b4a3d5e89bafdcb495dabec6b17eadb4e9beca665ce5ff2c753d0b1cfeaf7872"
+    },
+    {
+      "path": "services/judge-worker/src/http-server.ts",
+      "sha256": "9b4cc6266fd3f3fe94612e7d0460c782ef627a48cecba43056594986874d49f9"
+    },
+    {
+      "path": "services/judge-worker/src/job-queue.ts",
+      "sha256": "ead5054e20835120944392d743377be5f39cea1fa813d47f0c6dda0b833f61d7"
+    },
+    {
+      "path": "services/judge-worker/src/main.ts",
+      "sha256": "4e30fdb5b6e97eed5a3560cf90e9b12fc8c2a9a93c044334a9fbcc3d7b1f4a9d"
+    },
+    {
+      "path": "services/judge-worker/src/readiness.ts",
+      "sha256": "18f1ada5384f735e755781a7e6c9b83bdd0c6d94e53d873cb0684d405b6c48ba"
+    },
+    {
+      "path": "services/judge-worker/test/compose-topology.test.ts",
+      "sha256": "f0477e1475f9df4640d1e6d154e9137412c36a07e1823335fdc885dc7a0f0a65"
+    },
+    {
+      "path": "services/judge-worker/test/http-server.test.ts",
+      "sha256": "07a7e9a6f5ebee720b60a77fb227490635662ac0dbdabed77adfceb500308ebe"
+    },
+    {
+      "path": "services/judge-worker/test/job-queue.test.ts",
+      "sha256": "ddbf8e9727b191b740ef8ed31fdb20859266038f12a9bc506e061fc394fbc2e6"
+    },
+    {
+      "path": "services/judge-worker/test/readiness.test.ts",
+      "sha256": "322bf5ce7201b5357dc0ca201272120061574c32e6023d06e497054d8874c0ba"
+    },
+    {
+      "path": "services/judge-worker/tsconfig.build.json",
+      "sha256": "a42408a1fe307dae1330403900eed592a1d100893d0011a2197773df677b631e"
+    },
+    {
+      "path": "services/judge-worker/tsconfig.json",
+      "sha256": "dac27c444b9975a76634bc487b09d33165ae9cdd83e0de3f701ea99ce36b349a"
+    },
+    {
       "path": "spikes/judge-isolation/DECISION.md",
       "sha256": "f011b7fc5999f3874cbe00bb453b8a09bcb3df409544d4a7a2e58bfdb45e8947"
     },
@@ -716,5 +808,20 @@
       "path": "spikes/judge-isolation/spike.sh",
       "sha256": "e3c8e742a89316af41163cf1658b839bd517d430e7c89a7dedc5027b63131383"
     }
+  ],
+  "lessonReviews": [
+    "0001-submit-journey",
+    "0002-reveal-cutoff",
+    "0003-rounds-and-final-score",
+    "0004-lobby-to-match",
+    "0005-problem-editor-run",
+    "0006-evaluation-retries",
+    "0007-judge-boundary",
+    "0008-persistence-recovery",
+    "0009-live-connection",
+    "0010-team-collaboration",
+    "0012-arena-screen",
+    "0013-running-the-project",
+    "0014-rewrite-with-tests"
   ]
 }

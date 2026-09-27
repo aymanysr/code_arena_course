@@ -975,8 +975,8 @@
     <header class="hero">
       <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 4</p>
       <h1>The Lobby gathers players; Game creates the Match</h1>
-      <p class="hero-copy">In about 10 minutes: Follow private-room and public-queue entry from the Lobby screen to a server-created Match, and identify the readiness and host checks that the backend—not the button—enforces.</p>
-      <p class="mt-1"><span class="status status-current">Source references match 9 pinned files</span> <span class="quiet">Snapshot <code>94e3592a698707cc</code></span></p>
+      <p class="hero-copy">In about 10 minutes: Follow the invitation-only Lobby path, see how authoritative refresh rejects stale state, and identify the readiness and host checks that the backend—not the button—enforces.</p>
+      <p class="mt-1"><span class="status status-current">Source references match 11 pinned files</span> <span class="quiet">Snapshot <code>4edc506dd9158d21</code></span></p>
       <div class="stage-bar" aria-label="Lesson stages">
         <span class="stage-pill" aria-current="step">1 · Predict</span>
         <span aria-hidden="true" class="flow-arrow">→</span>
@@ -988,58 +988,60 @@
 
     <section class="section" aria-labelledby="predict-title">
       <p class="kicker">First, make a prediction</p>
-      <h2 id="predict-title">A 1v1 invite room has two players and both are Ready. Can the guest start—and can either player submit immediately?</h2>
-      <p class="section-intro">Write down who has permission to start, what still has to be created, and which part of this decision belongs to the server.</p>
+      <h2 id="predict-title">An older <code>getActive()</code> response arrives after a newer room update. Which Lobby state should the screen show?</h2>
+      <p class="section-intro">Predict whether the client should trust the socket payload, accept whichever HTTP response finishes last, or keep the newer authoritative refresh. Then identify who may start a full, Ready room.</p>
       <details class="card">
         <summary>Check your prediction</summary>
-        <p class="mt-1">Only the room host may start. The server rechecks membership, full sides, and everyone's readiness even if the UI button is enabled. Starting creates a Match in <code>MATCH_FOUND</code>; the first Round still needs its own start action before coding can begin.</p>
+        <p class="mt-1">Socket payloads are refresh hints, not replacement room state. <code>LobbySession</code>'s request-version guard means stale responses are discarded; the most recently started request that is still current supplies the view. Separately, only the room host may start; the server checks membership, full sides, and every player's Ready state.</p>
       </details>
     </section>
 
     <section class="section" id="trace" aria-labelledby="trace-title">
       <p class="kicker">Now trace the boundaries</p>
-      <h2 id="trace-title">A Lobby groups players; the Game service creates the Match</h2>
-      <p class="section-intro">The screen collects choices and displays membership/readiness. The backend checks those choices and owns the resulting Match identity.</p>
+      <h2 id="trace-title">Recover a current room, then follow its invitation to a Match</h2>
+      <p class="section-intro">This release exposes invitation-code rooms. The client reconciles its display from the authoritative active-state endpoint; Lobby events and ordinary mutation responses prompt a refresh.</p>
       <ol class="flow-list">
         <li class="source-step">
           <span class="step-number" aria-hidden="true">01</span>
           <div>
-            <h3>The screen asks the Lobby client to act</h3>
-            <p><code>LobbyPage</code> handles the clicks. <code>LobbyClient</code> turns them into HTTP requests such as <code>/lobby/rooms</code>, <code>/lobby/rooms/join</code>, <code>/ready</code>, and <code>/start</code>. The button can guide the player, but it is not the authority.</p>
+            <h3>Open the Lobby and recover the active state</h3>
+            <p><code>LobbySession.start()</code> opens the socket and requests <code>/lobby/active</code>. A room, Match-found, queue, or reconnect event starts another authoritative refresh. The socket payload itself does not replace the displayed snapshot.</p>
             <div class="source-links">
-              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=90" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="90" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:90">Create / join / ready / start handlers · LobbyPage.tsx:90</a>
-              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=170" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="170" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:170">UI's host-and-readiness display gate · LobbyPage.tsx:170</a>
-              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby.ts&amp;line=84" data-source-id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts" data-source-line="84" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby.ts:84">Lobby HTTP client · lobby.ts:84</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.controller.ts&amp;line=38" data-source-id="source-de3c459bfe7d6315" data-source-path="services/game/src/game/lobby.controller.ts" data-source-line="38" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.controller.ts:38">Backend room routes · lobby.controller.ts:38</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=28" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="28" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:28">Screen actions · LobbyPage.tsx:28</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=54" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="54" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:54">Connect and recover on start/reconnect · lobby-session.ts:54</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=83" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="83" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:83">Fetch active state and discard superseded responses · lobby-session.ts:83</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby.ts&amp;line=157" data-source-id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts" data-source-line="157" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby.ts:157">Authoritative active-state request · lobby.ts:157</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.test.ts&amp;line=64" data-source-id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts" data-source-line="64" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.test.ts:64">Newer refresh wins over a delayed response · lobby-session.test.ts:64</a>
             </div>
           </div>
         </li>
         <li class="source-step">
           <span class="step-number" aria-hidden="true">02</span>
           <div>
-            <h3>There are two current ways to gather players</h3>
-            <p><strong>Private room:</strong> the host creates an invite code; players join it and see the room's members, sides, and Ready flags. For 1v1, host starts Left and the guest joins Right. In 2v2, each side needs two members.</p>
-            <p class="mt-1"><strong>Public queue:</strong> a waiting entry is matched when enough players of that mode are available (two for 1v1; four for 2v2). The current matcher orders waiting rows by join time, creates the Match, then marks queue entries matched.</p>
+            <h3>Create a private room or join by invitation code</h3>
+            <p><code>LobbyPage</code> offers Create Room and Join by Code. The host begins on Left; a 1v1 guest joins Right, and in 2v2 each side needs two members. The private-room API returns room data, but the session refreshes before showing the result.</p>
             <div class="source-links">
-              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts&amp;line=291" data-source-id="source-1f750de8cdc4f242" data-source-path="packages/arena-game/src/lobby.ts" data-source-line="291" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/lobby.ts:291">Public queue matching · lobby.ts:291</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=311" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="311" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:311">Invitation-only entry controls · LobbyPage.tsx:311</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=124" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="124" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:124">Create and join through LobbySession · lobby-session.ts:124</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby.ts&amp;line=84" data-source-id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts" data-source-line="84" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby.ts:84">Create or join through HTTP · lobby.ts:84</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts&amp;line=357" data-source-id="source-1f750de8cdc4f242" data-source-path="packages/arena-game/src/lobby.ts" data-source-line="357" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/lobby.ts:357">Create private room · lobby.ts:357</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts&amp;line=426" data-source-id="source-1f750de8cdc4f242" data-source-path="packages/arena-game/src/lobby.ts" data-source-line="426" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/lobby.ts:426">Join private room by code · lobby.ts:426</a>
-              <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=67" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="67" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:67">Two-player queue case · lobby.test.ts:67</a>
-              <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=109" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="109" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:109">Four-player queue case · lobby.test.ts:109</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=137" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="137" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:137">Private-room cases · lobby.test.ts:137</a>
+              <a href="../source-map.html?file=frontend%2Fe2e%2Flive-lobby.spec.ts&amp;line=40" data-source-id="source-ce09aa653afc5425" data-source-path="frontend/e2e/live-lobby.spec.ts" data-source-line="40" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-lobby.spec.ts:40">Invitation-room browser scenario source · live-lobby.spec.ts:40</a>
             </div>
           </div>
         </li>
         <li class="source-step">
           <span class="step-number" aria-hidden="true">03</span>
           <div>
-            <h3>The server checks who may see the room and who may start</h3>
-            <p>Room reads and room socket subscriptions are for members only. To start a private room, the backend checks that the caller is the host, every player slot is filled on the correct sides, and every member is Ready. A direct HTTP request gets these same checks; bypassing the disabled UI button does not bypass the rule.</p>
+            <h3>Refresh after changes and rejoin the room channel</h3>
+            <p>Socket payloads are refresh hints. Room mutations such as Create, Join, Ready, and Leave trigger a new <code>getActive()</code>; the request-version guard discards older responses. After connecting or joining a room channel, the session refreshes again to cover updates that happened during recovery.</p>
             <div class="source-links">
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.service.ts&amp;line=364" data-source-id="source-8f207f0faebaa8fd" data-source-path="services/game/src/game/game.service.ts" data-source-line="364" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/game.service.ts:364">Authorize room membership · game.service.ts:364</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=162" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="162" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:162">Mutation results prompt an authoritative refresh · lobby-session.ts:162</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=174" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="174" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:174">Join the room channel, then refresh · lobby-session.ts:174</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.test.ts&amp;line=133" data-source-id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts" data-source-line="133" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.test.ts:133">Mutation and reconnect cases · lobby-session.test.ts:133</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.test.ts&amp;line=168" data-source-id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts" data-source-line="168" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.test.ts:168">Refresh after channel join · lobby-session.test.ts:168</a>
               <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.gateway.ts&amp;line=65" data-source-id="source-2eb3a4730072b63d" data-source-path="services/game/src/game/lobby.gateway.ts" data-source-line="65" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.gateway.ts:65">Authorize live room subscription · lobby.gateway.ts:65</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.controller.ts&amp;line=95" data-source-id="source-de3c459bfe7d6315" data-source-path="services/game/src/game/lobby.controller.ts" data-source-line="95" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.controller.ts:95">Private-room start route · lobby.controller.ts:95</a>
-              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts&amp;line=685" data-source-id="source-1f750de8cdc4f242" data-source-path="packages/arena-game/src/lobby.ts" data-source-line="685" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/lobby.ts:685">Host, capacity, and Ready gate · lobby.ts:685</a>
-              <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=215" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="215" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:215">Gate tests for host / fullness / Ready · lobby.test.ts:215</a>
               <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=68" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="68" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:68">Non-members cannot read or subscribe · lobby.test.ts:68</a>
             </div>
           </div>
@@ -1047,14 +1049,20 @@
         <li class="source-step">
           <span class="step-number" aria-hidden="true">04</span>
           <div>
-            <h3>Game creates a Match, then tells the players to enter it</h3>
-            <p><code>GameService</code> selects the problem versions and calls <code>ArenaEngine.createMatch()</code> with the mode and participant-to-side mapping. The private room becomes matched, and a member-targeted <code>lobby.matchFound</code> event carries the new Match ID. The Match begins at <code>MATCH_FOUND</code>; the first Round has not started yet.</p>
+            <h3>The host requests a start; the server checks the room again</h3>
+            <p>The button only enables when the host sees every slot filled and every player Ready. The server repeats the membership, host, capacity, side, and Ready checks before creating a Match. A successful start response carries its Match ID; duplicate <code>lobby.matchFound</code> events prompt refresh and do not cause a second handoff. The Match begins at <code>MATCH_FOUND</code>; the first Round has not started yet.</p>
             <div class="source-links">
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.service.ts&amp;line=348" data-source-id="source-8f207f0faebaa8fd" data-source-path="services/game/src/game/game.service.ts" data-source-line="348" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/game.service.ts:348">Create Match from private room · game.service.ts:348</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.service.ts&amp;line=299" data-source-id="source-8f207f0faebaa8fd" data-source-path="services/game/src/game/game.service.ts" data-source-line="299" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/game.service.ts:299">Create Match from public queue · game.service.ts:299</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.gateway.ts&amp;line=28" data-source-id="source-2eb3a4730072b63d" data-source-path="services/game/src/game/lobby.gateway.ts" data-source-line="28" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.gateway.ts:28">Send events to the selected users · lobby.gateway.ts:28</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=143" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="143" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:143">Queue Match begins at MATCH_FOUND · lobby.test.ts:143</a>
-              <a href="../source-map.html?file=frontend%2Fe2e%2Flive-lobby.spec.ts&amp;line=38" data-source-id="source-ce09aa653afc5425" data-source-path="frontend/e2e/live-lobby.spec.ts" data-source-line="38" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-lobby.spec.ts:38">Private invite-to-Arena browser journey · live-lobby.spec.ts:38</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=56" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="56" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:56">UI host, capacity, and readiness gate · LobbyPage.tsx:56</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=281" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="281" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:281">Host-only Start button · LobbyPage.tsx:281</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.service.ts&amp;line=334" data-source-id="source-8f207f0faebaa8fd" data-source-path="services/game/src/game/game.service.ts" data-source-line="334" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/game.service.ts:334">Start private room and create the Match · game.service.ts:334</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts&amp;line=685" data-source-id="source-1f750de8cdc4f242" data-source-path="packages/arena-game/src/lobby.ts" data-source-line="685" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/lobby.ts:685">Server host, capacity, and Ready gate · lobby.ts:685</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=215" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="215" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:215">Host/full/Ready rule cases · lobby.test.ts:215</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=150" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="150" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:150">Use the successful start response's Match ID · lobby-session.ts:150</a>
+              <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.test.ts&amp;line=89" data-source-id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts" data-source-line="89" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.test.ts:89">Duplicate Match events hand off once · lobby-session.test.ts:89</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.gateway.ts&amp;line=34" data-source-id="source-2eb3a4730072b63d" data-source-path="services/game/src/game/lobby.gateway.ts" data-source-line="34" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.gateway.ts:34">Target Match-found event to room members · lobby.gateway.ts:34</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.gateway.ts&amp;line=37" data-source-id="source-2eb3a4730072b63d" data-source-path="services/game/src/game/lobby.gateway.ts" data-source-line="37" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.gateway.ts:37">Send the committed Match ID to room members · lobby.gateway.ts:37</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=150" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="150" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:150">Private-room integration path · lobby.test.ts:150</a>
+              <a href="../source-map.html?file=frontend%2Fe2e%2Flive-lobby.spec.ts&amp;line=40" data-source-id="source-ce09aa653afc5425" data-source-path="frontend/e2e/live-lobby.spec.ts" data-source-line="40" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-lobby.spec.ts:40">Invite-to-Arena browser scenario source · live-lobby.spec.ts:40</a>
             </div>
           </div>
         </li>
@@ -1062,13 +1070,16 @@
     </section>
 
     <section class="section" aria-labelledby="truth-title">
-      <h2 id="truth-title">Current code and intended first-release scope disagree about Quick Play</h2>
+      <h2 id="truth-title">Public queue backend code remains for a future release</h2>
       <aside class="concept-note">
-        <h3>Keep this discrepancy visible</h3>
-        <p>The current UI, Lobby service, and queue tests include automatic public matchmaking. But <code>.scratch/code-arena/spec.md:19</code> says invitation-code rooms are the first-release entry and automatic matchmaking is not in scope. This course records what the checked code currently does; it does <strong>not</strong> approve expanding release scope or claim that the spec has been updated. Resolve that product decision separately before treating Quick Play as intended release behavior.</p>
+        <h3>The first release is invitation-only</h3>
+        <p><code>.scratch/code-arena/spec.md:19</code> keeps automatic matchmaking out of first-release scope. <code>LobbyPage</code> offers no queue action. When a recovered active state contains a waiting queue entry, <code>LobbySession</code> cancels it; if matching wins that race, it uses the returned Match ID. The public queue endpoint, matcher, client adapter, and API tests remain in code for a future release.</p>
+        <p class="source-links"><a href="../../../.scratch/code-arena/spec.md#L19">Approved first-release scope · spec.md:19</a></p>
+        <p class="source-links"><a href="../source-map.html?file=frontend%2Fsrc%2Fcomponents%2FLobbyPage.tsx&amp;line=311" data-source-id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx" data-source-line="311" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/components/LobbyPage.tsx:311">Current invitation-only controls · LobbyPage.tsx:311</a> <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.ts&amp;line=97" data-source-id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts" data-source-line="97" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.ts:97">Clear a recovered waiting queue entry · lobby-session.ts:97</a> <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.test.ts&amp;line=111" data-source-id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts" data-source-line="111" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.test.ts:111">Queue recovery cancellation case · lobby-session.test.ts:111</a></p>
+        <p class="source-links"><a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts&amp;line=291" data-source-id="source-1f750de8cdc4f242" data-source-path="packages/arena-game/src/lobby.ts" data-source-line="291" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/lobby.ts:291">Retained backend matcher · lobby.ts:291</a> <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.controller.ts&amp;line=14" data-source-id="source-de3c459bfe7d6315" data-source-path="services/game/src/game/lobby.controller.ts" data-source-line="14" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.controller.ts:14">Retained queue API · lobby.controller.ts:14</a> <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby.ts&amp;line=54" data-source-id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts" data-source-line="54" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby.ts:54">Retained HTTP adapter · lobby.ts:54</a> <a href="../source-map.html?file=frontend%2Fe2e%2Flive-lobby.spec.ts&amp;line=109" data-source-id="source-ce09aa653afc5425" data-source-path="frontend/e2e/live-lobby.spec.ts" data-source-line="109" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-lobby.spec.ts:109">Direct API test source · live-lobby.spec.ts:109</a></p>
       </aside>
       <p class="section-intro mt-1">There is also a development-auth boundary: this Lobby client sends an <code>x-dev-user-id</code> header, which the Game service reads through its development principal seam. That is not evidence of the finished signup/login system.</p>
-      <p class="source-links"><a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby.ts&amp;line=39" data-source-id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts" data-source-line="39" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby.ts:39">Development identity header · lobby.ts:39</a> <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.controller.ts&amp;line=14" data-source-id="source-de3c459bfe7d6315" data-source-path="services/game/src/game/lobby.controller.ts" data-source-line="14" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.controller.ts:14">Controller requires a principal · lobby.controller.ts:14</a></p>
+      <p class="source-links"><a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby.ts&amp;line=39" data-source-id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts" data-source-line="39" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby.ts:39">Development identity header · lobby.ts:39</a> <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.controller.ts&amp;line=40" data-source-id="source-de3c459bfe7d6315" data-source-path="services/game/src/game/lobby.controller.ts" data-source-line="40" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.controller.ts:40">Room route requires a principal · lobby.controller.ts:40</a></p>
     </section>
 
     <section class="section" aria-labelledby="tests-title">
@@ -1076,35 +1087,35 @@
       <div class="grid split">
         <article class="card">
           <h3>Domain tests</h3>
-          <p>The in-memory Lobby tests check queue capacity and side assignment, private invite joins, start rejection for the wrong host or an unready/not-full room, and that only one Match is created under simultaneous start requests.</p>
-          <p class="source-links"><a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=67" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="67" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:67">Queue tests · lobby.test.ts:67</a> <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=320" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="320" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:320">Concurrent starts · lobby.test.ts:320</a></p>
+          <p>The in-memory Lobby tests cover retained queue capacity, invite-room creation/joining, and the host/full/Ready start rule. PostgreSQL-backed cases exercise concurrent room joins and starts when that database suite is available.</p>
+          <p class="source-links"><a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=67" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="67" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:67">Retained queue behavior · lobby.test.ts:67</a> <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=215" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="215" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:215">Private-room start gate · lobby.test.ts:215</a> <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts&amp;line=320" data-source-id="source-26374ed504fae956" data-source-path="packages/arena-game/test/lobby.test.ts" data-source-line="320" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/lobby.test.ts:320">Database-backed start race case · lobby.test.ts:320</a></p>
         </article>
         <article class="card">
           <h3>Service and browser tests</h3>
-          <p>The Game service test crosses HTTP and WebSocket boundaries for private rooms and public 1v1 queue formation. The browser journeys exercise invite-room readiness and public queue entry. A test file is evidence for the cases it asserts; it does not settle the spec disagreement or prove production authentication.</p>
-          <p class="mt-1">The <code>live-lobby.spec.ts</code> Playwright journeys are linked as scenario source, not as a pass from this lesson update.</p>
-          <p class="source-links"><a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=112" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="112" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:112">HTTP queue match · lobby.test.ts:112</a> <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=150" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="150" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:150">HTTP/WebSocket private flow · lobby.test.ts:150</a> <a href="../source-map.html?file=frontend%2Fe2e%2Flive-lobby.spec.ts&amp;line=107" data-source-id="source-ce09aa653afc5425" data-source-path="frontend/e2e/live-lobby.spec.ts" data-source-line="107" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-lobby.spec.ts:107">Browser queue flow · live-lobby.spec.ts:107</a></p>
+          <p>The service tests exercise the private-room HTTP/socket path and the retained queue API. The Playwright file describes the invitation flow and a direct queue-API scenario; that queue scenario does not mean the Lobby screen has a queue button.</p>
+          <p class="mt-1">Test files and browser journeys are linked as evidence source, not as a pass from this lesson update. They do not establish production authentication.</p>
+          <p class="source-links"><a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=112" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="112" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:112">Retained HTTP queue API test · lobby.test.ts:112</a> <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Flobby.test.ts&amp;line=150" data-source-id="source-e9dbaabe5441f409" data-source-path="services/game/src/game/lobby.test.ts" data-source-line="150" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/lobby.test.ts:150">HTTP/WebSocket private flow · lobby.test.ts:150</a> <a href="../source-map.html?file=frontend%2Fe2e%2Flive-lobby.spec.ts&amp;line=109" data-source-id="source-ce09aa653afc5425" data-source-path="frontend/e2e/live-lobby.spec.ts" data-source-line="109" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/live-lobby.spec.ts:109">Direct queue-API browser-test source · live-lobby.spec.ts:109</a> <a href="../source-map.html?file=frontend%2Fsrc%2Farena%2Flobby-session.test.ts&amp;line=64" data-source-id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts" data-source-line="64" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/src/arena/lobby-session.test.ts:64">Reconciliation behavior tests · lobby-session.test.ts:64</a></p>
         </article>
       </div>
     </section>
 
     <section class="section" id="recall" aria-labelledby="recall-title">
       <p class="kicker">Check the model in your head</p>
-      <h2 id="recall-title">Everyone is Ready, but the guest sends <code>POST /lobby/rooms/:id/start</code> directly. What happens?</h2>
-      <p class="section-intro">Answer before opening the hint. Include the part the UI plays and the separate check the backend must perform.</p>
+      <h2 id="recall-title">A delayed active-state response disagrees with a newer refresh. What should update the screen?</h2>
+      <p class="section-intro">Answer before opening the hint. Include the role of the event, the authoritative request, and the request-version guard.</p>
       <details class="card">
         <summary>Show a useful answer hint</summary>
-        <p class="mt-1">The backend rejects the guest because only the room owner can start. The UI's disabled button is just guidance; the domain gate also verifies capacity and readiness before it asks the Arena engine to create the Match. Then the Match is in <code>MATCH_FOUND</code>, waiting for the first Round to begin.</p>
+        <p class="mt-1">The event prompts another <code>getActive()</code>; its payload does not replace the room snapshot. The request-version guard discards the older response. When a host later requests Start, the backend checks host identity, full sides, and readiness before creating the Match in <code>MATCH_FOUND</code>.</p>
       </details>
       <article class="card mt-1">
         <h3>Rewrite-test prompt</h3>
-        <p>Write separate tests for the boundary and the rule: a non-member cannot read or subscribe to a private room; a non-host cannot start; a host cannot start while slots are empty or someone is not Ready; a valid host request creates one Match only. For the public queue, first decide whether that behavior belongs in your approved product scope.</p>
+        <p>Write separate tests for stale refresh rejection, mutation-triggered refresh, room-channel rejoin after reconnect, one Match handoff for duplicate events, and the server's host/full/Ready gate. Keep any future queue API tests separate from the invitation-only Lobby screen flow.</p>
       </article>
       <p class="nav-row"><a href="0003-rounds-and-final-score.html">← Lesson 3: Round scores</a> · <a href="0005-problem-editor-run.html">Next: Lesson 5, Problem and Run →</a></p>
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>94e3592a698707cc</code>. This lesson describes current implementation evidence and flags its scope discrepancy; it does not change product behavior or the 42-subject module claims.</p>
+      <p>Source snapshot <code>4edc506dd9158d21</code>. This lesson describes the current invitation-only release path and retained queue API; it does not change product behavior or the 42-subject module claims.</p>
     </footer>
   </main>
 <div id="source-templates" hidden>
@@ -1113,7 +1124,7 @@
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">WEB</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_WEB_URL</span> ?? <span class="hljs-string">&quot;http://localhost:4173&quot;</span>;
 
 test.<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;Live Entry &amp; Lobby E2E&quot;</span>, <span class="hljs-function">() =&gt;</span> {
-  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renders entry lobby with mode selection, quick play, and private room options&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renders invitation-only entry with mode selection and private room options&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
     <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
     <span class="hljs-keyword">const</span> context = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>();
     <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> context.<span class="hljs-title function_">newPage</span>();
@@ -1121,7 +1132,7 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
     <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=test-entry-user`</span>);
 
     <span class="hljs-comment">// Verify main lobby heading and elements</span>
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena Matchmaking&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena Lobby&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Player: test-entry-user&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
 
     <span class="hljs-comment">// Mode selector</span>
@@ -1134,12 +1145,14 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
     <span class="hljs-comment">// Switching mode</span>
     <span class="hljs-keyword">await</span> btn2v2.<span class="hljs-title function_">click</span>();
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(btn2v2).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&quot;aria-pressed&quot;</span>, <span class="hljs-string">&quot;true&quot;</span>);
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 2v2 Match&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Quick Play Queue&quot;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/Find .* Match/</span> })).<span class="hljs-title function_">toHaveCount</span>(<span class="hljs-number">0</span>);
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 2v2 Room&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
 
     <span class="hljs-comment">// Switch back to 1v1</span>
     <span class="hljs-keyword">await</span> btn1v1.<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Quick Play Queue&quot;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/Find .* Match/</span> })).<span class="hljs-title function_">toHaveCount</span>(<span class="hljs-number">0</span>);
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 1v1 Room&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
 
     <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
@@ -1214,60 +1227,32 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
     <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
   });
 
-  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;public queue: two players join queue and are matched into a game&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
-    <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
-    <span class="hljs-keyword">const</span> p1Context = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>();
-    <span class="hljs-keyword">const</span> p2Context = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>();
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;public queue remains available through its server API for a future release&quot;</span>, <span class="hljs-title function_">async</span> ({ request }) =&gt; {
+    <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+    <span class="hljs-keyword">const</span> firstUser = <span class="hljs-string">`queue-first-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
+    <span class="hljs-keyword">const</span> secondUser = <span class="hljs-string">`queue-second-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
+    <span class="hljs-keyword">const</span> first = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
+      <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: firstUser },
+      <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
+    });
+    <span class="hljs-title function_">expect</span>(first.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> first.<span class="hljs-title function_">json</span>()).<span class="hljs-property">entry</span>.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;waiting&quot;</span>);
 
-    <span class="hljs-keyword">const</span> p1Page = <span class="hljs-keyword">await</span> p1Context.<span class="hljs-title function_">newPage</span>();
-    <span class="hljs-keyword">const</span> p2Page = <span class="hljs-keyword">await</span> p2Context.<span class="hljs-title function_">newPage</span>();
-
-    <span class="hljs-keyword">const</span> p1Id = <span class="hljs-string">`qp1-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
-    <span class="hljs-keyword">const</span> p2Id = <span class="hljs-string">`qp2-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
-
-    <span class="hljs-comment">// Player 1 joins queue</span>
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${p1Id}</span>`</span>);
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Finding 1v1 Opponent…&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Search&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-
-    <span class="hljs-comment">// Player 2 joins queue</span>
-    <span class="hljs-keyword">await</span> p2Page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${p2Id}</span>`</span>);
-    <span class="hljs-keyword">await</span> p2Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-
-    <span class="hljs-comment">// Both players match and enter Arena!</span>
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">10000</span> });
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p2Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">10000</span> });
-
-    <span class="hljs-comment">// Verify both are in the same match</span>
-    <span class="hljs-keyword">const</span> p1Match = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(p1Page.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
-    <span class="hljs-keyword">const</span> p2Match = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(p2Page.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
-    <span class="hljs-title function_">expect</span>(p1Match).<span class="hljs-title function_">toBeTruthy</span>();
-    <span class="hljs-title function_">expect</span>(p2Match).<span class="hljs-title function_">toBeTruthy</span>();
-    <span class="hljs-title function_">expect</span>(p1Match).<span class="hljs-title function_">toBe</span>(p2Match);
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Run&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Not run&quot;</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([
-      p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
-      p2Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
-    ]);
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p2Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ <span class="hljs-attr">entry</span>: <span class="hljs-string">&quot;1v1 queue&quot;</span>, <span class="hljs-attr">users</span>: [p1Id, p2Id], <span class="hljs-attr">matchId</span>: p1Match }));
-
-    <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
+    <span class="hljs-keyword">const</span> second = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
+      <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: secondUser },
+      <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
+    });
+    <span class="hljs-title function_">expect</span>(second.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> second.<span class="hljs-title function_">json</span>()).<span class="hljs-property">entry</span>.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;matched&quot;</span>);
   });
 });
 
 <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;queued player matched while offline recovers the same Arena on reload&quot;</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
   <span class="hljs-keyword">const</span> user = <span class="hljs-string">`offline-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
-  <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newPage</span>();
-  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${user}</span>`</span>);
-  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Search&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">close</span>();
   <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+  <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: user }, <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
+  });
   <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
     <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: <span class="hljs-string">`<span class="hljs-subst">${user}</span>-opponent`</span> }, <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
   });
@@ -1278,67 +1263,62 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
   <span class="hljs-keyword">await</span> recovered.<span class="hljs-title function_">close</span>();
 });
 
-<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> entry <span class="hljs-keyword">of</span> [<span class="hljs-string">&quot;queue&quot;</span>, <span class="hljs-string">&quot;private&quot;</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
-  <span class="hljs-title function_">test</span>(<span class="hljs-string">`2v2 <span class="hljs-subst">${entry}</span>: four players enter one Arena with isolated collaboration and chat`</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
-    <span class="hljs-keyword">const</span> users = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> <span class="hljs-string">`<span class="hljs-subst">${entry}</span>-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>-<span class="hljs-subst">${i}</span>`</span>);
-    <span class="hljs-keyword">const</span> pages = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(users.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> browser.<span class="hljs-title function_">newPage</span>()));
-    <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
-    <span class="hljs-keyword">let</span> code = <span class="hljs-string">&quot;&quot;</span>;
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
-      <span class="hljs-keyword">const</span> p = pages[i]!;
-      <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${users[i]}</span>`</span>);
-      <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;2v2&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-      <span class="hljs-keyword">if</span> (entry === <span class="hljs-string">&quot;queue&quot;</span>) {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 2v2 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-        <span class="hljs-keyword">if</span> (i &lt; <span class="hljs-number">3</span>) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Search&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (i === <span class="hljs-number">0</span>) {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 2v2 Room&quot;</span> }).<span class="hljs-title function_">click</span>();
-        code = (<span class="hljs-keyword">await</span> p.<span class="hljs-title function_">locator</span>(<span class="hljs-string">&quot;span.font-mono.text-base.font-bold&quot;</span>).<span class="hljs-title function_">textContent</span>())!.<span class="hljs-title function_">trim</span>();
-      } <span class="hljs-keyword">else</span> {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&quot;INVITE CODE&quot;</span>).<span class="hljs-title function_">fill</span>(code);
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Join&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-      }
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;2v2 private: four players enter one Arena with isolated collaboration and chat&quot;</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
+  <span class="hljs-keyword">const</span> users = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> <span class="hljs-string">`private-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>-<span class="hljs-subst">${i}</span>`</span>);
+  <span class="hljs-keyword">const</span> pages = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(users.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> browser.<span class="hljs-title function_">newPage</span>()));
+  <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+  <span class="hljs-keyword">let</span> code = <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
+    <span class="hljs-keyword">const</span> page = pages[i]!;
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${users[i]}</span>`</span>);
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;2v2&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">if</span> (i === <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 2v2 Room&quot;</span> }).<span class="hljs-title function_">click</span>();
+      code = (<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">locator</span>(<span class="hljs-string">&quot;span.font-mono.text-base.font-bold&quot;</span>).<span class="hljs-title function_">textContent</span>())!.<span class="hljs-title function_">trim</span>();
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&quot;INVITE CODE&quot;</span>).<span class="hljs-title function_">fill</span>(code);
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Join&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
     }
-    <span class="hljs-keyword">if</span> (entry === <span class="hljs-string">&quot;private&quot;</span>) {
-      <span class="hljs-keyword">const</span> overflow = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/rooms/join`</span>, { <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: <span class="hljs-string">`extra-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span> }, <span class="hljs-attr">data</span>: { code } });
-      <span class="hljs-title function_">expect</span>(overflow.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">409</span>);
-      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> }).<span class="hljs-title function_">click</span>();
-        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Ready&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-      }
-      <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start Match&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    }
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
-    <span class="hljs-title function_">expect</span>(matchId).<span class="hljs-title function_">toBeTruthy</span>();
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(p.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>)).<span class="hljs-title function_">toBe</span>(matchId);
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">get</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/matches/<span class="hljs-subst">${matchId}</span>/snapshot`</span>, { <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: users[i]! } });
-      <span class="hljs-keyword">const</span> snap = <span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>();
-      <span class="hljs-title function_">expect</span>(snap.<span class="hljs-property">roundPhase</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;MATCH_FOUND&quot;</span>);
-    }
-    <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Shared doc r1 · live/</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [author, teammate, opponent, marker] <span class="hljs-keyword">of</span> [[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;alpha-only&quot;</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;beta-only&quot;</span>]] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
-      <span class="hljs-keyword">const</span> editor = pages[author]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>);
-      <span class="hljs-keyword">await</span> editor.<span class="hljs-title function_">fill</span>(<span class="hljs-string">`# <span class="hljs-subst">${marker}</span>`</span>);
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toContainText</span>(marker);
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainText</span>(marker);
-      <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;textbox&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Team message&quot;</span> }).<span class="hljs-title function_">fill</span>(marker);
-      <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Send team message&quot;</span> }).<span class="hljs-title function_">click</span>();
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-title function_">toBeVisible</span>();
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
-    }
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>)) {
-      <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>).<span class="hljs-title function_">click</span>();
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>)).<span class="hljs-title function_">toBeChecked</span>();
-    }
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> })).<span class="hljs-title function_">toBeEnabled</span>();
-    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ entry, users, matchId, <span class="hljs-attr">teams</span>: [users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>), users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">2</span>)] }));
-    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(pages.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.<span class="hljs-title function_">close</span>()));
+  }
+  <span class="hljs-keyword">const</span> overflow = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/rooms/join`</span>, {
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: <span class="hljs-string">`extra-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span> }, <span class="hljs-attr">data</span>: { code },
   });
-}
+  <span class="hljs-title function_">expect</span>(overflow.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">409</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) {
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Ready&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+  }
+  <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start Match&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>();
+  <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
+  <span class="hljs-title function_">expect</span>(matchId).<span class="hljs-title function_">toBeTruthy</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(page.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>)).<span class="hljs-title function_">toBe</span>(matchId);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">get</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/matches/<span class="hljs-subst">${matchId}</span>/snapshot`</span>, { <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: users[i]! } });
+    <span class="hljs-keyword">const</span> snapshot = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+    <span class="hljs-title function_">expect</span>(snapshot.<span class="hljs-property">roundPhase</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;MATCH_FOUND&quot;</span>);
+  }
+  <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Shared doc r1 · live/</span>)).<span class="hljs-title function_">toBeVisible</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [author, teammate, opponent, marker] <span class="hljs-keyword">of</span> [[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;alpha-only&quot;</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;beta-only&quot;</span>]] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
+    <span class="hljs-keyword">const</span> editor = pages[author]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>);
+    <span class="hljs-keyword">await</span> editor.<span class="hljs-title function_">fill</span>(<span class="hljs-string">`# <span class="hljs-subst">${marker}</span>`</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toContainText</span>(marker);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainText</span>(marker);
+    <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;textbox&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Team message&quot;</span> }).<span class="hljs-title function_">fill</span>(marker);
+    <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Send team message&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
+  }
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>)) {
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>)).<span class="hljs-title function_">toBeChecked</span>();
+  }
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> })).<span class="hljs-title function_">toBeEnabled</span>();
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ <span class="hljs-attr">entry</span>: <span class="hljs-string">&quot;private&quot;</span>, users, matchId, <span class="hljs-attr">teams</span>: [users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>), users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">2</span>)] }));
+  <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(pages.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">page</span> =&gt;</span> page.<span class="hljs-title function_">close</span>()));
+});
 
 <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;private membership survives reload and offline match start&quot;</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
   <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
@@ -1370,6 +1350,402 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
   <span class="hljs-keyword">await</span> hostPage.<span class="hljs-title function_">close</span>();
   <span class="hljs-keyword">await</span> recovered.<span class="hljs-title function_">close</span>();
 });
+</template>
+<template id="source-63593c77e314156a" data-source-path="frontend/src/arena/lobby-session.test.ts"><span class="hljs-keyword">import</span> { describe, expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">LobbyClient</span>, <span class="hljs-title class_">RoomWithMembers</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./lobby.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">LobbySession</span>, <span class="hljs-keyword">type</span> <span class="hljs-title class_">LobbySessionClient</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./lobby-session.js&quot;</span>;
+
+<span class="hljs-keyword">function</span> deferred&lt;T&gt;() {
+  <span class="hljs-keyword">let</span> resolve!: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">value</span>: T</span>) =&gt;</span> <span class="hljs-built_in">void</span>;
+  <span class="hljs-keyword">const</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;T&gt;(<span class="hljs-function">(<span class="hljs-params">done</span>) =&gt;</span> {
+    resolve = done;
+  });
+  <span class="hljs-keyword">return</span> { promise, resolve };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">room</span>(<span class="hljs-params"><span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>, ready = <span class="hljs-literal">false</span></span>): <span class="hljs-title class_">RoomWithMembers</span> {
+  <span class="hljs-keyword">const</span> roomId = <span class="hljs-string">`room-<span class="hljs-subst">${code}</span>`</span>;
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">room</span>: {
+      <span class="hljs-attr">id</span>: roomId,
+      code,
+      <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>,
+      <span class="hljs-attr">ownerUserId</span>: <span class="hljs-string">&quot;left-user&quot;</span>,
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;open&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>,
+      <span class="hljs-attr">createdAt</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">expiresAt</span>: <span class="hljs-number">1000</span>,
+      <span class="hljs-attr">matchId</span>: <span class="hljs-literal">null</span>,
+    },
+    <span class="hljs-attr">members</span>: [
+      { roomId, <span class="hljs-attr">userId</span>: <span class="hljs-string">&quot;left-user&quot;</span>, <span class="hljs-attr">sideId</span>: <span class="hljs-string">&quot;left&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>, ready, <span class="hljs-attr">joinedAt</span>: <span class="hljs-number">1</span> },
+    ],
+  };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">active</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-title class_">ReturnType</span>&lt;<span class="hljs-keyword">typeof</span> room&gt; | <span class="hljs-literal">null</span>, <span class="hljs-attr">queue</span>: <span class="hljs-title class_">Awaited</span>&lt;<span class="hljs-title class_">ReturnType</span>&lt;<span class="hljs-title class_">LobbyClient</span>[<span class="hljs-string">&quot;getQueueStatus&quot;</span>]&gt;&gt; = <span class="hljs-literal">null</span></span>) {
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">room</span>: value, queue };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">makeClient</span>(<span class="hljs-params"><span class="hljs-attr">overrides</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">LobbySessionClient</span>&gt; = {}</span>) {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">callbacks</span>: <span class="hljs-title class_">Parameters</span>&lt;<span class="hljs-title class_">LobbyClient</span>[<span class="hljs-string">&quot;connectSocket&quot;</span>]&gt;[<span class="hljs-number">0</span>] | <span class="hljs-literal">undefined</span>;
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">client</span>: <span class="hljs-title class_">LobbySessionClient</span> = {
+    <span class="hljs-attr">getActive</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">active</span>(<span class="hljs-literal">null</span>)),
+    <span class="hljs-attr">cancelQueue</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">cancelled</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">matched</span>: <span class="hljs-literal">false</span> })),
+    <span class="hljs-attr">createRoom</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;CREATED&quot;</span>)),
+    <span class="hljs-attr">joinRoom</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;JOINED&quot;</span>)),
+    <span class="hljs-attr">setSide</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;SIDE&quot;</span>)),
+    <span class="hljs-attr">setReady</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;MUTATION&quot;</span>)),
+    <span class="hljs-attr">leaveRoom</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">left</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">closed</span>: <span class="hljs-literal">false</span> })),
+    <span class="hljs-attr">startRoom</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">matchId</span>: <span class="hljs-string">&quot;match-started&quot;</span> })),
+    <span class="hljs-attr">connectSocket</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-function">(<span class="hljs-params">value</span>) =&gt;</span> {
+      callbacks = value;
+      <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
+        callbacks = <span class="hljs-literal">undefined</span>;
+      };
+    }),
+    <span class="hljs-attr">joinRoomChannel</span>: vi.<span class="hljs-title function_">fn</span>(),
+    <span class="hljs-attr">leaveRoomChannel</span>: vi.<span class="hljs-title function_">fn</span>(),
+    ...overrides,
+  };
+  <span class="hljs-keyword">return</span> {
+    client,
+    <span class="hljs-attr">callbacks</span>: <span class="hljs-function">() =&gt;</span> callbacks,
+  };
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;LobbySession authoritative reconciliation&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;rejects an older active-state response after a newer room update refresh&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> oldResponse = deferred&lt;<span class="hljs-title class_">ReturnType</span>&lt;<span class="hljs-keyword">typeof</span> active&gt;&gt;();
+    <span class="hljs-keyword">const</span> newResponse = deferred&lt;<span class="hljs-title class_">ReturnType</span>&lt;<span class="hljs-keyword">typeof</span> active&gt;&gt;();
+    <span class="hljs-keyword">const</span> getActive = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockReturnValueOnce</span>(oldResponse.<span class="hljs-property">promise</span>).<span class="hljs-title function_">mockReturnValueOnce</span>(newResponse.<span class="hljs-property">promise</span>);
+    <span class="hljs-keyword">const</span> { client, callbacks } = <span class="hljs-title function_">makeClient</span>({ getActive });
+    <span class="hljs-keyword">const</span> session = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, vi.<span class="hljs-title function_">fn</span>());
+
+    <span class="hljs-keyword">const</span> startup = session.<span class="hljs-title function_">start</span>();
+    <span class="hljs-keyword">const</span> onRoomUpdated = <span class="hljs-title function_">callbacks</span>()?.<span class="hljs-property">onRoomUpdated</span>;
+    <span class="hljs-title function_">expect</span>(onRoomUpdated).<span class="hljs-title function_">toBeDefined</span>();
+    <span class="hljs-keyword">const</span> stale = <span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;SOCKET-STALE&quot;</span>);
+    onRoomUpdated!({ <span class="hljs-attr">roomId</span>: stale.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>, <span class="hljs-attr">room</span>: stale.<span class="hljs-property">room</span>, <span class="hljs-attr">members</span>: stale.<span class="hljs-property">members</span> });
+
+    newResponse.<span class="hljs-title function_">resolve</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;LATEST&quot;</span>)));
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    oldResponse.<span class="hljs-title function_">resolve</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;OLDER&quot;</span>)));
+    <span class="hljs-keyword">await</span> startup;
+
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">code</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;LATEST&quot;</span>);
+    <span class="hljs-title function_">expect</span>(client.<span class="hljs-property">joinRoomChannel</span>).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>);
+    <span class="hljs-title function_">expect</span>(client.<span class="hljs-property">joinRoomChannel</span>).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-string">&quot;room-LATEST&quot;</span>);
+    session.<span class="hljs-title function_">stop</span>();
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;treats duplicate Match events as hints and hands off once from the latest snapshot&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">matchedRoom</span>: <span class="hljs-title class_">RoomWithMembers</span> = {
+      ...<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;MATCHED&quot;</span>),
+      <span class="hljs-attr">room</span>: { ...<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;MATCHED&quot;</span>).<span class="hljs-property">room</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;matched&quot;</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-string">&quot;match-1&quot;</span> },
+    };
+    <span class="hljs-keyword">const</span> { client, callbacks } = <span class="hljs-title function_">makeClient</span>({ <span class="hljs-attr">getActive</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">active</span>(matchedRoom)) });
+    <span class="hljs-keyword">const</span> onMatchFound = vi.<span class="hljs-title function_">fn</span>();
+    <span class="hljs-keyword">const</span> session = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, onMatchFound);
+
+    <span class="hljs-keyword">await</span> session.<span class="hljs-title function_">start</span>();
+    <span class="hljs-title function_">callbacks</span>()?.<span class="hljs-property">onMatchFound</span>?.({ <span class="hljs-attr">roomId</span>: <span class="hljs-string">&quot;room-MATCHED&quot;</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-string">&quot;stale-match&quot;</span> });
+    <span class="hljs-title function_">callbacks</span>()?.<span class="hljs-property">onQueueMatched</span>?.({ <span class="hljs-attr">matchId</span>: <span class="hljs-string">&quot;stale-queue-match&quot;</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+
+    <span class="hljs-title function_">expect</span>(onMatchFound).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">1</span>);
+    <span class="hljs-title function_">expect</span>(onMatchFound).<span class="hljs-title function_">toHaveBeenCalledWith</span>(<span class="hljs-string">&quot;match-1&quot;</span>);
+    <span class="hljs-title function_">expect</span>(client.<span class="hljs-property">getActive</span>).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">3</span>);
+    session.<span class="hljs-title function_">stop</span>();
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;cancels a legacy waiting queue before exposing the invitation-only entry state&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> queue = {
+      <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;queue-1&quot;</span>,
+      <span class="hljs-attr">userId</span>: <span class="hljs-string">&quot;left-user&quot;</span>,
+      <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>,
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;waiting&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>,
+      <span class="hljs-attr">joinedAt</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">matchedMatchId</span>: <span class="hljs-literal">null</span>,
+    };
+    <span class="hljs-keyword">const</span> getActive = vi.<span class="hljs-title function_">fn</span>().<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-title function_">active</span>(<span class="hljs-literal">null</span>, queue)).<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-title function_">active</span>(<span class="hljs-literal">null</span>));
+    <span class="hljs-keyword">const</span> { client } = <span class="hljs-title function_">makeClient</span>({ getActive });
+    <span class="hljs-keyword">const</span> session = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, vi.<span class="hljs-title function_">fn</span>());
+
+    <span class="hljs-keyword">await</span> session.<span class="hljs-title function_">start</span>();
+
+    <span class="hljs-title function_">expect</span>(client.<span class="hljs-property">cancelQueue</span>).<span class="hljs-title function_">toHaveBeenCalledOnce</span>();
+    <span class="hljs-title function_">expect</span>(getActive).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>);
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">roomData</span>).<span class="hljs-title function_">toBeNull</span>();
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">mode</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;1v1&quot;</span>);
+    session.<span class="hljs-title function_">stop</span>();
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;refreshes after room mutations instead of applying their possibly stale response&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> getActive = vi.<span class="hljs-title function_">fn</span>()
+      .<span class="hljs-title function_">mockResolvedValue</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;CURRENT&quot;</span>, <span class="hljs-literal">true</span>)))
+      .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;CURRENT&quot;</span>)))
+      .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;CURRENT&quot;</span>, <span class="hljs-literal">true</span>)));
+    <span class="hljs-keyword">const</span> { client } = <span class="hljs-title function_">makeClient</span>({ getActive });
+    <span class="hljs-keyword">const</span> session = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, vi.<span class="hljs-title function_">fn</span>());
+    <span class="hljs-keyword">await</span> session.<span class="hljs-title function_">start</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">const</span> requestsBeforeMutation = getActive.<span class="hljs-property">mock</span>.<span class="hljs-property">calls</span>.<span class="hljs-property">length</span>;
+
+    <span class="hljs-keyword">await</span> session.<span class="hljs-title function_">setReady</span>(<span class="hljs-literal">false</span>);
+
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">code</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;CURRENT&quot;</span>);
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">roomData</span>?.<span class="hljs-property">members</span>[<span class="hljs-number">0</span>]?.<span class="hljs-property">ready</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>);
+    <span class="hljs-title function_">expect</span>(getActive).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(requestsBeforeMutation + <span class="hljs-number">1</span>);
+    session.<span class="hljs-title function_">stop</span>();
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;rejoins the active room channel after socket reconnection&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> currentRoom = <span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;RECONNECT&quot;</span>);
+    <span class="hljs-keyword">const</span> { client, callbacks } = <span class="hljs-title function_">makeClient</span>({ <span class="hljs-attr">getActive</span>: vi.<span class="hljs-title function_">fn</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-title function_">active</span>(currentRoom)) });
+    <span class="hljs-keyword">const</span> session = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, vi.<span class="hljs-title function_">fn</span>());
+    <span class="hljs-keyword">await</span> session.<span class="hljs-title function_">start</span>();
+
+    <span class="hljs-title function_">callbacks</span>()?.<span class="hljs-property">onConnect</span>?.();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+
+    <span class="hljs-title function_">expect</span>(client.<span class="hljs-property">joinRoomChannel</span>).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>);
+    <span class="hljs-title function_">expect</span>(client.<span class="hljs-property">joinRoomChannel</span>).<span class="hljs-title function_">toHaveBeenLastCalledWith</span>(currentRoom.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
+    session.<span class="hljs-title function_">stop</span>();
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;refreshes after joining a room channel to cover updates during room recovery&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> getActive = vi.<span class="hljs-title function_">fn</span>()
+      .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;INITIAL&quot;</span>)))
+      .<span class="hljs-title function_">mockResolvedValueOnce</span>(<span class="hljs-title function_">active</span>(<span class="hljs-title function_">room</span>(<span class="hljs-string">&quot;INITIAL&quot;</span>, <span class="hljs-literal">true</span>)));
+    <span class="hljs-keyword">const</span> { client } = <span class="hljs-title function_">makeClient</span>({ getActive });
+    <span class="hljs-keyword">const</span> session = <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, vi.<span class="hljs-title function_">fn</span>());
+
+    <span class="hljs-keyword">await</span> session.<span class="hljs-title function_">start</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+
+    <span class="hljs-title function_">expect</span>(getActive).<span class="hljs-title function_">toHaveBeenCalledTimes</span>(<span class="hljs-number">2</span>);
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">code</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;INITIAL&quot;</span>);
+    <span class="hljs-title function_">expect</span>(session.<span class="hljs-title function_">getSnapshot</span>().<span class="hljs-property">roomData</span>?.<span class="hljs-property">members</span>[<span class="hljs-number">0</span>]?.<span class="hljs-property">ready</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>);
+    session.<span class="hljs-title function_">stop</span>();
+  });
+});
+</template>
+<template id="source-dfb316c4684c5b43" data-source-path="frontend/src/arena/lobby-session.ts"><span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">LobbyClient</span>, <span class="hljs-title class_">LobbySideId</span>, <span class="hljs-title class_">RoomWithMembers</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./lobby.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./types.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">LobbySessionClient</span> = <span class="hljs-title class_">Pick</span>&lt;
+  <span class="hljs-title class_">LobbyClient</span>,
+  | <span class="hljs-string">&quot;getActive&quot;</span>
+  | <span class="hljs-string">&quot;cancelQueue&quot;</span>
+  | <span class="hljs-string">&quot;createRoom&quot;</span>
+  | <span class="hljs-string">&quot;joinRoom&quot;</span>
+  | <span class="hljs-string">&quot;setSide&quot;</span>
+  | <span class="hljs-string">&quot;setReady&quot;</span>
+  | <span class="hljs-string">&quot;leaveRoom&quot;</span>
+  | <span class="hljs-string">&quot;startRoom&quot;</span>
+  | <span class="hljs-string">&quot;connectSocket&quot;</span>
+  | <span class="hljs-string">&quot;joinRoomChannel&quot;</span>
+  | <span class="hljs-string">&quot;leaveRoomChannel&quot;</span>
+&gt;;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">LobbySessionSnapshot</span> {
+  <span class="hljs-attr">mode</span>: <span class="hljs-title class_">MatchMode</span>;
+  <span class="hljs-attr">roomData</span>: <span class="hljs-title class_">RoomWithMembers</span> | <span class="hljs-literal">null</span>;
+  <span class="hljs-attr">error</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>;
+}
+
+<span class="hljs-comment">/**
+ * Owns Lobby recovery and client-side convergence around the authoritative
+ * active-state endpoint. Socket payloads and mutation responses only trigger
+ * a refresh; they never replace the latest Lobby snapshot directly.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">LobbySession</span> {
+  <span class="hljs-keyword">private</span> <span class="hljs-attr">snapshot</span>: <span class="hljs-title class_">LobbySessionSnapshot</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> listeners = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>&gt;();
+  <span class="hljs-keyword">private</span> requestVersion = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-attr">socketCleanup</span>?: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>;
+  <span class="hljs-keyword">private</span> active = <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-attr">joinedRoomId</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> handedOffMatches = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">string</span>&gt;();
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params">
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">client</span>: <span class="hljs-title class_">LobbySessionClient</span>,
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">onMatchFound</span>: (matchId: <span class="hljs-built_in">string</span>) =&gt; <span class="hljs-built_in">void</span>,
+    <span class="hljs-attr">initialMode</span>: <span class="hljs-title class_">MatchMode</span> = <span class="hljs-string">&quot;1v1&quot;</span>,
+  </span>) {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span> = { <span class="hljs-attr">mode</span>: initialMode, <span class="hljs-attr">roomData</span>: <span class="hljs-literal">null</span>, <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> };
+  }
+
+  getSnapshot = (): <span class="hljs-function"><span class="hljs-params">LobbySessionSnapshot</span> =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>;
+
+  subscribe = (<span class="hljs-attr">listener</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>): <span class="hljs-function">(<span class="hljs-params">() =&gt; <span class="hljs-built_in">void</span></span>) =&gt;</span> {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">listeners</span>.<span class="hljs-title function_">add</span>(listener);
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">listeners</span>.<span class="hljs-title function_">delete</span>(listener);
+  };
+
+  <span class="hljs-title function_">start</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">this</span>.<span class="hljs-property">socketCleanup</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span> = <span class="hljs-literal">true</span>;
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">socketCleanup</span> = <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">connectSocket</span>({
+        <span class="hljs-attr">onConnect</span>: <span class="hljs-function">() =&gt;</span> {
+          <span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span> = <span class="hljs-literal">null</span>;
+          <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>();
+        },
+        <span class="hljs-attr">onRoomUpdated</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>(),
+        <span class="hljs-attr">onMatchFound</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>(),
+        <span class="hljs-attr">onQueueMatched</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>(),
+      });
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>();
+  }
+
+  <span class="hljs-title function_">stop</span>(): <span class="hljs-built_in">void</span> {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span> = <span class="hljs-literal">false</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">requestVersion</span> += <span class="hljs-number">1</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">socketCleanup</span>?.();
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">socketCleanup</span> = <span class="hljs-literal">undefined</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span> = <span class="hljs-literal">null</span>;
+  }
+
+  <span class="hljs-title function_">setMode</span>(<span class="hljs-attr">mode</span>: <span class="hljs-title class_">MatchMode</span>): <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>.<span class="hljs-property">roomData</span>) <span class="hljs-keyword">return</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ mode });
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">refresh</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> requestVersion = ++<span class="hljs-variable language_">this</span>.<span class="hljs-property">requestVersion</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">isCurrent</span> = (<span class="hljs-params"></span>) =&gt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span> &amp;&amp; requestVersion === <span class="hljs-variable language_">this</span>.<span class="hljs-property">requestVersion</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> });
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">let</span> activeState = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">getActive</span>();
+      <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isCurrent</span>()) <span class="hljs-keyword">return</span>;
+
+      <span class="hljs-keyword">if</span> (activeState.<span class="hljs-property">queue</span>?.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;matched&quot;</span> &amp;&amp; activeState.<span class="hljs-property">queue</span>.<span class="hljs-property">matchedMatchId</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">handoff</span>(activeState.<span class="hljs-property">queue</span>.<span class="hljs-property">matchedMatchId</span>);
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">applyRoom</span>(<span class="hljs-literal">null</span>);
+        <span class="hljs-keyword">return</span>;
+      }
+
+      <span class="hljs-comment">// Public matchmaking is retained by the server for a future release.</span>
+      <span class="hljs-comment">// Clear a persisted waiting entry so this release remains invite-only.</span>
+      <span class="hljs-keyword">if</span> (activeState.<span class="hljs-property">queue</span>?.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;waiting&quot;</span>) {
+        <span class="hljs-keyword">const</span> cancelled = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">cancelQueue</span>();
+        <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isCurrent</span>()) <span class="hljs-keyword">return</span>;
+        <span class="hljs-keyword">if</span> (cancelled.<span class="hljs-property">matched</span> &amp;&amp; cancelled.<span class="hljs-property">matchId</span>) {
+          <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">handoff</span>(cancelled.<span class="hljs-property">matchId</span>);
+          <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">applyRoom</span>(<span class="hljs-literal">null</span>);
+          <span class="hljs-keyword">return</span>;
+        }
+        activeState = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">getActive</span>();
+        <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isCurrent</span>()) <span class="hljs-keyword">return</span>;
+      }
+
+      <span class="hljs-keyword">if</span> (activeState.<span class="hljs-property">room</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;matched&quot;</span> &amp;&amp; activeState.<span class="hljs-property">room</span>.<span class="hljs-property">room</span>.<span class="hljs-property">matchId</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">handoff</span>(activeState.<span class="hljs-property">room</span>.<span class="hljs-property">room</span>.<span class="hljs-property">matchId</span>);
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">applyRoom</span>(<span class="hljs-literal">null</span>);
+        <span class="hljs-keyword">return</span>;
+      }
+
+      <span class="hljs-keyword">const</span> roomData = activeState.<span class="hljs-property">room</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;open&quot;</span> ? activeState.<span class="hljs-property">room</span> : <span class="hljs-literal">null</span>;
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">applyRoom</span>(roomData);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-title function_">isCurrent</span>()) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ <span class="hljs-attr">error</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">message</span>(error, <span class="hljs-string">&quot;Failed to recover lobby&quot;</span>) });
+    }
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">createRoom</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">mutate</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">createRoom</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>.<span class="hljs-property">mode</span>));
+  }
+
+  <span class="hljs-title function_">joinRoom</span>(<span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">boolean</span>&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">mutate</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">joinRoom</span>(code));
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">setSide</span>(<span class="hljs-attr">side</span>: <span class="hljs-title class_">LobbySideId</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> roomId = <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>.<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>;
+    <span class="hljs-keyword">if</span> (!roomId) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">mutate</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">setSide</span>(roomId, side));
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">setReady</span>(<span class="hljs-attr">ready</span>: <span class="hljs-built_in">boolean</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> roomId = <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>.<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>;
+    <span class="hljs-keyword">if</span> (!roomId) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">mutate</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">setReady</span>(roomId, ready));
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">leaveRoom</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> roomId = <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>.<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>;
+    <span class="hljs-keyword">if</span> (!roomId) <span class="hljs-keyword">return</span>;
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">mutate</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">leaveRoom</span>(roomId));
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">startRoom</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> roomId = <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>.<span class="hljs-property">roomData</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>;
+    <span class="hljs-keyword">if</span> (!roomId) <span class="hljs-keyword">return</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> });
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">startRoom</span>(roomId);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">handoff</span>(result.<span class="hljs-property">matchId</span>);
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ <span class="hljs-attr">error</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">message</span>(error, <span class="hljs-string">&quot;Failed to start room&quot;</span>) });
+    }
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">mutate</span>(<span class="hljs-attr">action</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">unknown</span>&gt;): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">boolean</span>&gt; {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ <span class="hljs-attr">error</span>: <span class="hljs-literal">null</span> });
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">action</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>();
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({ <span class="hljs-attr">error</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">message</span>(error, <span class="hljs-string">&quot;Failed to update lobby&quot;</span>) });
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    }
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">applyRoom</span>(<span class="hljs-attr">roomData</span>: <span class="hljs-title class_">RoomWithMembers</span> | <span class="hljs-literal">null</span>): <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">const</span> nextRoomId = roomData?.<span class="hljs-property">room</span>.<span class="hljs-property">id</span> ?? <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">let</span> joinedRoom = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span> !== nextRoomId) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">leaveRoomChannel</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span>);
+      <span class="hljs-keyword">if</span> (nextRoomId) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">client</span>.<span class="hljs-title function_">joinRoomChannel</span>(nextRoomId);
+        joinedRoom = <span class="hljs-literal">true</span>;
+      }
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span> = nextRoomId;
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">update</span>({
+      roomData,
+      ...(roomData ? { <span class="hljs-attr">mode</span>: roomData.<span class="hljs-property">room</span>.<span class="hljs-property">mode</span> } : {}),
+    });
+    <span class="hljs-keyword">if</span> (joinedRoom) {
+      <span class="hljs-title function_">queueMicrotask</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">joinedRoomId</span> === nextRoomId) <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">refresh</span>();
+      });
+    }
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">handoff</span>(<span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">handedOffMatches</span>.<span class="hljs-title function_">has</span>(matchId)) <span class="hljs-keyword">return</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">handedOffMatches</span>.<span class="hljs-title function_">add</span>(matchId);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">onMatchFound</span>(matchId);
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">message</span>(<span class="hljs-attr">error</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">fallback</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> {
+    <span class="hljs-keyword">return</span> error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? error.<span class="hljs-property">message</span> : fallback;
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">update</span>(<span class="hljs-attr">changes</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">LobbySessionSnapshot</span>&gt;): <span class="hljs-built_in">void</span> {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span> = { ...<span class="hljs-variable language_">this</span>.<span class="hljs-property">snapshot</span>, ...changes };
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> listener <span class="hljs-keyword">of</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">listeners</span>) <span class="hljs-title function_">listener</span>();
+  }
+}
 </template>
 <template id="source-6d21b9a979adb62e" data-source-path="frontend/src/arena/lobby.ts"><span class="hljs-keyword">import</span> { io, <span class="hljs-keyword">type</span> <span class="hljs-title class_">Socket</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;socket.io-client&quot;</span>;
 <span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./types.js&quot;</span>;
@@ -1582,8 +1958,9 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
   }
 }
 </template>
-<template id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx"><span class="hljs-keyword">import</span> { useEffect, useState, useTransition } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
-<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">LobbyClient</span>, <span class="hljs-title class_">LobbySideId</span>, <span class="hljs-title class_">PrivateRoomMember</span>, <span class="hljs-title class_">QueueEntry</span>, <span class="hljs-title class_">RoomWithMembers</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/lobby.js&quot;</span>;
+<template id="source-a7fe389fd518db60" data-source-path="frontend/src/components/LobbyPage.tsx"><span class="hljs-keyword">import</span> { useEffect, useMemo, useState, useSyncExternalStore } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;react&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">LobbyClient</span>, <span class="hljs-title class_">PrivateRoomMember</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/lobby.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">LobbySession</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/lobby-session.js&quot;</span>;
 <span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../arena/types.js&quot;</span>;
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">LobbyPage</span>(<span class="hljs-params">{
@@ -1597,151 +1974,37 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
   onMatchFound: (matchId: <span class="hljs-built_in">string</span>) =&gt; <span class="hljs-built_in">void</span>;
   initialMode?: MatchMode;
 }</span>) {
-  <span class="hljs-keyword">const</span> [mode, setMode] = useState&lt;<span class="hljs-title class_">MatchMode</span>&gt;(initialMode);
-  <span class="hljs-keyword">const</span> [queueEntry, setQueueEntry] = useState&lt;<span class="hljs-title class_">QueueEntry</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
-  <span class="hljs-keyword">const</span> [roomData, setRoomData] = useState&lt;<span class="hljs-title class_">RoomWithMembers</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
+  <span class="hljs-keyword">const</span> session = <span class="hljs-title function_">useMemo</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">LobbySession</span>(client, onMatchFound, initialMode), [client, initialMode, onMatchFound]);
+  <span class="hljs-keyword">const</span> state = <span class="hljs-title function_">useSyncExternalStore</span>(session.<span class="hljs-property">subscribe</span>, session.<span class="hljs-property">getSnapshot</span>, session.<span class="hljs-property">getSnapshot</span>);
+  <span class="hljs-keyword">const</span> { mode, roomData, error } = state;
   <span class="hljs-keyword">const</span> [inviteInput, setInviteInput] = <span class="hljs-title function_">useState</span>(<span class="hljs-string">&quot;&quot;</span>);
-  <span class="hljs-keyword">const</span> [error, setError] = useState&lt;<span class="hljs-built_in">string</span> | <span class="hljs-literal">null</span>&gt;(<span class="hljs-literal">null</span>);
   <span class="hljs-keyword">const</span> [copied, setCopied] = <span class="hljs-title function_">useState</span>(<span class="hljs-literal">false</span>);
-  <span class="hljs-keyword">const</span> [, startTransition] = <span class="hljs-title function_">useTransition</span>();
 
-  <span class="hljs-comment">// Socket subscription</span>
   <span class="hljs-title function_">useEffect</span>(<span class="hljs-function">() =&gt;</span> {
-    <span class="hljs-keyword">let</span> disposed = <span class="hljs-literal">false</span>;
-    <span class="hljs-keyword">const</span> <span class="hljs-title function_">recover</span> = (<span class="hljs-params"></span>) =&gt; {
-      <span class="hljs-built_in">void</span> client.<span class="hljs-title function_">getActive</span>().<span class="hljs-title function_">then</span>(<span class="hljs-function">(<span class="hljs-params">active</span>) =&gt;</span> {
-        <span class="hljs-keyword">if</span> (disposed) <span class="hljs-keyword">return</span>;
-        <span class="hljs-keyword">if</span> (active.<span class="hljs-property">queue</span>?.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;matched&quot;</span> &amp;&amp; active.<span class="hljs-property">queue</span>.<span class="hljs-property">matchedMatchId</span>) {
-          <span class="hljs-title function_">onMatchFound</span>(active.<span class="hljs-property">queue</span>.<span class="hljs-property">matchedMatchId</span>);
-        } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (active.<span class="hljs-property">room</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;matched&quot;</span> &amp;&amp; active.<span class="hljs-property">room</span>.<span class="hljs-property">room</span>.<span class="hljs-property">matchId</span>) {
-          <span class="hljs-title function_">onMatchFound</span>(active.<span class="hljs-property">room</span>.<span class="hljs-property">room</span>.<span class="hljs-property">matchId</span>);
-        } <span class="hljs-keyword">else</span> {
-          <span class="hljs-title function_">setQueueEntry</span>(active.<span class="hljs-property">queue</span>?.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;waiting&quot;</span> ? active.<span class="hljs-property">queue</span> : <span class="hljs-literal">null</span>);
-          <span class="hljs-title function_">setRoomData</span>(active.<span class="hljs-property">room</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;open&quot;</span> ? active.<span class="hljs-property">room</span> : <span class="hljs-literal">null</span>);
-          <span class="hljs-keyword">if</span> (active.<span class="hljs-property">queue</span>?.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;waiting&quot;</span>) <span class="hljs-title function_">setMode</span>(active.<span class="hljs-property">queue</span>.<span class="hljs-property">mode</span>);
-          <span class="hljs-keyword">if</span> (active.<span class="hljs-property">room</span>?.<span class="hljs-property">room</span>.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;open&quot;</span>) {
-            <span class="hljs-title function_">setMode</span>(active.<span class="hljs-property">room</span>.<span class="hljs-property">room</span>.<span class="hljs-property">mode</span>);
-            client.<span class="hljs-title function_">joinRoomChannel</span>(active.<span class="hljs-property">room</span>.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
-          }
-        }
-      }).<span class="hljs-title function_">catch</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
-        <span class="hljs-keyword">if</span> (!disposed) <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to recover lobby&quot;</span>);
-      });
-    };
-    <span class="hljs-keyword">const</span> unsub = client.<span class="hljs-title function_">connectSocket</span>({
-      <span class="hljs-attr">onConnect</span>: recover,
-      <span class="hljs-attr">onRoomUpdated</span>: <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> {
-        <span class="hljs-title function_">setRoomData</span>(data.<span class="hljs-property">room</span>.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;open&quot;</span> ? { <span class="hljs-attr">room</span>: data.<span class="hljs-property">room</span>, <span class="hljs-attr">members</span>: data.<span class="hljs-property">members</span> } : <span class="hljs-literal">null</span>);
-        <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-      },
-      <span class="hljs-attr">onMatchFound</span>: <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> <span class="hljs-title function_">onMatchFound</span>(data.<span class="hljs-property">matchId</span>),
-      <span class="hljs-attr">onQueueMatched</span>: <span class="hljs-function">(<span class="hljs-params">data</span>) =&gt;</span> <span class="hljs-title function_">onMatchFound</span>(data.<span class="hljs-property">matchId</span>),
-    });
+    <span class="hljs-built_in">void</span> session.<span class="hljs-title function_">start</span>();
+    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> session.<span class="hljs-title function_">stop</span>();
+  }, [session]);
 
-    <span class="hljs-keyword">return</span> <span class="hljs-function">() =&gt;</span> {
-      disposed = <span class="hljs-literal">true</span>;
-      <span class="hljs-title function_">unsub</span>();
-    };
-  }, [client, onMatchFound]);
-
-  <span class="hljs-comment">// Public Queue Actions</span>
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleJoinQueue</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> entry = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">joinQueue</span>(mode);
-      <span class="hljs-keyword">if</span> (entry.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;matched&quot;</span> &amp;&amp; entry.<span class="hljs-property">matchedMatchId</span>) <span class="hljs-title function_">onMatchFound</span>(entry.<span class="hljs-property">matchedMatchId</span>);
-      <span class="hljs-keyword">else</span> <span class="hljs-title function_">setQueueEntry</span>(entry);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to join queue&quot;</span>);
-    }
-  };
-
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleCancelQueue</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">cancelQueue</span>();
-      <span class="hljs-keyword">if</span> (res.<span class="hljs-property">matched</span> &amp;&amp; res.<span class="hljs-property">matchId</span>) {
-        <span class="hljs-title function_">onMatchFound</span>(res.<span class="hljs-property">matchId</span>);
-      } <span class="hljs-keyword">else</span> {
-        <span class="hljs-title function_">setQueueEntry</span>(<span class="hljs-literal">null</span>);
-      }
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to cancel queue&quot;</span>);
-    }
-  };
-
-  <span class="hljs-comment">// Private Room Actions</span>
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleCreateRoom</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">createRoom</span>(mode);
-      <span class="hljs-title function_">setRoomData</span>(res);
-      client.<span class="hljs-title function_">joinRoomChannel</span>(res.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to create room&quot;</span>);
-    }
-  };
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleCreateRoom</span> = (<span class="hljs-params"></span>) =&gt; <span class="hljs-built_in">void</span> session.<span class="hljs-title function_">createRoom</span>();
 
   <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleJoinRoom</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"><span class="hljs-attr">e</span>: <span class="hljs-title class_">React</span>.<span class="hljs-title class_">FormEvent</span></span>) =&gt; {
     e.<span class="hljs-title function_">preventDefault</span>();
     <span class="hljs-keyword">if</span> (!inviteInput.<span class="hljs-title function_">trim</span>()) <span class="hljs-keyword">return</span>;
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">joinRoom</span>(inviteInput.<span class="hljs-title function_">trim</span>());
-      <span class="hljs-title function_">setRoomData</span>(res);
-      client.<span class="hljs-title function_">joinRoomChannel</span>(res.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
-      <span class="hljs-title function_">setInviteInput</span>(<span class="hljs-string">&quot;&quot;</span>);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to join room&quot;</span>);
-    }
+    <span class="hljs-keyword">if</span> (<span class="hljs-keyword">await</span> session.<span class="hljs-title function_">joinRoom</span>(inviteInput.<span class="hljs-title function_">trim</span>())) <span class="hljs-title function_">setInviteInput</span>(<span class="hljs-string">&quot;&quot;</span>);
   };
 
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleSwitchSide</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"><span class="hljs-attr">targetSide</span>: <span class="hljs-title class_">LobbySideId</span></span>) =&gt; {
-    <span class="hljs-keyword">if</span> (!roomData) <span class="hljs-keyword">return</span>;
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">setSide</span>(roomData.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>, targetSide);
-      <span class="hljs-title function_">setRoomData</span>(res);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to change side&quot;</span>);
-    }
-  };
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleSwitchSide</span> = (<span class="hljs-params"><span class="hljs-attr">targetSide</span>: <span class="hljs-string">&quot;left&quot;</span> | <span class="hljs-string">&quot;right&quot;</span></span>) =&gt; <span class="hljs-built_in">void</span> session.<span class="hljs-title function_">setSide</span>(targetSide);
 
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleToggleReady</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleToggleReady</span> = (<span class="hljs-params"></span>) =&gt; {
     <span class="hljs-keyword">if</span> (!roomData) <span class="hljs-keyword">return</span>;
     <span class="hljs-keyword">const</span> myMember = roomData.<span class="hljs-property">members</span>.<span class="hljs-title function_">find</span>(<span class="hljs-function">(<span class="hljs-params">m</span>) =&gt;</span> m.<span class="hljs-property">userId</span> === userId);
     <span class="hljs-keyword">if</span> (!myMember) <span class="hljs-keyword">return</span>;
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">setReady</span>(roomData.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>, !myMember.<span class="hljs-property">ready</span>);
-      <span class="hljs-title function_">setRoomData</span>(res);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to toggle ready&quot;</span>);
-    }
+    <span class="hljs-built_in">void</span> session.<span class="hljs-title function_">setReady</span>(!myMember.<span class="hljs-property">ready</span>);
   };
 
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleLeaveRoom</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
-    <span class="hljs-keyword">if</span> (!roomData) <span class="hljs-keyword">return</span>;
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      client.<span class="hljs-title function_">leaveRoomChannel</span>(roomData.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
-      <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">leaveRoom</span>(roomData.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
-      <span class="hljs-title function_">setRoomData</span>(<span class="hljs-literal">null</span>);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to leave room&quot;</span>);
-    }
-  };
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleLeaveRoom</span> = (<span class="hljs-params"></span>) =&gt; <span class="hljs-built_in">void</span> session.<span class="hljs-title function_">leaveRoom</span>();
 
-  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleStartRoom</span> = <span class="hljs-keyword">async</span> (<span class="hljs-params"></span>) =&gt; {
-    <span class="hljs-keyword">if</span> (!roomData) <span class="hljs-keyword">return</span>;
-    <span class="hljs-title function_">setError</span>(<span class="hljs-literal">null</span>);
-    <span class="hljs-keyword">try</span> {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> client.<span class="hljs-title function_">startRoom</span>(roomData.<span class="hljs-property">room</span>.<span class="hljs-property">id</span>);
-      <span class="hljs-title function_">onMatchFound</span>(res.<span class="hljs-property">matchId</span>);
-    } <span class="hljs-keyword">catch</span> (<span class="hljs-attr">err</span>: <span class="hljs-built_in">unknown</span>) {
-      <span class="hljs-title function_">setError</span>(err <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? err.<span class="hljs-property">message</span> : <span class="hljs-string">&quot;Failed to start room&quot;</span>);
-    }
-  };
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">handleStartRoom</span> = (<span class="hljs-params"></span>) =&gt; <span class="hljs-built_in">void</span> session.<span class="hljs-title function_">startRoom</span>();
 
   <span class="hljs-keyword">const</span> <span class="hljs-title function_">copyCode</span> = (<span class="hljs-params"></span>) =&gt; {
     <span class="hljs-keyword">if</span> (!roomData) <span class="hljs-keyword">return</span>;
@@ -1769,19 +2032,19 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
       {/* Header */}
       <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mb-6 flex items-center justify-between border-b border-neutral-200 pb-4&quot;</span>&gt;</span>
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
-          <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-xl font-bold tracking-tight text-neutral-900&quot;</span>&gt;</span>Code Arena Matchmaking<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-xl font-bold tracking-tight text-neutral-900&quot;</span>&gt;</span>Code Arena Lobby<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
           <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;font-mono text-xs text-neutral-500&quot;</span>&gt;</span>
             Player: <span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-neutral-800&quot;</span>&gt;</span>{userId}<span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
           <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 
-        {/* Mode Selector (disabled during queue or in room) */}
+        {/* Mode Selector (disabled while in a room) */}
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex gap-1 rounded border border-neutral-200 bg-neutral-50 p-1&quot;</span> <span class="hljs-attr">role</span>=<span class="hljs-string">&quot;group&quot;</span> <span class="hljs-attr">aria-label</span>=<span class="hljs-string">&quot;Game Mode&quot;</span>&gt;</span>
           {([&quot;1v1&quot;, &quot;2v2&quot;] as const).map((m) =&gt; (
             <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
               <span class="hljs-attr">key</span>=<span class="hljs-string">{m}</span>
               <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
-              <span class="hljs-attr">disabled</span>=<span class="hljs-string">{queueEntry</span> !== <span class="hljs-string">null</span> || <span class="hljs-attr">roomData</span> !== <span class="hljs-string">null}</span>
+              <span class="hljs-attr">disabled</span>=<span class="hljs-string">{roomData</span> !== <span class="hljs-string">null}</span>
               <span class="hljs-attr">aria-pressed</span>=<span class="hljs-string">{mode</span> === <span class="hljs-string">m}</span>
               <span class="hljs-attr">className</span>=<span class="hljs-string">{</span>`<span class="hljs-attr">rounded</span> <span class="hljs-attr">px-3</span> <span class="hljs-attr">py-1</span> <span class="hljs-attr">font-mono</span> <span class="hljs-attr">text-xs</span> <span class="hljs-attr">font-medium</span> <span class="hljs-attr">transition-colors</span> ${
                 <span class="hljs-attr">mode</span> === <span class="hljs-string">m</span>
@@ -1789,7 +2052,7 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
                   <span class="hljs-attr">:</span> &quot;<span class="hljs-attr">text-neutral-600</span> <span class="hljs-attr">hover:bg-neutral-200</span> <span class="hljs-attr">hover:text-neutral-900</span> <span class="hljs-attr">disabled:opacity-50</span>&quot;
               }`}
               <span class="hljs-attr">onClick</span>=<span class="hljs-string">{()</span> =&gt;</span> {
-                startTransition(() =&gt; setMode(m));
+                session.setMode(m);
               }}
             &gt;
               {m}
@@ -1805,25 +2068,7 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
       )}
 
-      {/* VIEW 1: QUEUE SEARCHING */}
-      {queueEntry &amp;&amp; (
-        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-lg border border-neutral-200 bg-white p-6 shadow-sm&quot;</span>&gt;</span>
-          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex flex-col items-center justify-center py-8 text-center&quot;</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-700 border-r-transparent align-[-0.125em]&quot;</span> /&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-lg font-semibold text-neutral-900&quot;</span>&gt;</span>Finding {queueEntry.mode} Opponent…<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-1 font-mono text-xs text-neutral-500&quot;</span>&gt;</span>Searching public queue (FIFO matchmaking)<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
-              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
-              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleCancelQueue}</span>
-              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-6 rounded border border-neutral-300 bg-white px-4 py-1.5 font-mono text-xs font-medium text-neutral-700 hover:bg-neutral-50&quot;</span>
-            &gt;</span>
-              Cancel Search
-            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
-          <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-        <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-      )}
-
-      {/* VIEW 2: PRIVATE LOBBY ROOM */}
+      {/* PRIVATE LOBBY ROOM */}
       {roomData &amp;&amp; (
         <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded-lg border border-neutral-200 bg-white p-6 shadow-sm&quot;</span>&gt;</span>
           {/* Room Top Bar */}
@@ -2023,69 +2268,45 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
       )}
 
-      {/* VIEW 3: INITIAL ENTRY (NOT IN QUEUE OR ROOM) */}
-      {!queueEntry &amp;&amp; !roomData &amp;&amp; (
-        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;grid grid-cols-1 gap-6 sm:grid-cols-2&quot;</span>&gt;</span>
-          {/* Quick Play Queue */}
-          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex flex-col justify-between rounded-lg border border-neutral-200 bg-white p-6 shadow-sm&quot;</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
-              <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mb-2 inline-block rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs font-medium text-teal-700&quot;</span>&gt;</span>
-                Automated Matchmaking
-              <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-              <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-base font-semibold text-neutral-900&quot;</span>&gt;</span>Quick Play Queue<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
-              <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-1 text-xs text-neutral-500&quot;</span>&gt;</span>
-                Join the public queue for a {mode} match. The matchmaker forms an authoritative duel as soon as enough
-                players join.
-              <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
+      {/* INVITATION-ONLY ENTRY */}
+      {!roomData &amp;&amp; (
+        <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mx-auto w-full max-w-xl rounded-lg border border-neutral-200 bg-white p-6 shadow-sm&quot;</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mb-2 inline-block rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs font-medium text-neutral-700&quot;</span>&gt;</span>
+              Invitation Code
             <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
-              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
-              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleJoinQueue}</span>
-              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-6 w-full rounded bg-teal-700 px-4 py-2 font-mono text-xs font-bold text-white hover:bg-teal-600&quot;</span>
-            &gt;</span>
-              Find {mode} Match
-            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-base font-semibold text-neutral-900&quot;</span>&gt;</span>Private Custom Room<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-1 text-xs text-neutral-500&quot;</span>&gt;</span>
+              Create a private room to play with friends, pick teams, and start when everyone is ready.
+            <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
           <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
 
-          {/* Private Room */}
-          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex flex-col justify-between rounded-lg border border-neutral-200 bg-white p-6 shadow-sm&quot;</span>&gt;</span>
-            <span class="hljs-tag">&lt;<span class="hljs-name">div</span>&gt;</span>
-              <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mb-2 inline-block rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs font-medium text-neutral-700&quot;</span>&gt;</span>
-                Invitation Code
-              <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
-              <span class="hljs-tag">&lt;<span class="hljs-name">h2</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;text-base font-semibold text-neutral-900&quot;</span>&gt;</span>Private Custom Room<span class="hljs-tag">&lt;/<span class="hljs-name">h2</span>&gt;</span>
-              <span class="hljs-tag">&lt;<span class="hljs-name">p</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-1 text-xs text-neutral-500&quot;</span>&gt;</span>
-                Create a private room to play with friends, pick teams, and start when everyone is ready.
-              <span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span>
-            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+          <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-6 space-y-3&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
+              <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
+              <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleCreateRoom}</span>
+              <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;w-full rounded border border-neutral-300 bg-white px-4 py-2 font-mono text-xs font-medium text-neutral-800 hover:bg-neutral-50&quot;</span>
+            &gt;</span>
+              Create {mode} Room
+            <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
 
-            <span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;mt-6 space-y-3&quot;</span>&gt;</span>
+            <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleJoinRoom}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex gap-2&quot;</span>&gt;</span>
+              <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
+                <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span>
+                <span class="hljs-attr">maxLength</span>=<span class="hljs-string">{6}</span>
+                <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;INVITE CODE&quot;</span>
+                <span class="hljs-attr">value</span>=<span class="hljs-string">{inviteInput}</span>
+                <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(e)</span> =&gt;</span> setInviteInput(e.target.value.toUpperCase())}
+                className=&quot;w-full rounded border border-neutral-300 px-3 py-1.5 font-mono text-xs uppercase placeholder:text-neutral-400 focus:border-teal-700 focus:outline-none&quot;
+              /&gt;
               <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
-                <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;button&quot;</span>
-                <span class="hljs-attr">onClick</span>=<span class="hljs-string">{handleCreateRoom}</span>
-                <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;w-full rounded border border-neutral-300 bg-white px-4 py-2 font-mono text-xs font-medium text-neutral-800 hover:bg-neutral-50&quot;</span>
+                <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span>
+                <span class="hljs-attr">disabled</span>=<span class="hljs-string">{!inviteInput.trim()}</span>
+                <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded bg-neutral-800 px-3 py-1.5 font-mono text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-50&quot;</span>
               &gt;</span>
-                Create {mode} Room
+                Join
               <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
-
-              <span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">onSubmit</span>=<span class="hljs-string">{handleJoinRoom}</span> <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;flex gap-2&quot;</span>&gt;</span>
-                <span class="hljs-tag">&lt;<span class="hljs-name">input</span>
-                  <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;text&quot;</span>
-                  <span class="hljs-attr">maxLength</span>=<span class="hljs-string">{6}</span>
-                  <span class="hljs-attr">placeholder</span>=<span class="hljs-string">&quot;INVITE CODE&quot;</span>
-                  <span class="hljs-attr">value</span>=<span class="hljs-string">{inviteInput}</span>
-                  <span class="hljs-attr">onChange</span>=<span class="hljs-string">{(e)</span> =&gt;</span> setInviteInput(e.target.value.toUpperCase())}
-                  className=&quot;w-full rounded border border-neutral-300 px-3 py-1.5 font-mono text-xs uppercase placeholder:text-neutral-400 focus:border-teal-700 focus:outline-none&quot;
-                /&gt;
-                <span class="hljs-tag">&lt;<span class="hljs-name">button</span>
-                  <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;submit&quot;</span>
-                  <span class="hljs-attr">disabled</span>=<span class="hljs-string">{!inviteInput.trim()}</span>
-                  <span class="hljs-attr">className</span>=<span class="hljs-string">&quot;rounded bg-neutral-800 px-3 py-1.5 font-mono text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-50&quot;</span>
-                &gt;</span>
-                  Join
-                <span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
-              <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
-            <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+            <span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span>
           <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
         <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
       )}
@@ -3568,8 +3789,6 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-title
 <span class="hljs-keyword">import</span> { <span class="hljs-title class_">Injectable</span>, <span class="hljs-title class_">OnModuleDestroy</span>, <span class="hljs-title class_">OnModuleInit</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@nestjs/common&quot;</span>;
 <span class="hljs-keyword">import</span> {
   <span class="hljs-title class_">ArenaEngine</span>,
-  <span class="hljs-title class_">ContainerJudge</span>,
-  <span class="hljs-title class_">Judge0Adapter</span>,
   <span class="hljs-title class_">InMemoryEvaluationTelemetry</span>,
   <span class="hljs-title class_">FileBank</span>,
   <span class="hljs-title class_">InMemoryCollabPersist</span>,
@@ -3593,6 +3812,7 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-title
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-game-engine&quot;</span>;
 <span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-model&quot;</span>;
 <span class="hljs-keyword">import</span> { <span class="hljs-title class_">MatchSocketPresence</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./match-socket-presence.js&quot;</span>;
+<span class="hljs-keyword">import</span> { createGameJudge } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./judge-factory.js&quot;</span>;
 
 <span class="hljs-comment">/**
  * Thin application layer over ArenaEngine: owns NOTHING domain (no scoring,
@@ -3611,6 +3831,7 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-title
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> evaluationTelemetry = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InMemoryEvaluationTelemetry</span>();
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">matchSocketPresence</span>: <span class="hljs-title class_">MatchSocketPresence</span>;
   <span class="hljs-keyword">private</span> <span class="hljs-attr">graceTimer</span>?: <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">Timeout</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-attr">deadlineTimer</span>?: <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">Timeout</span>;
 
   <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">matchSocketPresence</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MatchSocketPresence</span>({
@@ -3681,7 +3902,7 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-title
       <span class="hljs-variable language_">this</span>.<span class="hljs-property">lobbyStore</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InMemoryLobbyStore</span>(<span class="hljs-literal">undefined</span>, <span class="hljs-literal">undefined</span>, matches);
     }
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArenaEngine</span>({
-      <span class="hljs-attr">judge</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">createJudge</span>(),
+      <span class="hljs-attr">judge</span>: <span class="hljs-title function_">createGameJudge</span>(process.<span class="hljs-property">env</span>),
       <span class="hljs-attr">bank</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileBank</span>(),
       persistence,
       <span class="hljs-attr">telemetry</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">evaluationTelemetry</span>,
@@ -3698,7 +3919,13 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-title
     <span class="hljs-comment">// pending-evaluation re-drive under original ids.</span>
     <span class="hljs-keyword">const</span> recovered = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span>.<span class="hljs-title function_">recover</span>();
     <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`[game] boot recovery: <span class="hljs-subst">${recovered.matches}</span> matches, <span class="hljs-subst">${recovered.retried}</span> retried, <span class="hljs-subst">${recovered.failed}</span> failed`</span>);
-    <span class="hljs-comment">// Explicit server-owned grace sweep (§11): never from socket callbacks.</span>
+    <span class="hljs-comment">// Match deadline closure has a short sweep interval so an expired Match</span>
+    <span class="hljs-comment">// reaches its saved terminal result without waiting for a player action.</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span> = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span>.<span class="hljs-title function_">sweepExpiredMatches</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> {});
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span>.<span class="hljs-title function_">unref</span>();
+    <span class="hljs-comment">// Reconnect grace and retained queue matchmaking use their slower cadence.</span>
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span> = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
       <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span>.<span class="hljs-title function_">sweepGrace</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> {});
       <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> mode <span class="hljs-keyword">of</span> [<span class="hljs-string">&quot;1v1&quot;</span>, <span class="hljs-string">&quot;2v2&quot;</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
@@ -3708,29 +3935,9 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-title
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span>.<span class="hljs-title function_">unref</span>();
   }
 
-  <span class="hljs-keyword">private</span> <span class="hljs-title function_">createJudge</span>(): <span class="hljs-title class_">ContainerJudge</span> | <span class="hljs-title class_">Judge0Adapter</span> {
-    <span class="hljs-keyword">const</span> backend = (process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE_BACKEND</span> ?? <span class="hljs-string">&quot;container&quot;</span>).<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">toLowerCase</span>();
-    <span class="hljs-keyword">if</span> (backend === <span class="hljs-string">&quot;container&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>();
-    <span class="hljs-keyword">if</span> (backend !== <span class="hljs-string">&quot;judge0&quot;</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`unsupported JUDGE_BACKEND <span class="hljs-subst">${backend}</span>`</span>);
-
-    <span class="hljs-keyword">const</span> baseUrl = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_URL</span>?.<span class="hljs-title function_">trim</span>();
-    <span class="hljs-keyword">if</span> (!baseUrl) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE0_URL is required when JUDGE_BACKEND=judge0&quot;</span>);
-    <span class="hljs-keyword">const</span> authToken = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_AUTH_TOKEN</span>?.<span class="hljs-title function_">trim</span>();
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Judge0Adapter</span>({
-      baseUrl,
-      <span class="hljs-attr">headers</span>: authToken ? { <span class="hljs-string">&quot;X-Auth-Token&quot;</span>: authToken } : {},
-      <span class="hljs-attr">languageIds</span>: {
-        <span class="hljs-attr">C</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_C_LANGUAGE_ID</span> ?? <span class="hljs-number">50</span>),
-        <span class="hljs-string">&quot;C++&quot;</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_CPP_LANGUAGE_ID</span> ?? <span class="hljs-number">54</span>),
-        <span class="hljs-title class_">Python</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_PYTHON_LANGUAGE_ID</span> ?? <span class="hljs-number">71</span>),
-      },
-      <span class="hljs-attr">pollIntervalMs</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_POLL_INTERVAL_MS</span> ?? <span class="hljs-number">250</span>),
-      <span class="hljs-attr">maxPolls</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_MAX_POLLS</span> ?? <span class="hljs-number">120</span>),
-    });
-  }
-
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">onModuleDestroy</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
     <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span>) <span class="hljs-built_in">clearInterval</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span>);
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span>) <span class="hljs-built_in">clearInterval</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span>);
     <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">stores</span>?.<span class="hljs-title function_">close</span>();
   }
 

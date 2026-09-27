@@ -976,7 +976,7 @@
       <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 14</p>
       <h1>A green test is evidence for this repo—not proof of your rewrite</h1>
       <p class="hero-copy">In about 12 minutes: Classify the reference project&#39;s tests by the boundary they exercise and turn them into honest, test-first parity gates for a separate rebuild.</p>
-      <p class="mt-1"><span class="status status-current">Source references match 36 pinned files</span> <span class="quiet">Snapshot <code>94e3592a698707cc</code></span></p>
+      <p class="mt-1"><span class="status status-current">Source references match 40 pinned files</span> <span class="quiet">Snapshot <code>4edc506dd9158d21</code></span></p>
       <div class="stage-bar" aria-label="Lesson stages">
         <span class="stage-pill" aria-current="step">1 · Predict</span>
         <span aria-hidden="true" class="flow-arrow">→</span>
@@ -1023,6 +1023,11 @@
             <tr><th scope="row">Browser E2E</th><td>A tested client journey across UI, transport, and services</td><td>Untested states, all environments, or every security property</td></tr>
             <tr><th scope="row">PostgreSQL</th><td>Database transaction, restart, claim, and cross-process scenarios</td><td>Anything in a test that was skipped or used only an in-memory store</td></tr>
             <tr><th scope="row">Docker Judge</th><td>Actual process/resource/network/filesystem controls exercised by the test</td><td>All attacks, or hidden-case secrecy unless a test reaches and proves that boundary</td></tr>
+            <tr><th scope="row">WorkerJudgeAdapter unit tests</th><td>Bearer auth, response shape/case identity, timeout/error mapping, and explicit provider selection with controlled transports</td><td>A listening worker, a live Compose stack, or container isolation</td></tr>
+            <tr><th scope="row">Judge Worker service tests</th><td>HTTP authentication and dispatch, bounded queue behavior, and Docker/image readiness seams</td><td>HTTP cases whose test server cannot bind, or a real Docker execution</td></tr>
+            <tr><th scope="row">Compose topology test</th><td>Static checks for the internal network, socket ownership, provider wiring, and secret placement</td><td>Starting Compose or observing its runtime health</td></tr>
+            <tr><th scope="row">ContainerJudge fake-runner trust tests</th><td>Response parsing, output limits, and per-case Docker arguments through a fake Docker executable</td><td>A real container or proof of hostile-code isolation</td></tr>
+            <tr><th scope="row">Container security tests</th><td>Actual resource, filesystem, and network attacks when the Docker-backed suite runs</td><td>Hidden-case confidentiality unless that boundary is tested directly</td></tr>
           </tbody>
         </table>
       </div>
@@ -1054,6 +1059,21 @@
         <a href="../source-map.html?file=frontend%2Fe2e%2Fcollab-reconnect.spec.ts&amp;line=270" data-source-id="source-0b9022c85a46016f" data-source-path="frontend/e2e/collab-reconnect.spec.ts" data-source-line="270" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/e2e/collab-reconnect.spec.ts:270">Browser source: process/Postgres restart Scenario E; can kill the service on TCP 3220 · collab-reconnect.spec.ts:270</a>
         <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fpostgres.test.ts&amp;line=384" data-source-id="source-a6d74dc18babe477" data-source-path="packages/arena-game/test/postgres.test.ts" data-source-line="384" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/postgres.test.ts:384">Postgres restart and replay scenarios · postgres.test.ts:384</a>
         <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fjudge-security.test.ts&amp;line=15" data-source-id="source-4614bc7b5cf459d3" data-source-path="packages/arena-game/test/judge-security.test.ts" data-source-line="15" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/judge-security.test.ts:15">Real Docker sandbox test matrix · judge-security.test.ts:15</a>
+        <a href="0007-judge-boundary.html#trace">Open Lesson 7 for the provider, WorkerJudgeAdapter, and fake-runner test code</a>
+        <a href="../source-map.html?file=services%2Fjudge-worker%2Ftest%2Fhttp-server.test.ts&amp;line=90" data-source-id="source-b07bcf0770b84b07" data-source-path="services/judge-worker/test/http-server.test.ts" data-source-line="90" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/test/http-server.test.ts:90">Judge Worker service tests · http-server.test.ts:90</a>
+        <a href="../source-map.html?file=services%2Fjudge-worker%2Ftest%2Fjob-queue.test.ts&amp;line=28" data-source-id="source-34bb8e053e318d27" data-source-path="services/judge-worker/test/job-queue.test.ts" data-source-line="28" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/test/job-queue.test.ts:28">Bounded queue service tests · job-queue.test.ts:28</a>
+        <a href="../source-map.html?file=services%2Fjudge-worker%2Ftest%2Freadiness.test.ts&amp;line=5" data-source-id="source-e565f8b940b4493e" data-source-path="services/judge-worker/test/readiness.test.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/test/readiness.test.ts:5">Docker/image readiness service test · readiness.test.ts:5</a>
+        <a href="../source-map.html?file=services%2Fjudge-worker%2Ftest%2Fcompose-topology.test.ts&amp;line=27" data-source-id="source-541b5efedb514091" data-source-path="services/judge-worker/test/compose-topology.test.ts" data-source-line="27" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/test/compose-topology.test.ts:27">Compose topology test · compose-topology.test.ts:27</a>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="judge-run-title">
+      <h2 id="judge-run-title">Current focused Judge-worker test run</h2>
+      <div class="card">
+        <p>Command run for this lesson update:</p>
+        <p class="mt-1"><code>npx vitest run packages/arena-game/test/worker-judge.test.ts packages/arena-game/test/container-judge-trust.test.ts services/game/src/game/judge-factory.test.ts services/judge-worker/test/*.test.ts</code></p>
+        <p class="mt-1">Twenty tests passed across the WorkerJudgeAdapter (4), fake-runner ContainerJudge trust (5), Game provider factory (3), bounded queue (4), readiness (1), and static Compose topology (3) suites.</p>
+        <p class="mt-1">The six Judge Worker HTTP API cases could not complete: the test fixture's loopback listener failed with <code>listen EPERM 127.0.0.1</code>, and Vitest then reported those cases as timed out. They are environment-blocked, not passing evidence. The static Compose test did not start Compose; the fake-runner tests did not execute real Docker jobs. No Docker-backed sandbox matrix ran.</p>
       </div>
     </section>
 
@@ -1139,7 +1159,7 @@
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>94e3592a698707cc</code>. This lesson synthesizes source and dated evidence; it ran no Game-service, PostgreSQL, Docker Judge, or Playwright suite. Nothing here establishes parity in a separate rewrite or changes 42-subject sign-off.</p>
+      <p>Source snapshot <code>4edc506dd9158d21</code>. This lesson includes a focused provider/worker test run with the HTTP listener limitation recorded above; it ran no PostgreSQL, real Docker Judge, or Playwright suite. Nothing here establishes parity in a separate rewrite or changes 42-subject sign-off.</p>
     </footer>
   </main>
 <div id="source-templates" hidden>
@@ -1770,6 +1790,7 @@ test.<span class="hljs-property">describe</span>.<span class="hljs-title functio
 
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">GAME</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">WEB</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_WEB_URL</span> ?? <span class="hljs-string">&quot;http://localhost:4173&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">CHROMIUM_ARGS</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_IGNORE_TLS</span> === <span class="hljs-string">&quot;true&quot;</span> ? [<span class="hljs-string">&quot;--ignore-certificate-errors&quot;</span>] : [];
 
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SOLVED</span> = <span class="hljs-string">`def ledger_sum(nums):
     total = 0
@@ -1827,7 +1848,7 @@ test.<span class="hljs-property">describe</span>.<span class="hljs-title functio
 
 <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> width <span class="hljs-keyword">of</span> [<span class="hljs-number">1440</span>, <span class="hljs-number">1024</span>, <span class="hljs-number">768</span>, <span class="hljs-number">320</span>]) {
   <span class="hljs-title function_">test</span>(<span class="hljs-string">`live 1v1 duel at <span class="hljs-subst">${width}</span>px (two clients, sealed, reveal, 3 rounds)`</span>, <span class="hljs-title function_">async</span> () =&gt; {
-    <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
+    <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>({ <span class="hljs-attr">args</span>: <span class="hljs-variable constant_">CHROMIUM_ARGS</span> });
     <span class="hljs-keyword">const</span> <span class="hljs-attr">errors</span>: <span class="hljs-built_in">string</span>[] = [];
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">await</span> <span class="hljs-title function_">createMatch</span>();
@@ -2269,7 +2290,7 @@ test.<span class="hljs-property">describe</span>.<span class="hljs-title functio
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">WEB</span> = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_WEB_URL</span> ?? <span class="hljs-string">&quot;http://localhost:4173&quot;</span>;
 
 test.<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;Live Entry &amp; Lobby E2E&quot;</span>, <span class="hljs-function">() =&gt;</span> {
-  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renders entry lobby with mode selection, quick play, and private room options&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;renders invitation-only entry with mode selection and private room options&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
     <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
     <span class="hljs-keyword">const</span> context = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>();
     <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> context.<span class="hljs-title function_">newPage</span>();
@@ -2277,7 +2298,7 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
     <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=test-entry-user`</span>);
 
     <span class="hljs-comment">// Verify main lobby heading and elements</span>
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena Matchmaking&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena Lobby&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Player: test-entry-user&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
 
     <span class="hljs-comment">// Mode selector</span>
@@ -2290,12 +2311,14 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
     <span class="hljs-comment">// Switching mode</span>
     <span class="hljs-keyword">await</span> btn2v2.<span class="hljs-title function_">click</span>();
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(btn2v2).<span class="hljs-title function_">toHaveAttribute</span>(<span class="hljs-string">&quot;aria-pressed&quot;</span>, <span class="hljs-string">&quot;true&quot;</span>);
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 2v2 Match&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Quick Play Queue&quot;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/Find .* Match/</span> })).<span class="hljs-title function_">toHaveCount</span>(<span class="hljs-number">0</span>);
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 2v2 Room&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
 
     <span class="hljs-comment">// Switch back to 1v1</span>
     <span class="hljs-keyword">await</span> btn1v1.<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Quick Play Queue&quot;</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-regexp">/Find .* Match/</span> })).<span class="hljs-title function_">toHaveCount</span>(<span class="hljs-number">0</span>);
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 1v1 Room&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
 
     <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
@@ -2370,60 +2393,32 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
     <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
   });
 
-  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;public queue: two players join queue and are matched into a game&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
-    <span class="hljs-keyword">const</span> browser = <span class="hljs-keyword">await</span> chromium.<span class="hljs-title function_">launch</span>();
-    <span class="hljs-keyword">const</span> p1Context = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>();
-    <span class="hljs-keyword">const</span> p2Context = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newContext</span>();
+  <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;public queue remains available through its server API for a future release&quot;</span>, <span class="hljs-title function_">async</span> ({ request }) =&gt; {
+    <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+    <span class="hljs-keyword">const</span> firstUser = <span class="hljs-string">`queue-first-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
+    <span class="hljs-keyword">const</span> secondUser = <span class="hljs-string">`queue-second-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
+    <span class="hljs-keyword">const</span> first = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
+      <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: firstUser },
+      <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
+    });
+    <span class="hljs-title function_">expect</span>(first.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> first.<span class="hljs-title function_">json</span>()).<span class="hljs-property">entry</span>.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;waiting&quot;</span>);
 
-    <span class="hljs-keyword">const</span> p1Page = <span class="hljs-keyword">await</span> p1Context.<span class="hljs-title function_">newPage</span>();
-    <span class="hljs-keyword">const</span> p2Page = <span class="hljs-keyword">await</span> p2Context.<span class="hljs-title function_">newPage</span>();
-
-    <span class="hljs-keyword">const</span> p1Id = <span class="hljs-string">`qp1-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
-    <span class="hljs-keyword">const</span> p2Id = <span class="hljs-string">`qp2-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
-
-    <span class="hljs-comment">// Player 1 joins queue</span>
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${p1Id}</span>`</span>);
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Finding 1v1 Opponent…&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Search&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-
-    <span class="hljs-comment">// Player 2 joins queue</span>
-    <span class="hljs-keyword">await</span> p2Page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${p2Id}</span>`</span>);
-    <span class="hljs-keyword">await</span> p2Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-
-    <span class="hljs-comment">// Both players match and enter Arena!</span>
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">10000</span> });
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p2Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>({ <span class="hljs-attr">timeout</span>: <span class="hljs-number">10000</span> });
-
-    <span class="hljs-comment">// Verify both are in the same match</span>
-    <span class="hljs-keyword">const</span> p1Match = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(p1Page.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
-    <span class="hljs-keyword">const</span> p2Match = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(p2Page.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
-    <span class="hljs-title function_">expect</span>(p1Match).<span class="hljs-title function_">toBeTruthy</span>();
-    <span class="hljs-title function_">expect</span>(p2Match).<span class="hljs-title function_">toBeTruthy</span>();
-    <span class="hljs-title function_">expect</span>(p1Match).<span class="hljs-title function_">toBe</span>(p2Match);
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Run&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Not run&quot;</span>).<span class="hljs-title function_">first</span>()).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([
-      p1Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
-      p2Page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>(),
-    ]);
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p1Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p2Page.<span class="hljs-title function_">getByText</span>(<span class="hljs-string">&quot;Scores revealed&quot;</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ <span class="hljs-attr">entry</span>: <span class="hljs-string">&quot;1v1 queue&quot;</span>, <span class="hljs-attr">users</span>: [p1Id, p2Id], <span class="hljs-attr">matchId</span>: p1Match }));
-
-    <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">close</span>();
+    <span class="hljs-keyword">const</span> second = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
+      <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: secondUser },
+      <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
+    });
+    <span class="hljs-title function_">expect</span>(second.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> second.<span class="hljs-title function_">json</span>()).<span class="hljs-property">entry</span>.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;matched&quot;</span>);
   });
 });
 
 <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;queued player matched while offline recovers the same Arena on reload&quot;</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
   <span class="hljs-keyword">const</span> user = <span class="hljs-string">`offline-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span>;
-  <span class="hljs-keyword">const</span> page = <span class="hljs-keyword">await</span> browser.<span class="hljs-title function_">newPage</span>();
-  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${user}</span>`</span>);
-  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 1v1 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Search&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-  <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">close</span>();
   <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+  <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: user }, <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
+  });
   <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/queue`</span>, {
     <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: <span class="hljs-string">`<span class="hljs-subst">${user}</span>-opponent`</span> }, <span class="hljs-attr">data</span>: { <span class="hljs-attr">mode</span>: <span class="hljs-string">&quot;1v1&quot;</span> },
   });
@@ -2434,67 +2429,62 @@ test.<span class="hljs-title function_">describe</span>(<span class="hljs-string
   <span class="hljs-keyword">await</span> recovered.<span class="hljs-title function_">close</span>();
 });
 
-<span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> entry <span class="hljs-keyword">of</span> [<span class="hljs-string">&quot;queue&quot;</span>, <span class="hljs-string">&quot;private&quot;</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
-  <span class="hljs-title function_">test</span>(<span class="hljs-string">`2v2 <span class="hljs-subst">${entry}</span>: four players enter one Arena with isolated collaboration and chat`</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
-    <span class="hljs-keyword">const</span> users = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> <span class="hljs-string">`<span class="hljs-subst">${entry}</span>-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>-<span class="hljs-subst">${i}</span>`</span>);
-    <span class="hljs-keyword">const</span> pages = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(users.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> browser.<span class="hljs-title function_">newPage</span>()));
-    <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
-    <span class="hljs-keyword">let</span> code = <span class="hljs-string">&quot;&quot;</span>;
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
-      <span class="hljs-keyword">const</span> p = pages[i]!;
-      <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${users[i]}</span>`</span>);
-      <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;2v2&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-      <span class="hljs-keyword">if</span> (entry === <span class="hljs-string">&quot;queue&quot;</span>) {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Find 2v2 Match&quot;</span> }).<span class="hljs-title function_">click</span>();
-        <span class="hljs-keyword">if</span> (i &lt; <span class="hljs-number">3</span>) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Search&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-      } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (i === <span class="hljs-number">0</span>) {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 2v2 Room&quot;</span> }).<span class="hljs-title function_">click</span>();
-        code = (<span class="hljs-keyword">await</span> p.<span class="hljs-title function_">locator</span>(<span class="hljs-string">&quot;span.font-mono.text-base.font-bold&quot;</span>).<span class="hljs-title function_">textContent</span>())!.<span class="hljs-title function_">trim</span>();
-      } <span class="hljs-keyword">else</span> {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&quot;INVITE CODE&quot;</span>).<span class="hljs-title function_">fill</span>(code);
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Join&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-      }
+<span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;2v2 private: four players enter one Arena with isolated collaboration and chat&quot;</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
+  <span class="hljs-keyword">const</span> users = [<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>].<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> <span class="hljs-string">`private-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>-<span class="hljs-subst">${i}</span>`</span>);
+  <span class="hljs-keyword">const</span> pages = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(users.<span class="hljs-title function_">map</span>(<span class="hljs-function">() =&gt;</span> browser.<span class="hljs-title function_">newPage</span>()));
+  <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
+  <span class="hljs-keyword">let</span> code = <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
+    <span class="hljs-keyword">const</span> page = pages[i]!;
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">goto</span>(<span class="hljs-string">`<span class="hljs-subst">${WEB}</span>/?live=1&amp;user=<span class="hljs-subst">${users[i]}</span>`</span>);
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;2v2&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">if</span> (i === <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Create 2v2 Room&quot;</span> }).<span class="hljs-title function_">click</span>();
+      code = (<span class="hljs-keyword">await</span> page.<span class="hljs-title function_">locator</span>(<span class="hljs-string">&quot;span.font-mono.text-base.font-bold&quot;</span>).<span class="hljs-title function_">textContent</span>())!.<span class="hljs-title function_">trim</span>();
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByPlaceholder</span>(<span class="hljs-string">&quot;INVITE CODE&quot;</span>).<span class="hljs-title function_">fill</span>(code);
+      <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Join&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
     }
-    <span class="hljs-keyword">if</span> (entry === <span class="hljs-string">&quot;private&quot;</span>) {
-      <span class="hljs-keyword">const</span> overflow = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/rooms/join`</span>, { <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: <span class="hljs-string">`extra-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span> }, <span class="hljs-attr">data</span>: { code } });
-      <span class="hljs-title function_">expect</span>(overflow.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">409</span>);
-      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) {
-        <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> }).<span class="hljs-title function_">click</span>();
-        <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Ready&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
-      }
-      <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start Match&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    }
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
-    <span class="hljs-title function_">expect</span>(matchId).<span class="hljs-title function_">toBeTruthy</span>();
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(p.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>)).<span class="hljs-title function_">toBe</span>(matchId);
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
-      <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">get</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/matches/<span class="hljs-subst">${matchId}</span>/snapshot`</span>, { <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: users[i]! } });
-      <span class="hljs-keyword">const</span> snap = <span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>();
-      <span class="hljs-title function_">expect</span>(snap.<span class="hljs-property">roundPhase</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;MATCH_FOUND&quot;</span>);
-    }
-    <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Shared doc r1 · live/</span>)).<span class="hljs-title function_">toBeVisible</span>();
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [author, teammate, opponent, marker] <span class="hljs-keyword">of</span> [[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;alpha-only&quot;</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;beta-only&quot;</span>]] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
-      <span class="hljs-keyword">const</span> editor = pages[author]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>);
-      <span class="hljs-keyword">await</span> editor.<span class="hljs-title function_">fill</span>(<span class="hljs-string">`# <span class="hljs-subst">${marker}</span>`</span>);
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toContainText</span>(marker);
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainText</span>(marker);
-      <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;textbox&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Team message&quot;</span> }).<span class="hljs-title function_">fill</span>(marker);
-      <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Send team message&quot;</span> }).<span class="hljs-title function_">click</span>();
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-title function_">toBeVisible</span>();
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
-    }
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> p <span class="hljs-keyword">of</span> pages.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>)) {
-      <span class="hljs-keyword">await</span> p.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>).<span class="hljs-title function_">click</span>();
-      <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(p.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>)).<span class="hljs-title function_">toBeChecked</span>();
-    }
-    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> })).<span class="hljs-title function_">toBeEnabled</span>();
-    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ entry, users, matchId, <span class="hljs-attr">teams</span>: [users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>), users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">2</span>)] }));
-    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(pages.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">p</span> =&gt;</span> p.<span class="hljs-title function_">close</span>()));
+  }
+  <span class="hljs-keyword">const</span> overflow = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">post</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/lobby/rooms/join`</span>, {
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: <span class="hljs-string">`extra-<span class="hljs-subst">${<span class="hljs-built_in">Date</span>.now()}</span>`</span> }, <span class="hljs-attr">data</span>: { code },
   });
-}
+  <span class="hljs-title function_">expect</span>(overflow.<span class="hljs-title function_">status</span>()).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">409</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) {
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Ready Up&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Cancel Ready&quot;</span> })).<span class="hljs-title function_">toBeVisible</span>();
+  }
+  <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start Match&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;heading&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Code Arena&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> })).<span class="hljs-title function_">toBeVisible</span>();
+  <span class="hljs-keyword">const</span> matchId = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>);
+  <span class="hljs-title function_">expect</span>(matchId).<span class="hljs-title function_">toBeTruthy</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(page.<span class="hljs-title function_">url</span>()).<span class="hljs-property">searchParams</span>.<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;match&quot;</span>)).<span class="hljs-title function_">toBe</span>(matchId);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">4</span>; i++) {
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> request.<span class="hljs-title function_">get</span>(<span class="hljs-string">`<span class="hljs-subst">${game}</span>/matches/<span class="hljs-subst">${matchId}</span>/snapshot`</span>, { <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;x-dev-user-id&quot;</span>: users[i]! } });
+    <span class="hljs-keyword">const</span> snapshot = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+    <span class="hljs-title function_">expect</span>(snapshot.<span class="hljs-property">roundPhase</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;MATCH_FOUND&quot;</span>);
+  }
+  <span class="hljs-keyword">await</span> pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Start round&quot;</span>, <span class="hljs-attr">exact</span>: <span class="hljs-literal">true</span> }).<span class="hljs-title function_">click</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages) <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByText</span>(<span class="hljs-regexp">/Shared doc r1 · live/</span>)).<span class="hljs-title function_">toBeVisible</span>();
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [author, teammate, opponent, marker] <span class="hljs-keyword">of</span> [[<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-string">&quot;alpha-only&quot;</span>], [<span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">0</span>, <span class="hljs-string">&quot;beta-only&quot;</span>]] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
+    <span class="hljs-keyword">const</span> editor = pages[author]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>);
+    <span class="hljs-keyword">await</span> editor.<span class="hljs-title function_">fill</span>(<span class="hljs-string">`# <span class="hljs-subst">${marker}</span>`</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-title function_">toContainText</span>(marker);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-regexp">/Solution editor/</span>)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContainText</span>(marker);
+    <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;textbox&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Team message&quot;</span> }).<span class="hljs-title function_">fill</span>(marker);
+    <span class="hljs-keyword">await</span> pages[author]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Send team message&quot;</span> }).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[teammate]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-title function_">toBeVisible</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[opponent]!.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;Team chat&quot;</span>).<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;listitem&quot;</span>).<span class="hljs-title function_">filter</span>({ <span class="hljs-attr">hasText</span>: marker })).<span class="hljs-property">not</span>.<span class="hljs-title function_">toBeVisible</span>();
+  }
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> page <span class="hljs-keyword">of</span> pages.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>)) {
+    <span class="hljs-keyword">await</span> page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>).<span class="hljs-title function_">click</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(page.<span class="hljs-title function_">getByLabel</span>(<span class="hljs-string">&quot;You are ready&quot;</span>)).<span class="hljs-title function_">toBeChecked</span>();
+  }
+  <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(pages[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">getByRole</span>(<span class="hljs-string">&quot;button&quot;</span>, { <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;Submit Team Solution&quot;</span> })).<span class="hljs-title function_">toBeEnabled</span>();
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({ <span class="hljs-attr">entry</span>: <span class="hljs-string">&quot;private&quot;</span>, users, matchId, <span class="hljs-attr">teams</span>: [users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">2</span>), users.<span class="hljs-title function_">slice</span>(<span class="hljs-number">2</span>)] }));
+  <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(pages.<span class="hljs-title function_">map</span>(<span class="hljs-function"><span class="hljs-params">page</span> =&gt;</span> page.<span class="hljs-title function_">close</span>()));
+});
 
 <span class="hljs-title function_">test</span>(<span class="hljs-string">&quot;private membership survives reload and offline match start&quot;</span>, <span class="hljs-title function_">async</span> ({ browser, request }) =&gt; {
   <span class="hljs-keyword">const</span> game = process.<span class="hljs-property">env</span>.<span class="hljs-property">E2E_GAME_URL</span> ?? <span class="hljs-string">&quot;http://localhost:3220&quot;</span>;
@@ -4876,6 +4866,110 @@ def solve(x):
     <span class="hljs-title function_">expect</span>(res[<span class="hljs-number">0</span>].<span class="hljs-property">output</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;&#x27;keys:&#x27;&quot;</span>);
   }, <span class="hljs-number">30000</span>);
 
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;submitted Python cannot recover expected answers from env or scratch during a sealed suite&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> pySrc = <span class="hljs-string">`
+import base64, os, pathlib, re
+def _decoded(value):
+    chunks = [value]
+    for _ in range(3):
+        try:
+            value = base64.b64decode(value).decode(&quot;utf8&quot;, &quot;ignore&quot;)
+            chunks.append(value)
+        except Exception:
+            break
+    return chunks
+def _all_judge_data():
+    for value in os.environ.values():
+        for chunk in _decoded(value): yield chunk
+    for root in (&quot;/scratch&quot;, &quot;/tmp&quot;):
+        for path in pathlib.Path(root).rglob(&quot;*&quot;):
+            if path.is_file():
+                try:
+                    value = path.read_text(errors=&quot;ignore&quot;)
+                    for line in value.splitlines() or [value]:
+                        for chunk in _decoded(line): yield chunk
+                except Exception:
+                    pass
+def solve(_):
+    for data in _all_judge_data():
+        match = re.search(r&quot;HIDDEN_ANSWER_[A-Z0-9_]+&quot;, data)
+        if match: return match.group(0)
+    return &quot;EMPTY&quot;
+`</span>;
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">evaluateSealed</span>({
+      <span class="hljs-attr">evaluationId</span>: <span class="hljs-string">&quot;leak-expected-evaluation&quot;</span>,
+      <span class="hljs-attr">submissionId</span>: <span class="hljs-string">&quot;leak-expected-submission&quot;</span>,
+      <span class="hljs-attr">problemVersionId</span>: <span class="hljs-string">&quot;problem-v1&quot;</span>,
+      <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;hidden-v1&quot;</span>,
+      <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-attr">source</span>: pySrc,
+      <span class="hljs-attr">groups</span>: [{
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;sealed&quot;</span>,
+        <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">tests</span>: [
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;expected-alpha&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 11&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;&#x27;HIDDEN_ANSWER_ALPHA_413&#x27;&quot;</span> },
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;expected-beta&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 22&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;&#x27;HIDDEN_ANSWER_BETA_527&#x27;&quot;</span> },
+        ],
+      }],
+      <span class="hljs-attr">limits</span>: <span class="hljs-variable constant_">LIMITS</span>,
+    });
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">groups</span>[<span class="hljs-number">0</span>]?.<span class="hljs-property">results</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item.<span class="hljs-property">passed</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-literal">false</span>, <span class="hljs-literal">false</span>]);
+  }, <span class="hljs-number">30000</span>);
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;a case cannot recover another hidden case&#x27;s input from env or scratch&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> pySrc = <span class="hljs-string">`
+import base64, os, pathlib, re
+def _decoded(value):
+    chunks = [value]
+    for _ in range(3):
+        try:
+            value = base64.b64decode(value).decode(&quot;utf8&quot;, &quot;ignore&quot;)
+            chunks.append(value)
+        except Exception:
+            break
+    return chunks
+def _all_judge_data():
+    for value in os.environ.values():
+        for chunk in _decoded(value): yield chunk
+    for root in (&quot;/scratch&quot;, &quot;/tmp&quot;):
+        for path in pathlib.Path(root).rglob(&quot;*&quot;):
+            if path.is_file():
+                try:
+                    value = path.read_text(errors=&quot;ignore&quot;)
+                    for line in value.splitlines() or [value]:
+                        for chunk in _decoded(line): yield chunk
+                except Exception:
+                    pass
+def solve(_):
+    for data in _all_judge_data():
+        match = re.search(r&quot;OTHER_CASE_INPUT_[A-Z0-9_]+&quot;, data)
+        if match: return match.group(0)
+    return &quot;EMPTY&quot;
+`</span>;
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">evaluateSealed</span>({
+      <span class="hljs-attr">evaluationId</span>: <span class="hljs-string">&quot;leak-input-evaluation&quot;</span>,
+      <span class="hljs-attr">submissionId</span>: <span class="hljs-string">&quot;leak-input-submission&quot;</span>,
+      <span class="hljs-attr">problemVersionId</span>: <span class="hljs-string">&quot;problem-v1&quot;</span>,
+      <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;hidden-v1&quot;</span>,
+      <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-attr">source</span>: pySrc,
+      <span class="hljs-attr">groups</span>: [{
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;sealed&quot;</span>,
+        <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">tests</span>: [
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;before-other-input&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = &#x27;CURRENT_CASE_INPUT&#x27;&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;&#x27;OTHER_CASE_INPUT_SECRET_638&#x27;&quot;</span> },
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;contains-other-input&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = &#x27;OTHER_CASE_INPUT_SECRET_638&#x27;&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;NOT_THE_INPUT_MARKER&quot;</span> },
+        ],
+      }],
+      <span class="hljs-attr">limits</span>: <span class="hljs-variable constant_">LIMITS</span>,
+    });
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">groups</span>[<span class="hljs-number">0</span>]?.<span class="hljs-property">results</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item.<span class="hljs-property">passed</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-literal">false</span>, <span class="hljs-literal">false</span>]);
+  }, <span class="hljs-number">30000</span>);
+
   <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;containers are automatically cleaned up after exit (--rm)&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
     <span class="hljs-keyword">const</span> beforeCount = <span class="hljs-title class_">Number</span>(<span class="hljs-title function_">execSync</span>(<span class="hljs-string">&quot;docker ps -q | wc -l&quot;</span>, { <span class="hljs-attr">encoding</span>: <span class="hljs-string">&quot;utf8&quot;</span> }).<span class="hljs-title function_">trim</span>());
     <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
@@ -7170,13 +7264,13 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-varia
   <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: res.<span class="hljs-property">status</span>, <span class="hljs-attr">json</span>: <span class="hljs-keyword">await</span> res.<span class="hljs-title function_">json</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-literal">null</span>) };
 }
 
-<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">boot</span>(<span class="hljs-params"><span class="hljs-attr">extraEnv</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt; = {}</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ChildProcess</span>&gt; {
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">boot</span>(<span class="hljs-params"><span class="hljs-attr">extraEnv</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt; = {}, timeoutMs = <span class="hljs-number">20000</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ChildProcess</span>&gt; {
   <span class="hljs-keyword">const</span> child = <span class="hljs-title function_">spawn</span>(<span class="hljs-string">&quot;node&quot;</span>, [<span class="hljs-string">&quot;dist/main.js&quot;</span>], {
     <span class="hljs-attr">cwd</span>: path.<span class="hljs-title function_">join</span>(__dirname, <span class="hljs-string">&quot;..&quot;</span>, <span class="hljs-string">&quot;..&quot;</span>),
     <span class="hljs-attr">env</span>: { ...process.<span class="hljs-property">env</span>, <span class="hljs-attr">PORT</span>: <span class="hljs-title class_">String</span>(<span class="hljs-variable constant_">PORT</span>), <span class="hljs-attr">DEV_PRINCIPAL</span>: <span class="hljs-string">&quot;true&quot;</span>, ...extraEnv },
     <span class="hljs-attr">stdio</span>: <span class="hljs-string">&quot;ignore&quot;</span>,
   });
-  <span class="hljs-keyword">const</span> deadline = <span class="hljs-title class_">Date</span>.<span class="hljs-title function_">now</span>() + <span class="hljs-number">20000</span>;
+  <span class="hljs-keyword">const</span> deadline = <span class="hljs-title class_">Date</span>.<span class="hljs-title function_">now</span>() + timeoutMs;
   <span class="hljs-keyword">for</span> (;;) {
     <span class="hljs-keyword">try</span> {
       <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${BASE}</span>/health`</span>);
@@ -7283,10 +7377,426 @@ describe.<span class="hljs-title function_">runIf</span>(<span class="hljs-varia
     <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">api</span>(<span class="hljs-string">&quot;POST&quot;</span>, <span class="hljs-string">`/matches/<span class="hljs-subst">${matchId}</span>/submit`</span>, <span class="hljs-string">&quot;user-a&quot;</span>, { <span class="hljs-attr">code</span>: <span class="hljs-variable constant_">SOLVED_PY</span>, <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span> })).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">201</span>);
     server.<span class="hljs-title function_">kill</span>();
     <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">r</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(r, <span class="hljs-number">500</span>));
-    server = <span class="hljs-keyword">await</span> <span class="hljs-title function_">boot</span>({ <span class="hljs-attr">DATABASE_URL</span>: <span class="hljs-variable constant_">PG_URL</span> });
+    server = <span class="hljs-keyword">await</span> <span class="hljs-title function_">boot</span>({ <span class="hljs-attr">DATABASE_URL</span>: <span class="hljs-variable constant_">PG_URL</span> }, <span class="hljs-number">60000</span>);
     <span class="hljs-keyword">const</span> snap = <span class="hljs-keyword">await</span> <span class="hljs-title function_">api</span>(<span class="hljs-string">&quot;GET&quot;</span>, <span class="hljs-string">`/matches/<span class="hljs-subst">${matchId}</span>/snapshot`</span>, <span class="hljs-string">&quot;user-a&quot;</span>);
     <span class="hljs-title function_">expect</span>((snap.<span class="hljs-property">json</span> <span class="hljs-keyword">as</span> { <span class="hljs-attr">sides</span>: { <span class="hljs-attr">left</span>: { <span class="hljs-attr">submissions</span>: <span class="hljs-built_in">number</span> } } }).<span class="hljs-property">sides</span>.<span class="hljs-property">left</span>.<span class="hljs-property">submissions</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
-  }, <span class="hljs-number">90000</span>);
+  }, <span class="hljs-number">120000</span>);
+});
+</template>
+<template id="source-541b5efedb514091" data-source-path="services/judge-worker/test/compose-topology.test.ts"><span class="hljs-keyword">import</span> { execFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:child_process&quot;</span>;
+<span class="hljs-keyword">import</span> { dirname, resolve } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:path&quot;</span>;
+<span class="hljs-keyword">import</span> { fileURLToPath } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:url&quot;</span>;
+<span class="hljs-keyword">import</span> { readFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:fs&quot;</span>;
+<span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+
+<span class="hljs-keyword">const</span> repositoryRoot = <span class="hljs-title function_">resolve</span>(<span class="hljs-title function_">dirname</span>(<span class="hljs-title function_">fileURLToPath</span>(<span class="hljs-keyword">import</span>.<span class="hljs-property">meta</span>.<span class="hljs-property">url</span>)), <span class="hljs-string">&quot;../../..&quot;</span>);
+<span class="hljs-keyword">const</span> nginxConfig = <span class="hljs-title function_">readFileSync</span>(<span class="hljs-title function_">resolve</span>(repositoryRoot, <span class="hljs-string">&quot;infra/nginx/nginx.conf&quot;</span>), <span class="hljs-string">&quot;utf8&quot;</span>);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">composeConfig</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">any</span> {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">const</span> rendered = <span class="hljs-title function_">execFileSync</span>(
+      <span class="hljs-string">&quot;docker&quot;</span>,
+      [<span class="hljs-string">&quot;compose&quot;</span>, <span class="hljs-string">&quot;--env-file&quot;</span>, <span class="hljs-string">&quot;.env.example&quot;</span>, <span class="hljs-string">&quot;config&quot;</span>, <span class="hljs-string">&quot;--format&quot;</span>, <span class="hljs-string">&quot;json&quot;</span>],
+      { <span class="hljs-attr">cwd</span>: repositoryRoot, <span class="hljs-attr">encoding</span>: <span class="hljs-string">&quot;utf8&quot;</span>, <span class="hljs-attr">maxBuffer</span>: <span class="hljs-number">4</span> * <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span> },
+    );
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(rendered);
+  } <span class="hljs-keyword">catch</span> {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;Docker Compose configuration could not be rendered&quot;</span>);
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">volumeTargets</span>(<span class="hljs-params"><span class="hljs-attr">service</span>: <span class="hljs-built_in">any</span></span>): <span class="hljs-built_in">string</span>[] {
+  <span class="hljs-keyword">return</span> (service.<span class="hljs-property">volumes</span> ?? []).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">volume</span>: <span class="hljs-built_in">any</span></span>) =&gt;</span> <span class="hljs-keyword">typeof</span> volume === <span class="hljs-string">&quot;string&quot;</span> ? volume : volume.<span class="hljs-property">target</span>);
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;single-host judge Compose boundary&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;gives the socket only to the private worker and keeps Game/Nginx off its network path&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> config = <span class="hljs-title function_">composeConfig</span>();
+    <span class="hljs-keyword">const</span> worker = config.<span class="hljs-property">services</span>[<span class="hljs-string">&quot;judge-worker&quot;</span>];
+    <span class="hljs-keyword">const</span> game = config.<span class="hljs-property">services</span>.<span class="hljs-property">game</span>;
+    <span class="hljs-keyword">const</span> nginx = config.<span class="hljs-property">services</span>.<span class="hljs-property">nginx</span>;
+
+    <span class="hljs-title function_">expect</span>(worker).<span class="hljs-title function_">toBeDefined</span>();
+    <span class="hljs-title function_">expect</span>(worker.<span class="hljs-property">ports</span> ?? []).<span class="hljs-title function_">toEqual</span>([]);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(worker.<span class="hljs-property">networks</span> ?? {})).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&quot;judge-internal&quot;</span>]);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">volumeTargets</span>(worker)).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;/var/run/docker.sock&quot;</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">volumeTargets</span>(game)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;/var/run/docker.sock&quot;</span>);
+    <span class="hljs-title function_">expect</span>(worker.<span class="hljs-property">environment</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;POSTGRES_PASSWORD&quot;</span>);
+    <span class="hljs-title function_">expect</span>(worker.<span class="hljs-property">environment</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;GAME_DB_PASSWORD&quot;</span>);
+    <span class="hljs-keyword">const</span> socketServices = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(config.<span class="hljs-property">services</span>)
+      .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">[, service]: [<span class="hljs-built_in">string</span>, <span class="hljs-built_in">any</span>]</span>) =&gt;</span> <span class="hljs-title function_">volumeTargets</span>(service).<span class="hljs-title function_">includes</span>(<span class="hljs-string">&quot;/var/run/docker.sock&quot;</span>))
+      .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">[name]</span>) =&gt;</span> name);
+    <span class="hljs-title function_">expect</span>(socketServices).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&quot;judge-worker&quot;</span>]);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(game.<span class="hljs-property">networks</span> ?? {})).<span class="hljs-title function_">toEqual</span>(expect.<span class="hljs-title function_">arrayContaining</span>([<span class="hljs-string">&quot;default&quot;</span>, <span class="hljs-string">&quot;judge-internal&quot;</span>]));
+    <span class="hljs-title function_">expect</span>(config.<span class="hljs-property">networks</span>[<span class="hljs-string">&quot;judge-internal&quot;</span>].<span class="hljs-property">internal</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>);
+    <span class="hljs-title function_">expect</span>(nginx.<span class="hljs-property">depends_on</span>?.[<span class="hljs-string">&quot;judge-worker&quot;</span>]).<span class="hljs-title function_">toBeUndefined</span>();
+    <span class="hljs-title function_">expect</span>(nginx.<span class="hljs-property">ports</span>).<span class="hljs-title function_">toBeDefined</span>();
+    <span class="hljs-title function_">expect</span>(nginxConfig).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;judge-worker&quot;</span>);
+    <span class="hljs-title function_">expect</span>(nginxConfig).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/location\s+~\s+\^\/\(matches\|lobby\)/</span>);
+    <span class="hljs-title function_">expect</span>(nginxConfig).<span class="hljs-title function_">toMatch</span>(<span class="hljs-regexp">/location\s+\/socket\.io\//</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;selects the worker explicitly and waits for its readiness before Game serves&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> config = <span class="hljs-title function_">composeConfig</span>();
+    <span class="hljs-keyword">const</span> worker = config.<span class="hljs-property">services</span>[<span class="hljs-string">&quot;judge-worker&quot;</span>];
+    <span class="hljs-keyword">const</span> game = config.<span class="hljs-property">services</span>.<span class="hljs-property">game</span>;
+
+    <span class="hljs-title function_">expect</span>(game.<span class="hljs-property">environment</span>.<span class="hljs-property">JUDGE_BACKEND</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;worker&quot;</span>);
+    <span class="hljs-title function_">expect</span>(game.<span class="hljs-property">environment</span>.<span class="hljs-property">JUDGE_WORKER_URL</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;http://judge-worker:3010&quot;</span>);
+    <span class="hljs-title function_">expect</span>(game.<span class="hljs-property">depends_on</span>[<span class="hljs-string">&quot;judge-worker&quot;</span>].<span class="hljs-property">condition</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;service_healthy&quot;</span>);
+    <span class="hljs-title function_">expect</span>(worker.<span class="hljs-property">healthcheck</span>).<span class="hljs-title function_">toBeDefined</span>();
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;keeps shared .env credentials out of services that do not need them&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-keyword">const</span> config = <span class="hljs-title function_">composeConfig</span>();
+    <span class="hljs-keyword">const</span> postgres = config.<span class="hljs-property">services</span>.<span class="hljs-property">postgres</span>;
+    <span class="hljs-keyword">const</span> core = config.<span class="hljs-property">services</span>.<span class="hljs-property">core</span>;
+    <span class="hljs-keyword">const</span> chat = config.<span class="hljs-property">services</span>.<span class="hljs-property">chat</span>;
+    <span class="hljs-keyword">const</span> game = config.<span class="hljs-property">services</span>.<span class="hljs-property">game</span>;
+    <span class="hljs-keyword">const</span> worker = config.<span class="hljs-property">services</span>[<span class="hljs-string">&quot;judge-worker&quot;</span>];
+
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(postgres.<span class="hljs-property">environment</span>).<span class="hljs-title function_">sort</span>()).<span class="hljs-title function_">toEqual</span>([
+      <span class="hljs-string">&quot;CHAT_DB_NAME&quot;</span>, <span class="hljs-string">&quot;CHAT_DB_PASSWORD&quot;</span>, <span class="hljs-string">&quot;CHAT_DB_USER&quot;</span>,
+      <span class="hljs-string">&quot;CORE_DB_NAME&quot;</span>, <span class="hljs-string">&quot;CORE_DB_PASSWORD&quot;</span>, <span class="hljs-string">&quot;CORE_DB_USER&quot;</span>,
+      <span class="hljs-string">&quot;GAME_DB_NAME&quot;</span>, <span class="hljs-string">&quot;GAME_DB_PASSWORD&quot;</span>, <span class="hljs-string">&quot;GAME_DB_USER&quot;</span>,
+      <span class="hljs-string">&quot;POSTGRES_PASSWORD&quot;</span>, <span class="hljs-string">&quot;POSTGRES_USER&quot;</span>,
+    ]);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(core.<span class="hljs-property">environment</span>).<span class="hljs-title function_">sort</span>()).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&quot;PORT&quot;</span>, <span class="hljs-string">&quot;SERVICE_NAME&quot;</span>]);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(chat.<span class="hljs-property">environment</span>).<span class="hljs-title function_">sort</span>()).<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&quot;PORT&quot;</span>, <span class="hljs-string">&quot;SERVICE_NAME&quot;</span>]);
+    <span class="hljs-title function_">expect</span>(game.<span class="hljs-property">environment</span>).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN&quot;</span>);
+    <span class="hljs-title function_">expect</span>(game.<span class="hljs-property">environment</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;CORE_DB_PASSWORD&quot;</span>);
+    <span class="hljs-title function_">expect</span>(game.<span class="hljs-property">environment</span>).<span class="hljs-property">not</span>.<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;CHAT_DB_PASSWORD&quot;</span>);
+    <span class="hljs-title function_">expect</span>(worker.<span class="hljs-property">environment</span>).<span class="hljs-title function_">toHaveProperty</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN&quot;</span>);
+  });
+});
+</template>
+<template id="source-b07bcf0770b84b07" data-source-path="services/judge-worker/test/http-server.test.ts"><span class="hljs-keyword">import</span> { afterEach, describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">BoundedJobQueue</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../src/job-queue.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> serverModulePath = <span class="hljs-string">&quot;../src/http-server.js&quot;</span>;
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">TOKEN</span> = <span class="hljs-string">&quot;worker-test-token-32-bytes-long&quot;</span>;
+<span class="hljs-keyword">const</span> limits = {
+  <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span>,
+  <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>,
+  <span class="hljs-attr">runMemoryMb</span>: <span class="hljs-number">64</span>,
+  <span class="hljs-attr">runOutputBytes</span>: <span class="hljs-number">1024</span>,
+  <span class="hljs-attr">runCpus</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">runPids</span>: <span class="hljs-number">16</span>,
+};
+<span class="hljs-keyword">const</span> visibleRequest = {
+  <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+  <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+  <span class="hljs-attr">source</span>: <span class="hljs-string">&quot;def solve(value): return value\n&quot;</span>,
+  <span class="hljs-attr">tests</span>: [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 1&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;1&quot;</span> }],
+  limits,
+};
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">servers</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">close</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">callback</span>: (error?: <span class="hljs-built_in">Error</span>) =&gt; <span class="hljs-built_in">void</span></span>) =&gt;</span> <span class="hljs-built_in">void</span> }&gt; = [];
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadServerModule</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">any</span>&gt; {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">loaded</span>: <span class="hljs-built_in">any</span>;
+  <span class="hljs-keyword">try</span> {
+    loaded = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(serverModulePath);
+  } <span class="hljs-keyword">catch</span> {
+    loaded = <span class="hljs-literal">null</span>;
+  }
+  <span class="hljs-title function_">expect</span>(loaded?.<span class="hljs-property">createJudgeWorkerServer</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;function&quot;</span>);
+  <span class="hljs-keyword">return</span> loaded;
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">startServer</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt; = {}</span>) {
+  <span class="hljs-keyword">const</span> { createJudgeWorkerServer } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadServerModule</span>();
+  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">createJudgeWorkerServer</span>({
+    <span class="hljs-attr">token</span>: <span class="hljs-variable constant_">TOKEN</span>,
+    <span class="hljs-attr">judge</span>: {
+      <span class="hljs-attr">provider</span>: <span class="hljs-string">&quot;fake&quot;</span>,
+      <span class="hljs-attr">runVisible</span>: <span class="hljs-title function_">async</span> () =&gt; [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> }],
+      <span class="hljs-attr">evaluateSealed</span>: <span class="hljs-title function_">async</span> (<span class="hljs-attr">request</span>: <span class="hljs-built_in">any</span>) =&gt; ({
+        <span class="hljs-attr">groups</span>: request.<span class="hljs-property">groups</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">group</span>: <span class="hljs-built_in">any</span></span>) =&gt;</span> ({
+          <span class="hljs-attr">name</span>: group.<span class="hljs-property">name</span>,
+          <span class="hljs-attr">weight</span>: group.<span class="hljs-property">weight</span>,
+          <span class="hljs-attr">results</span>: group.<span class="hljs-property">tests</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">test</span>: <span class="hljs-built_in">any</span></span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> })),
+        })),
+      }),
+      ...((options.<span class="hljs-property">judge</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">object</span> | <span class="hljs-literal">undefined</span>) ?? {}),
+    },
+    <span class="hljs-attr">queue</span>: options.<span class="hljs-property">queue</span> ?? <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>({
+      <span class="hljs-attr">concurrency</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">maxQueueSize</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-number">500</span>,
+    }),
+    <span class="hljs-attr">readiness</span>: options.<span class="hljs-property">readiness</span> ?? { <span class="hljs-attr">check</span>: <span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">ready</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">docker</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">gcc</span>: <span class="hljs-literal">true</span> } }) },
+    <span class="hljs-attr">maxBodyBytes</span>: options.<span class="hljs-property">maxBodyBytes</span> ?? <span class="hljs-number">4096</span>,
+  });
+  <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> server.<span class="hljs-title function_">listen</span>(<span class="hljs-number">0</span>, <span class="hljs-string">&quot;127.0.0.1&quot;</span>, resolve));
+  servers.<span class="hljs-title function_">push</span>(server);
+  <span class="hljs-keyword">const</span> address = server.<span class="hljs-title function_">address</span>();
+  <span class="hljs-keyword">if</span> (!address || <span class="hljs-keyword">typeof</span> address === <span class="hljs-string">&quot;string&quot;</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;test server did not bind a TCP port&quot;</span>);
+  <span class="hljs-keyword">return</span> <span class="hljs-string">`http://127.0.0.1:<span class="hljs-subst">${address.port}</span>`</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">post</span>(<span class="hljs-params"><span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">token</span>?: <span class="hljs-built_in">string</span>, <span class="hljs-attr">body</span>: <span class="hljs-built_in">unknown</span> = visibleRequest</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Response</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${url}</span>/v1/run-visible`</span>, {
+    <span class="hljs-attr">method</span>: <span class="hljs-string">&quot;POST&quot;</span>,
+    <span class="hljs-attr">headers</span>: {
+      <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>,
+      ...(token ? { <span class="hljs-attr">authorization</span>: <span class="hljs-string">`Bearer <span class="hljs-subst">${token}</span>`</span> } : {}),
+    },
+    <span class="hljs-attr">body</span>: <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body),
+  });
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">postSealed</span>(<span class="hljs-params"><span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">body</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">Response</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${url}</span>/v1/evaluate-sealed`</span>, {
+    <span class="hljs-attr">method</span>: <span class="hljs-string">&quot;POST&quot;</span>,
+    <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>, <span class="hljs-attr">authorization</span>: <span class="hljs-string">`Bearer <span class="hljs-subst">${token}</span>`</span> },
+    <span class="hljs-attr">body</span>: <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body),
+  });
+}
+
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-title function_">async</span> () =&gt; {
+  <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(servers.<span class="hljs-title function_">splice</span>(<span class="hljs-number">0</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">server</span>) =&gt;</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> server.<span class="hljs-title function_">close</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">resolve</span>()))));
+});
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;judge worker HTTP API&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;requires bearer authentication before dispatching a judge call&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startServer</span>({ <span class="hljs-attr">judge</span>: { <span class="hljs-attr">runVisible</span>: <span class="hljs-title function_">async</span> () =&gt; {
+      calls++;
+      <span class="hljs-keyword">return</span> [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> }];
+    } } });
+
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">401</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-string">&quot;wrong-token&quot;</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">401</span>);
+    <span class="hljs-keyword">const</span> authorized = <span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>);
+    <span class="hljs-title function_">expect</span>(authorized.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">200</span>);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;rejects oversized request bodies before judge dispatch&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startServer</span>({
+      <span class="hljs-attr">maxBodyBytes</span>: <span class="hljs-number">256</span>,
+      <span class="hljs-attr">judge</span>: { <span class="hljs-attr">runVisible</span>: <span class="hljs-title function_">async</span> () =&gt; { calls++; <span class="hljs-keyword">return</span> []; } },
+    });
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>, { ...visibleRequest, <span class="hljs-attr">source</span>: <span class="hljs-string">&quot;x&quot;</span>.<span class="hljs-title function_">repeat</span>(<span class="hljs-number">1024</span>) });
+
+    <span class="hljs-title function_">expect</span>(response.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">413</span>);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;implements the sealed GameJudge method without returning case inputs or expected answers&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startServer</span>();
+    <span class="hljs-keyword">const</span> response = <span class="hljs-keyword">await</span> <span class="hljs-title function_">postSealed</span>(url, <span class="hljs-variable constant_">TOKEN</span>, {
+      <span class="hljs-attr">evaluationId</span>: <span class="hljs-string">&quot;evaluation&quot;</span>,
+      <span class="hljs-attr">submissionId</span>: <span class="hljs-string">&quot;submission&quot;</span>,
+      <span class="hljs-attr">problemVersionId</span>: <span class="hljs-string">&quot;problem-v1&quot;</span>,
+      <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;suite-v1&quot;</span>,
+      <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-attr">source</span>: <span class="hljs-string">&quot;def solve(value): return value&quot;</span>,
+      <span class="hljs-attr">groups</span>: [{ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;hidden&quot;</span>, <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">tests</span>: [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;hidden-1&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value=1&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;1&quot;</span> }] }],
+      limits,
+    });
+
+    <span class="hljs-title function_">expect</span>(response.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">200</span>);
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>();
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">groups</span>[<span class="hljs-number">0</span>].<span class="hljs-property">results</span>).<span class="hljs-title function_">toEqual</span>([
+      { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;hidden-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> },
+    ]);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(result)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;value=1&quot;</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(result)).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&#x27;&quot;expected&quot;&#x27;</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;reports Docker and image readiness failures and recovers without restarting Game&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> available = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startServer</span>({
+      <span class="hljs-attr">readiness</span>: {
+        <span class="hljs-attr">check</span>: <span class="hljs-title function_">async</span> () =&gt; ({ <span class="hljs-attr">ready</span>: available, <span class="hljs-attr">docker</span>: available, <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: available, <span class="hljs-attr">gcc</span>: available } }),
+      },
+      <span class="hljs-attr">judge</span>: { <span class="hljs-attr">runVisible</span>: <span class="hljs-title function_">async</span> () =&gt; { calls++; <span class="hljs-keyword">return</span> []; } },
+    });
+
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${url}</span>/ready`</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">503</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">503</span>);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>);
+
+    available = <span class="hljs-literal">true</span>;
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`<span class="hljs-subst">${url}</span>/ready`</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">200</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">200</span>);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;maps queue saturation to 429 while the accepted job completes&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> signalStarted!: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">void</span>;
+    <span class="hljs-keyword">const</span> started = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> { signalStarted = resolve; });
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startServer</span>({
+      <span class="hljs-attr">queue</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>({ <span class="hljs-attr">concurrency</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">maxQueueSize</span>: <span class="hljs-number">0</span>, <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-number">100</span>, <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-number">500</span> }),
+      <span class="hljs-attr">judge</span>: { <span class="hljs-attr">runVisible</span>: <span class="hljs-title function_">async</span> () =&gt; {
+        <span class="hljs-title function_">signalStarted</span>();
+        <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">60</span>));
+        <span class="hljs-keyword">return</span> [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> }];
+      } },
+    });
+
+    <span class="hljs-keyword">const</span> active = <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>);
+    <span class="hljs-keyword">await</span> started;
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">429</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> active).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">200</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;times out the HTTP job and serves new work after the timed-out execution settles&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">await</span> <span class="hljs-title function_">startServer</span>({
+      <span class="hljs-attr">queue</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>({ <span class="hljs-attr">concurrency</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">maxQueueSize</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-number">150</span>, <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-number">20</span> }),
+      <span class="hljs-attr">judge</span>: { <span class="hljs-attr">runVisible</span>: <span class="hljs-title function_">async</span> () =&gt; {
+        calls++;
+        <span class="hljs-keyword">if</span> (calls === <span class="hljs-number">1</span>) <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">60</span>));
+        <span class="hljs-keyword">return</span> [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> }];
+      } },
+    });
+
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">504</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-number">55</span>));
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> <span class="hljs-title function_">post</span>(url, <span class="hljs-variable constant_">TOKEN</span>)).<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">200</span>);
+  });
+});
+</template>
+<template id="source-34bb8e053e318d27" data-source-path="services/judge-worker/test/job-queue.test.ts"><span class="hljs-keyword">import</span> { afterEach, describe, expect, it, vi } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+
+<span class="hljs-keyword">const</span> modulePath = <span class="hljs-string">&quot;../src/job-queue.js&quot;</span>;
+<span class="hljs-keyword">const</span> queueOptions = {
+  <span class="hljs-attr">concurrency</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">maxQueueSize</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-number">40</span>,
+  <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-number">40</span>,
+};
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadQueueModule</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">any</span>&gt; {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">loaded</span>: <span class="hljs-built_in">any</span>;
+  <span class="hljs-keyword">try</span> {
+    loaded = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(modulePath);
+  } <span class="hljs-keyword">catch</span> {
+    loaded = <span class="hljs-literal">null</span>;
+  }
+  <span class="hljs-title function_">expect</span>(loaded?.<span class="hljs-property">BoundedJobQueue</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;function&quot;</span>);
+  <span class="hljs-keyword">return</span> loaded;
+}
+
+<span class="hljs-keyword">function</span> deferred&lt;T&gt;() {
+  <span class="hljs-keyword">let</span> resolve!: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">value</span>: T</span>) =&gt;</span> <span class="hljs-built_in">void</span>;
+  <span class="hljs-keyword">const</span> promise = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;T&gt;(<span class="hljs-function">(<span class="hljs-params">done</span>) =&gt;</span> { resolve = done; });
+  <span class="hljs-keyword">return</span> { promise, resolve };
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;BoundedJobQueue&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> vi.<span class="hljs-title function_">useRealTimers</span>());
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;caps active work and rejects jobs after the bounded waiting queue fills&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">BoundedJobQueue</span>, <span class="hljs-title class_">QueueFullError</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadQueueModule</span>();
+    <span class="hljs-keyword">const</span> queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>(queueOptions);
+    <span class="hljs-keyword">const</span> gate = deferred&lt;<span class="hljs-built_in">string</span>&gt;();
+    <span class="hljs-keyword">let</span> active = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">let</span> maxActive = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">run</span> = (<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">string</span></span>) =&gt; queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; {
+      active++;
+      maxActive = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(maxActive, active);
+      <span class="hljs-keyword">try</span> { <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> gate.<span class="hljs-property">promise</span>.<span class="hljs-title function_">then</span>(<span class="hljs-function">() =&gt;</span> value); }
+      <span class="hljs-keyword">finally</span> { active--; }
+    });
+
+    <span class="hljs-keyword">const</span> first = <span class="hljs-title function_">run</span>(<span class="hljs-string">&quot;first&quot;</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">const</span> second = <span class="hljs-title function_">run</span>(<span class="hljs-string">&quot;second&quot;</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-string">&quot;overflow&quot;</span>)).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">QueueFullError</span>);
+    gate.<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&quot;release&quot;</span>);
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>([first, second])).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>([<span class="hljs-string">&quot;first&quot;</span>, <span class="hljs-string">&quot;second&quot;</span>]);
+    <span class="hljs-title function_">expect</span>(maxActive).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;removes a queued job when its queue wait limit expires&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">BoundedJobQueue</span>, <span class="hljs-title class_">QueueWaitTimeoutError</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadQueueModule</span>();
+    <span class="hljs-keyword">const</span> queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>({ ...queueOptions, <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-number">20</span> });
+    <span class="hljs-keyword">const</span> gate = deferred&lt;<span class="hljs-built_in">void</span>&gt;();
+    <span class="hljs-keyword">const</span> active = queue.<span class="hljs-title function_">run</span>(<span class="hljs-function">() =&gt;</span> gate.<span class="hljs-property">promise</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">const</span> waiting = queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-string">&quot;should not start&quot;</span>);
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(waiting).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">QueueWaitTimeoutError</span>);
+    gate.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(active).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toBeUndefined</span>();
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-string">&quot;recovered&quot;</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;recovered&quot;</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;times out a caller but keeps the slot occupied until the execution settles&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">BoundedJobQueue</span>, <span class="hljs-title class_">QueueExecutionTimeoutError</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadQueueModule</span>();
+    <span class="hljs-keyword">const</span> queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>({ ...queueOptions, <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-number">20</span> });
+    <span class="hljs-keyword">const</span> gate = deferred&lt;<span class="hljs-built_in">string</span>&gt;();
+    <span class="hljs-keyword">const</span> timed = queue.<span class="hljs-title function_">run</span>(<span class="hljs-function">() =&gt;</span> gate.<span class="hljs-property">promise</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>();
+    <span class="hljs-keyword">const</span> waiting = queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-string">&quot;recovered&quot;</span>);
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(timed).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">QueueExecutionTimeoutError</span>);
+    gate.<span class="hljs-title function_">resolve</span>(<span class="hljs-string">&quot;late result&quot;</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(waiting).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;recovered&quot;</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;releases capacity after a job rejects&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">BoundedJobQueue</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadQueueModule</span>();
+    <span class="hljs-keyword">const</span> queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>(queueOptions);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; { <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;judge failed&quot;</span>); })).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;judge failed&quot;</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(queue.<span class="hljs-title function_">run</span>(<span class="hljs-title function_">async</span> () =&gt; <span class="hljs-number">42</span>)).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toBe</span>(<span class="hljs-number">42</span>);
+  });
+});
+</template>
+<template id="source-e565f8b940b4493e" data-source-path="services/judge-worker/test/readiness.test.ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+
+<span class="hljs-keyword">const</span> modulePath = <span class="hljs-string">&quot;../src/readiness.js&quot;</span>;
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;DockerImageReadiness&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;requires Docker and every configured image, then becomes ready after recovery&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-attr">loaded</span>: <span class="hljs-built_in">any</span>;
+    <span class="hljs-keyword">try</span> { loaded = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(modulePath); } <span class="hljs-keyword">catch</span> { loaded = <span class="hljs-literal">null</span>; }
+    <span class="hljs-title function_">expect</span>(loaded?.<span class="hljs-property">DockerImageReadiness</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;function&quot;</span>);
+
+    <span class="hljs-keyword">let</span> dockerAvailable = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">const</span> images = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-built_in">string</span>&gt;();
+    <span class="hljs-keyword">const</span> readiness = <span class="hljs-keyword">new</span> loaded.<span class="hljs-title class_">DockerImageReadiness</span>({
+      <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: <span class="hljs-string">&quot;python:3.12-slim&quot;</span>, <span class="hljs-attr">gcc</span>: <span class="hljs-string">&quot;gcc:14-bookworm&quot;</span> },
+      <span class="hljs-attr">run</span>: <span class="hljs-title function_">async</span> (<span class="hljs-attr">_dockerBin</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">args</span>: <span class="hljs-built_in">string</span>[]) =&gt; {
+        <span class="hljs-keyword">if</span> (args[<span class="hljs-number">0</span>] === <span class="hljs-string">&quot;info&quot;</span>) {
+          <span class="hljs-keyword">if</span> (!dockerAvailable) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;daemon unavailable&quot;</span>);
+          <span class="hljs-keyword">return</span>;
+        }
+        <span class="hljs-keyword">const</span> image = args[<span class="hljs-number">2</span>];
+        <span class="hljs-keyword">if</span> (!dockerAvailable || !images.<span class="hljs-title function_">has</span>(image)) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;image unavailable&quot;</span>);
+      },
+    });
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(readiness.<span class="hljs-title function_">check</span>()).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({
+      <span class="hljs-attr">ready</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">docker</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">gcc</span>: <span class="hljs-literal">false</span> },
+    });
+
+    dockerAvailable = <span class="hljs-literal">true</span>;
+    images.<span class="hljs-title function_">add</span>(<span class="hljs-string">&quot;python:3.12-slim&quot;</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(readiness.<span class="hljs-title function_">check</span>()).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({
+      <span class="hljs-attr">ready</span>: <span class="hljs-literal">false</span>,
+      <span class="hljs-attr">docker</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">gcc</span>: <span class="hljs-literal">false</span> },
+    });
+
+    images.<span class="hljs-title function_">add</span>(<span class="hljs-string">&quot;gcc:14-bookworm&quot;</span>);
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(readiness.<span class="hljs-title function_">check</span>()).<span class="hljs-property">resolves</span>.<span class="hljs-title function_">toEqual</span>({
+      <span class="hljs-attr">ready</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">docker</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">gcc</span>: <span class="hljs-literal">true</span> },
+    });
+  });
 });
 </template>
   </div>

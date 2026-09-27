@@ -1070,12 +1070,24 @@ function refreshReferenceBaselineText(text, { recordedAt, gitHead, worktreeStatu
     if (!pattern.test(refreshed)) throw new Error(`Cannot refresh reference-baseline.md: missing ${pattern}`);
     refreshed = refreshed.replace(pattern, replacement);
   }
-  const evidenceHeading = /^## Test evidence captured for this snapshot$/m;
-  if (!evidenceHeading.test(refreshed)) throw new Error("Cannot refresh reference-baseline.md: missing test evidence heading");
-  refreshed = refreshed.replace(evidenceHeading, "## Historical test evidence (not rerun by snapshot refresh)");
-  const evidenceDate = /All commands ran on (\d{4}-\d{2}-\d{2})\./;
-  if (!evidenceDate.test(refreshed)) throw new Error("Cannot refresh reference-baseline.md: missing test evidence date");
-  refreshed = refreshed.replace(evidenceDate, `These test results were captured on $1. The reference baseline was refreshed on ${date}; tests were not rerun during that refresh.`);
+  const currentEvidenceHeading = /^## Test evidence captured for this snapshot$/m;
+  const historicalEvidenceHeading = /^## Historical test evidence \(not rerun by snapshot refresh\)$/m;
+  if (currentEvidenceHeading.test(refreshed)) {
+    refreshed = refreshed.replace(currentEvidenceHeading, "## Historical test evidence (not rerun by snapshot refresh)");
+  } else if (!historicalEvidenceHeading.test(refreshed)) {
+    throw new Error("Cannot refresh reference-baseline.md: missing test evidence heading");
+  }
+
+  const originalEvidenceDate = /All commands ran on (\d{4}-\d{2}-\d{2})\./;
+  if (originalEvidenceDate.test(refreshed)) {
+    refreshed = refreshed.replace(originalEvidenceDate, `These test results were captured on $1. The reference baseline was refreshed on ${date}; tests were not rerun during that refresh.`);
+  } else {
+    const historicalEvidenceDate = /(These test results were captured on \d{4}-\d{2}-\d{2}\. The reference baseline was refreshed on )\d{4}-\d{2}-\d{2}(; tests were not rerun during that refresh\.)/;
+    if (!historicalEvidenceDate.test(refreshed)) {
+      throw new Error("Cannot refresh reference-baseline.md: missing test evidence date");
+    }
+    refreshed = refreshed.replace(historicalEvidenceDate, (_match, prefix, suffix) => `${prefix}${date}${suffix}`);
+  }
   return refreshed;
 }
 

@@ -976,7 +976,7 @@
       <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 6</p>
       <h1>A retry is the same Evaluation only when its identity matches</h1>
       <p class="hero-copy">In about 9 minutes: Explain which IDs and submission fields make a retry idempotent, why changed data under an old ID is rejected, and what the focused tests do not prove about durable cross-process claims.</p>
-      <p class="mt-1"><span class="status status-current">Source references match 7 pinned files</span> <span class="quiet">Snapshot <code>94e3592a698707cc</code></span></p>
+      <p class="mt-1"><span class="status status-current">Source references match 7 pinned files</span> <span class="quiet">Snapshot <code>4edc506dd9158d21</code></span></p>
       <div class="stage-bar" aria-label="Lesson stages">
         <span class="stage-pill" aria-current="step">1 · Predict</span>
         <span aria-hidden="true" class="flow-arrow">→</span>
@@ -1007,8 +1007,8 @@
             <p>If callers omit them, the engine makes a <code>submissionId</code> and an <code>evaluationId</code>. It also computes a hash of the submitted source. To accept a reused <code>evaluationId</code>, it compares Match, Round, side, submission ID, problem version, language, source hash, and (for a shared team document) document revision.</p>
             <p class="mt-1">So “same Evaluation” means more than “same button was clicked.” Same ID + changed code is a conflict, not permission to change the accepted work.</p>
             <div class="source-links">
-              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fengine.ts&amp;line=544" data-source-id="source-45212ec6817bfc2a" data-source-path="packages/arena-game/src/engine.ts" data-source-line="544" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/engine.ts:544">Create IDs and compare in-flight identity · engine.ts:544</a>
-              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fengine.ts&amp;line=579" data-source-id="source-45212ec6817bfc2a" data-source-path="packages/arena-game/src/engine.ts" data-source-line="579" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/engine.ts:579">Compare the durable row and recover the terminal result · engine.ts:579</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fengine.ts&amp;line=581" data-source-id="source-45212ec6817bfc2a" data-source-path="packages/arena-game/src/engine.ts" data-source-line="581" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/engine.ts:581">Create IDs and compare in-flight identity · engine.ts:581</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fengine.ts&amp;line=616" data-source-id="source-45212ec6817bfc2a" data-source-path="packages/arena-game/src/engine.ts" data-source-line="616" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/engine.ts:616">Compare the durable row and recover the terminal result · engine.ts:616</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration.ts&amp;line=22" data-source-id="source-3730b8152c74a700" data-source-path="packages/arena-game/src/evaluation-orchestration.ts" data-source-line="22" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/evaluation-orchestration.ts:22">Fields in EvaluationIdentity · evaluation-orchestration.ts:22</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fsubmit-path.test.ts&amp;line=48" data-source-id="source-a1f014bca71678f7" data-source-path="packages/arena-game/test/submit-path.test.ts" data-source-line="48" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/submit-path.test.ts:48">Same IDs and same data make one attempt · submit-path.test.ts:48</a>
             </div>
@@ -1022,7 +1022,7 @@
             <div class="source-links">
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration.ts&amp;line=39" data-source-id="source-3730b8152c74a700" data-source-path="packages/arena-game/src/evaluation-orchestration.ts" data-source-line="39" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/evaluation-orchestration.ts:39">Scope of the in-flight registry · evaluation-orchestration.ts:39</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fpersistence.ts&amp;line=30" data-source-id="source-c4b2bf3746fb163f" data-source-path="packages/arena-game/src/persistence.ts" data-source-line="30" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/persistence.ts:30">Durable persistence and claim contract · persistence.ts:30</a>
-              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration.ts&amp;line=172" data-source-id="source-3730b8152c74a700" data-source-path="packages/arena-game/src/evaluation-orchestration.ts" data-source-line="172" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/evaluation-orchestration.ts:172">Acquire a claim, check terminal state, then evaluate · evaluation-orchestration.ts:172</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fevaluation-orchestration.ts&amp;line=191" data-source-id="source-3730b8152c74a700" data-source-path="packages/arena-game/src/evaluation-orchestration.ts" data-source-line="191" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/evaluation-orchestration.ts:191">Acquire a claim, check terminal state, then evaluate · evaluation-orchestration.ts:191</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fsubmit-path.test.ts&amp;line=69" data-source-id="source-a1f014bca71678f7" data-source-path="packages/arena-game/test/submit-path.test.ts" data-source-line="69" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/submit-path.test.ts:69">In-flight duplicate attaches without a second Judge call · submit-path.test.ts:69</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fevaluation-orchestration.test.ts&amp;line=4" data-source-id="source-de8af3952cc61286" data-source-path="packages/arena-game/test/evaluation-orchestration.test.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/evaluation-orchestration.test.ts:4">In-process registry ownership tests · evaluation-orchestration.test.ts:4</a>
             </div>
@@ -1077,12 +1077,13 @@
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>94e3592a698707cc</code>. In-memory tests demonstrate their asserted retry cases; they do not alone prove PostgreSQL claim behavior, sandbox security, or correctness of a separate rewrite.</p>
+      <p>Source snapshot <code>4edc506dd9158d21</code>. In-memory tests demonstrate their asserted retry cases; they do not alone prove PostgreSQL claim behavior, sandbox security, or correctness of a separate rewrite.</p>
     </footer>
   </main>
 <div id="source-templates" hidden>
     <template id="source-45212ec6817bfc2a" data-source-path="packages/arena-game/src/engine.ts"><span class="hljs-keyword">import</span> { randomUUID } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:crypto&quot;</span>;
 <span class="hljs-keyword">import</span> { createHash } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:crypto&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">AsyncLocalStorage</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:async_hooks&quot;</span>;
 <span class="hljs-keyword">import</span> {
   <span class="hljs-keyword">type</span> <span class="hljs-title class_">ArenaEvent</span>,
   <span class="hljs-keyword">type</span> <span class="hljs-title class_">MatchMode</span>,
@@ -1100,6 +1101,7 @@
   <span class="hljs-keyword">type</span> <span class="hljs-title class_">JudgeLimits</span>,
   <span class="hljs-variable constant_">SPIKE_LIMITS</span>,
   <span class="hljs-keyword">type</span> <span class="hljs-title class_">SupportedLanguage</span>,
+  <span class="hljs-title class_">JudgeInfraError</span>,
   <span class="hljs-title class_">ValidationError</span>,
   assertSupportedLanguage,
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./judge.js&quot;</span>;
@@ -1236,12 +1238,17 @@
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">rate</span>: <span class="hljs-title class_">RatePolicy</span>;
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">revealGraceMs</span>: <span class="hljs-built_in">number</span>;
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">reconnectGraceMs</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> deadlineByMatch = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">number</span>&gt;();
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> listeners = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">event</span>: <span class="hljs-title class_">ArenaEvent</span>, <span class="hljs-attr">payload</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>&gt;();
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> eventCommand = <span class="hljs-keyword">new</span> <span class="hljs-title class_">AsyncLocalStorage</span>&lt;{ <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">events</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">event</span>: <span class="hljs-title class_">ArenaEvent</span>; <span class="hljs-attr">payload</span>: <span class="hljs-built_in">unknown</span> }&gt; }&gt;();
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> runStamps = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">number</span>[]&gt;();
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">evaluation</span>: <span class="hljs-title class_">EvaluationOrchestrator</span>;
 
-  <span class="hljs-keyword">private</span> withMatchLock&lt;T&gt;(<span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">fn</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;T&gt;, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">MatchLockOptions</span>): <span class="hljs-title class_">Promise</span>&lt;T&gt; {
-    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">withLock</span>(matchId, fn, options);
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> withMatchLock&lt;T&gt;(<span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">fn</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;T&gt;, <span class="hljs-attr">options</span>?: <span class="hljs-title class_">MatchLockOptions</span>): <span class="hljs-title class_">Promise</span>&lt;T&gt; {
+    <span class="hljs-keyword">const</span> command = { matchId, <span class="hljs-attr">events</span>: [] <span class="hljs-keyword">as</span> <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">event</span>: <span class="hljs-title class_">ArenaEvent</span>; <span class="hljs-attr">payload</span>: <span class="hljs-built_in">unknown</span> }&gt; };
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">eventCommand</span>.<span class="hljs-title function_">run</span>(command, <span class="hljs-function">() =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">withLock</span>(matchId, fn, options));
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> queued <span class="hljs-keyword">of</span> command.<span class="hljs-property">events</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deliverEvent</span>(queued.<span class="hljs-property">event</span>, queued.<span class="hljs-property">payload</span>, result.<span class="hljs-property">revision</span>);
+    <span class="hljs-keyword">return</span> result.<span class="hljs-property">value</span>;
   }
 
   <span class="hljs-comment">/**
@@ -1303,6 +1310,7 @@
       <span class="hljs-attr">authority</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>,
       <span class="hljs-attr">roundLifecycle</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>,
       <span class="hljs-attr">clock</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">clock</span>,
+      <span class="hljs-attr">deadlineGraceMs</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">revealGraceMs</span>,
       <span class="hljs-attr">limits</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">limits</span>,
       <span class="hljs-attr">telemetry</span>: options.<span class="hljs-property">telemetry</span>,
       <span class="hljs-attr">host</span>: {
@@ -1325,7 +1333,17 @@
 
   <span class="hljs-keyword">private</span> <span class="hljs-title function_">emit</span>(<span class="hljs-attr">event</span>: <span class="hljs-title class_">ArenaEvent</span>, <span class="hljs-attr">payload</span>: <span class="hljs-built_in">unknown</span>): <span class="hljs-built_in">void</span> {
     <span class="hljs-keyword">const</span> matchId = (payload <span class="hljs-keyword">as</span> { <span class="hljs-attr">matchId</span>?: <span class="hljs-built_in">string</span> } | <span class="hljs-literal">null</span>)?.<span class="hljs-property">matchId</span>;
+    <span class="hljs-keyword">const</span> command = <span class="hljs-variable language_">this</span>.<span class="hljs-property">eventCommand</span>.<span class="hljs-title function_">getStore</span>();
+    <span class="hljs-keyword">if</span> (command &amp;&amp; command.<span class="hljs-property">matchId</span> === matchId) {
+      command.<span class="hljs-property">events</span>.<span class="hljs-title function_">push</span>({ event, payload });
+      <span class="hljs-keyword">return</span>;
+    }
     <span class="hljs-keyword">const</span> revision = <span class="hljs-keyword">typeof</span> matchId === <span class="hljs-string">&quot;string&quot;</span> ? <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">revisionFor</span>(matchId) : <span class="hljs-literal">undefined</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deliverEvent</span>(event, payload, revision);
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">deliverEvent</span>(<span class="hljs-attr">event</span>: <span class="hljs-title class_">ArenaEvent</span>, <span class="hljs-attr">payload</span>: <span class="hljs-built_in">unknown</span>, <span class="hljs-attr">revision</span>?: <span class="hljs-built_in">number</span>): <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">const</span> matchId = (payload <span class="hljs-keyword">as</span> { <span class="hljs-attr">matchId</span>?: <span class="hljs-built_in">string</span> } | <span class="hljs-literal">null</span>)?.<span class="hljs-property">matchId</span>;
     <span class="hljs-keyword">const</span> stamped =
       payload !== <span class="hljs-literal">null</span> &amp;&amp;
       <span class="hljs-keyword">typeof</span> payload === <span class="hljs-string">&quot;object&quot;</span> &amp;&amp;
@@ -1333,7 +1351,13 @@
       revision !== <span class="hljs-literal">undefined</span>
         ? { ...(payload <span class="hljs-keyword">as</span> <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;), revision }
         : payload;
-    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> l <span class="hljs-keyword">of</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">listeners</span>) <span class="hljs-title function_">l</span>(event, stamped);
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> listener <span class="hljs-keyword">of</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">listeners</span>) {
+      <span class="hljs-keyword">try</span> {
+        <span class="hljs-title function_">listener</span>(event, stamped);
+      } <span class="hljs-keyword">catch</span> (error) {
+        <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">`Arena event listener failed after <span class="hljs-subst">${event}</span> committed`</span>, error);
+      }
+    }
   }
 
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">createMatch</span>(<span class="hljs-attr">input</span>: {
@@ -1409,20 +1433,25 @@
       <span class="hljs-attr">forfeit</span>: <span class="hljs-literal">null</span>,
     };
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">save</span>(match);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rememberDeadline</span>(match);
     <span class="hljs-keyword">return</span> matchId;
   }
 
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">startRound</span>(<span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireUnexpired</span>(match);
       <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">startRound</span>(match);
       <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">saveMatch</span>(match);
       <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&quot;phase.changed&quot;</span>, { <span class="hljs-attr">matchId</span>: match.<span class="hljs-property">id</span>, <span class="hljs-attr">phase</span>: match.<span class="hljs-property">roundPhase</span>, <span class="hljs-attr">round</span>: match.<span class="hljs-property">currentRound</span> });
     });
   }
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">beginCoding</span>(<span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireUnexpired</span>(match);
       <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">beginCoding</span>(match);
       <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">saveMatch</span>(match);
       <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&quot;phase.changed&quot;</span>, { <span class="hljs-attr">matchId</span>: match.<span class="hljs-property">id</span>, <span class="hljs-attr">phase</span>: match.<span class="hljs-property">roundPhase</span>, <span class="hljs-attr">round</span>: match.<span class="hljs-property">currentRound</span> });
@@ -1435,8 +1464,10 @@
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
     <span class="hljs-attr">input</span>: { <span class="hljs-attr">ready</span>: <span class="hljs-built_in">boolean</span>; <span class="hljs-attr">documentRevision</span>?: <span class="hljs-title class_">DocumentRevision</span> },
   ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireUnexpired</span>(match);
       <span class="hljs-keyword">if</span> (match.<span class="hljs-property">mode</span> !== <span class="hljs-string">&quot;2v2&quot;</span>) <span class="hljs-keyword">return</span>;
       <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">teamCollaboration</span>.<span class="hljs-title function_">setReady</span>(match, principal.<span class="hljs-property">userId</span>, input);
       <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">saveMatch</span>(match);
@@ -1455,8 +1486,10 @@
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
     <span class="hljs-attr">input</span>: { <span class="hljs-attr">roundId</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">updateB64</span>: <span class="hljs-built_in">string</span> },
   ): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">revision</span>: <span class="hljs-title class_">DocumentRevision</span>; <span class="hljs-attr">changed</span>: <span class="hljs-built_in">boolean</span>; <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span> }&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireUnexpired</span>(match);
       <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">teamCollaboration</span>.<span class="hljs-title function_">applyUpdate</span>(match, principal.<span class="hljs-property">userId</span>, input);
       <span class="hljs-keyword">if</span> (result.<span class="hljs-property">changed</span>) {
         <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&quot;readiness.changed&quot;</span>, {
@@ -1509,8 +1542,10 @@
   }
 
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">setTeamLanguage</span>(<span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">language</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">DocumentRevision</span> | <span class="hljs-literal">null</span>&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireUnexpired</span>(match);
       <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">teamCollaboration</span>.<span class="hljs-title function_">setLanguage</span>(match, principal.<span class="hljs-property">userId</span>, language);
       <span class="hljs-keyword">if</span> (!result) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
       <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&quot;readiness.changed&quot;</span>, {
@@ -1527,6 +1562,7 @@
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
     <span class="hljs-attr">input</span>: { <span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">language</span>: <span class="hljs-built_in">string</span> },
   ): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">runId</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">tests</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">passed</span>: <span class="hljs-built_in">boolean</span>; <span class="hljs-attr">output</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">runtimeMs</span>: <span class="hljs-built_in">number</span> }&gt; }&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">const</span> setup = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
       <span class="hljs-keyword">const</span> side = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sideOf</span>(match, principal);
@@ -1596,6 +1632,7 @@
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
     <span class="hljs-attr">input</span>: { <span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">language</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">submissionId</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">evaluationId</span>?: <span class="hljs-built_in">string</span>; <span class="hljs-attr">documentRevision</span>?: <span class="hljs-title class_">DocumentRevision</span> },
   ): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span>; <span class="hljs-attr">round</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">submissionId</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">evaluationId</span>: <span class="hljs-built_in">string</span> }&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-comment">// Phase 1 (locked): gates, ids, pending record, activity dispatch.</span>
     <span class="hljs-keyword">const</span> setup = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
@@ -1674,6 +1711,9 @@
           <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">DuplicateError</span>(<span class="hljs-string">&quot;evaluation id is already bound to different submission data&quot;</span>);
         }
         <span class="hljs-keyword">if</span> (existing &amp;&amp; existing.<span class="hljs-property">status</span> !== <span class="hljs-string">&quot;pending&quot;</span>) {
+          <span class="hljs-keyword">if</span> (existing.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;failed&quot;</span>) {
+            <span class="hljs-keyword">throw</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">evaluation</span>.<span class="hljs-title function_">failureFor</span>(evaluationId) ?? <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;evaluation previously failed&quot;</span>);
+          }
           <span class="hljs-comment">// Idempotent retry: same stored outcome, no second logical evaluation.</span>
           <span class="hljs-variable language_">this</span>.<span class="hljs-property">evaluation</span>.<span class="hljs-title function_">settle</span>(evaluationId, tracked, { <span class="hljs-attr">ok</span>: <span class="hljs-literal">true</span> });
           <span class="hljs-keyword">return</span> { <span class="hljs-attr">attached</span>: <span class="hljs-literal">true</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>, <span class="hljs-attr">roundNo</span>: match.<span class="hljs-property">currentRound</span>, <span class="hljs-attr">submissionId</span>: existing.<span class="hljs-property">submissionId</span>, <span class="hljs-attr">evaluationId</span>: existing.<span class="hljs-property">evaluationId</span> };
@@ -1732,7 +1772,6 @@
             <span class="hljs-attr">weight</span>: g.<span class="hljs-property">weight</span>,
             <span class="hljs-attr">tests</span>: g.<span class="hljs-property">tests</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">t</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: t.<span class="hljs-property">id</span>, <span class="hljs-attr">input</span>: t.<span class="hljs-property">input</span>, <span class="hljs-attr">expected</span>: t.<span class="hljs-property">expected</span> })),
           })),
-          now,
           tracked,
         };
       } <span class="hljs-keyword">catch</span> (error) {
@@ -1764,7 +1803,6 @@
       <span class="hljs-attr">source</span>: setup.<span class="hljs-property">source</span>,
       <span class="hljs-attr">groups</span>: setup.<span class="hljs-property">groups</span>,
       <span class="hljs-attr">documentRevision</span>: setup.<span class="hljs-property">tracked</span>.<span class="hljs-property">documentRevision</span>,
-      <span class="hljs-attr">now</span>: setup.<span class="hljs-property">now</span>,
       <span class="hljs-attr">tracked</span>: setup.<span class="hljs-property">tracked</span>,
     });
   }
@@ -1774,11 +1812,22 @@
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
     <span class="hljs-attr">options</span>: { <span class="hljs-attr">graceMs</span>?: <span class="hljs-built_in">number</span> } = {},
   ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RevealSnapshot</span>&gt; {
-    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId) &amp;&amp; <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId)) {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-keyword">const</span> reveal = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">currentRound</span>(match).<span class="hljs-property">reveal</span>;
+      <span class="hljs-keyword">if</span> (reveal) <span class="hljs-keyword">return</span> <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(reveal)) <span class="hljs-keyword">as</span> <span class="hljs-title class_">RevealSnapshot</span>;
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalStateError</span>(<span class="hljs-string">&quot;expired Match has no current Reveal&quot;</span>);
+    }
+    <span class="hljs-keyword">const</span> existingReveal = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">currentRound</span>(match).<span class="hljs-property">reveal</span>) {
+        <span class="hljs-keyword">return</span> <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">currentRound</span>(match).<span class="hljs-property">reveal</span>)) <span class="hljs-keyword">as</span> <span class="hljs-title class_">RevealSnapshot</span>;
+      }
       <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">beginReveal</span>(match);
       <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">saveMatch</span>(match);
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
     });
+    <span class="hljs-keyword">if</span> (existingReveal) <span class="hljs-keyword">return</span> existingReveal;
     <span class="hljs-keyword">const</span> first = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
     <span class="hljs-keyword">const</span> firstRound = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">currentRound</span>(first);
     <span class="hljs-keyword">const</span> graceMs = options.<span class="hljs-property">graceMs</span> ?? <span class="hljs-variable language_">this</span>.<span class="hljs-property">revealGraceMs</span>;
@@ -1830,6 +1879,7 @@
   }
 
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">nextRound</span>(<span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId) &amp;&amp; <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId)) <span class="hljs-keyword">return</span>;
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
       <span class="hljs-keyword">const</span> plan = <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">advance</span>(match);
@@ -1857,6 +1907,7 @@
     <span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>,
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
   ): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">scores</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">SideId</span>, <span class="hljs-built_in">number</span>&gt;&gt;; <span class="hljs-attr">outcome</span>: <span class="hljs-string">&quot;left&quot;</span> | <span class="hljs-string">&quot;right&quot;</span> | <span class="hljs-string">&quot;draw&quot;</span>; <span class="hljs-attr">winner</span>: <span class="hljs-title class_">SideId</span> | <span class="hljs-literal">null</span>; <span class="hljs-attr">forfeit</span>: <span class="hljs-title class_">ForfeitRecord</span> | <span class="hljs-literal">null</span> }&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
     <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> !== <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">IllegalStateError</span>(<span class="hljs-string">&quot;match not complete&quot;</span>);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">computeFinal</span>(match);
@@ -1875,6 +1926,7 @@
   }
 
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">snapshot</span>(<span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">SealedSnapshot</span>&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withRevisionRetry</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
       <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">applyGraceToMatch</span>(match);
@@ -2036,6 +2088,173 @@
     <span class="hljs-keyword">return</span> forfeited;
   }
 
+  <span class="hljs-comment">/** Close expired Matches on the server, including after a process restart. */</span>
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">sweepExpiredMatches</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">string</span>[]&gt; {
+    <span class="hljs-keyword">const</span> ids = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">listMatchIds</span>();
+    <span class="hljs-keyword">const</span> outcomes = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(ids.<span class="hljs-title function_">map</span>(<span class="hljs-title function_">async</span> (id) =&gt; {
+      <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">return</span> (<span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(id)) ? id : <span class="hljs-literal">null</span>;
+      } <span class="hljs-keyword">catch</span> {
+        <span class="hljs-comment">// A failed Match commit is retried by the next sweep or player snapshot.</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+      }
+    }));
+    <span class="hljs-keyword">return</span> outcomes.<span class="hljs-title function_">filter</span>((id): id is <span class="hljs-built_in">string</span> =&gt; id !== <span class="hljs-literal">null</span>);
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">closeExpiredMatch</span>(<span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">boolean</span>&gt; {
+    <span class="hljs-keyword">const</span> decision = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withRevisionRetry</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">loadMatchOrThrow</span>(matchId);
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span> || !<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isExpired</span>(match)) {
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;idle&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span> };
+      }
+
+      <span class="hljs-keyword">const</span> round = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">currentRound</span>(match);
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;CODING&quot;</span>) {
+        <span class="hljs-keyword">const</span> persistedReveal = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">findReveal</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>);
+        <span class="hljs-keyword">if</span> (persistedReveal) {
+          <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">finishExpiredRound</span>(match, round, persistedReveal);
+          <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;completed&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span> };
+        }
+        <span class="hljs-keyword">const</span> matchDeadline = match.<span class="hljs-property">startedAt</span> + match.<span class="hljs-property">durationMs</span>;
+        <span class="hljs-keyword">const</span> pendingEvaluationIds = (<span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">listRoundSubmissions</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>))
+          .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">submission</span>) =&gt;</span> submission.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;pending&quot;</span> &amp;&amp; submission.<span class="hljs-property">submittedAt</span> &lt; matchDeadline)
+          .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">submission</span>) =&gt;</span> submission.<span class="hljs-property">evaluationId</span>);
+        <span class="hljs-keyword">if</span> (!round.<span class="hljs-property">closing</span>) {
+          <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">beginReveal</span>(match);
+          <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">saveMatch</span>(match);
+        }
+        <span class="hljs-keyword">return</span> {
+          <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;waiting&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>,
+          <span class="hljs-attr">roundId</span>: round.<span class="hljs-property">roundId</span>,
+          <span class="hljs-attr">cutoffPassed</span>: round.<span class="hljs-property">cutoffPassed</span>,
+          pendingEvaluationIds,
+          <span class="hljs-attr">graceDeadline</span>: matchDeadline + <span class="hljs-variable language_">this</span>.<span class="hljs-property">revealGraceMs</span>,
+        };
+      }
+
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_FOUND&quot;</span> || match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;ROUND_INTRO&quot;</span>) {
+        <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">finishExpiredRound</span>(match, round);
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;completed&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span> };
+      }
+
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;SCORE_REVEAL&quot;</span> || match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;ROUND_COMPLETE&quot;</span>) {
+        <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">finishExpiredRound</span>(match, round, round.<span class="hljs-property">reveal</span> ?? <span class="hljs-literal">undefined</span>);
+        <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;completed&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span> };
+      }
+
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;idle&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span> };
+    });
+
+    <span class="hljs-keyword">if</span> (decision.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;idle&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (decision.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;completed&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+
+    <span class="hljs-keyword">if</span> (!decision.<span class="hljs-property">cutoffPassed</span> &amp;&amp; decision.<span class="hljs-property">pendingEvaluationIds</span>.<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">waitForDeadlineEvaluations</span>(
+        matchId,
+        decision.<span class="hljs-property">roundId</span>,
+        decision.<span class="hljs-property">pendingEvaluationIds</span>,
+        decision.<span class="hljs-property">graceDeadline</span>,
+      );
+    }
+
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withRevisionRetry</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
+      <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">loadMatchOrThrow</span>(matchId);
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span> || !<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isExpired</span>(match)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+      <span class="hljs-keyword">const</span> round = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">currentRound</span>(match);
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;CODING&quot;</span>) {
+        <span class="hljs-keyword">const</span> persistedReveal = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">findReveal</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>);
+        <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">finishExpiredRound</span>(match, round, persistedReveal);
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+      }
+      <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;SCORE_REVEAL&quot;</span> || match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;ROUND_COMPLETE&quot;</span>) {
+        <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">finishExpiredRound</span>(match, round, round.<span class="hljs-property">reveal</span> ?? <span class="hljs-literal">undefined</span>);
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+      }
+      <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    });
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">waitForDeadlineEvaluations</span>(
+    <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">roundId</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">evaluationIds</span>: <span class="hljs-keyword">readonly</span> <span class="hljs-built_in">string</span>[],
+    <span class="hljs-attr">graceDeadline</span>: <span class="hljs-built_in">number</span>,
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+      <span class="hljs-keyword">const</span> submissions = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(
+        evaluationIds.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">evaluationId</span>) =&gt;</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">findSubmissionByEvaluationId</span>(evaluationId)),
+      );
+      <span class="hljs-keyword">if</span> (!submissions.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">submission</span>) =&gt;</span> submission?.<span class="hljs-property">matchId</span> === matchId &amp;&amp; submission.<span class="hljs-property">roundId</span> === roundId &amp;&amp; submission.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;pending&quot;</span>)) {
+        <span class="hljs-keyword">return</span>;
+      }
+
+      <span class="hljs-keyword">const</span> remainingGraceMs = graceDeadline - <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">clock</span>();
+      <span class="hljs-keyword">if</span> (remainingGraceMs &lt;= <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span>;
+      <span class="hljs-keyword">await</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;(<span class="hljs-function">(<span class="hljs-params">resolve</span>) =&gt;</span> <span class="hljs-built_in">setTimeout</span>(resolve, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-number">50</span>, remainingGraceMs)));
+    }
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">finishExpiredRound</span>(
+    <span class="hljs-attr">match</span>: <span class="hljs-title class_">MatchRecord</span>,
+    <span class="hljs-attr">round</span>: <span class="hljs-title class_">RoundState</span>,
+    <span class="hljs-attr">existingReveal</span>?: <span class="hljs-title class_">RevealSnapshot</span>,
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> phase = match.<span class="hljs-property">roundPhase</span>;
+    <span class="hljs-keyword">const</span> wasRevealed = round.<span class="hljs-property">reveal</span> !== <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">let</span> reveal = round.<span class="hljs-property">reveal</span> ?? existingReveal ?? (<span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">findReveal</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>));
+
+    <span class="hljs-keyword">if</span> (phase === <span class="hljs-string">&quot;CODING&quot;</span>) {
+      <span class="hljs-keyword">const</span> submissions = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">listRoundSubmissions</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">prepareReveal</span>(
+        match,
+        <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>(submissions.<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">submission</span>) =&gt;</span> submission.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;completed&quot;</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">submission</span>) =&gt;</span> submission.<span class="hljs-property">evaluationId</span>)),
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">evaluation</span>.<span class="hljs-title function_">forRound</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">entry</span>) =&gt;</span> entry.<span class="hljs-property">evaluationId</span>),
+      );
+    } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (phase === <span class="hljs-string">&quot;MATCH_FOUND&quot;</span> || phase === <span class="hljs-string">&quot;ROUND_INTRO&quot;</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">prepareDeadlineReveal</span>(match, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>(), []);
+    }
+
+    <span class="hljs-keyword">if</span> (!reveal) {
+      reveal = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">createRevealSnapshot</span>(match, round);
+      <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">publishReveal</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>, reveal);
+    }
+
+    <span class="hljs-keyword">if</span> (!round.<span class="hljs-property">reveal</span>) {
+      <span class="hljs-keyword">if</span> (phase === <span class="hljs-string">&quot;CODING&quot;</span> || phase === <span class="hljs-string">&quot;MATCH_FOUND&quot;</span> || phase === <span class="hljs-string">&quot;ROUND_INTRO&quot;</span>) {
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">commitReveal</span>(match, reveal, <span class="hljs-string">&quot;MATCH_DEADLINE&quot;</span>);
+      } <span class="hljs-keyword">else</span> {
+        round.<span class="hljs-property">reveal</span> = reveal;
+      }
+    }
+
+    round.<span class="hljs-property">closing</span> = <span class="hljs-literal">false</span>;
+    round.<span class="hljs-property">cutoffPassed</span> = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> side <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(round.<span class="hljs-property">activities</span>)) {
+      <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">activityOf</span>(round, side) !== <span class="hljs-string">&quot;locked&quot;</span>) {
+        <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">setActivity</span>(match, round, side, <span class="hljs-string">&quot;locked&quot;</span>);
+      }
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">finishAtDeadline</span>(match);
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">saveMatch</span>(match);
+    <span class="hljs-keyword">if</span> (!wasRevealed) <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&quot;reveal.published&quot;</span>, { <span class="hljs-attr">matchId</span>: match.<span class="hljs-property">id</span>, <span class="hljs-attr">round</span>: match.<span class="hljs-property">currentRound</span> });
+    <span class="hljs-keyword">const</span> final = <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">computeFinal</span>(match);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">emit</span>(<span class="hljs-string">&quot;match.ended&quot;</span>, { <span class="hljs-attr">matchId</span>: match.<span class="hljs-property">id</span>, <span class="hljs-attr">result</span>: <span class="hljs-string">&quot;deadline&quot;</span>, <span class="hljs-attr">winner</span>: final.<span class="hljs-property">winner</span> ?? <span class="hljs-literal">undefined</span> });
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">createRevealSnapshot</span>(<span class="hljs-attr">match</span>: <span class="hljs-title class_">MatchRecord</span>, <span class="hljs-attr">round</span>: <span class="hljs-title class_">RoundState</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RevealSnapshot</span>&gt; {
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">scores</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">SideId</span>, <span class="hljs-built_in">number</span>&gt;&gt; = {};
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">groups</span>: <span class="hljs-title class_">RevealSnapshot</span>[<span class="hljs-string">&quot;groups&quot;</span>] = {};
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">totals</span>: <span class="hljs-title class_">Partial</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">SideId</span>, <span class="hljs-built_in">number</span>&gt;&gt; = {};
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> side <span class="hljs-keyword">of</span> <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(round.<span class="hljs-property">activities</span>)) {
+      scores[side] = round.<span class="hljs-property">counted</span>[side]?.<span class="hljs-property">score</span> ?? <span class="hljs-number">0</span>;
+      <span class="hljs-keyword">const</span> latest = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">latestCompleted</span>(match.<span class="hljs-property">id</span>, round.<span class="hljs-property">roundId</span>, side);
+      groups[side] = latest?.<span class="hljs-property">groups</span> ?? [];
+      totals[side] = <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">totalScore</span>(match, side);
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">roundLifecycle</span>.<span class="hljs-title function_">createReveal</span>(match, { scores, groups, totals, <span class="hljs-attr">publishedAt</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">clock</span>() });
+  }
+
   <span class="hljs-comment">/**
    * Caller holds the lock and a loaded match. Records a grace forfeit when an
    * offline side (previously online, never rejoined) exhausts the window.
@@ -2045,7 +2264,7 @@
     <span class="hljs-comment">// ponytail: no 2v2 grace-forfeit rules exist yet (ticket 14 §20) — member</span>
     <span class="hljs-comment">// offline windows are presence display only. 1v1 path below untouched.</span>
     <span class="hljs-keyword">if</span> (match.<span class="hljs-property">mode</span> === <span class="hljs-string">&quot;2v2&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
-    <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span> || match.<span class="hljs-property">forfeit</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span> || match.<span class="hljs-property">forfeit</span> || <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isExpired</span>(match)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
     <span class="hljs-keyword">const</span> now = <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">clock</span>();
     <span class="hljs-keyword">const</span> expired = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(match.<span class="hljs-property">offlineSinceMs</span>)
       .<span class="hljs-title function_">filter</span>(<span class="hljs-function">(<span class="hljs-params">[, since]</span>) =&gt;</span> since !== <span class="hljs-literal">undefined</span> &amp;&amp; since + <span class="hljs-variable language_">this</span>.<span class="hljs-property">reconnectGraceMs</span> &lt;= now)
@@ -2065,6 +2284,7 @@
     <span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>,
     <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>,
   ): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">winner</span>: <span class="hljs-title class_">SideId</span>; <span class="hljs-attr">loser</span>: <span class="hljs-title class_">SideId</span> }&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(matchId)) <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">closeExpiredMatch</span>(matchId);
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">withMatchLock</span>(matchId, <span class="hljs-title function_">async</span> () =&gt; {
       <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
       <span class="hljs-keyword">if</span> (match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;MATCH_COMPLETE&quot;</span> || match.<span class="hljs-property">forfeit</span>) {
@@ -2156,15 +2376,29 @@
     <span class="hljs-keyword">const</span> recovery = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">evaluation</span>.<span class="hljs-title function_">recoverPending</span>();
     retried = recovery.<span class="hljs-property">retried</span>;
     failed = recovery.<span class="hljs-property">failed</span>;
+    <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">sweepExpiredMatches</span>();
     <span class="hljs-keyword">return</span> { <span class="hljs-attr">matches</span>: ids.<span class="hljs-property">length</span>, retried, failed };
   }
 
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">requireMember</span>(<span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>, <span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">MatchRecord</span>&gt; {
-    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+    <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">requireMember</span>(principal, matchId);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rememberDeadline</span>(match);
+    <span class="hljs-keyword">return</span> match;
   }
 
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">loadMatchOrThrow</span>(<span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">MatchRecord</span>&gt; {
-    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">loadOrThrow</span>(matchId);
+    <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">authority</span>.<span class="hljs-title function_">loadOrThrow</span>(matchId);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">rememberDeadline</span>(match);
+    <span class="hljs-keyword">return</span> match;
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">rememberDeadline</span>(<span class="hljs-attr">match</span>: <span class="hljs-title class_">MatchRecord</span>): <span class="hljs-built_in">void</span> {
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineByMatch</span>.<span class="hljs-title function_">set</span>(match.<span class="hljs-property">id</span>, match.<span class="hljs-property">startedAt</span> + match.<span class="hljs-property">durationMs</span>);
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">deadlineHasElapsedOrUnknown</span>(<span class="hljs-attr">matchId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">boolean</span> {
+    <span class="hljs-keyword">const</span> deadline = <span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineByMatch</span>.<span class="hljs-title function_">get</span>(matchId);
+    <span class="hljs-keyword">return</span> deadline === <span class="hljs-literal">undefined</span> || <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">clock</span>() &gt;= deadline;
   }
 
   <span class="hljs-keyword">private</span> <span class="hljs-title function_">sideOf</span>(<span class="hljs-attr">match</span>: <span class="hljs-title class_">MatchRecord</span>, <span class="hljs-attr">principal</span>: <span class="hljs-title class_">AuthenticatedPrincipal</span>): <span class="hljs-title class_">SideId</span> {
@@ -2194,7 +2428,11 @@
   }
 
   <span class="hljs-keyword">private</span> <span class="hljs-title function_">requireUnexpired</span>(<span class="hljs-attr">match</span>: <span class="hljs-title class_">MatchRecord</span>): <span class="hljs-built_in">void</span> {
-    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">clock</span>() - match.<span class="hljs-property">startedAt</span> &gt; match.<span class="hljs-property">durationMs</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ExpiredError</span>();
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-title function_">isExpired</span>(match)) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ExpiredError</span>();
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">isExpired</span>(<span class="hljs-attr">match</span>: <span class="hljs-title class_">MatchRecord</span>): <span class="hljs-built_in">boolean</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">clock</span>() &gt;= match.<span class="hljs-property">startedAt</span> + match.<span class="hljs-property">durationMs</span>;
   }
 
   <span class="hljs-keyword">private</span> <span class="hljs-title function_">validateSource</span>(<span class="hljs-attr">code</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">void</span> {
@@ -2316,6 +2554,7 @@
  */</span>
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">EvaluationInFlightRegistry</span> {
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> entries = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-title class_">InFlightEvaluation</span>&gt;();
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> settledFailures = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;();
 
   <span class="hljs-title function_">get</span>(<span class="hljs-attr">evaluationId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-title class_">InFlightEvaluation</span> | <span class="hljs-literal">undefined</span> {
     <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">entries</span>.<span class="hljs-title function_">get</span>(evaluationId);
@@ -2333,7 +2572,20 @@
 
   <span class="hljs-title function_">settle</span>(<span class="hljs-attr">evaluationId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">tracked</span>: <span class="hljs-title class_">InFlightEvaluation</span>, <span class="hljs-attr">completion</span>: <span class="hljs-title class_">EvaluationCompletion</span>): <span class="hljs-built_in">void</span> {
     <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">entries</span>.<span class="hljs-title function_">get</span>(evaluationId) === tracked) <span class="hljs-variable language_">this</span>.<span class="hljs-property">entries</span>.<span class="hljs-title function_">delete</span>(evaluationId);
+    <span class="hljs-keyword">if</span> (completion.<span class="hljs-property">ok</span>) {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">settledFailures</span>.<span class="hljs-title function_">delete</span>(evaluationId);
+    } <span class="hljs-keyword">else</span> {
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">settledFailures</span>.<span class="hljs-title function_">set</span>(evaluationId, completion.<span class="hljs-property">error</span>);
+      <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">settledFailures</span>.<span class="hljs-property">size</span> &gt; <span class="hljs-number">256</span>) {
+        <span class="hljs-keyword">const</span> oldest = <span class="hljs-variable language_">this</span>.<span class="hljs-property">settledFailures</span>.<span class="hljs-title function_">keys</span>().<span class="hljs-title function_">next</span>().<span class="hljs-property">value</span>;
+        <span class="hljs-keyword">if</span> (oldest !== <span class="hljs-literal">undefined</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">settledFailures</span>.<span class="hljs-title function_">delete</span>(oldest);
+      }
+    }
     tracked.<span class="hljs-title function_">resolve</span>(completion);
+  }
+
+  <span class="hljs-title function_">failureFor</span>(<span class="hljs-attr">evaluationId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">unknown</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">settledFailures</span>.<span class="hljs-title function_">get</span>(evaluationId);
   }
 
   <span class="hljs-title function_">forRound</span>(
@@ -2365,7 +2617,6 @@
   <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span>;
   <span class="hljs-attr">groups</span>: <span class="hljs-title class_">SealedGroup</span>[];
   <span class="hljs-attr">documentRevision</span>: <span class="hljs-title class_">DocumentRevision</span> | <span class="hljs-literal">null</span>;
-  <span class="hljs-attr">now</span>: <span class="hljs-built_in">number</span>;
   <span class="hljs-attr">tracked</span>: <span class="hljs-title class_">InFlightEvaluation</span>;
 }
 
@@ -2402,6 +2653,8 @@
   <span class="hljs-attr">authority</span>: <span class="hljs-title class_">MatchAuthority</span>;
   <span class="hljs-attr">roundLifecycle</span>: <span class="hljs-title class_">RoundLifecycle</span>;
   <span class="hljs-attr">clock</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-built_in">number</span>;
+  <span class="hljs-comment">/** Time after Match expiry during which already-accepted evaluations may count. */</span>
+  <span class="hljs-attr">deadlineGraceMs</span>: <span class="hljs-built_in">number</span>;
   <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>;
   <span class="hljs-attr">telemetry</span>?: <span class="hljs-title class_">EvaluationTelemetry</span>;
   <span class="hljs-attr">host</span>: <span class="hljs-title class_">EvaluationOrchestrationHost</span>;
@@ -2431,6 +2684,10 @@
 
   <span class="hljs-title function_">settle</span>(<span class="hljs-attr">evaluationId</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">tracked</span>: <span class="hljs-title class_">InFlightEvaluation</span>, <span class="hljs-attr">completion</span>: <span class="hljs-title class_">EvaluationCompletion</span>): <span class="hljs-built_in">void</span> {
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">inFlight</span>.<span class="hljs-title function_">settle</span>(evaluationId, tracked, completion);
+  }
+
+  <span class="hljs-title function_">failureFor</span>(<span class="hljs-attr">evaluationId</span>: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">unknown</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">inFlight</span>.<span class="hljs-title function_">failureFor</span>(evaluationId);
   }
 
   <span class="hljs-title function_">forRound</span>(
@@ -2520,7 +2777,13 @@
         <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">host</span>.<span class="hljs-title function_">withMatchLock</span>(
           input.<span class="hljs-property">matchId</span>,
           <span class="hljs-title function_">async</span> () =&gt; {
-            <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">commitStoredEvaluation</span>(claim!, input.<span class="hljs-property">matchId</span>, input.<span class="hljs-property">evaluationId</span>, verdict, input.<span class="hljs-property">now</span>);
+            <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">commitStoredEvaluation</span>(
+              claim!,
+              input.<span class="hljs-property">matchId</span>,
+              input.<span class="hljs-property">evaluationId</span>,
+              verdict,
+              <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-title function_">clock</span>(),
+            );
           },
           { <span class="hljs-attr">skipFinalSave</span>: <span class="hljs-literal">true</span> },
         );
@@ -2554,12 +2817,18 @@
       <span class="hljs-keyword">try</span> {
         <span class="hljs-keyword">const</span> match = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">loadMatch</span>(stored.<span class="hljs-property">matchId</span>);
         <span class="hljs-keyword">const</span> round = match?.<span class="hljs-property">rounds</span>.<span class="hljs-title function_">find</span>(<span class="hljs-function">(<span class="hljs-params">candidate</span>) =&gt;</span> candidate.<span class="hljs-property">roundId</span> === stored.<span class="hljs-property">roundId</span>);
+        <span class="hljs-keyword">const</span> matchDeadline = match ? match.<span class="hljs-property">startedAt</span> + match.<span class="hljs-property">durationMs</span> : <span class="hljs-literal">undefined</span>;
+        <span class="hljs-keyword">const</span> withinDeadlineGrace =
+          matchDeadline !== <span class="hljs-literal">undefined</span> &amp;&amp;
+          stored.<span class="hljs-property">submittedAt</span> &lt; matchDeadline &amp;&amp;
+          <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-title function_">clock</span>() &lt;= matchDeadline + <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">deadlineGraceMs</span>;
         <span class="hljs-keyword">const</span> live =
           match &amp;&amp;
           match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;CODING&quot;</span> &amp;&amp;
           round &amp;&amp;
           round.<span class="hljs-property">roundId</span> === match.<span class="hljs-property">rounds</span>[match.<span class="hljs-property">currentRound</span> - <span class="hljs-number">1</span>]?.<span class="hljs-property">roundId</span> &amp;&amp;
-          !round.<span class="hljs-property">cutoffPassed</span>;
+          !round.<span class="hljs-property">cutoffPassed</span> &amp;&amp;
+          withinDeadlineGrace;
         <span class="hljs-keyword">if</span> (!live) {
           <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">host</span>.<span class="hljs-title function_">withMatchLock</span>(stored.<span class="hljs-property">matchId</span>, <span class="hljs-title function_">async</span> () =&gt; {
             <span class="hljs-keyword">const</span> gone = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">persistence</span>.<span class="hljs-title function_">findSubmissionByEvaluationId</span>(stored.<span class="hljs-property">evaluationId</span>);
@@ -2700,15 +2969,18 @@
       <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge returned non-competitive verdict set&quot;</span>);
     }
     <span class="hljs-keyword">const</span> { score, scoreBp, <span class="hljs-attr">groups</span>: groupResults, <span class="hljs-attr">testStatuses</span>: statuses } = scored;
+    <span class="hljs-keyword">const</span> matchDeadline = match.<span class="hljs-property">startedAt</span> + match.<span class="hljs-property">durationMs</span>;
+    <span class="hljs-keyword">const</span> withinDeadlineGrace = stored.<span class="hljs-property">submittedAt</span> &lt; matchDeadline &amp;&amp; now &lt;= matchDeadline + <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">deadlineGraceMs</span>;
     <span class="hljs-keyword">if</span> (
       match.<span class="hljs-property">roundPhase</span> === <span class="hljs-string">&quot;CODING&quot;</span> &amp;&amp;
       round.<span class="hljs-property">roundId</span> === <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">host</span>.<span class="hljs-title function_">currentRound</span>(match).<span class="hljs-property">roundId</span> &amp;&amp;
       !round.<span class="hljs-property">cutoffPassed</span> &amp;&amp;
-      !round.<span class="hljs-property">superseded</span>.<span class="hljs-title function_">includes</span>(evaluationId)
+      !round.<span class="hljs-property">superseded</span>.<span class="hljs-title function_">includes</span>(evaluationId) &amp;&amp;
+      withinDeadlineGrace
     ) {
       <span class="hljs-keyword">const</span> attempts = (round.<span class="hljs-property">attempts</span>[side] ?? <span class="hljs-number">0</span>) + <span class="hljs-number">1</span>;
       round.<span class="hljs-property">attempts</span>[side] = attempts;
-      <span class="hljs-keyword">const</span> <span class="hljs-attr">counted</span>: <span class="hljs-title class_">CountedResult</span> = { score, <span class="hljs-attr">scoringTimeMs</span>: now - match.<span class="hljs-property">startedAt</span> };
+      <span class="hljs-keyword">const</span> <span class="hljs-attr">counted</span>: <span class="hljs-title class_">CountedResult</span> = { score, <span class="hljs-attr">scoringTimeMs</span>: stored.<span class="hljs-property">elapsedMatchMs</span> };
       round.<span class="hljs-property">counted</span>[side] = counted;
       stored.<span class="hljs-property">status</span> = <span class="hljs-string">&quot;completed&quot;</span>;
       stored.<span class="hljs-property">score</span> = score;

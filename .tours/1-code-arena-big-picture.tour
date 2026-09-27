@@ -8,39 +8,45 @@
       "description": "This is a beginner-friendly route through the existing game. When you come back later, open the CodeTour view or Command Palette, choose CodeTour: Start Tour, then select this first tour. Read only the highlighted file and its explanation at each stop. You can pause at any point; the numbered tours link together."
     },
     {
+      "file": "frontend/src/arena/lobby-session.ts",
+      "line": 83,
+      "title": "1. Invitation-only Lobby reads the latest server state",
+      "description": "LobbySession treats room and queue socket events and mutation responses as refresh hints. It fetches the authoritative active state and rejects superseded responses, so an older HTTP result cannot restore stale membership or readiness. Legacy waiting-queue entries are cleared before the first-release room flow is shown."
+    },
+    {
       "file": "frontend/src/components/ArenaPage.tsx",
       "line": 36,
-      "title": "1. The game screen",
-      "description": "ArenaPage is the main game screen. It reads the current game snapshot and manages screen-level things such as your editor draft. It can also create separate live collaboration and chat connections for 2v2. The screen displays game state; it is not the final authority on game rules."
+      "title": "2. The game screen",
+      "description": "ArenaPage reads the latest game snapshot and manages screen-level state such as the editor draft. It also creates separate live collaboration and chat connections for 2v2. The screen displays game state; it is not the authority for game rules."
     },
     {
       "file": "frontend/src/arena/transport.ts",
       "line": 61,
-      "title": "2. The frontend's doorway to the game",
+      "title": "3. The frontend's doorway to the game",
       "description": "ArenaTransport is a contract: it lists the actions the screen can ask for, such as run, submit, and advance. The screen can use this contract without knowing whether the current transport talks to a mock or the live server. A contract like this is often called an interface."
     },
     {
       "file": "services/game/src/game/game.controller.ts",
       "line": 12,
-      "title": "3. The server's HTTP entrance",
+      "title": "4. The server's HTTP entrance",
       "description": "GameController receives HTTP requests, checks that the request has the expected basic shape, and passes the action onward. Think of it as the front desk: it routes a request, but the deeper game rules live elsewhere."
     },
     {
       "file": "services/game/src/game/game.service.ts",
       "line": 117,
-      "title": "4. The game service connects the pieces",
-      "description": "GameService creates ArenaEngine with the selected judge and persistence. This is where the running service assembles its major parts. Follow this file when you need to know which implementation is actually wired in."
+      "title": "5. The game service connects the pieces",
+      "description": "GameService creates ArenaEngine with the startup-selected GameJudge and persistence, recovers saved matches before serving, and starts the deadline sweep. Follow this file to see how the service assembles its current parts."
     },
     {
       "file": "packages/arena-game/src/engine.ts",
-      "line": 142,
-      "title": "5. The authority for a match",
+      "line": 144,
+      "title": "6. The authority for a match",
       "description": "ArenaEngine is the central game authority. It checks who may act, whether the match is in the right phase, and what state changes after an action. The browser can request an action, but the engine decides whether it is allowed."
     },
     {
       "file": "packages/arena-game/src/records.ts",
       "line": 45,
-      "title": "6. The main pieces of match data",
+      "title": "7. The main pieces of match data",
       "description": "Start with RoundState, then look a little below at MatchRecord and SubmissionRecord. These are TypeScript descriptions of the information the game keeps: match settings and participants, each round's state, and each submitted solution."
     },
     {

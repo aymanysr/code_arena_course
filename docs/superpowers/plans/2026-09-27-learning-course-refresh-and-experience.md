@@ -401,8 +401,8 @@ Expected: pure tests pass; any host-network or Docker restriction is recorded be
 - Consumes: reviewed lesson templates, catalog references, actual current source, and `acceptReviewedSnapshot()`.
 - Produces: zero stale lesson links, zero uncovered files, zero unclassified files, valid CodeTour anchors, and one accepted snapshot shared by every generated page.
 
-- [ ] **Step 1: Run the read-only impact report.** Run `node .tours/learning/scripts/build-catalog.mjs --check` and save its output for comparison. Expected: only the not-yet-repaired CodeTour/baseline/generated-output items remain after Tasks 1-5.
-- [ ] **Step 2: Repair existing CodeTour anchors.** Update every affected step reported by the command. Preserve the six tour purposes and add these changed-behavior destinations where the existing tour teaches that boundary:
+- [x] **Step 1: Run the read-only impact report.** Run `node .tours/learning/scripts/build-catalog.mjs --check` and save its output for comparison. Expected: only the not-yet-repaired CodeTour/baseline/generated-output items remain after Tasks 1-5.
+- [x] **Step 2: Repair existing CodeTour anchors.** Update every affected step reported by the command. Preserve the six tour purposes and add these changed-behavior destinations where the existing tour teaches that boundary:
 
 ```text
 Tour 1: LobbySession convergence and ArenaEngine authority.
@@ -413,23 +413,23 @@ Tour 5: post-commit event publication -> authoritative reconnect snapshot.
 Tour 6: deadline, invitation-only Lobby, post-commit event, and Judge worker parity gates.
 ```
 
-- [ ] **Step 3: Run all course tooling tests.** Run:
+- [x] **Step 3: Run all course tooling tests.** Run:
 
 ```sh
 node --test .tours/learning/scripts/*.test.mjs
 ```
 
 Expected: all tests pass before baseline acceptance.
-- [ ] **Step 4: Review every affected lesson ID.** Use the audit output to verify that Lessons 1-10 and 12-14 either changed semantically or were re-anchored after inspection. Lesson 11 remains omitted when its sources are unchanged.
-- [ ] **Step 5: Accept the reviewed snapshot exactly once.** Run:
+- [x] **Step 4: Review every affected lesson ID.** Use the audit output to verify that Lessons 1-10 and 12-14 either changed semantically or were re-anchored after inspection. Lesson 11 remains omitted when its sources are unchanged.
+- [x] **Step 5: Accept the reviewed snapshot exactly once.** Run:
 
 ```sh
 node .tours/learning/scripts/build-catalog.mjs --accept-reviewed-snapshot --reviewed-lessons=0001-submit-journey,0002-reveal-cutoff,0003-rounds-and-final-score,0004-lobby-to-match,0005-problem-editor-run,0006-evaluation-retries,0007-judge-boundary,0008-persistence-recovery,0009-live-connection,0010-team-collaboration,0012-arena-screen,0013-running-the-project,0014-rewrite-with-tests
 ```
 
 Expected: the command records the new content hashes, Git HEAD, worktree status, lesson review list, CodeTour checksums, and regenerates all current lesson pages from the same snapshot ID.
-- [ ] **Step 6: Run `node .tours/learning/scripts/build-catalog.mjs --check`.** Expected: exit 0 with zero stale, uncovered, unclassified, missing, or invalid items and no generated output drift.
-- [ ] **Step 7: Commit the reviewed reference.** Commit `docs(course): accept current implementation reference`.
+- [x] **Step 6: Run `node .tours/learning/scripts/build-catalog.mjs --check`.** Expected: exit 0 with zero stale, uncovered, unclassified, missing, or invalid items and no generated output drift.
+- [x] **Step 7: Commit the reviewed reference.** Commit `docs(course): accept current implementation reference`.
 
 ### Task 7: Add catalog-owned batches and generate Course Home
 

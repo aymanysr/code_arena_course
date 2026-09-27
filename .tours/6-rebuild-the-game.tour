@@ -10,19 +10,25 @@
       "file": ".scratch/code-arena/spec.md",
       "line": 1,
       "title": "0. Freeze the course target and label spec differences",
-      "description": "This course teaches the code and tests that exist in the current reference. The spec describes intended product behavior; it does not prove that behavior is implemented. Label every claim IMPLEMENTED AND TESTED, PLANNED OR UNVERIFIED, or SPEC/CODE DISAGREEMENT.\n\nCourse parity choices (approved 2026-09-25): reproduce these current behaviors in your rewrite, and keep the spec differences visible. These are choices about the learning baseline, not amendments to the product spec:\n- Public matchmaking: include the 1v1 public queue because it is exercised by services/game/src/game/lobby.test.ts and frontend/e2e/live-lobby.spec.ts. The spec says automatic matchmaking is outside the first release.\n- Disconnect expiry: reproduce the 1v1 grace-expiry forfeit in packages/arena-game/test/reconnect.test.ts; reproduce the 2v2 behavior in packages/arena-game/test/team-2v2.test.ts, where an expired offline member does not forfeit the match. The spec says no first-release forfeit. Do not generalize the 1v1 rule to 2v2.\n- Team chat history: reproduce the current process-local history in services/game/src/game/team-chat.gateway.ts. Reconnect can restore recent history while that process is running, but a Game service restart loses it. The spec/ADRs describe durable records as intended future persistence.\n\nWhen a later change updates the original game, update this course to the newly tested reference and identify the exact changed files. Never turn a planned behavior into implementation evidence. The 42-subject matrix also separates test evidence from module sign-off."
+      "description": "This course teaches the code and tests that exist in the current reference. The spec describes intended product behavior; it does not prove that behavior is implemented. Label every claim IMPLEMENTED AND TESTED, PLANNED OR UNVERIFIED, or SPEC/CODE DISAGREEMENT.\n\nCourse parity choices (approved 2026-09-27): reproduce the first-release scope and keep remaining code/spec differences visible. These choices do not amend the product spec:\n- Lobby entry: first release is invitation-only. Retain the public queue service/API as future-capability code, but do not expose automatic matchmaking in the release flow. Keep legacy queue behavior tests separate from the invite-room journey.\n- Disconnect expiry: reproduce the 1v1 grace-expiry forfeit in packages/arena-game/test/reconnect.test.ts; reproduce the 2v2 behavior in packages/arena-game/test/team-2v2.test.ts, where an expired offline member does not forfeit the match. The spec says no first-release forfeit. Do not generalize the 1v1 rule to 2v2.\n- Team chat history: reproduce the current process-local history in services/game/src/game/team-chat.gateway.ts. Reconnect can restore recent history while that process is running, but a Game service restart loses it. The spec/ADRs describe durable records as intended future persistence.\n\nWhen a later change updates the original game, update this course to the newly tested reference and identify the exact changed files. Never turn a planned behavior into implementation evidence. The 42-subject matrix also separates test evidence from module sign-off."
     },
     {
       "file": "packages/arena-game/test/lobby.test.ts",
       "line": 11,
       "title": "Gate 1 — Lobby and match entry",
-      "description": "Your equivalent tests should cover private room creation/join by code; rejecting full or already-started rooms; correct 1v1/2v2 team sizes; ready-up and host start gating; leaving/cancelling; and the current public queue behavior. The live browser journey is in frontend/e2e/live-lobby.spec.ts.\n\nDo not count PostgreSQL race behavior as verified unless the gated tests in lobby-atomic.test.ts actually run. A skipped database test is still open."
+      "description": "Your equivalent tests should cover private room creation and join by code; rejecting full or already-started rooms; correct 1v1/2v2 team sizes; ready-up and host start gating; leaving/cancelling; and the invitation-only first-release path. The live browser journey is in frontend/e2e/live-lobby.spec.ts. The retained public-queue API is future-capability code; test it as a separate backend contract, not as a player-facing release path.\n\nDo not count PostgreSQL race behavior as verified unless the gated tests in lobby-atomic.test.ts actually run. A skipped database test is still open."
     },
     {
       "file": "packages/arena-game/test/round-lifecycle.test.ts",
       "line": 43,
       "title": "Gate 2 — Phases, scores, and reveal",
       "description": "Port the cases here and in scoring-reveal.test.ts. Check legal and illegal phase changes; weighted round scores from 0–100; match totals as the sum of round scores; tie-breaks by counted-score time, then submission count, then draw; and an immutable reveal. Also check that reveal closes new submits, waits for in-flight judging only during the grace window, and does not count a result arriving after cutoff."
+    },
+    {
+      "file": "packages/arena-game/test/deadline-closure.test.ts",
+      "line": 10,
+      "title": "Gate 2b — Match deadline, Reveal, and terminal result",
+      "description": "Port exact-deadline Run/Submit rejection; a zero-score Reveal when expiry occurs before coding; bounded grace for an already accepted Submit; exclusion of late verdicts; and durable MATCH_COMPLETE with unplayed Rounds at zero. The UI can stage the saved Reveal before the final score, but no player action ends the Match."
     },
     {
       "file": "packages/arena-game/test/run-path.test.ts",
@@ -45,8 +51,14 @@
     {
       "file": "packages/arena-game/test/judge-security.test.ts",
       "line": 15,
-      "title": "Gate 6 — Verify the real sandbox separately",
-      "description": "These Docker-backed cases check timeout, memory, bounded output, process count, read-only filesystem, path traversal, disabled network, no host secrets in the container, and cleanup. Run them only in a configured Docker environment and count only tests that actually execute. Passing proves these cases, not every possible attack. ContainerJudge is the default; Judge0 is optional and is not required to match game behavior."
+      "title": "Gate 6 — Verify the real Docker sandbox separately",
+      "description": "These Docker-backed cases check timeout, memory, bounded output, process count, read-only filesystem, path traversal, disabled network, no host secrets in the container, and cleanup. Run them only in a configured Docker environment and count only tests that actually execute. Passing proves these cases, not every possible attack or hidden-case confidentiality. Keep the real-container matrix separate from provider-adapter and worker-service tests."
+    },
+    {
+      "file": "services/judge-worker/test/compose-topology.test.ts",
+      "line": 27,
+      "title": "Gate 6b — Verify the configured Judge Worker path",
+      "description": "Check that Game selects its configured worker, the worker is private to the judge network, only that service receives the Docker socket, readiness gates Game startup, and worker credentials stay scoped. Pair this static topology test with WorkerJudgeAdapter auth/response tests and worker HTTP/queue tests. It does not start Compose or prove real-container isolation."
     },
     {
       "file": "packages/arena-game/test/team-2v2.test.ts",
@@ -65,6 +77,12 @@
       "line": 14,
       "title": "Gate 9 — Disconnect, reconnect, and recover",
       "description": "Check that connectivity is separate from game activity; the match clock continues offline; reconnect restores the authoritative filtered snapshot; hidden data stays hidden; older revisions are ignored; and pending evaluations/reveals recover without double-counting. Use persistence.test.ts for the storage contract and postgres.test.ts for cross-process claims and real database restarts. Preserve the reference distinction: 1v1 forfeits after grace expiry (reconnect.test.ts); an expired offline 2v2 member does not forfeit the match (team-2v2.test.ts). The production spec differs; Gate 0 records the course choice."
+    },
+    {
+      "file": "packages/arena-game/test/post-commit-events.test.ts",
+      "line": 20,
+      "title": "Gate 9b — Publish events after commit; recover by snapshot",
+      "description": "Verify that a failed Match save publishes no event, successful events carry the committed revision, and one broken listener does not undo durable state. Events are transient: after a missed update, reconnect from the latest authoritative snapshot instead of expecting event replay."
     },
     {
       "file": "frontend/e2e/live-1v1.spec.ts",

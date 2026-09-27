@@ -26,32 +26,44 @@
     },
     {
       "file": "services/game/src/game/game.service.ts",
-      "line": 226,
-      "title": "4. GameService forwards the action",
-      "description": "run() and submit() delegate to ArenaEngine. After a successful submit, GameService may also publish the reveal when the round's reveal condition has been met."
+      "line": 117,
+      "title": "4. GameService wires its selected Judge",
+      "description": "GameService calls createGameJudge() once while constructing ArenaEngine. The selected implementation and persistence sit behind the engine boundary; recovery runs before the service begins accepting gameplay."
+    },
+    {
+      "file": "services/game/src/game/judge-factory.ts",
+      "line": 19,
+      "title": "5. Configuration selects one provider",
+      "description": "The factory defaults a direct local Game process to ContainerJudge. Compose selects WorkerJudgeAdapter; Judge0 is an optional explicit configuration. The process selects one provider at startup, and a provider failure never silently switches to another."
+    },
+    {
+      "file": "services/game/src/game/game.service.ts",
+      "line": 216,
+      "title": "6. GameService forwards Submit",
+      "description": "submit() delegates to ArenaEngine and may request the game-owned Reveal condition after a successful action. GameService routes the command; it does not calculate the score."
     },
     {
       "file": "packages/arena-game/src/engine.ts",
-      "line": 511,
-      "title": "5. ArenaEngine checks and records the submission",
+      "line": 547,
+      "title": "7. ArenaEngine checks and records the submission",
       "description": "Before judging, the engine checks match membership, phase, time, and submission rules. In 2v2 it takes the current approved team document from server-owned collaboration state; it does not trust a different source string sent by the browser. It assigns stable IDs and records the submission so retries can be recognized."
     },
     {
       "file": "packages/arena-game/src/evaluation-orchestration.ts",
-      "line": 172,
-      "title": "6. Evaluation work is claimed before execution",
+      "line": 191,
+      "title": "8. Evaluation work is claimed before execution",
       "description": "The orchestrator claims the pending evaluation through persistence, then asks a GameJudge to run the hidden test suite. This separates the game workflow (ownership, retries, recording) from the code-execution adapter."
     },
     {
       "file": "packages/arena-game/src/judge.ts",
       "line": 108,
-      "title": "7. The judge returns verdicts, not match decisions",
+      "title": "9. The configured GameJudge returns verdicts, not Match decisions",
       "description": "GameJudge is the execution contract: it runs source and returns verdicts. It does not own match phases, decide whether a submission is allowed, or publish the round reveal."
     },
     {
       "file": "packages/arena-game/test/submit-path.test.ts",
       "line": 6,
-      "title": "8. See the journey expressed as behavior",
+      "title": "10. See the journey expressed as behavior",
       "description": "This test file exercises the submit path. Tests are useful reading tools: they show a concrete action and the result the project expects, without requiring you to understand every helper first."
     },
     {

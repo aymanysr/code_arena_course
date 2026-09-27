@@ -19,33 +19,51 @@
       "description": "The game depends on the GameJudge contract, not on one provider's API. The judge runs source and returns verdicts; ArenaEngine and EvaluationOrchestrator retain match authority and workflow."
     },
     {
-      "file": "services/game/src/game/game.service.ts",
-      "line": 145,
-      "title": "3. Which judge is wired into the service?",
-      "description": "createJudge reads JUDGE_BACKEND. The current default is the container backend; Judge0 is selected explicitly and requires JUDGE0_URL. This is the place to inspect when someone asks which backend this service will actually use."
+      "file": "services/game/src/game/judge-factory.ts",
+      "line": 19,
+      "title": "3. Which provider is selected at startup?",
+      "description": "createGameJudge selects one configured backend. Direct local Game defaults to ContainerJudge; Compose configures the worker adapter; Judge0 remains optional. Missing or failed provider settings do not silently fall back."
+    },
+    {
+      "file": "packages/arena-game/src/worker-judge.ts",
+      "line": 68,
+      "title": "4. WorkerJudgeAdapter crosses the internal HTTP boundary",
+      "description": "The Game-side adapter sends bearer-authenticated requests for visible or sealed evaluation. It validates response shape and case identity, applies a timeout, and maps transport failures to JudgeInfraError. This adapter does not own Match state or score."
+    },
+    {
+      "file": "services/judge-worker/src/http-server.ts",
+      "line": 183,
+      "title": "5. Judge Worker serves its internal API",
+      "description": "The worker requires bearer auth for judge requests and exposes separate liveness and readiness routes. Compose keeps its listener on the internal judge network; it is not published through Nginx."
+    },
+    {
+      "file": "services/judge-worker/src/job-queue.ts",
+      "line": 22,
+      "title": "6. The worker bounds concurrent judging",
+      "description": "The bounded queue limits active work and waiting jobs, then applies separate queue-wait and execution timeouts. Capacity settings make overload behavior explicit; they do not prove that submitted programs are isolated."
     },
     {
       "file": "packages/arena-game/src/container-judge.ts",
-      "line": 184,
-      "title": "4. The container execution adapter",
-      "description": "ContainerJudge implements GameJudge. runVisible handles public examples, while evaluateSealed handles hidden groups. Read further into runBatch to see the concrete Docker invocation and the limits passed to it; isolation depends on those runtime settings being applied."
+      "line": 188,
+      "title": "7. ContainerJudge executes one selected case",
+      "description": "ContainerJudge implements GameJudge and runs visible examples or sealed groups. Read the Docker invocation and effective flags: actual isolation depends on the runtime configuration and the authority of the Docker host."
     },
     {
       "file": "packages/arena-game/src/judge0.ts",
       "line": 91,
-      "title": "5. Judge0 fits behind the same game contract",
+      "title": "8. Judge0 is an optional adapter",
       "description": "Judge0Adapter translates the game's execution request into Judge0's API and translates the response back. It can replace the execution backend, but it does not replace ArenaEngine, scoring, persistence, or reveal rules."
     },
     {
       "file": "packages/arena-game/test/sealing.test.ts",
       "line": 6,
-      "title": "6. Hidden tests must stay hidden",
+      "title": "9. Hidden tests must stay hidden",
       "description": "This suite checks what clients can observe before reveal. Notice the difference between a useful verdict or score and exposing hidden inputs or expected answers."
     },
     {
       "file": "packages/arena-game/test/judge-security.test.ts",
-      "line": 1,
-      "title": "7. Read security behavior as requirements",
+      "line": 15,
+      "title": "10. Read real-container security tests as scoped evidence",
       "description": "These tests cover security-sensitive execution behavior. They are evidence for specific tested cases, not proof that every possible attack is prevented. When you later change the sandbox, read these tests alongside the actual Docker options."
     },
     {

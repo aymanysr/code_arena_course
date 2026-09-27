@@ -976,7 +976,7 @@
       <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 7</p>
       <h1>The Game owns the rules; the Judge runs code—but is it really sealed?</h1>
       <p class="hero-copy">In about 10 minutes: Trace the default and optional judge adapters, understand the current resource restrictions, and distinguish client-side sealing from confidentiality against hostile submitted code.</p>
-      <p class="mt-1"><span class="status status-current">Source references match 10 pinned files</span> <span class="quiet">Snapshot <code>94e3592a698707cc</code></span></p>
+      <p class="mt-1"><span class="status status-current">Source references match 15 pinned files</span> <span class="quiet">Snapshot <code>4edc506dd9158d21</code></span></p>
       <div class="stage-bar" aria-label="Lesson stages">
         <span class="stage-pill" aria-current="step">1 · Predict</span>
         <span aria-hidden="true" class="flow-arrow">→</span>
@@ -1004,10 +1004,15 @@
           <span class="step-number" aria-hidden="true">01</span>
           <div>
             <h3>The Game chooses the judge; the interface only defines execution</h3>
-            <p><code>GameJudge</code> has two jobs: run visible tests and evaluate sealed groups. It owns no Match state, score counting, or Reveal. The Game service currently defaults to <code>ContainerJudge</code>; <code>JUDGE_BACKEND=judge0</code> selects the optional Judge0 adapter, which requires its configured URL. It does not silently switch providers.</p>
+            <p><code>GameJudge</code> is an execution-only boundary: Game authorizes Run/Submit, selects hidden groups, owns Match rules and durable Evaluation records, and counts score; the Judge runs visible tests or evaluates those sealed groups. Game selects exactly one provider at startup: direct <code>ContainerJudge</code> by default, <code>WorkerJudgeAdapter</code> when configured with <code>JUDGE_BACKEND=worker</code>, or optional Judge0. Compose chooses the worker; provider failures never trigger fallback.</p>
+            <p class="mt-1"><code>WorkerJudgeAdapter</code> sends bearer-authenticated requests to the internal worker, validates result shapes and case identity, and maps transport/response failures to <code>JudgeInfraError</code>. The worker runs <code>ContainerJudge</code>; neither adapter owns Match state or scoring.</p>
             <div class="source-links">
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fjudge.ts&amp;line=107" data-source-id="source-c1d7d0f2f9a9032f" data-source-path="packages/arena-game/src/judge.ts" data-source-line="107" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/judge.ts:107">Execution-only contract · judge.ts:107</a>
               <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.service.ts&amp;line=145" data-source-id="source-8f207f0faebaa8fd" data-source-path="services/game/src/game/game.service.ts" data-source-line="145" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/game.service.ts:145">Default ContainerJudge and optional Judge0 wiring · game.service.ts:145</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.ts&amp;line=21" data-source-id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/judge-factory.ts:21">Select exactly one configured provider; no fallback · judge-factory.ts:21</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fworker-judge.ts&amp;line=68" data-source-id="source-aa3d9c8fa797ce3c" data-source-path="packages/arena-game/src/worker-judge.ts" data-source-line="68" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/worker-judge.ts:68">WorkerJudgeAdapter auth, response validation, and error mapping · worker-judge.ts:68</a>
+              <a href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fworker-judge.test.ts&amp;line=82" data-source-id="source-bb1dceba86779e7a" data-source-path="packages/arena-game/test/worker-judge.test.ts" data-source-line="82" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/test/worker-judge.test.ts:82">Worker failure stays an infrastructure error; no other provider is tried · worker-judge.test.ts:82</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.test.ts&amp;line=32" data-source-id="source-1645dde5c58bac52" data-source-path="services/game/src/game/judge-factory.test.ts" data-source-line="32" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/judge-factory.test.ts:32">Unsupported provider fails closed · judge-factory.test.ts:32</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fcontainer-judge.ts&amp;line=196" data-source-id="source-e13d6d2faaaf6b2e" data-source-path="packages/arena-game/src/container-judge.ts" data-source-line="196" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/container-judge.ts:196">Visible and sealed methods share the adapter · container-judge.ts:196</a>
               <a href="../source-map.html?file=packages%2Farena-game%2Fsrc%2Fjudge0.ts&amp;line=88" data-source-id="source-116bff79754cdaf5" data-source-path="packages/arena-game/src/judge0.ts" data-source-line="88" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/src/judge0.ts:88">Judge0 stays behind the same interface · judge0.ts:88</a>
             </div>
@@ -1095,7 +1100,7 @@
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>94e3592a698707cc</code>. This lesson records the current implementation and a source-level confidentiality concern; it changes no game behavior. Docker suites were not run in this session and are not described as passing.</p>
+      <p>Source snapshot <code>4edc506dd9158d21</code>. This lesson records the current implementation and a source-level confidentiality concern; it changes no game behavior. Docker suites were not run in this session and are not described as passing.</p>
     </footer>
   </main>
 <div id="source-templates" hidden>
@@ -1114,16 +1119,9 @@
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./judge.js&quot;</span>;
 
 <span class="hljs-comment">/**
- * ContainerJudge: real isolated execution (ticket 06 mechanism, productionized).
- * Topology per evaluation: ONE source snapshot -&gt; ONE compilation (compiled
- * languages) -&gt; N bounded test executions inside ONE one-shot container.
- * Per-test containers were rejected: same image/flags/source means no extra
- * security boundary, only ~400ms x N overhead (measured in Check A). Test
- * processes are still individually bounded (wall clock, output cap, fresh
- * stdio); the container boundary (network/fs/pids/memory/user) is per job.
- * Source and test material travel via sealed env blobs; verdicts return as
- * JSONL (output_b64), never raw hidden material in the clear beyond caps.
- * Stdlib only.
+ * Each test case runs in its own one-shot container. The caller keeps expected
+ * answers and the rest of a suite in trusted memory and compares output only
+ * after the isolated process exits.
  */</span>
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ContainerJudgeOptions</span> {
   <span class="hljs-attr">dockerBin</span>?: <span class="hljs-built_in">string</span>;
@@ -1139,147 +1137,158 @@
 
 <span class="hljs-keyword">const</span> <span class="hljs-attr">SOURCE_FILE</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-title class_">SupportedLanguage</span>, <span class="hljs-built_in">string</span>&gt; = {
   <span class="hljs-title class_">Python</span>: <span class="hljs-string">&quot;player.py&quot;</span>,
-  <span class="hljs-string">&quot;C++&quot;</span>: <span class="hljs-string">&quot;main.cpp&quot;</span>,
-  <span class="hljs-attr">C</span>: <span class="hljs-string">&quot;main.c&quot;</span>,
+  <span class="hljs-string">&quot;C++&quot;</span>: <span class="hljs-string">&quot;player.cpp&quot;</span>,
+  <span class="hljs-attr">C</span>: <span class="hljs-string">&quot;player.c&quot;</span>,
 };
 
+<span class="hljs-comment">/**
+ * Runs exactly one Python snippet input. It reports output and execution
+ * status, never a pass bit or expected answer. The trusted caller decides
+ * whether `comparison_b64` matches the expected value.
+ */</span>
 <span class="hljs-keyword">const</span> <span class="hljs-variable constant_">SNIPPET_DRIVER</span> = <span class="hljs-title class_">String</span>.<span class="hljs-property">raw</span><span class="hljs-string">`
-import base64, importlib.util, inspect, io, json, signal, sys, time
-class Cap:
-    def __init__(self, cap):
-        self.cap = cap; self.buf = []; self.n = 0; self.overflow = False
-    def write(self, s):
-        if not s: return 0
-        if self.overflow: return len(s)
-        room = self.cap - self.n
-        if len(s) &gt; room:
-            self.overflow = True; self.n = self.cap; return len(s)
-        self.buf.append(s); self.n += len(s); return len(s)
-    def flush(self): pass
-    def text(self): return &quot;&quot;.join(self.buf)
+import importlib.util, inspect, os, signal, sys
 class Timeout(Exception): pass
-def alarm_handler(signum, frame): raise Timeout()
-def b64e(s): return base64.b64encode(s.encode(&quot;utf8&quot;)).decode()
+def _alarm_handler(signum, frame): raise Timeout()
+def _fail(status, message=&quot;&quot;):
+    if message:
+        os.write(2, (message + &quot;\n&quot;).encode(&quot;utf8&quot;, &quot;replace&quot;))
+    code = {
+        &quot;compile_error&quot;: 20,
+        &quot;runtime_error&quot;: 21,
+        &quot;internal_error&quot;: 22,
+        &quot;time_limit_exceeded&quot;: 124,
+    }.get(status, 21)
+    raise SystemExit(code)
 def main():
-    import contextlib
-    cap = int(sys.argv[1]); bound = int(sys.argv[2]); sealed = sys.argv[3] == &quot;1&quot;
-    signal.signal(signal.SIGALRM, alarm_handler)
+    bound = int(sys.argv[1])
+    with open(&quot;/scratch/input.txt&quot;, &quot;r&quot;, encoding=&quot;utf8&quot;) as input_file:
+        input_code = input_file.read()
+    os.environ.pop(&quot;INP&quot;, None)
+    entry = os.environ.pop(&quot;ENTRYPOINT&quot;, &quot;&quot;)
+    # Runner-only values are removed before submitted code is imported.
+    os.environ.pop(&quot;SRC&quot;, None); os.environ.pop(&quot;DRV&quot;, None)
+    # The player&#x27;s Python writes go to the display channel. Stdout carries only
+    # the candidate comparison bytes; the shell writes the runner record after
+    # this process and all of its atexit handlers have exited.
+    sys.stdout = sys.stderr
     spec = importlib.util.spec_from_file_location(&quot;player&quot;, &quot;/scratch/player.py&quot;)
     player = importlib.util.module_from_spec(spec)
+    signal.signal(signal.SIGALRM, _alarm_handler)
     signal.alarm(max(1, bound))
     try:
         spec.loader.exec_module(player)
     except Timeout:
+        signal.alarm(0); _fail(&quot;time_limit_exceeded&quot;, &quot;execution timed out during import&quot;)
+    except Exception as error:
         signal.alarm(0)
-        return [{&quot;id&quot;: i, &quot;status&quot;: &quot;time_limit_exceeded&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: &quot;&quot;, &quot;ms&quot;: bound * 1000} for i in ids()]
-    except SyntaxError as e:
-        signal.alarm(0)
-        return [{&quot;id&quot;: i, &quot;status&quot;: &quot;compile_error&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: b64e(f&quot;SyntaxError: {e.msg}&quot;), &quot;ms&quot;: 0} for i in ids()]
-    except Exception as e:
-        signal.alarm(0)
-        return [{&quot;id&quot;: i, &quot;status&quot;: &quot;runtime_error&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: b64e(f&quot;{type(e).__name__}: {e}&quot;), &quot;ms&quot;: 0} for i in ids()]
+        status = &quot;compile_error&quot; if isinstance(error, SyntaxError) else &quot;runtime_error&quot;
+        _fail(status, f&quot;{type(error).__name__}: {error}&quot;)
     signal.alarm(0)
-    fns = [(n, m) for n, m in inspect.getmembers(player, inspect.isfunction)
-           if getattr(m, &quot;__module__&quot;, None) == &quot;player&quot; and not n.startswith(&quot;_&quot;)]
-    entry = sys.argv[4] if len(sys.argv) &gt; 4 and sys.argv[4] else None
+    functions = [(name, fn) for name, fn in inspect.getmembers(player, inspect.isfunction)
+                 if getattr(fn, &quot;__module__&quot;, None) == &quot;player&quot; and not name.startswith(&quot;_&quot;)]
     if entry:
-        fn = getattr(player, entry, None)
-        if not callable(fn):
-            return [{&quot;id&quot;: i, &quot;status&quot;: &quot;runtime_error&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: b64e(f&quot;missing entrypoint {entry}&quot;), &quot;ms&quot;: 0} for i in ids()]
-        fns = [(entry, fn)]
-    if len(fns) != 1:
-        return [{&quot;id&quot;: i, &quot;status&quot;: &quot;runtime_error&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: b64e(&quot;ambiguous entry&quot;), &quot;ms&quot;: 0} for i in ids()]
-    out = []
-    for (cid, inp, exp) in cases():
-        ns = {}
-        try:
-            exec(compile(inp, &quot;input&quot;, &quot;exec&quot;), ns)
-        except Exception:
-            out.append({&quot;id&quot;: cid, &quot;status&quot;: &quot;internal_error&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: &quot;&quot;, &quot;ms&quot;: 0})
-            continue
-        args = [ns[k] for k in ns if not k.startswith(&quot;__&quot;)]
-        buf = Cap(cap); t0 = time.monotonic(); status = &quot;accepted&quot;; result = None
-        try:
-            signal.signal(signal.SIGALRM, alarm_handler); signal.alarm(max(1, bound))
-            with contextlib.redirect_stdout(buf):
-                result = fns[0][1](*args)
-            signal.alarm(0)
-        except Timeout:
-            status = &quot;time_limit_exceeded&quot;
-        except Exception as e:
-            status = &quot;runtime_error&quot;; result = f&quot;{type(e).__name__}: {e}&quot;
-        finally:
-            try: signal.alarm(0)
-            except Exception: pass
-        ms = int((time.monotonic() - t0) * 1000)
-        if buf.overflow:
-            out.append({&quot;id&quot;: cid, &quot;status&quot;: &quot;output_limit_exceeded&quot;, &quot;passed&quot;: False, &quot;output_b64&quot;: &quot;&quot;, &quot;ms&quot;: ms})
-            continue
-        got = repr(result)
-        ok = got.strip() == exp.strip()
-        out.append({&quot;id&quot;: cid, &quot;status&quot;: status if status != &quot;accepted&quot; else &quot;accepted&quot;, &quot;passed&quot;: ok and status == &quot;accepted&quot;,
-                    &quot;output_b64&quot;: &quot;&quot; if sealed else b64e(buf.text() + (&quot;&quot; if buf.text().endswith(&quot;\n&quot;) or not buf.text() else &quot;\n&quot;) + got), &quot;ms&quot;: ms})
-    return out
-def ids():
-    with open(&quot;/scratch/ids.txt&quot;) as f: return [l.rstrip(&quot;\n&quot;) for l in f]
-def cases():
-    with open(&quot;/scratch/ids.txt&quot;) as f: ids = [l.rstrip(&quot;\n&quot;) for l in f]
-    with open(&quot;/scratch/inputs.b64l&quot;) as f: inps = [base64.b64decode(l.strip()).decode(&quot;utf8&quot;) for l in f]
-    with open(&quot;/scratch/expecteds.b64l&quot;) as f: exps = [base64.b64decode(l.strip()).decode(&quot;utf8&quot;) for l in f]
-    return list(zip(ids, inps, exps))
-for verdict in main():
-    print(json.dumps(verdict), flush=True)
+        function = getattr(player, entry, None)
+        if not callable(function):
+            _fail(&quot;runtime_error&quot;, f&quot;missing entrypoint {entry}&quot;)
+        functions = [(entry, function)]
+    if len(functions) != 1:
+        _fail(&quot;runtime_error&quot;, &quot;ambiguous entry&quot;)
+    values = {}
+    try:
+        exec(compile(input_code, &quot;input&quot;, &quot;exec&quot;), values)
+    except Exception as error:
+        _fail(&quot;internal_error&quot;, f&quot;invalid test input: {type(error).__name__}&quot;)
+    args = [value for name, value in values.items() if not name.startswith(&quot;__&quot;)]
+    signal.signal(signal.SIGALRM, _alarm_handler); signal.alarm(max(1, bound))
+    try:
+        result = functions[0][1](*args)
+    except Timeout:
+        _fail(&quot;time_limit_exceeded&quot;, &quot;execution timed out&quot;)
+    except Exception as error:
+        os.write(1, repr(f&quot;{type(error).__name__}: {error}&quot;).encode(&quot;utf8&quot;, &quot;replace&quot;))
+        _fail(&quot;runtime_error&quot;, f&quot;{type(error).__name__}: {error}&quot;)
+    finally:
+        signal.alarm(0)
+    os.write(1, repr(result).encode(&quot;utf8&quot;, &quot;replace&quot;))
+if __name__ == &quot;__main__&quot;: main()
 `</span>;
 
-<span class="hljs-keyword">interface</span> <span class="hljs-title class_">BatchCase</span> {
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">CaseInput</span> {
   <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
   <span class="hljs-attr">input</span>: <span class="hljs-built_in">string</span>;
   <span class="hljs-attr">expected</span>: <span class="hljs-built_in">string</span>;
 }
 
-<span class="hljs-keyword">interface</span> <span class="hljs-title class_">BatchVerdict</span> {
-  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">RawExecution</span> {
   <span class="hljs-attr">status</span>: <span class="hljs-title class_">ExecutionStatus</span>;
-  <span class="hljs-attr">passed</span>: <span class="hljs-built_in">boolean</span>;
   <span class="hljs-attr">output</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">comparison</span>: <span class="hljs-built_in">string</span>;
   <span class="hljs-attr">ms</span>: <span class="hljs-built_in">number</span>;
 }
 
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">b64</span>(<span class="hljs-params"><span class="hljs-attr">s</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span> {
-  <span class="hljs-keyword">return</span> <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(s, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>);
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">TrustedVerdict</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">RawExecution</span> {
+  <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">passed</span>: <span class="hljs-built_in">boolean</span>;
 }
 
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">b64Lines</span>(<span class="hljs-params"><span class="hljs-attr">values</span>: <span class="hljs-built_in">string</span>[]</span>): <span class="hljs-built_in">string</span> {
-  <span class="hljs-keyword">return</span> values.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> <span class="hljs-title function_">b64</span>(v)).<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">RunnerRecord</span> {
+  <span class="hljs-attr">status</span>?: <span class="hljs-built_in">unknown</span>;
+  <span class="hljs-attr">output_b64</span>?: <span class="hljs-built_in">unknown</span>;
+  <span class="hljs-attr">comparison_b64</span>?: <span class="hljs-built_in">unknown</span>;
+  <span class="hljs-attr">ms</span>?: <span class="hljs-built_in">unknown</span>;
 }
 
-<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseVerdictLine</span>(<span class="hljs-params"><span class="hljs-attr">line</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">BatchVerdict</span> | <span class="hljs-literal">null</span> {
-  <span class="hljs-keyword">let</span> <span class="hljs-attr">parsed</span>: { <span class="hljs-attr">id</span>?: <span class="hljs-built_in">unknown</span>; <span class="hljs-attr">status</span>?: <span class="hljs-built_in">unknown</span>; <span class="hljs-attr">passed</span>?: <span class="hljs-built_in">unknown</span>; <span class="hljs-attr">output_b64</span>?: <span class="hljs-built_in">unknown</span>; <span class="hljs-attr">ms</span>?: <span class="hljs-built_in">unknown</span> };
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">EXECUTION_STATUSES</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-title class_">ExecutionStatus</span>&gt;([
+  <span class="hljs-string">&quot;accepted&quot;</span>,
+  <span class="hljs-string">&quot;compile_error&quot;</span>,
+  <span class="hljs-string">&quot;runtime_error&quot;</span>,
+  <span class="hljs-string">&quot;time_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;memory_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;output_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;process_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;internal_error&quot;</span>,
+]);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">decodeBase64</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> value !== <span class="hljs-string">&quot;string&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;
   <span class="hljs-keyword">try</span> {
-    parsed = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(line) <span class="hljs-keyword">as</span> <span class="hljs-keyword">typeof</span> parsed;
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(value, <span class="hljs-string">&quot;base64&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;utf8&quot;</span>);
+  } <span class="hljs-keyword">catch</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;&quot;</span>;
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseRunnerRecord</span>(<span class="hljs-params"><span class="hljs-attr">stdout</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-title class_">RawExecution</span> | <span class="hljs-literal">null</span> {
+  <span class="hljs-comment">// The shell writes one record after the candidate process has exited. Do</span>
+  <span class="hljs-comment">// not accept a record embedded in or appended to contestant output.</span>
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">parsed</span>: <span class="hljs-title class_">RunnerRecord</span>;
+  <span class="hljs-keyword">try</span> {
+    parsed = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(stdout.<span class="hljs-title function_">trim</span>()) <span class="hljs-keyword">as</span> <span class="hljs-title class_">RunnerRecord</span>;
   } <span class="hljs-keyword">catch</span> {
     <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
   }
-  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">id</span> !== <span class="hljs-string">&quot;string&quot;</span> || <span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">status</span> !== <span class="hljs-string">&quot;string&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
-  <span class="hljs-keyword">let</span> output = <span class="hljs-string">&quot;&quot;</span>;
-  <span class="hljs-keyword">try</span> {
-    output = <span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">output_b64</span> === <span class="hljs-string">&quot;string&quot;</span> ? <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(parsed.<span class="hljs-property">output_b64</span>, <span class="hljs-string">&quot;base64&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;utf8&quot;</span>) : <span class="hljs-string">&quot;&quot;</span>;
-  } <span class="hljs-keyword">catch</span> {
-    output = <span class="hljs-string">&quot;&quot;</span>;
-  }
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">status</span> !== <span class="hljs-string">&quot;string&quot;</span> || !<span class="hljs-variable constant_">EXECUTION_STATUSES</span>.<span class="hljs-title function_">has</span>(parsed.<span class="hljs-property">status</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>)) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">output_b64</span> !== <span class="hljs-string">&quot;string&quot;</span> || <span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">comparison_b64</span> !== <span class="hljs-string">&quot;string&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
   <span class="hljs-keyword">return</span> {
-    <span class="hljs-attr">id</span>: parsed.<span class="hljs-property">id</span>,
     <span class="hljs-attr">status</span>: parsed.<span class="hljs-property">status</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>,
-    <span class="hljs-attr">passed</span>: parsed.<span class="hljs-property">passed</span> === <span class="hljs-literal">true</span>,
-    output,
-    <span class="hljs-attr">ms</span>: <span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">ms</span> === <span class="hljs-string">&quot;number&quot;</span> ? parsed.<span class="hljs-property">ms</span> : <span class="hljs-number">0</span>,
+    <span class="hljs-attr">output</span>: <span class="hljs-title function_">decodeBase64</span>(parsed.<span class="hljs-property">output_b64</span>),
+    <span class="hljs-attr">comparison</span>: <span class="hljs-title function_">decodeBase64</span>(parsed.<span class="hljs-property">comparison_b64</span>),
+    <span class="hljs-attr">ms</span>: <span class="hljs-keyword">typeof</span> parsed.<span class="hljs-property">ms</span> === <span class="hljs-string">&quot;number&quot;</span> &amp;&amp; <span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(parsed.<span class="hljs-property">ms</span>) &amp;&amp; parsed.<span class="hljs-property">ms</span> &gt;= <span class="hljs-number">0</span> ? parsed.<span class="hljs-property">ms</span> : <span class="hljs-number">0</span>,
   };
 }
 
 <span class="hljs-keyword">function</span> <span class="hljs-title function_">verdictFromContainerExit</span>(<span class="hljs-params"><span class="hljs-attr">code</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">ExecutionStatus</span> {
-  <span class="hljs-keyword">if</span> (code === <span class="hljs-number">124</span>) <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;time_limit_exceeded&quot;</span>;
+  <span class="hljs-keyword">if</span> (code === <span class="hljs-number">124</span> || code === <span class="hljs-number">143</span>) <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;time_limit_exceeded&quot;</span>;
   <span class="hljs-keyword">if</span> (code === <span class="hljs-number">137</span>) <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;memory_limit_exceeded&quot;</span>;
   <span class="hljs-keyword">return</span> <span class="hljs-string">&quot;internal_error&quot;</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">expectedMatches</span>(<span class="hljs-params"><span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>, <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>, <span class="hljs-attr">actual</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">expected</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">boolean</span> {
+  <span class="hljs-keyword">if</span> (driver === <span class="hljs-string">&quot;snippet&quot;</span> &amp;&amp; language === <span class="hljs-string">&quot;Python&quot;</span>) <span class="hljs-keyword">return</span> actual.<span class="hljs-title function_">trim</span>() === expected.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-comment">// Match shell command substitution&#x27;s removal of trailing line feeds while</span>
+  <span class="hljs-comment">// preserving spaces and carriage returns in stdio answers.</span>
+  <span class="hljs-keyword">return</span> actual.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/\n+$/</span>, <span class="hljs-string">&quot;&quot;</span>) === expected.<span class="hljs-title function_">replace</span>(<span class="hljs-regexp">/\n+$/</span>, <span class="hljs-string">&quot;&quot;</span>);
 }
 
 <span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">ContainerJudge</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">GameJudge</span> {
@@ -1301,63 +1310,80 @@ for verdict in main():
     <span class="hljs-attr">tests</span>: <span class="hljs-title class_">VisibleTest</span>[],
     <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>,
   ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">CaseResult</span>[]&gt; {
-    <span class="hljs-keyword">const</span> verdicts = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">runBatch</span>({
-      language,
-      driver,
-      source,
-      <span class="hljs-attr">entrypoint</span>: <span class="hljs-literal">undefined</span>,
-      <span class="hljs-attr">cases</span>: tests.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">t</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: t.<span class="hljs-property">id</span>, <span class="hljs-attr">input</span>: t.<span class="hljs-property">input</span>, <span class="hljs-attr">expected</span>: t.<span class="hljs-property">expected</span> })),
-      <span class="hljs-attr">sealed</span>: <span class="hljs-literal">false</span>,
-      limits,
-    });
-    <span class="hljs-keyword">return</span> verdicts.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> ({
-      <span class="hljs-attr">id</span>: v.<span class="hljs-property">id</span>,
-      <span class="hljs-attr">passed</span>: v.<span class="hljs-property">passed</span>,
-      <span class="hljs-attr">status</span>: v.<span class="hljs-property">status</span>,
-      <span class="hljs-attr">output</span>: v.<span class="hljs-property">output</span>.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">4000</span>),
-      <span class="hljs-attr">runtimeMs</span>: v.<span class="hljs-property">ms</span>,
-    }));
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">results</span>: <span class="hljs-title class_">CaseResult</span>[] = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> test <span class="hljs-keyword">of</span> tests) {
+      <span class="hljs-keyword">const</span> verdict = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">runCase</span>(language, driver, source, <span class="hljs-literal">undefined</span>, test, limits);
+      results.<span class="hljs-title function_">push</span>({
+        <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span>,
+        <span class="hljs-attr">passed</span>: verdict.<span class="hljs-property">passed</span>,
+        <span class="hljs-attr">status</span>: verdict.<span class="hljs-property">status</span>,
+        <span class="hljs-attr">output</span>: verdict.<span class="hljs-property">output</span>.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">4000</span>),
+        <span class="hljs-attr">runtimeMs</span>: verdict.<span class="hljs-property">ms</span>,
+      });
+    }
+    <span class="hljs-keyword">return</span> results;
   }
 
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">evaluateSealed</span>(<span class="hljs-attr">request</span>: <span class="hljs-title class_">SealedEvaluationRequest</span>): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">groups</span>: <span class="hljs-title class_">SealedGroupResult</span>[] }&gt; {
-    <span class="hljs-keyword">const</span> <span class="hljs-attr">flat</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">group</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">test</span>: <span class="hljs-title class_">BatchCase</span> }&gt; = [];
-    request.<span class="hljs-property">groups</span>.<span class="hljs-title function_">forEach</span>(<span class="hljs-function">(<span class="hljs-params">g, gi</span>) =&gt;</span> {
-      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> t <span class="hljs-keyword">of</span> g.<span class="hljs-property">tests</span>) flat.<span class="hljs-title function_">push</span>({ <span class="hljs-attr">group</span>: gi, <span class="hljs-attr">test</span>: { <span class="hljs-attr">id</span>: t.<span class="hljs-property">id</span>, <span class="hljs-attr">input</span>: t.<span class="hljs-property">input</span>, <span class="hljs-attr">expected</span>: t.<span class="hljs-property">expected</span> } });
-    });
-    <span class="hljs-keyword">const</span> verdicts = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">runBatch</span>({
-      <span class="hljs-attr">language</span>: request.<span class="hljs-property">language</span>,
-      <span class="hljs-attr">driver</span>: request.<span class="hljs-property">driver</span>,
-      <span class="hljs-attr">source</span>: request.<span class="hljs-property">source</span>,
-      <span class="hljs-attr">entrypoint</span>: request.<span class="hljs-property">entrypoint</span>,
-      <span class="hljs-attr">cases</span>: flat.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">f</span>) =&gt;</span> f.<span class="hljs-property">test</span>),
-      <span class="hljs-attr">sealed</span>: <span class="hljs-literal">true</span>,
-      <span class="hljs-attr">limits</span>: request.<span class="hljs-property">limits</span>,
-    });
-    <span class="hljs-keyword">const</span> byId = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>(verdicts.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">v</span>) =&gt;</span> [v.<span class="hljs-property">id</span>, v]));
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">groups</span>: <span class="hljs-title class_">SealedGroupResult</span>[] = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> group <span class="hljs-keyword">of</span> request.<span class="hljs-property">groups</span>) {
+      <span class="hljs-keyword">const</span> <span class="hljs-attr">results</span>: <span class="hljs-title class_">SealedGroupResult</span>[<span class="hljs-string">&quot;results&quot;</span>] = [];
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> test <span class="hljs-keyword">of</span> group.<span class="hljs-property">tests</span>) {
+        <span class="hljs-keyword">const</span> verdict = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">runCase</span>(
+          request.<span class="hljs-property">language</span>,
+          request.<span class="hljs-property">driver</span>,
+          request.<span class="hljs-property">source</span>,
+          request.<span class="hljs-property">entrypoint</span>,
+          test,
+          request.<span class="hljs-property">limits</span>,
+        );
+        results.<span class="hljs-title function_">push</span>({
+          <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span>,
+          <span class="hljs-attr">passed</span>: verdict.<span class="hljs-property">passed</span>,
+          <span class="hljs-attr">status</span>: verdict.<span class="hljs-property">status</span>,
+          <span class="hljs-attr">runtimeMs</span>: verdict.<span class="hljs-property">ms</span>,
+        });
+      }
+      groups.<span class="hljs-title function_">push</span>({ <span class="hljs-attr">name</span>: group.<span class="hljs-property">name</span>, <span class="hljs-attr">weight</span>: group.<span class="hljs-property">weight</span>, results });
+    }
+    <span class="hljs-keyword">return</span> { groups };
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">runCase</span>(
+    <span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>,
+    <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>,
+    <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">entrypoint</span>: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>,
+    <span class="hljs-attr">test</span>: <span class="hljs-title class_">CaseInput</span>,
+    <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>,
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">TrustedVerdict</span>&gt; {
+    <span class="hljs-keyword">if</span> (driver === <span class="hljs-string">&quot;snippet&quot;</span> &amp;&amp; language !== <span class="hljs-string">&quot;Python&quot;</span>) {
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;internal_error&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">comparison</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">ms</span>: <span class="hljs-number">0</span> };
+    }
+
+    <span class="hljs-keyword">const</span> execution = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">executeOneCase</span>({ language, driver, source, entrypoint, <span class="hljs-attr">input</span>: test.<span class="hljs-property">input</span>, limits });
+    <span class="hljs-keyword">const</span> passed = execution.<span class="hljs-property">status</span> === <span class="hljs-string">&quot;accepted&quot;</span>
+      &amp;&amp; <span class="hljs-title function_">expectedMatches</span>(language, driver, execution.<span class="hljs-property">comparison</span>, test.<span class="hljs-property">expected</span>);
     <span class="hljs-keyword">return</span> {
-      <span class="hljs-attr">groups</span>: request.<span class="hljs-property">groups</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">g</span>) =&gt;</span> ({
-        <span class="hljs-attr">name</span>: g.<span class="hljs-property">name</span>,
-        <span class="hljs-attr">weight</span>: g.<span class="hljs-property">weight</span>,
-        <span class="hljs-attr">results</span>: g.<span class="hljs-property">tests</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">t</span>) =&gt;</span> {
-          <span class="hljs-keyword">const</span> v = byId.<span class="hljs-title function_">get</span>(t.<span class="hljs-property">id</span>) ?? { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;internal_error&quot;</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">ms</span>: <span class="hljs-number">0</span> };
-          <span class="hljs-keyword">return</span> { <span class="hljs-attr">id</span>: t.<span class="hljs-property">id</span>, <span class="hljs-attr">passed</span>: v.<span class="hljs-property">passed</span>, <span class="hljs-attr">status</span>: v.<span class="hljs-property">status</span>, <span class="hljs-attr">runtimeMs</span>: v.<span class="hljs-property">ms</span> };
-        }),
-      })),
+      <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span>,
+      passed,
+      <span class="hljs-attr">status</span>: execution.<span class="hljs-property">status</span>,
+      <span class="hljs-attr">output</span>: execution.<span class="hljs-property">output</span>,
+      <span class="hljs-attr">comparison</span>: execution.<span class="hljs-property">comparison</span>,
+      <span class="hljs-attr">ms</span>: execution.<span class="hljs-property">ms</span>,
     };
   }
 
-  <span class="hljs-keyword">private</span> <span class="hljs-title function_">runBatch</span>(<span class="hljs-attr">input</span>: {
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">executeOneCase</span>(<span class="hljs-attr">input</span>: {
     <span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>;
     <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>;
     <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span>;
     <span class="hljs-attr">entrypoint</span>?: <span class="hljs-built_in">string</span>;
-    <span class="hljs-attr">cases</span>: <span class="hljs-title class_">BatchCase</span>[];
-    <span class="hljs-attr">sealed</span>: <span class="hljs-built_in">boolean</span>;
+    <span class="hljs-attr">input</span>: <span class="hljs-built_in">string</span>;
     <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>;
-  }): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">BatchVerdict</span>[]&gt; {
+  }): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RawExecution</span>&gt; {
     <span class="hljs-keyword">const</span> image = <span class="hljs-variable language_">this</span>.<span class="hljs-property">images</span>[input.<span class="hljs-property">language</span>];
-    <span class="hljs-keyword">const</span> mem = <span class="hljs-string">`<span class="hljs-subst">${input.limits.runMemoryMb}</span>m`</span>;
-    <span class="hljs-keyword">const</span> ids = input.<span class="hljs-property">cases</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">c</span>) =&gt;</span> c.<span class="hljs-property">id</span>).<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+    <span class="hljs-keyword">const</span> memory = <span class="hljs-string">`<span class="hljs-subst">${input.limits.runMemoryMb}</span>m`</span>;
     <span class="hljs-keyword">const</span> args = [
       <span class="hljs-string">&quot;run&quot;</span>,
       <span class="hljs-string">&quot;--rm&quot;</span>,
@@ -1368,135 +1394,166 @@ for verdict in main():
       <span class="hljs-string">&quot;--cpus&quot;</span>,
       <span class="hljs-title class_">String</span>(input.<span class="hljs-property">limits</span>.<span class="hljs-property">runCpus</span>),
       <span class="hljs-string">&quot;--memory&quot;</span>,
-      mem,
+      memory,
       <span class="hljs-string">&quot;--memory-swap&quot;</span>,
-      mem,
+      memory,
       <span class="hljs-string">&quot;--pids-limit&quot;</span>,
       <span class="hljs-title class_">String</span>(input.<span class="hljs-property">limits</span>.<span class="hljs-property">runPids</span>),
       <span class="hljs-string">&quot;--read-only&quot;</span>,
       <span class="hljs-string">&quot;--tmpfs&quot;</span>,
-      <span class="hljs-string">&quot;/scratch:rw,exec,mode=1777&quot;</span>,
+      <span class="hljs-string">`/scratch:rw,exec,size=<span class="hljs-subst">${memory}</span>,mode=1777`</span>,
       <span class="hljs-string">&quot;--tmpfs&quot;</span>,
-      <span class="hljs-string">&quot;/tmp:rw,exec,mode=1777&quot;</span>,
+      <span class="hljs-string">`/tmp:rw,exec,size=<span class="hljs-subst">${memory}</span>,mode=1777`</span>,
       <span class="hljs-string">&quot;--workdir&quot;</span>,
       <span class="hljs-string">&quot;/scratch&quot;</span>,
       <span class="hljs-string">&quot;--user&quot;</span>,
       <span class="hljs-string">&quot;nobody&quot;</span>,
-      <span class="hljs-string">&quot;-i&quot;</span>,
       <span class="hljs-string">&quot;-e&quot;</span>,
-      <span class="hljs-string">`SRC=<span class="hljs-subst">${b64(input.source)}</span>`</span>,
+      <span class="hljs-string">`SRC=<span class="hljs-subst">${Buffer.<span class="hljs-keyword">from</span>(input.source, <span class="hljs-string">&quot;utf8&quot;</span>).toString(<span class="hljs-string">&quot;base64&quot;</span>)}</span>`</span>,
       <span class="hljs-string">&quot;-e&quot;</span>,
-      <span class="hljs-string">`IDS=<span class="hljs-subst">${b64(ids)}</span>`</span>,
+      <span class="hljs-string">`INP=<span class="hljs-subst">${Buffer.<span class="hljs-keyword">from</span>(input.input, <span class="hljs-string">&quot;utf8&quot;</span>).toString(<span class="hljs-string">&quot;base64&quot;</span>)}</span>`</span>,
       <span class="hljs-string">&quot;-e&quot;</span>,
-      <span class="hljs-string">`INP=<span class="hljs-subst">${b64Lines(input.cases.map((c) =&gt; c.input))}</span>`</span>,
-      <span class="hljs-string">&quot;-e&quot;</span>,
-      <span class="hljs-string">`EXP=<span class="hljs-subst">${b64Lines(input.cases.map((c) =&gt; c.expected))}</span>`</span>,
-      <span class="hljs-string">&quot;-e&quot;</span>,
-      <span class="hljs-string">`DRV=<span class="hljs-subst">${b64(SNIPPET_DRIVER)}</span>`</span>,
+      <span class="hljs-string">`DRV=<span class="hljs-subst">${Buffer.<span class="hljs-keyword">from</span>(SNIPPET_DRIVER, <span class="hljs-string">&quot;utf8&quot;</span>).toString(<span class="hljs-string">&quot;base64&quot;</span>)}</span>`</span>,
       <span class="hljs-string">&quot;-e&quot;</span>,
       <span class="hljs-string">`ENTRY=<span class="hljs-subst">${input.entrypoint ?? <span class="hljs-string">&quot;&quot;</span>}</span>`</span>,
       image,
       <span class="hljs-string">&quot;bash&quot;</span>,
       <span class="hljs-string">&quot;-c&quot;</span>,
-      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">batchScript</span>(input.<span class="hljs-property">language</span>, input.<span class="hljs-property">driver</span>, input.<span class="hljs-property">limits</span>, input.<span class="hljs-property">sealed</span>, input.<span class="hljs-property">cases</span>.<span class="hljs-property">length</span>),
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">oneCaseScript</span>(input.<span class="hljs-property">language</span>, input.<span class="hljs-property">driver</span>, input.<span class="hljs-property">limits</span>),
     ];
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">BatchVerdict</span>[]&gt;(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+
+    <span class="hljs-keyword">const</span> outputCap = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">1</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(input.<span class="hljs-property">limits</span>.<span class="hljs-property">runOutputBytes</span>));
+    <span class="hljs-keyword">const</span> maxBuffer = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">64</span> * <span class="hljs-number">1024</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>((outputCap + <span class="hljs-number">1</span>) * <span class="hljs-number">4</span> / <span class="hljs-number">3</span>) + <span class="hljs-number">16</span> * <span class="hljs-number">1024</span>);
+    <span class="hljs-keyword">const</span> pythonSnippet = input.<span class="hljs-property">language</span> === <span class="hljs-string">&quot;Python&quot;</span> &amp;&amp; input.<span class="hljs-property">driver</span> === <span class="hljs-string">&quot;snippet&quot;</span>;
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">RawExecution</span>&gt;(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
       <span class="hljs-title function_">execFile</span>(
         <span class="hljs-variable language_">this</span>.<span class="hljs-property">dockerBin</span>,
         args,
-        { <span class="hljs-attr">timeout</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">outerTimeoutMs</span>, <span class="hljs-attr">maxBuffer</span>: <span class="hljs-number">16</span> * <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span> },
-        <span class="hljs-function">(<span class="hljs-params">error, stdout</span>) =&gt;</span> {
+        { <span class="hljs-attr">timeout</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">outerTimeoutMs</span>, maxBuffer },
+        <span class="hljs-function">(<span class="hljs-params">error, stdout, stderr</span>) =&gt;</span> {
+          <span class="hljs-keyword">const</span> code = <span class="hljs-title function_">typeof</span> (error <span class="hljs-keyword">as</span> { <span class="hljs-attr">code</span>?: <span class="hljs-built_in">unknown</span> } | <span class="hljs-literal">null</span>)?.<span class="hljs-property">code</span> === <span class="hljs-string">&quot;number&quot;</span>
+            ? (error <span class="hljs-keyword">as</span> { <span class="hljs-attr">code</span>: <span class="hljs-built_in">number</span> }).<span class="hljs-property">code</span>
+            : <span class="hljs-number">0</span>;
           <span class="hljs-keyword">if</span> (error &amp;&amp; (error <span class="hljs-keyword">as</span> <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">ErrnoException</span>).<span class="hljs-property">code</span> === <span class="hljs-string">&quot;ETIMEDOUT&quot;</span>) {
             <span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge orchestrator timeout&quot;</span>));
             <span class="hljs-keyword">return</span>;
           }
-          <span class="hljs-keyword">if</span> (error &amp;&amp; !(<span class="hljs-string">&quot;code&quot;</span> <span class="hljs-title function_">in</span> (error <span class="hljs-keyword">as</span> <span class="hljs-built_in">object</span>))) {
-            <span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">`judge launch failed: <span class="hljs-subst">${(error <span class="hljs-keyword">as</span> <span class="hljs-built_in">Error</span>).message}</span>`</span>));
-            <span class="hljs-keyword">return</span>;
-          }
-          <span class="hljs-comment">// ponytail: string codes (ENOENT/EACCES/ERR_CHILD_PROCESS_*) mean the</span>
-          <span class="hljs-comment">// launcher never produced a container exit — synthesizing verdicts</span>
-          <span class="hljs-comment">// here would let a missing/broken docker binary masquerade as graded</span>
-          <span class="hljs-comment">// failures and count phantom submit attempts. Only a numeric exit</span>
-          <span class="hljs-comment">// (or clean stdout) may resolve verdicts.</span>
+          <span class="hljs-comment">// String error codes (ENOENT/EACCES/ERR_CHILD_PROCESS_*) mean Docker</span>
+          <span class="hljs-comment">// never returned a container verdict. Do not turn launch failures</span>
+          <span class="hljs-comment">// into competitive failures or phantom Submit counts.</span>
           <span class="hljs-keyword">if</span> (error &amp;&amp; <span class="hljs-title function_">typeof</span> (error <span class="hljs-keyword">as</span> { <span class="hljs-attr">code</span>?: <span class="hljs-built_in">unknown</span> }).<span class="hljs-property">code</span> === <span class="hljs-string">&quot;string&quot;</span>) {
+            <span class="hljs-keyword">if</span> (pythonSnippet &amp;&amp; (error <span class="hljs-keyword">as</span> <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">ErrnoException</span>).<span class="hljs-property">code</span> === <span class="hljs-string">&quot;ERR_CHILD_PROCESS_STDIO_MAXBUFFER&quot;</span>) {
+              <span class="hljs-title function_">resolve</span>({
+                <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;output_limit_exceeded&quot;</span>,
+                <span class="hljs-attr">output</span>: stderr.<span class="hljs-title function_">slice</span>(<span class="hljs-number">0</span>, <span class="hljs-number">4000</span>),
+                <span class="hljs-attr">comparison</span>: <span class="hljs-string">&quot;&quot;</span>,
+                <span class="hljs-attr">ms</span>: <span class="hljs-number">0</span>,
+              });
+              <span class="hljs-keyword">return</span>;
+            }
             <span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">`judge launch failed: <span class="hljs-subst">${(error <span class="hljs-keyword">as</span> <span class="hljs-built_in">Error</span>).message}</span>`</span>));
             <span class="hljs-keyword">return</span>;
           }
-          <span class="hljs-keyword">const</span> code = <span class="hljs-title function_">typeof</span> (error <span class="hljs-keyword">as</span> { <span class="hljs-attr">code</span>?: <span class="hljs-built_in">unknown</span> } | <span class="hljs-literal">null</span>)?.<span class="hljs-property">code</span> === <span class="hljs-string">&quot;number&quot;</span>
-            ? ((error <span class="hljs-keyword">as</span> { <span class="hljs-attr">code</span>: <span class="hljs-built_in">number</span> }).<span class="hljs-property">code</span>)
-            : <span class="hljs-number">0</span>;
-          <span class="hljs-keyword">const</span> seen = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Map</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-title class_">BatchVerdict</span>&gt;();
-          <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> line <span class="hljs-keyword">of</span> stdout.<span class="hljs-title function_">split</span>(<span class="hljs-string">&quot;\n&quot;</span>)) {
-            <span class="hljs-keyword">const</span> trimmed = line.<span class="hljs-title function_">trim</span>();
-            <span class="hljs-keyword">if</span> (!trimmed.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;{&quot;</span>)) <span class="hljs-keyword">continue</span>;
-            <span class="hljs-keyword">const</span> v = <span class="hljs-title function_">parseVerdictLine</span>(trimmed);
-            <span class="hljs-keyword">if</span> (v) seen.<span class="hljs-title function_">set</span>(v.<span class="hljs-property">id</span>, v);
+          <span class="hljs-keyword">if</span> (code !== <span class="hljs-number">0</span>) {
+            <span class="hljs-keyword">if</span> ([<span class="hljs-number">124</span>, <span class="hljs-number">137</span>, <span class="hljs-number">143</span>].<span class="hljs-title function_">includes</span>(code)) {
+              <span class="hljs-title function_">resolve</span>({ <span class="hljs-attr">status</span>: <span class="hljs-title function_">verdictFromContainerExit</span>(code), <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">comparison</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">ms</span>: <span class="hljs-number">0</span> });
+            } <span class="hljs-keyword">else</span> {
+              <span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">`judge runner exited without a verdict (code <span class="hljs-subst">${code}</span>)`</span>));
+            }
+            <span class="hljs-keyword">return</span>;
           }
-          <span class="hljs-keyword">const</span> <span class="hljs-attr">verdicts</span>: <span class="hljs-title class_">BatchVerdict</span>[] = input.<span class="hljs-property">cases</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">c</span>) =&gt;</span> {
-            <span class="hljs-keyword">const</span> v = seen.<span class="hljs-title function_">get</span>(c.<span class="hljs-property">id</span>);
-            <span class="hljs-keyword">if</span> (v) <span class="hljs-keyword">return</span> { <span class="hljs-attr">id</span>: c.<span class="hljs-property">id</span>, <span class="hljs-attr">status</span>: v.<span class="hljs-property">status</span>, <span class="hljs-attr">passed</span>: v.<span class="hljs-property">passed</span>, <span class="hljs-attr">output</span>: v.<span class="hljs-property">output</span>, <span class="hljs-attr">ms</span>: v.<span class="hljs-property">ms</span> };
-            <span class="hljs-keyword">return</span> { <span class="hljs-attr">id</span>: c.<span class="hljs-property">id</span>, <span class="hljs-attr">status</span>: <span class="hljs-title function_">verdictFromContainerExit</span>(code), <span class="hljs-attr">passed</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">ms</span>: <span class="hljs-number">0</span> };
-          });
-          <span class="hljs-title function_">resolve</span>(verdicts);
+          <span class="hljs-keyword">const</span> record = <span class="hljs-title function_">parseRunnerRecord</span>(stdout);
+          <span class="hljs-keyword">if</span> (!record) {
+            <span class="hljs-title function_">resolve</span>({ <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;internal_error&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">comparison</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-attr">ms</span>: <span class="hljs-number">0</span> });
+            <span class="hljs-keyword">return</span>;
+          }
+          <span class="hljs-keyword">if</span> (pythonSnippet) {
+            <span class="hljs-keyword">const</span> display = stderr
+              ? <span class="hljs-string">`<span class="hljs-subst">${stderr}</span><span class="hljs-subst">${stderr.endsWith(<span class="hljs-string">&quot;\n&quot;</span>) || !record.output ? <span class="hljs-string">&quot;&quot;</span> : <span class="hljs-string">&quot;\n&quot;</span>}</span><span class="hljs-subst">${record.output}</span>`</span>
+              : record.<span class="hljs-property">output</span>;
+            <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">byteLength</span>(stderr, <span class="hljs-string">&quot;utf8&quot;</span>) + <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">byteLength</span>(record.<span class="hljs-property">comparison</span>, <span class="hljs-string">&quot;utf8&quot;</span>) &gt; outputCap) {
+              <span class="hljs-title function_">resolve</span>({
+                <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;output_limit_exceeded&quot;</span>,
+                <span class="hljs-attr">output</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(display, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">subarray</span>(<span class="hljs-number">0</span>, outputCap).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;utf8&quot;</span>),
+                <span class="hljs-attr">comparison</span>: <span class="hljs-string">&quot;&quot;</span>,
+                <span class="hljs-attr">ms</span>: record.<span class="hljs-property">ms</span>,
+              });
+              <span class="hljs-keyword">return</span>;
+            }
+            <span class="hljs-title function_">resolve</span>({ ...record, <span class="hljs-attr">output</span>: display });
+            <span class="hljs-keyword">return</span>;
+          }
+          <span class="hljs-title function_">resolve</span>(record);
         },
       );
     });
   }
 
-  <span class="hljs-keyword">private</span> <span class="hljs-title function_">batchScript</span>(
-    <span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>,
-    <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>,
-    <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>,
-    <span class="hljs-attr">sealed</span>: <span class="hljs-built_in">boolean</span>,
-    <span class="hljs-attr">testCount</span>: <span class="hljs-built_in">number</span>,
-  ): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">oneCaseScript</span>(<span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>, <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>, <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>): <span class="hljs-built_in">string</span> {
     <span class="hljs-keyword">const</span> file = <span class="hljs-variable constant_">SOURCE_FILE</span>[language];
-    <span class="hljs-keyword">const</span> runSecs = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(limits.<span class="hljs-property">runWallMs</span> / <span class="hljs-number">1000</span>);
-    <span class="hljs-keyword">const</span> compileSecs = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(limits.<span class="hljs-property">compileWallMs</span> / <span class="hljs-number">1000</span>);
-    <span class="hljs-keyword">const</span> batchSecs = compileSecs + testCount * runSecs + <span class="hljs-number">30</span>;
-    <span class="hljs-keyword">const</span> cap = limits.<span class="hljs-property">runOutputBytes</span>;
-    <span class="hljs-keyword">const</span> sealFlag = sealed ? <span class="hljs-string">&quot;1&quot;</span> : <span class="hljs-string">&quot;0&quot;</span>;
-    <span class="hljs-keyword">const</span> failLine = <span class="hljs-string">`printf &#x27;{&quot;id&quot;:&quot;%s&quot;,&quot;status&quot;:&quot;compile_error&quot;,&quot;passed&quot;:false,&quot;output_b64&quot;:&quot;&quot;,&quot;ms&quot;:0}\\n&#x27; &quot;$CID&quot;`</span>;
-    <span class="hljs-keyword">const</span> compile =
-      language === <span class="hljs-string">&quot;Python&quot;</span>
-        ? <span class="hljs-string">`echo &quot;$SRC&quot; | base64 -d &gt; <span class="hljs-subst">${file}</span> &amp;&amp; python3 -m py_compile <span class="hljs-subst">${file}</span> || { while IFS= read -r CID; do <span class="hljs-subst">${failLine}</span>; done &lt; ids.txt; exit 0; }`</span>
-        : <span class="hljs-string">`echo &quot;$SRC&quot; | base64 -d &gt; <span class="hljs-subst">${file}</span> &amp;&amp; timeout <span class="hljs-subst">${compileSecs}</span> <span class="hljs-subst">${language === <span class="hljs-string">&quot;C++&quot;</span> ? <span class="hljs-string">&quot;g++&quot;</span> : <span class="hljs-string">&quot;gcc&quot;</span>}</span> -O2 -o prog <span class="hljs-subst">${file}</span> || { while IFS= read -r CID; do <span class="hljs-subst">${failLine}</span>; done &lt; ids.txt; exit 0; }`</span>;
-    <span class="hljs-keyword">const</span> materialize = <span class="hljs-string">`echo &quot;$IDS&quot; | base64 -d &gt; ids.txt &amp;&amp; printf &#x27;\\n&#x27; &gt;&gt; ids.txt &amp;&amp; printf &#x27;%s&#x27; &quot;$INP&quot; &gt; inputs.b64l &amp;&amp; printf &#x27;%s&#x27; &quot;$EXP&quot; &gt; expecteds.b64l`</span>;
-    <span class="hljs-keyword">if</span> (driver === <span class="hljs-string">&quot;snippet&quot;</span>) {
-      <span class="hljs-keyword">if</span> (language !== <span class="hljs-string">&quot;Python&quot;</span>) {
-        <span class="hljs-keyword">return</span> <span class="hljs-string">`<span class="hljs-subst">${materialize}</span>\nwhile IFS= read -r CID; do echo &#x27;{&quot;id&quot;:&quot;&#x27;&quot;$CID&quot;&#x27;&quot;,&quot;status&quot;:&quot;internal_error&quot;,&quot;passed&quot;:false,&quot;output_b64&quot;:&quot;&quot;,&quot;ms&quot;:0}&#x27;; done &lt; ids.txt`</span>;
-      }
-      <span class="hljs-keyword">return</span> [
-        materialize,
-        compile,
-        <span class="hljs-string">`echo &quot;$DRV&quot; | base64 -d &gt; driver.py`</span>,
-        <span class="hljs-string">`timeout <span class="hljs-subst">${batchSecs}</span> python3 driver.py <span class="hljs-subst">${cap}</span> <span class="hljs-subst">${runSecs}</span> <span class="hljs-subst">${sealFlag}</span> &quot;$ENTRY&quot;`</span>,
-      ].<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
-    }
+    <span class="hljs-keyword">const</span> runSeconds = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">1</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(limits.<span class="hljs-property">runWallMs</span> / <span class="hljs-number">1000</span>));
+    <span class="hljs-keyword">const</span> compileSeconds = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">1</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">ceil</span>(limits.<span class="hljs-property">compileWallMs</span> / <span class="hljs-number">1000</span>));
+    <span class="hljs-keyword">const</span> cap = <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">1</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">floor</span>(limits.<span class="hljs-property">runOutputBytes</span>));
+    <span class="hljs-keyword">const</span> compiler = language === <span class="hljs-string">&quot;C++&quot;</span> ? <span class="hljs-string">&quot;g++&quot;</span> : <span class="hljs-string">&quot;gcc&quot;</span>;
+    <span class="hljs-keyword">const</span> compile = language === <span class="hljs-string">&quot;Python&quot;</span>
+      ? <span class="hljs-string">`timeout <span class="hljs-subst">${compileSeconds}</span> python3 -m py_compile <span class="hljs-subst">${file}</span> 2&gt; compile.err`</span>
+      : <span class="hljs-string">`timeout <span class="hljs-subst">${compileSeconds}</span> <span class="hljs-subst">${compiler}</span> -O2 -o prog <span class="hljs-subst">${file}</span> 2&gt; compile.err`</span>;
     <span class="hljs-keyword">const</span> prog = language === <span class="hljs-string">&quot;Python&quot;</span> ? <span class="hljs-string">&quot;python3 player.py&quot;</span> : <span class="hljs-string">&quot;./prog&quot;</span>;
-    <span class="hljs-keyword">return</span> [
-      materialize,
-      compile,
-      <span class="hljs-string">`i=0`</span>,
-      <span class="hljs-string">`while IFS= read -r CID; do`</span>,
-      <span class="hljs-string">`sed -n &quot;$((i+1))p&quot; inputs.b64l | base64 -d &gt; in.txt`</span>,
-      <span class="hljs-string">`sed -n &quot;$((i+1))p&quot; expecteds.b64l | base64 -d &gt; exp.txt`</span>,
-      <span class="hljs-string">`T0=$(date +%s%N)`</span>,
-      <span class="hljs-string">`timeout <span class="hljs-subst">${runSecs}</span> bash -c &#x27;<span class="hljs-subst">${prog}</span> &lt; in.txt 2&gt;/dev/null | head -c <span class="hljs-subst">${cap}</span> &gt; out.txt; echo \${PIPESTATUS[0]} &gt; px.txt&#x27;; TOX=$?`</span>,
-      <span class="hljs-string">`PX=$(cat px.txt 2&gt;/dev/null || echo &quot;$TOX&quot;); OB=$(wc -c &lt; out.txt 2&gt;/dev/null || echo 0); OB=$(echo &quot;$OB&quot; | tr -d &#x27; &#x27;); MS=$(( ($(date +%s%N) - T0) / 1000000 ))`</span>,
-      <span class="hljs-string">`if [ &quot;$TOX&quot; = 124 ] || [ &quot;$PX&quot; = 124 ] || [ &quot;$PX&quot; = 143 ]; then ST=time_limit_exceeded; P=0; O=`</span>,
-      <span class="hljs-string">`elif [ &quot;$TOX&quot; = 137 ] || [ &quot;$PX&quot; = 137 ]; then ST=memory_limit_exceeded; P=0; O=`</span>,
-      <span class="hljs-string">`elif [ &quot;$PX&quot; = 141 ] &amp;&amp; [ &quot;$OB&quot; -ge <span class="hljs-subst">${cap}</span> ]; then ST=output_limit_exceeded; P=0; O=`</span>,
-      <span class="hljs-string">`elif [ &quot;$PX&quot; != 0 ]; then ST=runtime_error; P=0; O=$(base64 -w0 out.txt)`</span>,
-      <span class="hljs-string">`elif [ &quot;$(cat out.txt)&quot; = &quot;$(cat exp.txt)&quot; ]; then ST=accepted; P=1; O=$(base64 -w0 out.txt)`</span>,
-      <span class="hljs-string">`else ST=accepted; P=0; O=$(base64 -w0 out.txt); fi`</span>,
-      <span class="hljs-string">`if [ &quot;<span class="hljs-subst">${sealFlag}</span>&quot; = &quot;1&quot; ]; then O=; fi`</span>,
-      <span class="hljs-string">`if [ &quot;$P&quot; = 1 ]; then PB=true; else PB=false; fi`</span>,
-      <span class="hljs-string">`printf &#x27;{&quot;id&quot;:&quot;%s&quot;,&quot;status&quot;:&quot;%s&quot;,&quot;passed&quot;:%s,&quot;output_b64&quot;:&quot;%s&quot;,&quot;ms&quot;:%s}\\n&#x27; &quot;$CID&quot; &quot;$ST&quot; &quot;$PB&quot; &quot;$O&quot; &quot;$MS&quot;`</span>,
-      <span class="hljs-string">`i=$((i+1))`</span>,
-      <span class="hljs-string">`done &lt; ids.txt`</span>,
-    ].<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+
+    <span class="hljs-keyword">const</span> prefix = [
+      <span class="hljs-string">`printf &#x27;%s&#x27; &quot;$SRC&quot; | base64 -d &gt; <span class="hljs-subst">${file}</span>`</span>,
+      <span class="hljs-string">`printf &#x27;%s&#x27; &quot;$INP&quot; | base64 -d &gt; input.txt`</span>,
+      <span class="hljs-string">`printf &#x27;%s&#x27; &quot;$DRV&quot; | base64 -d &gt; driver.py`</span>,
+      <span class="hljs-string">`export ENTRYPOINT=&quot;$ENTRY&quot;`</span>,
+      <span class="hljs-string">&quot;unset SRC INP DRV ENTRY&quot;</span>,
+      <span class="hljs-string">&quot;emit_result() { printf &#x27;{\&quot;status\&quot;:\&quot;%s\&quot;,\&quot;output_b64\&quot;:\&quot;%s\&quot;,\&quot;comparison_b64\&quot;:\&quot;%s\&quot;,\&quot;ms\&quot;:%s}\\n&#x27; \&quot;$1\&quot; \&quot;$2\&quot; \&quot;$3\&quot; \&quot;$4\&quot;; }&quot;</span>,
+      <span class="hljs-string">`<span class="hljs-subst">${compile}</span>`</span>,
+      <span class="hljs-string">&quot;COMPILE_STATUS=$?&quot;</span>,
+      <span class="hljs-string">`if [ &quot;$COMPILE_STATUS&quot; = 124 ]; then OUTPUT_B64=$(head -c <span class="hljs-subst">${cap}</span> compile.err | base64 -w0); emit_result time_limit_exceeded &quot;$OUTPUT_B64&quot; &#x27;&#x27; 0; exit 0; fi`</span>,
+      <span class="hljs-string">`if [ &quot;$COMPILE_STATUS&quot; != 0 ]; then OUTPUT_B64=$(head -c <span class="hljs-subst">${cap}</span> compile.err | base64 -w0); emit_result compile_error &quot;$OUTPUT_B64&quot; &#x27;&#x27; 0; exit 0; fi`</span>,
+    ];
+
+    <span class="hljs-keyword">if</span> (driver === <span class="hljs-string">&quot;snippet&quot;</span>) {
+      prefix.<span class="hljs-title function_">push</span>(
+        <span class="hljs-string">&quot;set +e&quot;</span>,
+        <span class="hljs-string">&quot;START_NS=$(date +%s%N)&quot;</span>,
+        <span class="hljs-string">`COMPARISON_B64=$(timeout --kill-after=1s <span class="hljs-subst">${runSeconds}</span> python3 driver.py <span class="hljs-subst">${runSeconds}</span> | head -c <span class="hljs-subst">${cap + <span class="hljs-number">1</span>}</span> | base64 -w0; PIPE_CODES=(&quot;\${PIPESTATUS[@]}&quot;); exit &quot;\${PIPE_CODES[0]:-1}&quot;)`</span>,
+        <span class="hljs-string">&quot;RUN_STATUS=$?&quot;</span>,
+        <span class="hljs-string">&quot;END_NS=$(date +%s%N)&quot;</span>,
+        <span class="hljs-string">&quot;RUNTIME_MS=$(( (END_NS - START_NS) / 1000000 ))&quot;</span>,
+        <span class="hljs-string">&quot;COMPARISON_BYTES=$(printf &#x27;%s&#x27; \&quot;$COMPARISON_B64\&quot; | base64 -d | wc -c | tr -d &#x27; &#x27;)&quot;</span>,
+        <span class="hljs-string">&quot;OUTPUT_B64=$COMPARISON_B64&quot;</span>,
+        <span class="hljs-string">`if [ &quot;$COMPARISON_BYTES&quot; -gt <span class="hljs-subst">${cap}</span> ]; then STATUS=output_limit_exceeded; COMPARISON_B64=&#x27;&#x27;;`</span>,
+        <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; = 124 ] || [ \&quot;$RUN_STATUS\&quot; = 143 ]; then STATUS=time_limit_exceeded&quot;</span>,
+        <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; = 137 ]; then STATUS=memory_limit_exceeded&quot;</span>,
+        <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; = 20 ]; then STATUS=compile_error&quot;</span>,
+        <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; = 22 ]; then STATUS=internal_error&quot;</span>,
+        <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; != 0 ]; then STATUS=runtime_error&quot;</span>,
+        <span class="hljs-string">&quot;else STATUS=accepted; fi&quot;</span>,
+        <span class="hljs-string">&quot;emit_result \&quot;$STATUS\&quot; \&quot;$OUTPUT_B64\&quot; \&quot;$COMPARISON_B64\&quot; \&quot;$RUNTIME_MS\&quot;&quot;</span>,
+      );
+      <span class="hljs-keyword">return</span> prefix.<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+    }
+
+    prefix.<span class="hljs-title function_">push</span>(
+      <span class="hljs-string">&quot;START_NS=$(date +%s%N)&quot;</span>,
+      <span class="hljs-string">&quot;set +e&quot;</span>,
+      <span class="hljs-string">`timeout <span class="hljs-subst">${runSeconds}</span> <span class="hljs-subst">${prog}</span> &lt; input.txt 2&gt;/dev/null | head -c <span class="hljs-subst">${cap + <span class="hljs-number">1</span>}</span> &gt; output.raw`</span>,
+      <span class="hljs-string">&quot;PIPE_CODES=(\&quot;${PIPESTATUS[@]}\&quot;)&quot;</span>,
+      <span class="hljs-string">&quot;RUN_STATUS=${PIPE_CODES[0]:-1}&quot;</span>,
+      <span class="hljs-string">&quot;END_NS=$(date +%s%N)&quot;</span>,
+      <span class="hljs-string">&quot;RUNTIME_MS=$(( (END_NS - START_NS) / 1000000 ))&quot;</span>,
+      <span class="hljs-string">&quot;OUTPUT_BYTES=$(wc -c &lt; output.raw | tr -d &#x27; &#x27;)&quot;</span>,
+      <span class="hljs-string">`if [ &quot;$OUTPUT_BYTES&quot; -gt <span class="hljs-subst">${cap}</span> ]; then head -c <span class="hljs-subst">${cap}</span> output.raw &gt; output.capped; OUTPUT_B64=$(base64 -w0 output.capped); emit_result output_limit_exceeded &quot;$OUTPUT_B64&quot; &quot;$OUTPUT_B64&quot; &quot;$RUNTIME_MS&quot;; exit 0; fi`</span>,
+      <span class="hljs-string">&quot;OUTPUT_B64=$(base64 -w0 output.raw)&quot;</span>,
+      <span class="hljs-string">&quot;if [ \&quot;$RUN_STATUS\&quot; = 124 ] || [ \&quot;$RUN_STATUS\&quot; = 143 ]; then STATUS=time_limit_exceeded&quot;</span>,
+      <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; = 137 ]; then STATUS=memory_limit_exceeded&quot;</span>,
+      <span class="hljs-string">&quot;elif [ \&quot;$RUN_STATUS\&quot; != 0 ]; then STATUS=runtime_error&quot;</span>,
+      <span class="hljs-string">&quot;else STATUS=accepted; fi&quot;</span>,
+      <span class="hljs-string">&quot;emit_result \&quot;$STATUS\&quot; \&quot;$OUTPUT_B64\&quot; \&quot;$OUTPUT_B64\&quot; \&quot;$RUNTIME_MS\&quot;&quot;</span>,
+    );
+    <span class="hljs-keyword">return</span> prefix.<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
   }
 }
 </template>
@@ -2046,6 +2103,338 @@ for verdict in main():
   }
 }
 </template>
+<template id="source-aa3d9c8fa797ce3c" data-source-path="packages/arena-game/src/worker-judge.ts"><span class="hljs-keyword">import</span> {
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">CaseResult</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">DriverKind</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">ExecutionStatus</span>,
+  <span class="hljs-title class_">GameJudge</span>,
+  <span class="hljs-title class_">JudgeInfraError</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">JudgeLimits</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">SealedEvaluationRequest</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">SealedGroupResult</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">SupportedLanguage</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">VisibleTest</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./judge.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">WorkerJudgeAdapterOptions</span> {
+  <span class="hljs-attr">baseUrl</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">timeoutMs</span>?: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">fetchImpl</span>?: <span class="hljs-keyword">typeof</span> fetch;
+}
+
+<span class="hljs-keyword">const</span> <span class="hljs-variable constant_">STATUSES</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Set</span>&lt;<span class="hljs-title class_">ExecutionStatus</span>&gt;([
+  <span class="hljs-string">&quot;accepted&quot;</span>,
+  <span class="hljs-string">&quot;compile_error&quot;</span>,
+  <span class="hljs-string">&quot;runtime_error&quot;</span>,
+  <span class="hljs-string">&quot;time_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;memory_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;output_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;process_limit_exceeded&quot;</span>,
+  <span class="hljs-string">&quot;internal_error&quot;</span>,
+]);
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isRecord</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): value is <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">&quot;object&quot;</span> &amp;&amp; value !== <span class="hljs-literal">null</span> &amp;&amp; !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(value);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseCaseResult</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">CaseResult</span> | <span class="hljs-literal">null</span> {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(value) || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">id</span> !== <span class="hljs-string">&quot;string&quot;</span> || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">passed</span> !== <span class="hljs-string">&quot;boolean&quot;</span>
+    || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">status</span> !== <span class="hljs-string">&quot;string&quot;</span> || !<span class="hljs-variable constant_">STATUSES</span>.<span class="hljs-title function_">has</span>(value.<span class="hljs-property">status</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>)
+    || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">output</span> !== <span class="hljs-string">&quot;string&quot;</span> || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">runtimeMs</span> !== <span class="hljs-string">&quot;number&quot;</span>
+    || !<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(value.<span class="hljs-property">runtimeMs</span>) || value.<span class="hljs-property">runtimeMs</span> &lt; <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">id</span>: value.<span class="hljs-property">id</span>,
+    <span class="hljs-attr">passed</span>: value.<span class="hljs-property">passed</span>,
+    <span class="hljs-attr">status</span>: value.<span class="hljs-property">status</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>,
+    <span class="hljs-attr">output</span>: value.<span class="hljs-property">output</span>,
+    <span class="hljs-attr">runtimeMs</span>: value.<span class="hljs-property">runtimeMs</span>,
+  };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseSealedGroup</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">SealedGroupResult</span> | <span class="hljs-literal">null</span> {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(value) || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">name</span> !== <span class="hljs-string">&quot;string&quot;</span> || <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">weight</span> !== <span class="hljs-string">&quot;number&quot;</span>
+    || !<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(value.<span class="hljs-property">weight</span>) || !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(value.<span class="hljs-property">results</span>)) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">const</span> results = value.<span class="hljs-property">results</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(item) || <span class="hljs-keyword">typeof</span> item.<span class="hljs-property">id</span> !== <span class="hljs-string">&quot;string&quot;</span> || <span class="hljs-keyword">typeof</span> item.<span class="hljs-property">passed</span> !== <span class="hljs-string">&quot;boolean&quot;</span>
+      || <span class="hljs-keyword">typeof</span> item.<span class="hljs-property">status</span> !== <span class="hljs-string">&quot;string&quot;</span> || !<span class="hljs-variable constant_">STATUSES</span>.<span class="hljs-title function_">has</span>(item.<span class="hljs-property">status</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>)
+      || <span class="hljs-keyword">typeof</span> item.<span class="hljs-property">runtimeMs</span> !== <span class="hljs-string">&quot;number&quot;</span> || !<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(item.<span class="hljs-property">runtimeMs</span>) || item.<span class="hljs-property">runtimeMs</span> &lt; <span class="hljs-number">0</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">id</span>: item.<span class="hljs-property">id</span>,
+      <span class="hljs-attr">passed</span>: item.<span class="hljs-property">passed</span>,
+      <span class="hljs-attr">status</span>: item.<span class="hljs-property">status</span> <span class="hljs-keyword">as</span> <span class="hljs-title class_">ExecutionStatus</span>,
+      <span class="hljs-attr">runtimeMs</span>: item.<span class="hljs-property">runtimeMs</span>,
+    };
+  });
+  <span class="hljs-keyword">if</span> (results.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item === <span class="hljs-literal">null</span>)) <span class="hljs-keyword">return</span> <span class="hljs-literal">null</span>;
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">name</span>: value.<span class="hljs-property">name</span>, <span class="hljs-attr">weight</span>: value.<span class="hljs-property">weight</span>, <span class="hljs-attr">results</span>: results <span class="hljs-keyword">as</span> <span class="hljs-title class_">SealedGroupResult</span>[<span class="hljs-string">&quot;results&quot;</span>] };
+}
+
+<span class="hljs-comment">/** Game-side transport adapter. It has no provider fallback by design. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">WorkerJudgeAdapter</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">GameJudge</span> {
+  <span class="hljs-keyword">readonly</span> provider = <span class="hljs-string">&quot;worker&quot;</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">endpoint</span>: <span class="hljs-variable constant_">URL</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">timeoutMs</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">fetchImpl</span>: <span class="hljs-keyword">typeof</span> fetch;
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">WorkerJudgeAdapterOptions</span></span>) {
+    <span class="hljs-keyword">const</span> token = options.<span class="hljs-property">token</span>.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!token) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN is required&quot;</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-attr">endpoint</span>: <span class="hljs-variable constant_">URL</span>;
+    <span class="hljs-keyword">try</span> {
+      endpoint = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(options.<span class="hljs-property">baseUrl</span>);
+    } <span class="hljs-keyword">catch</span> {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_URL must be an absolute HTTP URL&quot;</span>);
+    }
+    <span class="hljs-keyword">if</span> ((endpoint.<span class="hljs-property">protocol</span> !== <span class="hljs-string">&quot;http:&quot;</span> &amp;&amp; endpoint.<span class="hljs-property">protocol</span> !== <span class="hljs-string">&quot;https:&quot;</span>) || endpoint.<span class="hljs-property">username</span> || endpoint.<span class="hljs-property">password</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_URL must be an absolute HTTP URL without embedded credentials&quot;</span>);
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">endpoint</span> = endpoint;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">token</span> = token;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span> = options.<span class="hljs-property">timeoutMs</span> ?? <span class="hljs-number">930000</span>;
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span>) || <span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span> &lt; <span class="hljs-number">1</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;worker timeout must be positive&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">fetchImpl</span> = options.<span class="hljs-property">fetchImpl</span> ?? fetch;
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">runVisible</span>(
+    <span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>,
+    <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>,
+    <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">tests</span>: <span class="hljs-title class_">VisibleTest</span>[],
+    <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>,
+  ): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">CaseResult</span>[]&gt; {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">post</span>(<span class="hljs-string">&quot;/v1/run-visible&quot;</span>, { language, driver, source, tests, limits });
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(result) || result.<span class="hljs-property">length</span> !== tests.<span class="hljs-property">length</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned an invalid visible result&quot;</span>);
+    }
+    <span class="hljs-keyword">const</span> cases = result.<span class="hljs-title function_">map</span>(parseCaseResult);
+    <span class="hljs-keyword">if</span> (cases.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item === <span class="hljs-literal">null</span>)) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned an invalid visible result&quot;</span>);
+    <span class="hljs-keyword">const</span> typedCases = cases <span class="hljs-keyword">as</span> <span class="hljs-title class_">CaseResult</span>[];
+    <span class="hljs-keyword">if</span> (typedCases.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">item, index</span>) =&gt;</span> item.<span class="hljs-property">id</span> !== tests[index]?.<span class="hljs-property">id</span>)) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned mismatched visible cases&quot;</span>);
+    }
+    <span class="hljs-keyword">return</span> typedCases;
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">evaluateSealed</span>(<span class="hljs-attr">request</span>: <span class="hljs-title class_">SealedEvaluationRequest</span>): <span class="hljs-title class_">Promise</span>&lt;{ <span class="hljs-attr">groups</span>: <span class="hljs-title class_">SealedGroupResult</span>[] }&gt; {
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">post</span>(<span class="hljs-string">&quot;/v1/evaluate-sealed&quot;</span>, request);
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(result) || !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(result.<span class="hljs-property">groups</span>) || result.<span class="hljs-property">groups</span>.<span class="hljs-property">length</span> !== request.<span class="hljs-property">groups</span>.<span class="hljs-property">length</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned an invalid sealed result&quot;</span>);
+    }
+    <span class="hljs-keyword">const</span> groups = result.<span class="hljs-property">groups</span>.<span class="hljs-title function_">map</span>(parseSealedGroup);
+    <span class="hljs-keyword">if</span> (groups.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item === <span class="hljs-literal">null</span>)) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned an invalid sealed result&quot;</span>);
+    <span class="hljs-keyword">const</span> typedGroups = groups <span class="hljs-keyword">as</span> <span class="hljs-title class_">SealedGroupResult</span>[];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">let</span> groupIndex = <span class="hljs-number">0</span>; groupIndex &lt; typedGroups.<span class="hljs-property">length</span>; groupIndex++) {
+      <span class="hljs-keyword">const</span> actual = typedGroups[groupIndex]!;
+      <span class="hljs-keyword">const</span> expected = request.<span class="hljs-property">groups</span>[groupIndex]!;
+      <span class="hljs-keyword">if</span> (actual.<span class="hljs-property">name</span> !== expected.<span class="hljs-property">name</span> || actual.<span class="hljs-property">weight</span> !== expected.<span class="hljs-property">weight</span> || actual.<span class="hljs-property">results</span>.<span class="hljs-property">length</span> !== expected.<span class="hljs-property">tests</span>.<span class="hljs-property">length</span>
+        || actual.<span class="hljs-property">results</span>.<span class="hljs-title function_">some</span>(<span class="hljs-function">(<span class="hljs-params">item, testIndex</span>) =&gt;</span> item.<span class="hljs-property">id</span> !== expected.<span class="hljs-property">tests</span>[testIndex]?.<span class="hljs-property">id</span>)) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned mismatched sealed cases&quot;</span>);
+      }
+    }
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">groups</span>: typedGroups };
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">async</span> <span class="hljs-title function_">post</span>(<span class="hljs-attr">path</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">body</span>: <span class="hljs-built_in">unknown</span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">unknown</span>&gt; {
+    <span class="hljs-keyword">const</span> url = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(path, <span class="hljs-variable language_">this</span>.<span class="hljs-property">endpoint</span>);
+    <span class="hljs-keyword">let</span> <span class="hljs-attr">response</span>: <span class="hljs-title class_">Response</span>;
+    <span class="hljs-keyword">try</span> {
+      response = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">fetchImpl</span>(url, {
+        <span class="hljs-attr">method</span>: <span class="hljs-string">&quot;POST&quot;</span>,
+        <span class="hljs-attr">headers</span>: {
+          <span class="hljs-attr">authorization</span>: <span class="hljs-string">`Bearer <span class="hljs-subst">${<span class="hljs-variable language_">this</span>.token}</span>`</span>,
+          <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span>,
+          <span class="hljs-attr">accept</span>: <span class="hljs-string">&quot;application/json&quot;</span>,
+        },
+        <span class="hljs-attr">body</span>: <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body),
+        <span class="hljs-attr">signal</span>: <span class="hljs-title class_">AbortSignal</span>.<span class="hljs-title function_">timeout</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span>),
+      });
+    } <span class="hljs-keyword">catch</span> (error) {
+      <span class="hljs-keyword">const</span> errorName = error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? error.<span class="hljs-property">name</span> : <span class="hljs-string">&quot;&quot;</span>;
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(errorName === <span class="hljs-string">&quot;TimeoutError&quot;</span> || errorName === <span class="hljs-string">&quot;AbortError&quot;</span>
+        ? <span class="hljs-string">&quot;judge worker request timed out&quot;</span>
+        : <span class="hljs-string">&quot;judge worker request failed&quot;</span>);
+    }
+    <span class="hljs-keyword">if</span> (!response.<span class="hljs-property">ok</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">`judge worker returned HTTP <span class="hljs-subst">${response.status}</span>`</span>);
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> response.<span class="hljs-title function_">json</span>() <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span>;
+    } <span class="hljs-keyword">catch</span> {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">JudgeInfraError</span>(<span class="hljs-string">&quot;judge worker returned invalid JSON&quot;</span>);
+    }
+  }
+}
+</template>
+<template id="source-14e4e49d8d6b995e" data-source-path="packages/arena-game/test/container-judge-trust.test.ts"><span class="hljs-keyword">import</span> { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:fs&quot;</span>;
+<span class="hljs-keyword">import</span> { execFileSync } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:child_process&quot;</span>;
+<span class="hljs-keyword">import</span> { tmpdir } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:os&quot;</span>;
+<span class="hljs-keyword">import</span> { join } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:path&quot;</span>;
+<span class="hljs-keyword">import</span> { afterEach, describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">ContainerJudge</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../src/container-judge.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-variable constant_">SPIKE_LIMITS</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../src/judge.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> <span class="hljs-attr">scratchDirs</span>: <span class="hljs-built_in">string</span>[] = [];
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">fakeDocker</span>(<span class="hljs-params"><span class="hljs-attr">stdout</span>: <span class="hljs-built_in">string</span>, stderr = <span class="hljs-string">&quot;&quot;</span></span>): { <span class="hljs-attr">binary</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">argsLog</span>: <span class="hljs-built_in">string</span> } {
+  <span class="hljs-keyword">const</span> directory = <span class="hljs-title function_">mkdtempSync</span>(<span class="hljs-title function_">join</span>(<span class="hljs-title function_">tmpdir</span>(), <span class="hljs-string">&quot;container-judge-trust-&quot;</span>));
+  scratchDirs.<span class="hljs-title function_">push</span>(directory);
+  <span class="hljs-keyword">const</span> binary = <span class="hljs-title function_">join</span>(directory, <span class="hljs-string">&quot;docker-fake&quot;</span>);
+  <span class="hljs-keyword">const</span> argsLog = <span class="hljs-title function_">join</span>(directory, <span class="hljs-string">&quot;args.jsonl&quot;</span>);
+  <span class="hljs-keyword">const</span> script = <span class="hljs-string">`#!/usr/bin/env node
+const fs = require(&quot;node:fs&quot;);
+fs.appendFileSync(<span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(argsLog)}</span>, JSON.stringify(process.argv.slice(2)) + &quot;\\n&quot;);
+process.stdout.write(<span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(stdout)}</span> + &quot;\\n&quot;);
+process.stderr.write(<span class="hljs-subst">${<span class="hljs-built_in">JSON</span>.stringify(stderr)}</span>);
+`</span>;
+  <span class="hljs-title function_">writeFileSync</span>(binary, script);
+  <span class="hljs-title function_">chmodSync</span>(binary, <span class="hljs-number">0o755</span>);
+  <span class="hljs-keyword">return</span> { binary, argsLog };
+}
+
+<span class="hljs-title function_">afterEach</span>(<span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> directory <span class="hljs-keyword">of</span> scratchDirs.<span class="hljs-title function_">splice</span>(<span class="hljs-number">0</span>)) <span class="hljs-title function_">rmSync</span>(directory, { <span class="hljs-attr">recursive</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">force</span>: <span class="hljs-literal">true</span> });
+});
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;ContainerJudge trusted boundary&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;ignores a forged runner pass when captured output differs from the expected answer&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> forged = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({
+      <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;forged-case&quot;</span>,
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>,
+      <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">output_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;forged-output&quot;</span>, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">comparison_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;forged-output&quot;</span>, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">ms</span>: <span class="hljs-number">1</span>,
+    });
+    <span class="hljs-keyword">const</span> fake = <span class="hljs-title function_">fakeDocker</span>(forged);
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>({ <span class="hljs-attr">dockerBin</span>: fake.<span class="hljs-property">binary</span> });
+
+    <span class="hljs-keyword">const</span> [result] = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
+      <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-string">&quot;def solve(value): return value\n&quot;</span>,
+      [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;forged-case&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 1&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;trusted-answer&quot;</span> }],
+      { ...<span class="hljs-variable constant_">SPIKE_LIMITS</span>, <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>, <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span> },
+    );
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;accepted&quot;</span>);
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">output</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;forged-output&quot;</span>);
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">passed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;rejects a trailing forged runner record instead of grading it&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> expected = <span class="hljs-string">&quot;trusted-answer&quot;</span>;
+    <span class="hljs-keyword">const</span> actual = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;runtime_error&quot;</span>,
+      <span class="hljs-attr">output_b64</span>: <span class="hljs-string">&quot;&quot;</span>,
+      <span class="hljs-attr">comparison_b64</span>: <span class="hljs-string">&quot;&quot;</span>,
+      <span class="hljs-attr">ms</span>: <span class="hljs-number">1</span>,
+    });
+    <span class="hljs-keyword">const</span> forged = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>,
+      <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>,
+      <span class="hljs-attr">output_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(expected, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">comparison_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(expected, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">ms</span>: <span class="hljs-number">1</span>,
+    });
+    <span class="hljs-keyword">const</span> fake = <span class="hljs-title function_">fakeDocker</span>(<span class="hljs-string">`<span class="hljs-subst">${actual}</span>\n<span class="hljs-subst">${forged}</span>`</span>);
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>({ <span class="hljs-attr">dockerBin</span>: fake.<span class="hljs-property">binary</span> });
+
+    <span class="hljs-keyword">const</span> [result] = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
+      <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-string">&quot;def solve(value): return value\n&quot;</span>,
+      [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;forged-atexit&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 1&quot;</span>, expected }],
+      { ...<span class="hljs-variable constant_">SPIKE_LIMITS</span>, <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>, <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span> },
+    );
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;internal_error&quot;</span>);
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">passed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;counts captured Python print output against the case output limit&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> comparison = <span class="hljs-string">&quot;trusted-answer&quot;</span>;
+    <span class="hljs-keyword">const</span> runner = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>,
+      <span class="hljs-attr">output_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(comparison, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">comparison_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(comparison, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">ms</span>: <span class="hljs-number">1</span>,
+    });
+    <span class="hljs-keyword">const</span> fake = <span class="hljs-title function_">fakeDocker</span>(runner, <span class="hljs-string">&quot;x&quot;</span>.<span class="hljs-title function_">repeat</span>(<span class="hljs-number">80</span>));
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>({ <span class="hljs-attr">dockerBin</span>: fake.<span class="hljs-property">binary</span> });
+
+    <span class="hljs-keyword">const</span> [result] = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
+      <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-string">&quot;def solve(value): return value\n&quot;</span>,
+      [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;output-cap&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 1&quot;</span>, <span class="hljs-attr">expected</span>: comparison }],
+      { ...<span class="hljs-variable constant_">SPIKE_LIMITS</span>, <span class="hljs-attr">runOutputBytes</span>: <span class="hljs-number">64</span>, <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>, <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span> },
+    );
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;output_limit_exceeded&quot;</span>);
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">passed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;starts one container per case without passing expected answers or another case&#x27;s input&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> fake = <span class="hljs-title function_">fakeDocker</span>(<span class="hljs-string">&quot;unstructured contestant output&quot;</span>);
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>({ <span class="hljs-attr">dockerBin</span>: fake.<span class="hljs-property">binary</span> });
+    <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
+      <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-string">&quot;def solve(value): return value\n&quot;</span>,
+      [
+        { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;case-alpha&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;INPUT_ALPHA_731&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;EXPECTED_ALPHA_842&quot;</span> },
+        { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;case-beta&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;INPUT_BETA_953&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;EXPECTED_BETA_064&quot;</span> },
+      ],
+      { ...<span class="hljs-variable constant_">SPIKE_LIMITS</span>, <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>, <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span> },
+    );
+
+    <span class="hljs-keyword">const</span> calls = <span class="hljs-title function_">readFileSync</span>(fake.<span class="hljs-property">argsLog</span>, <span class="hljs-string">&quot;utf8&quot;</span>)
+      .<span class="hljs-title function_">trim</span>()
+      .<span class="hljs-title function_">split</span>(<span class="hljs-string">&quot;\n&quot;</span>)
+      .<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">line</span>) =&gt;</span> <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(line) <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>[]);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">2</span>);
+
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">encoded</span> = (<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">string</span></span>) =&gt; <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(value, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>);
+    <span class="hljs-keyword">const</span> alphaArgs = calls[<span class="hljs-number">0</span>]!.<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+    <span class="hljs-keyword">const</span> betaArgs = calls[<span class="hljs-number">1</span>]!.<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+    <span class="hljs-title function_">expect</span>(alphaArgs).<span class="hljs-title function_">toContain</span>(<span class="hljs-title function_">encoded</span>(<span class="hljs-string">&quot;INPUT_ALPHA_731&quot;</span>));
+    <span class="hljs-title function_">expect</span>(alphaArgs).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-title function_">encoded</span>(<span class="hljs-string">&quot;INPUT_BETA_953&quot;</span>));
+    <span class="hljs-title function_">expect</span>(betaArgs).<span class="hljs-title function_">toContain</span>(<span class="hljs-title function_">encoded</span>(<span class="hljs-string">&quot;INPUT_BETA_953&quot;</span>));
+    <span class="hljs-title function_">expect</span>(betaArgs).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-title function_">encoded</span>(<span class="hljs-string">&quot;INPUT_ALPHA_731&quot;</span>));
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> args <span class="hljs-keyword">of</span> calls) {
+      <span class="hljs-keyword">const</span> serialized = args.<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+      <span class="hljs-title function_">expect</span>(serialized).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;EXP=&quot;</span>);
+      <span class="hljs-title function_">expect</span>(serialized).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-title function_">encoded</span>(<span class="hljs-string">&quot;EXPECTED_ALPHA_842&quot;</span>));
+      <span class="hljs-title function_">expect</span>(serialized).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-title function_">encoded</span>(<span class="hljs-string">&quot;EXPECTED_BETA_064&quot;</span>));
+      <span class="hljs-title function_">expect</span>(serialized).<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;none&quot;</span>);
+      <span class="hljs-title function_">expect</span>(serialized).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;--mount&quot;</span>);
+      <span class="hljs-title function_">expect</span>(serialized).<span class="hljs-property">not</span>.<span class="hljs-title function_">toContain</span>(<span class="hljs-string">&quot;--volume&quot;</span>);
+    }
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;generates a syntactically valid shell runner for Python snippets&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> fake = <span class="hljs-title function_">fakeDocker</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>({
+      <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>,
+      <span class="hljs-attr">output_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">comparison_b64</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(<span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;base64&quot;</span>),
+      <span class="hljs-attr">ms</span>: <span class="hljs-number">1</span>,
+    }));
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>({ <span class="hljs-attr">dockerBin</span>: fake.<span class="hljs-property">binary</span> });
+    <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
+      <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-string">&quot;def solve(value): return value\n&quot;</span>,
+      [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;script-syntax&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 1&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;1&quot;</span> }],
+      { ...<span class="hljs-variable constant_">SPIKE_LIMITS</span>, <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>, <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span> },
+    );
+
+    <span class="hljs-keyword">const</span> args = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title function_">readFileSync</span>(fake.<span class="hljs-property">argsLog</span>, <span class="hljs-string">&quot;utf8&quot;</span>).<span class="hljs-title function_">trim</span>()) <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>[];
+    <span class="hljs-keyword">const</span> runnerScript = args.<span class="hljs-title function_">at</span>(-<span class="hljs-number">1</span>);
+    <span class="hljs-title function_">expect</span>(runnerScript).<span class="hljs-title function_">toBeDefined</span>();
+    <span class="hljs-title function_">execFileSync</span>(<span class="hljs-string">&quot;bash&quot;</span>, [<span class="hljs-string">&quot;-n&quot;</span>], { <span class="hljs-attr">input</span>: runnerScript });
+  });
+});
+</template>
 <template id="source-19b00b61990b08ae" data-source-path="packages/arena-game/test/container-judge.test.ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
 <span class="hljs-keyword">import</span> { <span class="hljs-title class_">ContainerJudge</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../src/container-judge.js&quot;</span>;
 <span class="hljs-keyword">import</span> { <span class="hljs-title class_">JudgeInfraError</span>, <span class="hljs-variable constant_">SPIKE_LIMITS</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../src/judge.js&quot;</span>;
@@ -2083,6 +2472,37 @@ for verdict in main():
     <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>();
     <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(<span class="hljs-string">&quot;Python&quot;</span>, <span class="hljs-string">&quot;snippet&quot;</span>, <span class="hljs-string">&quot;while True:\n    pass\n&quot;</span>, [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;ex1&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;nums = []&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;0&quot;</span> }], <span class="hljs-variable constant_">LIMITS</span>);
     <span class="hljs-title function_">expect</span>(res[<span class="hljs-number">0</span>].<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;time_limit_exceeded&quot;</span>);
+  }, <span class="hljs-number">30000</span>);
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;Python atexit output cannot forge an accepted result or bypass the output limit&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> source = [
+      <span class="hljs-string">&quot;import atexit, base64, json, os&quot;</span>,
+      <span class="hljs-string">&quot;def forge_runner_record():&quot;</span>,
+      <span class="hljs-string">&quot;    record = {&quot;</span>,
+      <span class="hljs-string">&quot;        &#x27;status&#x27;: &#x27;accepted&#x27;,&quot;</span>,
+      <span class="hljs-string">&quot;        &#x27;passed&#x27;: True,&quot;</span>,
+      <span class="hljs-string">&quot;        &#x27;output_b64&#x27;: base64.b64encode(b&#x27;forged&#x27;).decode(),&quot;</span>,
+      <span class="hljs-string">&quot;        &#x27;comparison_b64&#x27;: base64.b64encode(b&#x27;42&#x27;).decode(),&quot;</span>,
+      <span class="hljs-string">&quot;        &#x27;ms&#x27;: 1,&quot;</span>,
+      <span class="hljs-string">&quot;    }&quot;</span>,
+      <span class="hljs-string">&quot;    os.write(1, (json.dumps(record) + &#x27;\\n&#x27;).encode())&quot;</span>,
+      <span class="hljs-string">&quot;atexit.register(forge_runner_record)&quot;</span>,
+      <span class="hljs-string">&quot;def solve(value):&quot;</span>,
+      <span class="hljs-string">&quot;    print(&#x27;x&#x27; * 2048)&quot;</span>,
+      <span class="hljs-string">&quot;    return value&quot;</span>,
+      <span class="hljs-string">&quot;&quot;</span>,
+    ].<span class="hljs-title function_">join</span>(<span class="hljs-string">&quot;\n&quot;</span>);
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>();
+    <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
+      <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-string">&quot;snippet&quot;</span>,
+      source,
+      [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;forged-atexit&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 42&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;42&quot;</span> }],
+      { ...<span class="hljs-variable constant_">LIMITS</span>, <span class="hljs-attr">runOutputBytes</span>: <span class="hljs-number">64</span> },
+    );
+
+    <span class="hljs-title function_">expect</span>(res[<span class="hljs-number">0</span>].<span class="hljs-property">status</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;output_limit_exceeded&quot;</span>);
+    <span class="hljs-title function_">expect</span>(res[<span class="hljs-number">0</span>].<span class="hljs-property">passed</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">false</span>);
   }, <span class="hljs-number">30000</span>);
 
   <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;c++ stdio program compiles and runs isolated&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
@@ -2325,6 +2745,110 @@ def solve(x):
     <span class="hljs-title function_">expect</span>(res[<span class="hljs-number">0</span>].<span class="hljs-property">output</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;&#x27;keys:&#x27;&quot;</span>);
   }, <span class="hljs-number">30000</span>);
 
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;submitted Python cannot recover expected answers from env or scratch during a sealed suite&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> pySrc = <span class="hljs-string">`
+import base64, os, pathlib, re
+def _decoded(value):
+    chunks = [value]
+    for _ in range(3):
+        try:
+            value = base64.b64decode(value).decode(&quot;utf8&quot;, &quot;ignore&quot;)
+            chunks.append(value)
+        except Exception:
+            break
+    return chunks
+def _all_judge_data():
+    for value in os.environ.values():
+        for chunk in _decoded(value): yield chunk
+    for root in (&quot;/scratch&quot;, &quot;/tmp&quot;):
+        for path in pathlib.Path(root).rglob(&quot;*&quot;):
+            if path.is_file():
+                try:
+                    value = path.read_text(errors=&quot;ignore&quot;)
+                    for line in value.splitlines() or [value]:
+                        for chunk in _decoded(line): yield chunk
+                except Exception:
+                    pass
+def solve(_):
+    for data in _all_judge_data():
+        match = re.search(r&quot;HIDDEN_ANSWER_[A-Z0-9_]+&quot;, data)
+        if match: return match.group(0)
+    return &quot;EMPTY&quot;
+`</span>;
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">evaluateSealed</span>({
+      <span class="hljs-attr">evaluationId</span>: <span class="hljs-string">&quot;leak-expected-evaluation&quot;</span>,
+      <span class="hljs-attr">submissionId</span>: <span class="hljs-string">&quot;leak-expected-submission&quot;</span>,
+      <span class="hljs-attr">problemVersionId</span>: <span class="hljs-string">&quot;problem-v1&quot;</span>,
+      <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;hidden-v1&quot;</span>,
+      <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-attr">source</span>: pySrc,
+      <span class="hljs-attr">groups</span>: [{
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;sealed&quot;</span>,
+        <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">tests</span>: [
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;expected-alpha&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 11&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;&#x27;HIDDEN_ANSWER_ALPHA_413&#x27;&quot;</span> },
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;expected-beta&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = 22&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;&#x27;HIDDEN_ANSWER_BETA_527&#x27;&quot;</span> },
+        ],
+      }],
+      <span class="hljs-attr">limits</span>: <span class="hljs-variable constant_">LIMITS</span>,
+    });
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">groups</span>[<span class="hljs-number">0</span>]?.<span class="hljs-property">results</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item.<span class="hljs-property">passed</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-literal">false</span>, <span class="hljs-literal">false</span>]);
+  }, <span class="hljs-number">30000</span>);
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;a case cannot recover another hidden case&#x27;s input from env or scratch&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> pySrc = <span class="hljs-string">`
+import base64, os, pathlib, re
+def _decoded(value):
+    chunks = [value]
+    for _ in range(3):
+        try:
+            value = base64.b64decode(value).decode(&quot;utf8&quot;, &quot;ignore&quot;)
+            chunks.append(value)
+        except Exception:
+            break
+    return chunks
+def _all_judge_data():
+    for value in os.environ.values():
+        for chunk in _decoded(value): yield chunk
+    for root in (&quot;/scratch&quot;, &quot;/tmp&quot;):
+        for path in pathlib.Path(root).rglob(&quot;*&quot;):
+            if path.is_file():
+                try:
+                    value = path.read_text(errors=&quot;ignore&quot;)
+                    for line in value.splitlines() or [value]:
+                        for chunk in _decoded(line): yield chunk
+                except Exception:
+                    pass
+def solve(_):
+    for data in _all_judge_data():
+        match = re.search(r&quot;OTHER_CASE_INPUT_[A-Z0-9_]+&quot;, data)
+        if match: return match.group(0)
+    return &quot;EMPTY&quot;
+`</span>;
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">evaluateSealed</span>({
+      <span class="hljs-attr">evaluationId</span>: <span class="hljs-string">&quot;leak-input-evaluation&quot;</span>,
+      <span class="hljs-attr">submissionId</span>: <span class="hljs-string">&quot;leak-input-submission&quot;</span>,
+      <span class="hljs-attr">problemVersionId</span>: <span class="hljs-string">&quot;problem-v1&quot;</span>,
+      <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;hidden-v1&quot;</span>,
+      <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-attr">source</span>: pySrc,
+      <span class="hljs-attr">groups</span>: [{
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;sealed&quot;</span>,
+        <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">tests</span>: [
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;before-other-input&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = &#x27;CURRENT_CASE_INPUT&#x27;&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;&#x27;OTHER_CASE_INPUT_SECRET_638&#x27;&quot;</span> },
+          { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;contains-other-input&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value = &#x27;OTHER_CASE_INPUT_SECRET_638&#x27;&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;NOT_THE_INPUT_MARKER&quot;</span> },
+        ],
+      }],
+      <span class="hljs-attr">limits</span>: <span class="hljs-variable constant_">LIMITS</span>,
+    });
+
+    <span class="hljs-title function_">expect</span>(result.<span class="hljs-property">groups</span>[<span class="hljs-number">0</span>]?.<span class="hljs-property">results</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">item</span>) =&gt;</span> item.<span class="hljs-property">passed</span>)).<span class="hljs-title function_">toEqual</span>([<span class="hljs-literal">false</span>, <span class="hljs-literal">false</span>]);
+  }, <span class="hljs-number">30000</span>);
+
   <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;containers are automatically cleaned up after exit (--rm)&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
     <span class="hljs-keyword">const</span> beforeCount = <span class="hljs-title class_">Number</span>(<span class="hljs-title function_">execSync</span>(<span class="hljs-string">&quot;docker ps -q | wc -l&quot;</span>, { <span class="hljs-attr">encoding</span>: <span class="hljs-string">&quot;utf8&quot;</span> }).<span class="hljs-title function_">trim</span>());
     <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(
@@ -2503,12 +3027,141 @@ def solve(x):
   });
 });
 </template>
+<template id="source-bb1dceba86779e7a" data-source-path="packages/arena-game/test/worker-judge.test.ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">JudgeInfraError</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;../src/judge.js&quot;</span>;
+<span class="hljs-keyword">import</span> { setup, <span class="hljs-variable constant_">SOLVED_PY</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./setup.js&quot;</span>;
+
+<span class="hljs-keyword">const</span> modulePath = <span class="hljs-string">&quot;../src/worker-judge.js&quot;</span>;
+<span class="hljs-keyword">const</span> baseUrl = <span class="hljs-string">&quot;http://judge-worker.internal:3010&quot;</span>;
+<span class="hljs-keyword">const</span> token = <span class="hljs-string">&quot;worker-adapter-test-token&quot;</span>;
+<span class="hljs-keyword">const</span> limits = {
+  <span class="hljs-attr">compileWallMs</span>: <span class="hljs-number">1000</span>,
+  <span class="hljs-attr">runWallMs</span>: <span class="hljs-number">1000</span>,
+  <span class="hljs-attr">runMemoryMb</span>: <span class="hljs-number">64</span>,
+  <span class="hljs-attr">runOutputBytes</span>: <span class="hljs-number">1024</span>,
+  <span class="hljs-attr">runCpus</span>: <span class="hljs-number">1</span>,
+  <span class="hljs-attr">runPids</span>: <span class="hljs-number">16</span>,
+};
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadAdapterModule</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">any</span>&gt; {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">loaded</span>: <span class="hljs-built_in">any</span>;
+  <span class="hljs-keyword">try</span> { loaded = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(modulePath); } <span class="hljs-keyword">catch</span> { loaded = <span class="hljs-literal">null</span>; }
+  <span class="hljs-title function_">expect</span>(loaded?.<span class="hljs-property">WorkerJudgeAdapter</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;function&quot;</span>);
+  <span class="hljs-keyword">return</span> loaded;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">jsonResponse</span>(<span class="hljs-params"><span class="hljs-attr">body</span>: <span class="hljs-built_in">unknown</span>, status = <span class="hljs-number">200</span></span>): <span class="hljs-title class_">Response</span> {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body), { status, <span class="hljs-attr">headers</span>: { <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json&quot;</span> } });
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;WorkerJudgeAdapter&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;sends authenticated visible requests and returns the existing CaseResult shape&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">calls</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">url</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">init</span>?: <span class="hljs-title class_">RequestInit</span> }&gt; = [];
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">fetchImpl</span>: <span class="hljs-keyword">typeof</span> fetch = <span class="hljs-title function_">async</span> (input, init) =&gt; {
+      calls.<span class="hljs-title function_">push</span>({ <span class="hljs-attr">url</span>: <span class="hljs-title class_">String</span>(input), init });
+      <span class="hljs-keyword">return</span> <span class="hljs-title function_">jsonResponse</span>([{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">2</span> }]);
+    };
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">WorkerJudgeAdapter</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadAdapterModule</span>();
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({ baseUrl, token, fetchImpl });
+
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">runVisible</span>(<span class="hljs-string">&quot;Python&quot;</span>, <span class="hljs-string">&quot;snippet&quot;</span>, <span class="hljs-string">&quot;def solve(value): return value&quot;</span>, [
+      { <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value=1&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;1&quot;</span> },
+    ], limits);
+
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toHaveLength</span>(<span class="hljs-number">1</span>);
+    <span class="hljs-title function_">expect</span>(calls[<span class="hljs-number">0</span>]?.<span class="hljs-property">url</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">`<span class="hljs-subst">${baseUrl}</span>/v1/run-visible`</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Headers</span>(calls[<span class="hljs-number">0</span>]?.<span class="hljs-property">init</span>?.<span class="hljs-property">headers</span>).<span class="hljs-title function_">get</span>(<span class="hljs-string">&quot;authorization&quot;</span>)).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">`Bearer <span class="hljs-subst">${token}</span>`</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title class_">String</span>(calls[<span class="hljs-number">0</span>]?.<span class="hljs-property">init</span>?.<span class="hljs-property">body</span>))).<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>, <span class="hljs-attr">tests</span>: [{ <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;1&quot;</span> }] });
+    <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toEqual</span>([{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;visible-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">output</span>: <span class="hljs-string">&quot;1&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">2</span> }]);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;sends sealed evaluations and accepts only sealed group verdicts in the response&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> <span class="hljs-attr">sent</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt; | <span class="hljs-literal">null</span> = <span class="hljs-literal">null</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">fetchImpl</span>: <span class="hljs-keyword">typeof</span> fetch = <span class="hljs-title function_">async</span> (_input, init) =&gt; {
+      sent = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title class_">String</span>(init?.<span class="hljs-property">body</span>)) <span class="hljs-keyword">as</span> <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;;
+      <span class="hljs-keyword">return</span> <span class="hljs-title function_">jsonResponse</span>({ <span class="hljs-attr">groups</span>: [{
+        <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;hidden&quot;</span>,
+        <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>,
+        <span class="hljs-attr">results</span>: [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;hidden-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">4</span> }],
+      }] });
+    };
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">WorkerJudgeAdapter</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadAdapterModule</span>();
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({ baseUrl, token, fetchImpl });
+
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> judge.<span class="hljs-title function_">evaluateSealed</span>({
+      <span class="hljs-attr">evaluationId</span>: <span class="hljs-string">&quot;evaluation-1&quot;</span>,
+      <span class="hljs-attr">submissionId</span>: <span class="hljs-string">&quot;submission-1&quot;</span>,
+      <span class="hljs-attr">problemVersionId</span>: <span class="hljs-string">&quot;problem-v1&quot;</span>,
+      <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;suite-v1&quot;</span>,
+      <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span>,
+      <span class="hljs-attr">driver</span>: <span class="hljs-string">&quot;snippet&quot;</span>,
+      <span class="hljs-attr">source</span>: <span class="hljs-string">&quot;def solve(value): return value&quot;</span>,
+      <span class="hljs-attr">groups</span>: [{ <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;hidden&quot;</span>, <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>, <span class="hljs-attr">tests</span>: [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;hidden-1&quot;</span>, <span class="hljs-attr">input</span>: <span class="hljs-string">&quot;value=2&quot;</span>, <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;2&quot;</span> }] }],
+      limits,
+    });
+
+    <span class="hljs-title function_">expect</span>(sent).<span class="hljs-title function_">toMatchObject</span>({ <span class="hljs-attr">hiddenSuiteId</span>: <span class="hljs-string">&quot;suite-v1&quot;</span>, <span class="hljs-attr">groups</span>: [{ <span class="hljs-attr">tests</span>: [{ <span class="hljs-attr">expected</span>: <span class="hljs-string">&quot;2&quot;</span> }] }] });
+    <span class="hljs-title function_">expect</span>(result).<span class="hljs-title function_">toEqual</span>({ <span class="hljs-attr">groups</span>: [{
+      <span class="hljs-attr">name</span>: <span class="hljs-string">&quot;hidden&quot;</span>,
+      <span class="hljs-attr">weight</span>: <span class="hljs-number">1</span>,
+      <span class="hljs-attr">results</span>: [{ <span class="hljs-attr">id</span>: <span class="hljs-string">&quot;hidden-1&quot;</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">4</span> }],
+    }] });
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;maps worker HTTP errors and timeouts to JudgeInfraError without trying another backend&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">failedFetch</span>: <span class="hljs-keyword">typeof</span> fetch = <span class="hljs-title function_">async</span> () =&gt; {
+      calls++;
+      <span class="hljs-keyword">return</span> <span class="hljs-title function_">jsonResponse</span>({ <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge unavailable&quot;</span> }, <span class="hljs-number">503</span>);
+    };
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">WorkerJudgeAdapter</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadAdapterModule</span>();
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({ baseUrl, token, <span class="hljs-attr">fetchImpl</span>: failedFetch, <span class="hljs-attr">timeoutMs</span>: <span class="hljs-number">20</span> });
+    <span class="hljs-keyword">const</span> <span class="hljs-title function_">run</span> = (<span class="hljs-params"></span>) =&gt; judge.<span class="hljs-title function_">runVisible</span>(<span class="hljs-string">&quot;Python&quot;</span>, <span class="hljs-string">&quot;snippet&quot;</span>, <span class="hljs-string">&quot;source&quot;</span>, [], limits);
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">run</span>()).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">JudgeInfraError</span>);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
+
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">hangingFetch</span>: <span class="hljs-keyword">typeof</span> fetch = <span class="hljs-title function_">async</span> (_input, init) =&gt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">_resolve, reject</span>) =&gt;</span> {
+      init?.<span class="hljs-property">signal</span>?.<span class="hljs-title function_">addEventListener</span>(<span class="hljs-string">&quot;abort&quot;</span>, <span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">DOMException</span>(<span class="hljs-string">&quot;aborted&quot;</span>, <span class="hljs-string">&quot;AbortError&quot;</span>)), { <span class="hljs-attr">once</span>: <span class="hljs-literal">true</span> });
+    });
+    <span class="hljs-keyword">const</span> timed = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({ baseUrl, token, <span class="hljs-attr">fetchImpl</span>: hangingFetch, <span class="hljs-attr">timeoutMs</span>: <span class="hljs-number">10</span> });
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(timed.<span class="hljs-title function_">runVisible</span>(<span class="hljs-string">&quot;Python&quot;</span>, <span class="hljs-string">&quot;snippet&quot;</span>, <span class="hljs-string">&quot;source&quot;</span>, [], limits)).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">JudgeInfraError</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;keeps infrastructure failures uncounted and retries recovery through this same worker&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">let</span> calls = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword">const</span> <span class="hljs-attr">fetchImpl</span>: <span class="hljs-keyword">typeof</span> fetch = <span class="hljs-title function_">async</span> (_input, init) =&gt; {
+      calls++;
+      <span class="hljs-keyword">if</span> (calls === <span class="hljs-number">1</span>) <span class="hljs-keyword">return</span> <span class="hljs-title function_">jsonResponse</span>({ <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge unavailable&quot;</span> }, <span class="hljs-number">503</span>);
+      <span class="hljs-keyword">const</span> request = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title class_">String</span>(init?.<span class="hljs-property">body</span>)) <span class="hljs-keyword">as</span> {
+        <span class="hljs-attr">groups</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>; <span class="hljs-attr">weight</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">tests</span>: <span class="hljs-title class_">Array</span>&lt;{ <span class="hljs-attr">id</span>: <span class="hljs-built_in">string</span> }&gt; }&gt;;
+      };
+      <span class="hljs-keyword">return</span> <span class="hljs-title function_">jsonResponse</span>({ <span class="hljs-attr">groups</span>: request.<span class="hljs-property">groups</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">group</span>) =&gt;</span> ({
+        <span class="hljs-attr">name</span>: group.<span class="hljs-property">name</span>,
+        <span class="hljs-attr">weight</span>: group.<span class="hljs-property">weight</span>,
+        <span class="hljs-attr">results</span>: group.<span class="hljs-property">tests</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">test</span>) =&gt;</span> ({ <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span>, <span class="hljs-attr">passed</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;accepted&quot;</span>, <span class="hljs-attr">runtimeMs</span>: <span class="hljs-number">1</span> })),
+      })) });
+    };
+    <span class="hljs-keyword">const</span> { <span class="hljs-title class_">WorkerJudgeAdapter</span> } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadAdapterModule</span>();
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({ baseUrl, token, fetchImpl });
+    <span class="hljs-keyword">const</span> { engine, left, matchId } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">setup</span>([{ <span class="hljs-attr">score</span>: <span class="hljs-number">100</span> }], { judge });
+
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">expect</span>(engine.<span class="hljs-title function_">submit</span>(left, matchId, { <span class="hljs-attr">code</span>: <span class="hljs-variable constant_">SOLVED_PY</span>, <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span> })).<span class="hljs-property">rejects</span>.<span class="hljs-title function_">toBeInstanceOf</span>(<span class="hljs-title class_">JudgeInfraError</span>);
+    <span class="hljs-keyword">const</span> afterFailure = <span class="hljs-keyword">await</span> engine.<span class="hljs-title function_">snapshot</span>(left, matchId);
+    <span class="hljs-title function_">expect</span>(afterFailure.<span class="hljs-property">sides</span>.<span class="hljs-property">left</span>?.<span class="hljs-property">submissions</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">0</span>);
+    <span class="hljs-title function_">expect</span>(afterFailure.<span class="hljs-property">roundPhase</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;CODING&quot;</span>);
+
+    <span class="hljs-keyword">const</span> receipt = <span class="hljs-keyword">await</span> engine.<span class="hljs-title function_">submit</span>(left, matchId, { <span class="hljs-attr">code</span>: <span class="hljs-variable constant_">SOLVED_PY</span>, <span class="hljs-attr">language</span>: <span class="hljs-string">&quot;Python&quot;</span> });
+    <span class="hljs-title function_">expect</span>(receipt.<span class="hljs-property">ok</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-literal">true</span>);
+    <span class="hljs-title function_">expect</span>(calls).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">2</span>);
+    <span class="hljs-title function_">expect</span>((<span class="hljs-keyword">await</span> engine.<span class="hljs-title function_">snapshot</span>(left, matchId)).<span class="hljs-property">sides</span>.<span class="hljs-property">left</span>?.<span class="hljs-property">submissions</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-number">1</span>);
+  });
+});
+</template>
 <template id="source-8f207f0faebaa8fd" data-source-path="services/game/src/game/game.service.ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">ForbiddenException</span>, <span class="hljs-title class_">NotFoundException</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@nestjs/common&quot;</span>;
 <span class="hljs-keyword">import</span> { <span class="hljs-title class_">Injectable</span>, <span class="hljs-title class_">OnModuleDestroy</span>, <span class="hljs-title class_">OnModuleInit</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@nestjs/common&quot;</span>;
 <span class="hljs-keyword">import</span> {
   <span class="hljs-title class_">ArenaEngine</span>,
-  <span class="hljs-title class_">ContainerJudge</span>,
-  <span class="hljs-title class_">Judge0Adapter</span>,
   <span class="hljs-title class_">InMemoryEvaluationTelemetry</span>,
   <span class="hljs-title class_">FileBank</span>,
   <span class="hljs-title class_">InMemoryCollabPersist</span>,
@@ -2532,6 +3185,7 @@ def solve(x):
 } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-game-engine&quot;</span>;
 <span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">MatchMode</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-model&quot;</span>;
 <span class="hljs-keyword">import</span> { <span class="hljs-title class_">MatchSocketPresence</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./match-socket-presence.js&quot;</span>;
+<span class="hljs-keyword">import</span> { createGameJudge } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./judge-factory.js&quot;</span>;
 
 <span class="hljs-comment">/**
  * Thin application layer over ArenaEngine: owns NOTHING domain (no scoring,
@@ -2550,6 +3204,7 @@ def solve(x):
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> evaluationTelemetry = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InMemoryEvaluationTelemetry</span>();
   <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">matchSocketPresence</span>: <span class="hljs-title class_">MatchSocketPresence</span>;
   <span class="hljs-keyword">private</span> <span class="hljs-attr">graceTimer</span>?: <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">Timeout</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-attr">deadlineTimer</span>?: <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">Timeout</span>;
 
   <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">matchSocketPresence</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">MatchSocketPresence</span>({
@@ -2620,7 +3275,7 @@ def solve(x):
       <span class="hljs-variable language_">this</span>.<span class="hljs-property">lobbyStore</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">InMemoryLobbyStore</span>(<span class="hljs-literal">undefined</span>, <span class="hljs-literal">undefined</span>, matches);
     }
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ArenaEngine</span>({
-      <span class="hljs-attr">judge</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">createJudge</span>(),
+      <span class="hljs-attr">judge</span>: <span class="hljs-title function_">createGameJudge</span>(process.<span class="hljs-property">env</span>),
       <span class="hljs-attr">bank</span>: <span class="hljs-keyword">new</span> <span class="hljs-title class_">FileBank</span>(),
       persistence,
       <span class="hljs-attr">telemetry</span>: <span class="hljs-variable language_">this</span>.<span class="hljs-property">evaluationTelemetry</span>,
@@ -2637,7 +3292,13 @@ def solve(x):
     <span class="hljs-comment">// pending-evaluation re-drive under original ids.</span>
     <span class="hljs-keyword">const</span> recovered = <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span>.<span class="hljs-title function_">recover</span>();
     <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`[game] boot recovery: <span class="hljs-subst">${recovered.matches}</span> matches, <span class="hljs-subst">${recovered.retried}</span> retried, <span class="hljs-subst">${recovered.failed}</span> failed`</span>);
-    <span class="hljs-comment">// Explicit server-owned grace sweep (§11): never from socket callbacks.</span>
+    <span class="hljs-comment">// Match deadline closure has a short sweep interval so an expired Match</span>
+    <span class="hljs-comment">// reaches its saved terminal result without waiting for a player action.</span>
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span> = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span>.<span class="hljs-title function_">sweepExpiredMatches</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> {});
+    }, <span class="hljs-number">1000</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span>.<span class="hljs-title function_">unref</span>();
+    <span class="hljs-comment">// Reconnect grace and retained queue matchmaking use their slower cadence.</span>
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span> = <span class="hljs-built_in">setInterval</span>(<span class="hljs-function">() =&gt;</span> {
       <span class="hljs-built_in">void</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">engine</span>.<span class="hljs-title function_">sweepGrace</span>().<span class="hljs-title function_">catch</span>(<span class="hljs-function">() =&gt;</span> {});
       <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> mode <span class="hljs-keyword">of</span> [<span class="hljs-string">&quot;1v1&quot;</span>, <span class="hljs-string">&quot;2v2&quot;</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>) {
@@ -2647,29 +3308,9 @@ def solve(x):
     <span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span>.<span class="hljs-title function_">unref</span>();
   }
 
-  <span class="hljs-keyword">private</span> <span class="hljs-title function_">createJudge</span>(): <span class="hljs-title class_">ContainerJudge</span> | <span class="hljs-title class_">Judge0Adapter</span> {
-    <span class="hljs-keyword">const</span> backend = (process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE_BACKEND</span> ?? <span class="hljs-string">&quot;container&quot;</span>).<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">toLowerCase</span>();
-    <span class="hljs-keyword">if</span> (backend === <span class="hljs-string">&quot;container&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>();
-    <span class="hljs-keyword">if</span> (backend !== <span class="hljs-string">&quot;judge0&quot;</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`unsupported JUDGE_BACKEND <span class="hljs-subst">${backend}</span>`</span>);
-
-    <span class="hljs-keyword">const</span> baseUrl = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_URL</span>?.<span class="hljs-title function_">trim</span>();
-    <span class="hljs-keyword">if</span> (!baseUrl) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE0_URL is required when JUDGE_BACKEND=judge0&quot;</span>);
-    <span class="hljs-keyword">const</span> authToken = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_AUTH_TOKEN</span>?.<span class="hljs-title function_">trim</span>();
-    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Judge0Adapter</span>({
-      baseUrl,
-      <span class="hljs-attr">headers</span>: authToken ? { <span class="hljs-string">&quot;X-Auth-Token&quot;</span>: authToken } : {},
-      <span class="hljs-attr">languageIds</span>: {
-        <span class="hljs-attr">C</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_C_LANGUAGE_ID</span> ?? <span class="hljs-number">50</span>),
-        <span class="hljs-string">&quot;C++&quot;</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_CPP_LANGUAGE_ID</span> ?? <span class="hljs-number">54</span>),
-        <span class="hljs-title class_">Python</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_PYTHON_LANGUAGE_ID</span> ?? <span class="hljs-number">71</span>),
-      },
-      <span class="hljs-attr">pollIntervalMs</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_POLL_INTERVAL_MS</span> ?? <span class="hljs-number">250</span>),
-      <span class="hljs-attr">maxPolls</span>: <span class="hljs-title class_">Number</span>(process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE0_MAX_POLLS</span> ?? <span class="hljs-number">120</span>),
-    });
-  }
-
   <span class="hljs-keyword">async</span> <span class="hljs-title function_">onModuleDestroy</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
     <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span>) <span class="hljs-built_in">clearInterval</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">graceTimer</span>);
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span>) <span class="hljs-built_in">clearInterval</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">deadlineTimer</span>);
     <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-property">stores</span>?.<span class="hljs-title function_">close</span>();
   }
 
@@ -2895,6 +3536,94 @@ def solve(x):
       }
     }
   }
+}
+</template>
+<template id="source-1645dde5c58bac52" data-source-path="services/game/src/game/judge-factory.test.ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+
+<span class="hljs-keyword">const</span> modulePath = <span class="hljs-string">&quot;./judge-factory.js&quot;</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadFactory</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">any</span>&gt; {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">loaded</span>: <span class="hljs-built_in">any</span>;
+  <span class="hljs-keyword">try</span> { loaded = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(modulePath); } <span class="hljs-keyword">catch</span> { loaded = <span class="hljs-literal">null</span>; }
+  <span class="hljs-title function_">expect</span>(loaded?.<span class="hljs-property">createGameJudge</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;function&quot;</span>);
+  <span class="hljs-keyword">return</span> loaded;
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;Game judge backend selection&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;keeps the local runner as the development default and preserves Judge0&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { createGameJudge } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadFactory</span>();
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">createGameJudge</span>({}).<span class="hljs-property">provider</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;container&quot;</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;judge0&quot;</span>, <span class="hljs-title class_">JUDGE0</span><span class="hljs-attr">_URL</span>: <span class="hljs-string">&quot;http://judge0.internal&quot;</span> }).<span class="hljs-property">provider</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;judge0&quot;</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;selects only an explicitly configured worker and fails closed when its settings are missing&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { createGameJudge } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadFactory</span>();
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-title function_">createGameJudge</span>({
+      <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span>,
+      <span class="hljs-attr">JUDGE_WORKER_URL</span>: <span class="hljs-string">&quot;http://judge-worker:3010&quot;</span>,
+      <span class="hljs-attr">JUDGE_WORKER_TOKEN</span>: <span class="hljs-string">&quot;worker-token&quot;</span>,
+    });
+    <span class="hljs-title function_">expect</span>(judge.<span class="hljs-property">provider</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;worker&quot;</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span>, <span class="hljs-attr">JUDGE_WORKER_TOKEN</span>: <span class="hljs-string">&quot;worker-token&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/JUDGE_WORKER_URL/</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span>, <span class="hljs-attr">JUDGE_WORKER_URL</span>: <span class="hljs-string">&quot;http://judge-worker:3010&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/JUDGE_WORKER_TOKEN/</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/JUDGE_WORKER_URL/</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;rejects unsupported backends instead of silently using the local runner&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { createGameJudge } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadFactory</span>();
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;unknown&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;unsupported JUDGE_BACKEND unknown&quot;</span>);
+  });
+});
+</template>
+<template id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts"><span class="hljs-keyword">import</span> {
+  <span class="hljs-title class_">ContainerJudge</span>,
+  <span class="hljs-title class_">Judge0Adapter</span>,
+  <span class="hljs-title class_">WorkerJudgeAdapter</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">GameJudge</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-game-engine&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">JudgeEnvironment</span> = <span class="hljs-title class_">Readonly</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>&gt;&gt;;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">configuredPositiveInteger</span>(<span class="hljs-params"><span class="hljs-attr">environment</span>: <span class="hljs-title class_">JudgeEnvironment</span>, <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span> {
+  <span class="hljs-keyword">const</span> raw = environment[name]?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">if</span> (!raw) <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
+  <span class="hljs-keyword">if</span> (!<span class="hljs-regexp">/^\d+$/</span>.<span class="hljs-title function_">test</span>(raw)) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be a positive integer`</span>);
+  <span class="hljs-keyword">const</span> value = <span class="hljs-title class_">Number</span>(raw);
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-title function_">isSafeInteger</span>(value) || value &lt; <span class="hljs-number">1</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be a positive integer`</span>);
+  <span class="hljs-keyword">return</span> value;
+}
+
+<span class="hljs-comment">/** Select one GameJudge provider at process startup; provider failures never trigger fallback. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createGameJudge</span>(<span class="hljs-params"><span class="hljs-attr">environment</span>: <span class="hljs-title class_">JudgeEnvironment</span> = process.env</span>): <span class="hljs-title class_">GameJudge</span> {
+  <span class="hljs-keyword">const</span> backend = (environment.<span class="hljs-property">JUDGE_BACKEND</span> ?? <span class="hljs-string">&quot;container&quot;</span>).<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">toLowerCase</span>();
+  <span class="hljs-keyword">if</span> (backend === <span class="hljs-string">&quot;container&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>();
+  <span class="hljs-keyword">if</span> (backend === <span class="hljs-string">&quot;worker&quot;</span>) {
+    <span class="hljs-keyword">const</span> baseUrl = environment.<span class="hljs-property">JUDGE_WORKER_URL</span>?.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!baseUrl) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_URL is required when JUDGE_BACKEND=worker&quot;</span>);
+    <span class="hljs-keyword">const</span> token = environment.<span class="hljs-property">JUDGE_WORKER_TOKEN</span>?.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!token) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN is required when JUDGE_BACKEND=worker&quot;</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({
+      baseUrl,
+      token,
+      <span class="hljs-attr">timeoutMs</span>: <span class="hljs-title function_">configuredPositiveInteger</span>(environment, <span class="hljs-string">&quot;JUDGE_WORKER_TIMEOUT_MS&quot;</span>),
+    });
+  }
+  <span class="hljs-keyword">if</span> (backend !== <span class="hljs-string">&quot;judge0&quot;</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`unsupported JUDGE_BACKEND <span class="hljs-subst">${backend}</span>`</span>);
+
+  <span class="hljs-keyword">const</span> baseUrl = environment.<span class="hljs-property">JUDGE0_URL</span>?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">if</span> (!baseUrl) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE0_URL is required when JUDGE_BACKEND=judge0&quot;</span>);
+  <span class="hljs-keyword">const</span> authToken = environment.<span class="hljs-property">JUDGE0_AUTH_TOKEN</span>?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Judge0Adapter</span>({
+    baseUrl,
+    <span class="hljs-attr">headers</span>: authToken ? { <span class="hljs-string">&quot;X-Auth-Token&quot;</span>: authToken } : {},
+    <span class="hljs-attr">languageIds</span>: {
+      <span class="hljs-attr">C</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_C_LANGUAGE_ID</span> ?? <span class="hljs-number">50</span>),
+      <span class="hljs-string">&quot;C++&quot;</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_CPP_LANGUAGE_ID</span> ?? <span class="hljs-number">54</span>),
+      <span class="hljs-title class_">Python</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_PYTHON_LANGUAGE_ID</span> ?? <span class="hljs-number">71</span>),
+    },
+    <span class="hljs-attr">pollIntervalMs</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_POLL_INTERVAL_MS</span> ?? <span class="hljs-number">250</span>),
+    <span class="hljs-attr">maxPolls</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_MAX_POLLS</span> ?? <span class="hljs-number">120</span>),
+  });
 }
 </template>
 <template id="source-853b66f9bcf925bc" data-source-path="spikes/judge-isolation/DECISION.md"><span class="hljs-section"># 06 — Judge isolation mechanism decision</span>

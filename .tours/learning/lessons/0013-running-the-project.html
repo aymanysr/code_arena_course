@@ -976,7 +976,7 @@
       <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 13</p>
       <h1>The local play script and Compose stack are not the same thing</h1>
       <p class="hero-copy">In about 10 minutes: Trace the two supported local run paths, identify what each service currently owns, and use the setup files without mistaking scaffolding for product behavior.</p>
-      <p class="mt-1"><span class="status status-current">Source references match 40 pinned files</span> <span class="quiet">Snapshot <code>94e3592a698707cc</code></span></p>
+      <p class="mt-1"><span class="status status-current">Source references match 46 pinned files</span> <span class="quiet">Snapshot <code>4edc506dd9158d21</code></span></p>
       <div class="stage-bar" aria-label="Lesson stages">
         <span class="stage-pill" aria-current="step">1 · Predict</span>
         <span aria-hidden="true" class="flow-arrow">→</span>
@@ -1007,6 +1007,8 @@
         <dd>“Is this process answering?” The current <code>/health</code> route reports process/model information; it does not prove the application is ready to serve gameplay.</dd>
         <dt class="mt-1">Readiness</dt>
         <dd>“Can required dependencies be reached?” The current <code>/ready</code> route checks TCP reachability for PostgreSQL and Redis. It is a separate route, not a gameplay test.</dd>
+        <dt class="mt-1">Judge Worker readiness</dt>
+        <dd>The worker readiness checks Docker and required images through its separate <code>/ready</code> route. Game's health/readiness routes check Game dependencies instead.</dd>
       </dl>
     </section>
 
@@ -1047,9 +1049,19 @@
           <span class="step-number" aria-hidden="true">03</span>
           <div>
             <h3>Compose builds the local service stack—but not the whole game</h3>
-            <p>The Compose comment gives the setup order: create self-signed localhost certificates, copy <code>.env.example</code> to the ignored <code>.env</code>, then start Compose. The listed services are PostgreSQL, Redis, Core, Game, Chat, and Nginx. Only Nginx publishes ports 80 and 443. This Compose file has no frontend container and no Judge container; do not infer either one from the presence of build scripts or Judge settings.</p>
+            <p>The Compose comment gives the setup order: create self-signed localhost certificates, copy <code>.env.example</code> to the ignored <code>.env</code>, then start Compose. The services include PostgreSQL, Redis, Core, Game, the Judge Worker, the deferred Chat skeleton, and Nginx. Only Nginx publishes ports 80 and 443; there is no frontend container. Compose sets <code>JUDGE_BACKEND=worker</code> and the Game-side <code>WorkerJudgeAdapter</code> sends requests to <code>JUDGE_WORKER_URL=http://judge-worker:3010</code> over the internal judge network. The worker runs <code>ContainerJudge</code>. Compose mounts the Docker socket into the Judge Worker only. Local direct Game runs default to <code>ContainerJudge</code>; optional Judge0 is another explicitly configured provider.</p>
+            <p class="mt-1">The worker requires <code>JUDGE_WORKER_TOKEN</code>; the value in <code>.env.example</code> is only a placeholder. <code>JUDGE_WORKER_TIMEOUT_MS</code> is 930000 ms. Worker defaults are <code>JUDGE_WORKER_CONCURRENCY=2</code>, <code>JUDGE_WORKER_MAX_QUEUE=8</code>, <code>JUDGE_WORKER_QUEUE_TIMEOUT_MS=30000</code>, and <code>JUDGE_WORKER_JOB_TIMEOUT_MS=900000</code>. Its entrypoint prepares missing judge images. <code>/health</code> is liveness; worker readiness checks Docker and required images through <code>/ready</code>, and Compose waits for that readiness before starting Game. These values describe local Compose configuration, not a production capacity claim.</p>
+            <p class="mt-1">The internal network keeps the worker off the public path: Nginx does not publish or proxy the worker. The Docker socket grants daemon-level authority, so a private Compose network is not proof that running hostile code is safe or isolated from the host.</p>
             <div class="source-links">
               <a href="../source-map.html?file=docker-compose.yml&amp;line=1" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:1">Local Compose startup and intentional omissions · docker-compose.yml:1</a>
+              <a href="../source-map.html?file=docker-compose.yml&amp;line=57" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="57" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:57">Judge Worker service, bounded queue, socket mount, and readiness check · docker-compose.yml:57</a>
+              <a href="../source-map.html?file=docker-compose.yml&amp;line=85" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="85" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:85">Compose configures Game to use the internal worker · docker-compose.yml:85</a>
+              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.ts&amp;line=19" data-source-id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/judge-factory.ts:19">Game backend selection and no-fallback rule · judge-factory.ts:19</a>
+              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fmain.ts&amp;line=21" data-source-id="source-d6e914cd95e4e14e" data-source-path="services/judge-worker/src/main.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/main.ts:21">Worker configuration, ContainerJudge, queue, and listener · main.ts:21</a>
+              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fhttp-server.ts&amp;line=183" data-source-id="source-ac47c28cfc201378" data-source-path="services/judge-worker/src/http-server.ts" data-source-line="183" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/http-server.ts:183">Worker HTTP endpoints and liveness/readiness routes · http-server.ts:183</a>
+              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fjob-queue.ts&amp;line=22" data-source-id="source-751066cc12adb6bb" data-source-path="services/judge-worker/src/job-queue.ts" data-source-line="22" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/job-queue.ts:22">Bounded active work and waiting queue settings · job-queue.ts:22</a>
+              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Freadiness.ts&amp;line=31" data-source-id="source-d6972f22a23c365f" data-source-path="services/judge-worker/src/readiness.ts" data-source-line="31" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/readiness.ts:31">Readiness checks Docker and every configured image · readiness.ts:31</a>
+              <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/infra/nginx/nginx.conf:19">Public proxy routes omit the internal worker · nginx.conf:19</a>
               <a href="../source-map.html?file=docker-compose.yml&amp;line=95" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="95" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:95">Nginx is the only published service · docker-compose.yml:95</a>
               <a href="../source-map.html?file=scripts%2Fgen-dev-certs.sh&amp;line=2" data-source-id="source-353133ae448c8d19" data-source-path="scripts/gen-dev-certs.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/scripts/gen-dev-certs.sh:2">Local-only self-signed TLS certificate generation · gen-dev-certs.sh:2</a>
               <a href="../source-map.html?file=.env.example&amp;line=1" data-source-id="source-a3046da0d15a27e8" data-source-path=".env.example" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/.env.example:1">Safe placeholder settings and internal ports · .env.example:1</a>
@@ -1151,7 +1163,7 @@
     </section>
 
     <footer class="footer-note">
-      <p>Source snapshot <code>94e3592a698707cc</code>. Commands and Compose configuration were inspected, not executed for this course update. The local play script, Compose stack, and production deployment are distinct environments.</p>
+      <p>Source snapshot <code>4edc506dd9158d21</code>. Commands and Compose configuration were inspected, not executed for this course update. The local play script, Compose stack, and production deployment are distinct environments.</p>
     </footer>
   </main>
 <div id="source-templates" hidden>
@@ -1173,10 +1185,27 @@
 <span class="hljs-attr">CORE_PORT</span>=<span class="hljs-number">3001</span>
 <span class="hljs-attr">GAME_PORT</span>=<span class="hljs-number">3002</span>
 <span class="hljs-attr">CHAT_PORT</span>=<span class="hljs-number">3003</span>
-<span class="hljs-comment"># Game execution backend. ContainerJudge is the safe local/default backend;</span>
-<span class="hljs-comment"># select judge0 only when the self-hosted service is on a private network with</span>
-<span class="hljs-comment"># network execution disabled in its own configuration.</span>
+<span class="hljs-comment"># Dev/test identity and direct-match fixture only; keep false outside local E2E.</span>
+<span class="hljs-attr">DEV_PRINCIPAL</span>=<span class="hljs-literal">false</span>
+<span class="hljs-comment"># Local Game process default. Docker Compose overrides this to `worker` and</span>
+<span class="hljs-comment"># sends judging through the private judge-worker service.</span>
 <span class="hljs-attr">JUDGE_BACKEND</span>=container
+<span class="hljs-comment"># Internal Game ↔ worker bearer secret. Compose passes it only to Game and</span>
+<span class="hljs-comment"># judge-worker. Replace before sharing/deploying.</span>
+<span class="hljs-attr">JUDGE_WORKER_TOKEN</span>=replace-with-a-random-<span class="hljs-number">64</span>-character-secret
+<span class="hljs-attr">JUDGE_WORKER_TIMEOUT_MS</span>=<span class="hljs-number">930000</span>
+<span class="hljs-comment"># Single-host worker capacity: two running GameJudge calls and eight waiting.</span>
+<span class="hljs-attr">JUDGE_WORKER_CONCURRENCY</span>=<span class="hljs-number">2</span>
+<span class="hljs-attr">JUDGE_WORKER_MAX_QUEUE</span>=<span class="hljs-number">8</span>
+<span class="hljs-attr">JUDGE_WORKER_QUEUE_TIMEOUT_MS</span>=<span class="hljs-number">30000</span>
+<span class="hljs-attr">JUDGE_WORKER_JOB_TIMEOUT_MS</span>=<span class="hljs-number">900000</span>
+<span class="hljs-comment"># The worker pulls missing images through its Docker socket at startup.</span>
+<span class="hljs-attr">JUDGE_PYTHON_IMAGE</span>=python:<span class="hljs-number">3.12</span>-slim
+<span class="hljs-attr">JUDGE_GCC_IMAGE</span>=gcc:<span class="hljs-number">14</span>-bookworm
+<span class="hljs-comment"># Linux default. On Docker Desktop, use the absolute host path to its socket</span>
+<span class="hljs-comment"># if /var/run/docker.sock is not available to Compose.</span>
+<span class="hljs-attr">JUDGE_DOCKER_SOCKET</span>=/var/run/docker.sock
+<span class="hljs-comment"># Optional Judge0 adapter (not selected by Compose).</span>
 <span class="hljs-attr">JUDGE0_URL</span>=http://judge0-server:<span class="hljs-number">2358</span>
 <span class="hljs-attr">JUDGE0_AUTH_TOKEN</span>=
 <span class="hljs-attr">JUDGE0_C_LANGUAGE_ID</span>=<span class="hljs-number">50</span>
@@ -1197,17 +1226,25 @@ coverage/
 # Local dev TLS certs (generated by npm run certs)
 infra/nginx/certs/
 </template>
-<template id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml"><span class="hljs-comment"># Code Arena local production stack (ticket 01).</span>
+<template id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml"><span class="hljs-comment"># Single-host Code Arena stack.</span>
 <span class="hljs-comment"># Boot: npm run certs (once, dev TLS) &amp;&amp; cp .env.example .env &amp;&amp; docker compose up --build</span>
-<span class="hljs-comment"># Only Nginx is publicly exposed. Frontend (12) and judging (06) attach later</span>
-<span class="hljs-comment"># at the marked points; their blocks are intentionally absent, not forgotten.</span>
+<span class="hljs-comment"># Only Nginx is publicly exposed. The judge worker is private and owns the</span>
+<span class="hljs-comment"># Docker socket; untrusted player containers run with --network none.</span>
 <span class="hljs-attr">services:</span>
   <span class="hljs-attr">postgres:</span>
     <span class="hljs-attr">image:</span> <span class="hljs-string">postgres:17-alpine</span>
-    <span class="hljs-attr">env_file:</span> <span class="hljs-string">.env</span>
     <span class="hljs-attr">environment:</span>
       <span class="hljs-attr">POSTGRES_USER:</span> <span class="hljs-string">${POSTGRES_USER}</span>
       <span class="hljs-attr">POSTGRES_PASSWORD:</span> <span class="hljs-string">${POSTGRES_PASSWORD}</span>
+      <span class="hljs-attr">CORE_DB_NAME:</span> <span class="hljs-string">${CORE_DB_NAME}</span>
+      <span class="hljs-attr">CORE_DB_USER:</span> <span class="hljs-string">${CORE_DB_USER}</span>
+      <span class="hljs-attr">CORE_DB_PASSWORD:</span> <span class="hljs-string">${CORE_DB_PASSWORD}</span>
+      <span class="hljs-attr">GAME_DB_NAME:</span> <span class="hljs-string">${GAME_DB_NAME}</span>
+      <span class="hljs-attr">GAME_DB_USER:</span> <span class="hljs-string">${GAME_DB_USER}</span>
+      <span class="hljs-attr">GAME_DB_PASSWORD:</span> <span class="hljs-string">${GAME_DB_PASSWORD}</span>
+      <span class="hljs-attr">CHAT_DB_NAME:</span> <span class="hljs-string">${CHAT_DB_NAME}</span>
+      <span class="hljs-attr">CHAT_DB_USER:</span> <span class="hljs-string">${CHAT_DB_USER}</span>
+      <span class="hljs-attr">CHAT_DB_PASSWORD:</span> <span class="hljs-string">${CHAT_DB_PASSWORD}</span>
     <span class="hljs-attr">volumes:</span>
       <span class="hljs-bullet">-</span> <span class="hljs-string">pgdata:/var/lib/postgresql/data</span>
       <span class="hljs-bullet">-</span> <span class="hljs-string">./infra/postgres/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro</span>
@@ -1231,7 +1268,6 @@ infra/nginx/certs/
     <span class="hljs-attr">build:</span>
       <span class="hljs-attr">context:</span> <span class="hljs-string">.</span>
       <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">services/core/Dockerfile</span>
-    <span class="hljs-attr">env_file:</span> <span class="hljs-string">.env</span>
     <span class="hljs-attr">environment:</span>
       <span class="hljs-attr">SERVICE_NAME:</span> <span class="hljs-string">core</span>
       <span class="hljs-attr">PORT:</span> <span class="hljs-string">${CORE_PORT}</span>
@@ -1246,14 +1282,49 @@ infra/nginx/certs/
       <span class="hljs-attr">timeout:</span> <span class="hljs-string">5s</span>
       <span class="hljs-attr">retries:</span> <span class="hljs-number">5</span>
 
+  <span class="hljs-attr">judge-worker:</span>
+    <span class="hljs-attr">build:</span>
+      <span class="hljs-attr">context:</span> <span class="hljs-string">.</span>
+      <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">services/judge-worker/Dockerfile</span>
+    <span class="hljs-attr">environment:</span>
+      <span class="hljs-attr">JUDGE_WORKER_TOKEN:</span> <span class="hljs-string">${JUDGE_WORKER_TOKEN:?set</span> <span class="hljs-string">JUDGE_WORKER_TOKEN</span> <span class="hljs-string">in</span> <span class="hljs-string">.env}</span>
+      <span class="hljs-attr">JUDGE_WORKER_PORT:</span> <span class="hljs-string">&quot;3010&quot;</span>
+      <span class="hljs-attr">JUDGE_DOCKER_BIN:</span> <span class="hljs-string">docker</span>
+      <span class="hljs-attr">JUDGE_PYTHON_IMAGE:</span> <span class="hljs-string">${JUDGE_PYTHON_IMAGE:-python:3.12-slim}</span>
+      <span class="hljs-attr">JUDGE_GCC_IMAGE:</span> <span class="hljs-string">${JUDGE_GCC_IMAGE:-gcc:14-bookworm}</span>
+      <span class="hljs-attr">JUDGE_WORKER_CONCURRENCY:</span> <span class="hljs-string">${JUDGE_WORKER_CONCURRENCY:-2}</span>
+      <span class="hljs-attr">JUDGE_WORKER_MAX_QUEUE:</span> <span class="hljs-string">${JUDGE_WORKER_MAX_QUEUE:-8}</span>
+      <span class="hljs-attr">JUDGE_WORKER_QUEUE_TIMEOUT_MS:</span> <span class="hljs-string">${JUDGE_WORKER_QUEUE_TIMEOUT_MS:-30000}</span>
+      <span class="hljs-attr">JUDGE_WORKER_JOB_TIMEOUT_MS:</span> <span class="hljs-string">${JUDGE_WORKER_JOB_TIMEOUT_MS:-900000}</span>
+    <span class="hljs-attr">volumes:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-attr">type:</span> <span class="hljs-string">bind</span>
+        <span class="hljs-attr">source:</span> <span class="hljs-string">${JUDGE_DOCKER_SOCKET:-/var/run/docker.sock}</span>
+        <span class="hljs-attr">target:</span> <span class="hljs-string">/var/run/docker.sock</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">judge-internal</span>
+    <span class="hljs-attr">restart:</span> <span class="hljs-string">unless-stopped</span>
+    <span class="hljs-attr">healthcheck:</span>
+      <span class="hljs-attr">test:</span> [<span class="hljs-string">&quot;CMD&quot;</span>, <span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;-e&quot;</span>, <span class="hljs-string">&quot;fetch(&#x27;http://localhost:3010/ready&#x27;).then(r=&gt;{if(!r.ok)process.exit(1)}).catch(()=&gt;process.exit(1))&quot;</span>]
+      <span class="hljs-attr">interval:</span> <span class="hljs-string">10s</span>
+      <span class="hljs-attr">timeout:</span> <span class="hljs-string">5s</span>
+      <span class="hljs-attr">retries:</span> <span class="hljs-number">12</span>
+      <span class="hljs-attr">start_period:</span> <span class="hljs-string">5s</span>
+
   <span class="hljs-attr">game:</span>
     <span class="hljs-attr">build:</span>
       <span class="hljs-attr">context:</span> <span class="hljs-string">.</span>
       <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">services/game/Dockerfile</span>
-    <span class="hljs-attr">env_file:</span> <span class="hljs-string">.env</span>
     <span class="hljs-attr">environment:</span>
       <span class="hljs-attr">SERVICE_NAME:</span> <span class="hljs-string">game</span>
       <span class="hljs-attr">PORT:</span> <span class="hljs-string">${GAME_PORT}</span>
+      <span class="hljs-comment"># Compose uses the internal worker. Local development keeps</span>
+      <span class="hljs-comment"># JUDGE_BACKEND=container from .env.example.</span>
+      <span class="hljs-attr">JUDGE_BACKEND:</span> <span class="hljs-string">worker</span>
+      <span class="hljs-attr">JUDGE_WORKER_URL:</span> <span class="hljs-string">http://judge-worker:3010</span>
+      <span class="hljs-attr">JUDGE_WORKER_TOKEN:</span> <span class="hljs-string">${JUDGE_WORKER_TOKEN:?set</span> <span class="hljs-string">JUDGE_WORKER_TOKEN</span> <span class="hljs-string">in</span> <span class="hljs-string">.env}</span>
+      <span class="hljs-attr">JUDGE_WORKER_TIMEOUT_MS:</span> <span class="hljs-string">${JUDGE_WORKER_TIMEOUT_MS:-930000}</span>
+      <span class="hljs-attr">DEV_PRINCIPAL:</span> <span class="hljs-string">${DEV_PRINCIPAL:-false}</span>
+      <span class="hljs-attr">RECONNECT_GRACE_MS:</span> <span class="hljs-string">${RECONNECT_GRACE_MS:-90000}</span>
       <span class="hljs-comment"># ponytail: game persists matches/submissions/reveals/collab via this</span>
       <span class="hljs-comment"># URL (ADR-0002 least-privilege game role). Without it the service</span>
       <span class="hljs-comment"># silently falls back to in-memory stores. Keep the password</span>
@@ -1264,6 +1335,11 @@ infra/nginx/certs/
         <span class="hljs-attr">condition:</span> <span class="hljs-string">service_healthy</span>
       <span class="hljs-attr">redis:</span>
         <span class="hljs-attr">condition:</span> <span class="hljs-string">service_healthy</span>
+      <span class="hljs-attr">judge-worker:</span>
+        <span class="hljs-attr">condition:</span> <span class="hljs-string">service_healthy</span>
+    <span class="hljs-attr">networks:</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">default</span>
+      <span class="hljs-bullet">-</span> <span class="hljs-string">judge-internal</span>
     <span class="hljs-attr">healthcheck:</span>
       <span class="hljs-attr">test:</span> [<span class="hljs-string">&quot;CMD&quot;</span>, <span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;-e&quot;</span>, <span class="hljs-string">&quot;fetch(&#x27;http://localhost:3002/health&#x27;).then(r=&gt;{if(!r.ok)process.exit(1)}).catch(()=&gt;process.exit(1))&quot;</span>]
       <span class="hljs-attr">interval:</span> <span class="hljs-string">10s</span>
@@ -1276,7 +1352,6 @@ infra/nginx/certs/
     <span class="hljs-attr">build:</span>
       <span class="hljs-attr">context:</span> <span class="hljs-string">.</span>
       <span class="hljs-attr">dockerfile:</span> <span class="hljs-string">services/chat/Dockerfile</span>
-    <span class="hljs-attr">env_file:</span> <span class="hljs-string">.env</span>
     <span class="hljs-attr">environment:</span>
       <span class="hljs-attr">SERVICE_NAME:</span> <span class="hljs-string">chat</span>
       <span class="hljs-attr">PORT:</span> <span class="hljs-string">${CHAT_PORT}</span>
@@ -1308,6 +1383,10 @@ infra/nginx/certs/
 <span class="hljs-attr">volumes:</span>
   <span class="hljs-attr">pgdata:</span>
   <span class="hljs-attr">redisdata:</span>
+
+<span class="hljs-attr">networks:</span>
+  <span class="hljs-attr">judge-internal:</span>
+    <span class="hljs-attr">internal:</span> <span class="hljs-literal">true</span>
 </template>
 <template id="source-959f9cada636604d" data-source-path="frontend/index.html"><span class="hljs-meta">&lt;!doctype <span class="hljs-keyword">html</span>&gt;</span>
 <span class="hljs-tag">&lt;<span class="hljs-name">html</span> <span class="hljs-attr">lang</span>=<span class="hljs-string">&quot;en&quot;</span>&gt;</span>
@@ -1436,6 +1515,20 @@ http {
       proxy_set_header Upgrade $http_upgrade<span class="hljs-comment">;</span>
       proxy_set_header Connection $connection_upgrade<span class="hljs-comment">;</span>
       proxy_set_header Host $host<span class="hljs-comment">;</span>
+    }
+
+    <span class="hljs-comment"># The frontend&#x27;s single game base URL serves both REST (/matches and</span>
+    <span class="hljs-comment"># /lobby) and Socket.IO namespaces. Keep those paths on the same HTTPS</span>
+    <span class="hljs-comment"># origin so namespace URLs such as /collab and /chat use WSS at /socket.io.</span>
+    location ~ ^/(matches|lobby)(/|$) {
+      proxy_pass http://game_svc<span class="hljs-comment">;</span>
+      proxy_http_version 1.1<span class="hljs-comment">;</span>
+      proxy_set_header Upgrade $http_upgrade<span class="hljs-comment">;</span>
+      proxy_set_header Connection $connection_upgrade<span class="hljs-comment">;</span>
+      proxy_set_header Host $host<span class="hljs-comment">;</span>
+      proxy_set_header X-Real-IP $remote_addr<span class="hljs-comment">;</span>
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for<span class="hljs-comment">;</span>
+      proxy_set_header X-Forwarded-Proto $scheme<span class="hljs-comment">;</span>
     }
 
     <span class="hljs-comment"># WebSocket / Socket.IO ingress (terminates WSS, proxies every namespace,</span>
@@ -1994,6 +2087,94 @@ WEB_PID=$!
   }
 }
 </template>
+<template id="source-1645dde5c58bac52" data-source-path="services/game/src/game/judge-factory.test.ts"><span class="hljs-keyword">import</span> { describe, expect, it } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;vitest&quot;</span>;
+
+<span class="hljs-keyword">const</span> modulePath = <span class="hljs-string">&quot;./judge-factory.js&quot;</span>;
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">loadFactory</span>(<span class="hljs-params"></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">any</span>&gt; {
+  <span class="hljs-keyword">let</span> <span class="hljs-attr">loaded</span>: <span class="hljs-built_in">any</span>;
+  <span class="hljs-keyword">try</span> { loaded = <span class="hljs-keyword">await</span> <span class="hljs-keyword">import</span>(modulePath); } <span class="hljs-keyword">catch</span> { loaded = <span class="hljs-literal">null</span>; }
+  <span class="hljs-title function_">expect</span>(loaded?.<span class="hljs-property">createGameJudge</span>).<span class="hljs-title function_">toBeTypeOf</span>(<span class="hljs-string">&quot;function&quot;</span>);
+  <span class="hljs-keyword">return</span> loaded;
+}
+
+<span class="hljs-title function_">describe</span>(<span class="hljs-string">&quot;Game judge backend selection&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;keeps the local runner as the development default and preserves Judge0&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { createGameJudge } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadFactory</span>();
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">createGameJudge</span>({}).<span class="hljs-property">provider</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;container&quot;</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;judge0&quot;</span>, <span class="hljs-title class_">JUDGE0</span><span class="hljs-attr">_URL</span>: <span class="hljs-string">&quot;http://judge0.internal&quot;</span> }).<span class="hljs-property">provider</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;judge0&quot;</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;selects only an explicitly configured worker and fails closed when its settings are missing&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { createGameJudge } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadFactory</span>();
+    <span class="hljs-keyword">const</span> judge = <span class="hljs-title function_">createGameJudge</span>({
+      <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span>,
+      <span class="hljs-attr">JUDGE_WORKER_URL</span>: <span class="hljs-string">&quot;http://judge-worker:3010&quot;</span>,
+      <span class="hljs-attr">JUDGE_WORKER_TOKEN</span>: <span class="hljs-string">&quot;worker-token&quot;</span>,
+    });
+    <span class="hljs-title function_">expect</span>(judge.<span class="hljs-property">provider</span>).<span class="hljs-title function_">toBe</span>(<span class="hljs-string">&quot;worker&quot;</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span>, <span class="hljs-attr">JUDGE_WORKER_TOKEN</span>: <span class="hljs-string">&quot;worker-token&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/JUDGE_WORKER_URL/</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span>, <span class="hljs-attr">JUDGE_WORKER_URL</span>: <span class="hljs-string">&quot;http://judge-worker:3010&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/JUDGE_WORKER_TOKEN/</span>);
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;worker&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-regexp">/JUDGE_WORKER_URL/</span>);
+  });
+
+  <span class="hljs-title function_">it</span>(<span class="hljs-string">&quot;rejects unsupported backends instead of silently using the local runner&quot;</span>, <span class="hljs-title function_">async</span> () =&gt; {
+    <span class="hljs-keyword">const</span> { createGameJudge } = <span class="hljs-keyword">await</span> <span class="hljs-title function_">loadFactory</span>();
+    <span class="hljs-title function_">expect</span>(<span class="hljs-function">() =&gt;</span> <span class="hljs-title function_">createGameJudge</span>({ <span class="hljs-attr">JUDGE_BACKEND</span>: <span class="hljs-string">&quot;unknown&quot;</span> })).<span class="hljs-title function_">toThrow</span>(<span class="hljs-string">&quot;unsupported JUDGE_BACKEND unknown&quot;</span>);
+  });
+});
+</template>
+<template id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts"><span class="hljs-keyword">import</span> {
+  <span class="hljs-title class_">ContainerJudge</span>,
+  <span class="hljs-title class_">Judge0Adapter</span>,
+  <span class="hljs-title class_">WorkerJudgeAdapter</span>,
+  <span class="hljs-keyword">type</span> <span class="hljs-title class_">GameJudge</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-game-engine&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">JudgeEnvironment</span> = <span class="hljs-title class_">Readonly</span>&lt;<span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>&gt;&gt;;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">configuredPositiveInteger</span>(<span class="hljs-params"><span class="hljs-attr">environment</span>: <span class="hljs-title class_">JudgeEnvironment</span>, <span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">number</span> | <span class="hljs-literal">undefined</span> {
+  <span class="hljs-keyword">const</span> raw = environment[name]?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">if</span> (!raw) <span class="hljs-keyword">return</span> <span class="hljs-literal">undefined</span>;
+  <span class="hljs-keyword">if</span> (!<span class="hljs-regexp">/^\d+$/</span>.<span class="hljs-title function_">test</span>(raw)) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be a positive integer`</span>);
+  <span class="hljs-keyword">const</span> value = <span class="hljs-title class_">Number</span>(raw);
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-title function_">isSafeInteger</span>(value) || value &lt; <span class="hljs-number">1</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be a positive integer`</span>);
+  <span class="hljs-keyword">return</span> value;
+}
+
+<span class="hljs-comment">/** Select one GameJudge provider at process startup; provider failures never trigger fallback. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createGameJudge</span>(<span class="hljs-params"><span class="hljs-attr">environment</span>: <span class="hljs-title class_">JudgeEnvironment</span> = process.env</span>): <span class="hljs-title class_">GameJudge</span> {
+  <span class="hljs-keyword">const</span> backend = (environment.<span class="hljs-property">JUDGE_BACKEND</span> ?? <span class="hljs-string">&quot;container&quot;</span>).<span class="hljs-title function_">trim</span>().<span class="hljs-title function_">toLowerCase</span>();
+  <span class="hljs-keyword">if</span> (backend === <span class="hljs-string">&quot;container&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>();
+  <span class="hljs-keyword">if</span> (backend === <span class="hljs-string">&quot;worker&quot;</span>) {
+    <span class="hljs-keyword">const</span> baseUrl = environment.<span class="hljs-property">JUDGE_WORKER_URL</span>?.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!baseUrl) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_URL is required when JUDGE_BACKEND=worker&quot;</span>);
+    <span class="hljs-keyword">const</span> token = environment.<span class="hljs-property">JUDGE_WORKER_TOKEN</span>?.<span class="hljs-title function_">trim</span>();
+    <span class="hljs-keyword">if</span> (!token) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN is required when JUDGE_BACKEND=worker&quot;</span>);
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">WorkerJudgeAdapter</span>({
+      baseUrl,
+      token,
+      <span class="hljs-attr">timeoutMs</span>: <span class="hljs-title function_">configuredPositiveInteger</span>(environment, <span class="hljs-string">&quot;JUDGE_WORKER_TIMEOUT_MS&quot;</span>),
+    });
+  }
+  <span class="hljs-keyword">if</span> (backend !== <span class="hljs-string">&quot;judge0&quot;</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`unsupported JUDGE_BACKEND <span class="hljs-subst">${backend}</span>`</span>);
+
+  <span class="hljs-keyword">const</span> baseUrl = environment.<span class="hljs-property">JUDGE0_URL</span>?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">if</span> (!baseUrl) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE0_URL is required when JUDGE_BACKEND=judge0&quot;</span>);
+  <span class="hljs-keyword">const</span> authToken = environment.<span class="hljs-property">JUDGE0_AUTH_TOKEN</span>?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Judge0Adapter</span>({
+    baseUrl,
+    <span class="hljs-attr">headers</span>: authToken ? { <span class="hljs-string">&quot;X-Auth-Token&quot;</span>: authToken } : {},
+    <span class="hljs-attr">languageIds</span>: {
+      <span class="hljs-attr">C</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_C_LANGUAGE_ID</span> ?? <span class="hljs-number">50</span>),
+      <span class="hljs-string">&quot;C++&quot;</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_CPP_LANGUAGE_ID</span> ?? <span class="hljs-number">54</span>),
+      <span class="hljs-title class_">Python</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_PYTHON_LANGUAGE_ID</span> ?? <span class="hljs-number">71</span>),
+    },
+    <span class="hljs-attr">pollIntervalMs</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_POLL_INTERVAL_MS</span> ?? <span class="hljs-number">250</span>),
+    <span class="hljs-attr">maxPolls</span>: <span class="hljs-title class_">Number</span>(environment.<span class="hljs-property">JUDGE0_MAX_POLLS</span> ?? <span class="hljs-number">120</span>),
+  });
+}
+</template>
 <template id="source-edbe4d34ad2907a9" data-source-path="services/game/src/health.controller.ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">Controller</span>, <span class="hljs-title class_">Get</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;@nestjs/common&quot;</span>;
 <span class="hljs-keyword">import</span> { <span class="hljs-variable constant_">ALL_ROUND_PHASES</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-model&quot;</span>;
 <span class="hljs-keyword">import</span> * <span class="hljs-keyword">as</span> net <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:net&quot;</span>;
@@ -2059,6 +2240,529 @@ WEB_PID=$!
   <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;include&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;src&quot;</span><span class="hljs-punctuation">]</span>
 <span class="hljs-punctuation">}</span>
+</template>
+<template id="source-ac47c28cfc201378" data-source-path="services/judge-worker/src/http-server.ts"><span class="hljs-keyword">import</span> { createHash, timingSafeEqual } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:crypto&quot;</span>;
+<span class="hljs-keyword">import</span> { createServer, <span class="hljs-keyword">type</span> <span class="hljs-title class_">IncomingMessage</span>, <span class="hljs-keyword">type</span> <span class="hljs-title class_">Server</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:http&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> {
+  <span class="hljs-title class_">DriverKind</span>,
+  <span class="hljs-title class_">GameJudge</span>,
+  <span class="hljs-title class_">JudgeLimits</span>,
+  <span class="hljs-title class_">SealedEvaluationRequest</span>,
+  <span class="hljs-title class_">SupportedLanguage</span>,
+  <span class="hljs-title class_">VisibleTest</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-game-engine&quot;</span>;
+<span class="hljs-keyword">import</span> {
+  <span class="hljs-title class_">BoundedJobQueue</span>,
+  <span class="hljs-title class_">QueueExecutionTimeoutError</span>,
+  <span class="hljs-title class_">QueueFullError</span>,
+  <span class="hljs-title class_">QueueWaitTimeoutError</span>,
+} <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./job-queue.js&quot;</span>;
+<span class="hljs-keyword">import</span> <span class="hljs-keyword">type</span> { <span class="hljs-title class_">JudgeReadinessProbe</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./readiness.js&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">JudgeWorkerServerOptions</span> {
+  <span class="hljs-attr">token</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">judge</span>: <span class="hljs-title class_">GameJudge</span>;
+  <span class="hljs-attr">queue</span>: <span class="hljs-title class_">BoundedJobQueue</span>;
+  <span class="hljs-attr">readiness</span>: <span class="hljs-title class_">JudgeReadinessProbe</span>;
+  <span class="hljs-attr">maxBodyBytes</span>?: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">BodyTooLargeError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">super</span>(<span class="hljs-string">&quot;request body too large&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = <span class="hljs-string">&quot;BodyTooLargeError&quot;</span>;
+  }
+}
+
+<span class="hljs-keyword">class</span> <span class="hljs-title class_">InvalidRequestError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">super</span>(<span class="hljs-string">&quot;invalid judge request&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = <span class="hljs-string">&quot;InvalidRequestError&quot;</span>;
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isRecord</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): value is <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">typeof</span> value === <span class="hljs-string">&quot;object&quot;</span> &amp;&amp; value !== <span class="hljs-literal">null</span> &amp;&amp; !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(value);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isLanguage</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): value is <span class="hljs-title class_">SupportedLanguage</span> {
+  <span class="hljs-keyword">return</span> value === <span class="hljs-string">&quot;C&quot;</span> || value === <span class="hljs-string">&quot;C++&quot;</span> || value === <span class="hljs-string">&quot;Python&quot;</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isDriver</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): value is <span class="hljs-title class_">DriverKind</span> {
+  <span class="hljs-keyword">return</span> value === <span class="hljs-string">&quot;snippet&quot;</span> || value === <span class="hljs-string">&quot;stdio&quot;</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isLimits</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): value is <span class="hljs-title class_">JudgeLimits</span> {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(value)) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">return</span> [
+    value.<span class="hljs-property">compileWallMs</span>,
+    value.<span class="hljs-property">runWallMs</span>,
+    value.<span class="hljs-property">runMemoryMb</span>,
+    value.<span class="hljs-property">runOutputBytes</span>,
+    value.<span class="hljs-property">runCpus</span>,
+    value.<span class="hljs-property">runPids</span>,
+  ].<span class="hljs-title function_">every</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-built_in">number</span></span>) =&gt;</span> <span class="hljs-keyword">typeof</span> <span class="hljs-built_in">number</span> === <span class="hljs-string">&quot;number&quot;</span> &amp;&amp; <span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(<span class="hljs-built_in">number</span>) &amp;&amp; <span class="hljs-built_in">number</span> &gt; <span class="hljs-number">0</span>);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">isStringField</span>(<span class="hljs-params"><span class="hljs-attr">record</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">unknown</span>&gt;, <span class="hljs-attr">key</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">boolean</span> {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">typeof</span> record[key] === <span class="hljs-string">&quot;string&quot;</span>;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseVisibleRequest</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): {
+  <span class="hljs-attr">language</span>: <span class="hljs-title class_">SupportedLanguage</span>;
+  <span class="hljs-attr">driver</span>: <span class="hljs-title class_">DriverKind</span>;
+  <span class="hljs-attr">source</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">tests</span>: <span class="hljs-title class_">VisibleTest</span>[];
+  <span class="hljs-attr">limits</span>: <span class="hljs-title class_">JudgeLimits</span>;
+} {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(value) || !<span class="hljs-title function_">isLanguage</span>(value.<span class="hljs-property">language</span>) || !<span class="hljs-title function_">isDriver</span>(value.<span class="hljs-property">driver</span>)
+    || !<span class="hljs-title function_">isStringField</span>(value, <span class="hljs-string">&quot;source&quot;</span>) || !<span class="hljs-title function_">isLimits</span>(value.<span class="hljs-property">limits</span>) || !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(value.<span class="hljs-property">tests</span>)) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvalidRequestError</span>();
+  }
+  <span class="hljs-keyword">const</span> tests = value.<span class="hljs-property">tests</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">test</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(test) || !<span class="hljs-title function_">isStringField</span>(test, <span class="hljs-string">&quot;id&quot;</span>) || !<span class="hljs-title function_">isStringField</span>(test, <span class="hljs-string">&quot;input&quot;</span>) || !<span class="hljs-title function_">isStringField</span>(test, <span class="hljs-string">&quot;expected&quot;</span>)) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvalidRequestError</span>();
+    }
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>, <span class="hljs-attr">input</span>: test.<span class="hljs-property">input</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>, <span class="hljs-attr">expected</span>: test.<span class="hljs-property">expected</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span> };
+  });
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">language</span>: value.<span class="hljs-property">language</span>,
+    <span class="hljs-attr">driver</span>: value.<span class="hljs-property">driver</span>,
+    <span class="hljs-attr">source</span>: value.<span class="hljs-property">source</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>,
+    tests,
+    <span class="hljs-attr">limits</span>: value.<span class="hljs-property">limits</span>,
+  };
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">parseSealedRequest</span>(<span class="hljs-params"><span class="hljs-attr">value</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-title class_">SealedEvaluationRequest</span> {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(value) || !<span class="hljs-title function_">isStringField</span>(value, <span class="hljs-string">&quot;evaluationId&quot;</span>) || !<span class="hljs-title function_">isStringField</span>(value, <span class="hljs-string">&quot;submissionId&quot;</span>)
+    || !<span class="hljs-title function_">isStringField</span>(value, <span class="hljs-string">&quot;problemVersionId&quot;</span>) || !<span class="hljs-title function_">isStringField</span>(value, <span class="hljs-string">&quot;hiddenSuiteId&quot;</span>)
+    || !<span class="hljs-title function_">isLanguage</span>(value.<span class="hljs-property">language</span>) || !<span class="hljs-title function_">isDriver</span>(value.<span class="hljs-property">driver</span>) || !<span class="hljs-title function_">isStringField</span>(value, <span class="hljs-string">&quot;source&quot;</span>)
+    || !<span class="hljs-title function_">isLimits</span>(value.<span class="hljs-property">limits</span>) || !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(value.<span class="hljs-property">groups</span>)
+    || (value.<span class="hljs-property">entrypoint</span> !== <span class="hljs-literal">undefined</span> &amp;&amp; <span class="hljs-keyword">typeof</span> value.<span class="hljs-property">entrypoint</span> !== <span class="hljs-string">&quot;string&quot;</span>)) {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvalidRequestError</span>();
+  }
+  <span class="hljs-keyword">const</span> groups = value.<span class="hljs-property">groups</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">group</span>) =&gt;</span> {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(group) || !<span class="hljs-title function_">isStringField</span>(group, <span class="hljs-string">&quot;name&quot;</span>) || <span class="hljs-keyword">typeof</span> group.<span class="hljs-property">weight</span> !== <span class="hljs-string">&quot;number&quot;</span>
+      || !<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(group.<span class="hljs-property">weight</span>) || group.<span class="hljs-property">weight</span> &lt; <span class="hljs-number">0</span> || !<span class="hljs-title class_">Array</span>.<span class="hljs-title function_">isArray</span>(group.<span class="hljs-property">tests</span>)) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvalidRequestError</span>();
+    }
+    <span class="hljs-keyword">const</span> tests = group.<span class="hljs-property">tests</span>.<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">test</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">isRecord</span>(test) || !<span class="hljs-title function_">isStringField</span>(test, <span class="hljs-string">&quot;id&quot;</span>) || !<span class="hljs-title function_">isStringField</span>(test, <span class="hljs-string">&quot;input&quot;</span>) || !<span class="hljs-title function_">isStringField</span>(test, <span class="hljs-string">&quot;expected&quot;</span>)) {
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvalidRequestError</span>();
+      }
+      <span class="hljs-keyword">return</span> { <span class="hljs-attr">id</span>: test.<span class="hljs-property">id</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>, <span class="hljs-attr">input</span>: test.<span class="hljs-property">input</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>, <span class="hljs-attr">expected</span>: test.<span class="hljs-property">expected</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span> };
+    });
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">name</span>: group.<span class="hljs-property">name</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>, <span class="hljs-attr">weight</span>: group.<span class="hljs-property">weight</span>, tests };
+  });
+  <span class="hljs-keyword">return</span> {
+    <span class="hljs-attr">evaluationId</span>: value.<span class="hljs-property">evaluationId</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">submissionId</span>: value.<span class="hljs-property">submissionId</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">problemVersionId</span>: value.<span class="hljs-property">problemVersionId</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">hiddenSuiteId</span>: value.<span class="hljs-property">hiddenSuiteId</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>,
+    <span class="hljs-attr">language</span>: value.<span class="hljs-property">language</span>,
+    <span class="hljs-attr">driver</span>: value.<span class="hljs-property">driver</span>,
+    ...(<span class="hljs-keyword">typeof</span> value.<span class="hljs-property">entrypoint</span> === <span class="hljs-string">&quot;string&quot;</span> ? { <span class="hljs-attr">entrypoint</span>: value.<span class="hljs-property">entrypoint</span> } : {}),
+    <span class="hljs-attr">source</span>: value.<span class="hljs-property">source</span> <span class="hljs-keyword">as</span> <span class="hljs-built_in">string</span>,
+    groups,
+    <span class="hljs-attr">limits</span>: value.<span class="hljs-property">limits</span>,
+  };
+}
+
+<span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">readJsonBody</span>(<span class="hljs-params"><span class="hljs-attr">request</span>: <span class="hljs-title class_">IncomingMessage</span>, <span class="hljs-attr">maxBytes</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">unknown</span>&gt; {
+  <span class="hljs-keyword">const</span> declaredLength = <span class="hljs-title class_">Number</span>(request.<span class="hljs-property">headers</span>[<span class="hljs-string">&quot;content-length&quot;</span>] ?? <span class="hljs-number">0</span>);
+  <span class="hljs-keyword">let</span> tooLarge = <span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(declaredLength) &amp;&amp; declaredLength &gt; maxBytes;
+  <span class="hljs-keyword">let</span> total = <span class="hljs-number">0</span>;
+  <span class="hljs-keyword">const</span> <span class="hljs-attr">chunks</span>: <span class="hljs-title class_">Buffer</span>[] = [];
+  <span class="hljs-keyword">for</span> <span class="hljs-keyword">await</span> (<span class="hljs-keyword">const</span> chunk <span class="hljs-keyword">of</span> request) {
+    <span class="hljs-keyword">const</span> buffer = <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">isBuffer</span>(chunk) ? chunk : <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">from</span>(chunk <span class="hljs-keyword">as</span> <span class="hljs-title class_">Uint8Array</span>);
+    total += buffer.<span class="hljs-property">length</span>;
+    <span class="hljs-keyword">if</span> (total &gt; maxBytes) tooLarge = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">if</span> (!tooLarge) chunks.<span class="hljs-title function_">push</span>(buffer);
+  }
+  <span class="hljs-keyword">if</span> (tooLarge) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">BodyTooLargeError</span>();
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-keyword">return</span> <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">parse</span>(<span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">concat</span>(chunks).<span class="hljs-title function_">toString</span>(<span class="hljs-string">&quot;utf8&quot;</span>)) <span class="hljs-keyword">as</span> <span class="hljs-built_in">unknown</span>;
+  } <span class="hljs-keyword">catch</span> {
+    <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">InvalidRequestError</span>();
+  }
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">authenticated</span>(<span class="hljs-params"><span class="hljs-attr">request</span>: <span class="hljs-title class_">IncomingMessage</span>, <span class="hljs-attr">expectedToken</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">boolean</span> {
+  <span class="hljs-keyword">const</span> header = request.<span class="hljs-property">headers</span>.<span class="hljs-property">authorization</span>;
+  <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> header !== <span class="hljs-string">&quot;string&quot;</span>) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">const</span> match = <span class="hljs-regexp">/^Bearer ([^\s]+)$/</span>.<span class="hljs-title function_">exec</span>(header);
+  <span class="hljs-keyword">if</span> (!match) <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+  <span class="hljs-keyword">const</span> expectedDigest = <span class="hljs-title function_">createHash</span>(<span class="hljs-string">&quot;sha256&quot;</span>).<span class="hljs-title function_">update</span>(expectedToken).<span class="hljs-title function_">digest</span>();
+  <span class="hljs-keyword">const</span> providedDigest = <span class="hljs-title function_">createHash</span>(<span class="hljs-string">&quot;sha256&quot;</span>).<span class="hljs-title function_">update</span>(match[<span class="hljs-number">1</span>]!).<span class="hljs-title function_">digest</span>();
+  <span class="hljs-keyword">return</span> <span class="hljs-title function_">timingSafeEqual</span>(expectedDigest, providedDigest);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">respond</span>(<span class="hljs-params"><span class="hljs-attr">serverResponse</span>: <span class="hljs-keyword">import</span>(<span class="hljs-string">&quot;node:http&quot;</span>).<span class="hljs-title class_">ServerResponse</span>, <span class="hljs-attr">status</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">body</span>: <span class="hljs-built_in">unknown</span></span>): <span class="hljs-built_in">void</span> {
+  <span class="hljs-keyword">if</span> (serverResponse.<span class="hljs-property">writableEnded</span> || serverResponse.<span class="hljs-property">destroyed</span>) <span class="hljs-keyword">return</span>;
+  <span class="hljs-keyword">const</span> json = <span class="hljs-title class_">JSON</span>.<span class="hljs-title function_">stringify</span>(body);
+  serverResponse.<span class="hljs-title function_">writeHead</span>(status, {
+    <span class="hljs-string">&quot;content-type&quot;</span>: <span class="hljs-string">&quot;application/json; charset=utf-8&quot;</span>,
+    <span class="hljs-string">&quot;content-length&quot;</span>: <span class="hljs-title class_">Buffer</span>.<span class="hljs-title function_">byteLength</span>(json),
+    <span class="hljs-string">&quot;cache-control&quot;</span>: <span class="hljs-string">&quot;no-store&quot;</span>,
+  });
+  serverResponse.<span class="hljs-title function_">end</span>(json);
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">errorResponse</span>(<span class="hljs-params"><span class="hljs-attr">error</span>: <span class="hljs-built_in">unknown</span></span>): { <span class="hljs-attr">status</span>: <span class="hljs-built_in">number</span>; <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-built_in">string</span> } } {
+  <span class="hljs-keyword">const</span> name = error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? error.<span class="hljs-property">name</span> : <span class="hljs-string">&quot;&quot;</span>;
+  <span class="hljs-keyword">if</span> (error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">BodyTooLargeError</span>) <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">413</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;request body too large&quot;</span> } };
+  <span class="hljs-keyword">if</span> (error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">InvalidRequestError</span> || name === <span class="hljs-string">&quot;ValidationError&quot;</span>) {
+    <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">400</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;invalid judge request&quot;</span> } };
+  }
+  <span class="hljs-keyword">if</span> (error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">QueueFullError</span>) <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">429</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge queue is full&quot;</span> } };
+  <span class="hljs-keyword">if</span> (error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">QueueWaitTimeoutError</span>) <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">503</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge queue timed out&quot;</span> } };
+  <span class="hljs-keyword">if</span> (error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">QueueExecutionTimeoutError</span>) <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">504</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge job timed out&quot;</span> } };
+  <span class="hljs-keyword">if</span> (name === <span class="hljs-string">&quot;JudgeInfraError&quot;</span>) <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">503</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge unavailable&quot;</span> } };
+  <span class="hljs-keyword">return</span> { <span class="hljs-attr">status</span>: <span class="hljs-number">500</span>, <span class="hljs-attr">body</span>: { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge request failed&quot;</span> } };
+}
+
+<span class="hljs-comment">/** Internal-only HTTP transport for the existing GameJudge contract. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">createJudgeWorkerServer</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">JudgeWorkerServerOptions</span></span>): <span class="hljs-title class_">Server</span> {
+  <span class="hljs-keyword">if</span> (!options.<span class="hljs-property">token</span>.<span class="hljs-title function_">trim</span>()) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN is required&quot;</span>);
+  <span class="hljs-keyword">const</span> maxBodyBytes = options.<span class="hljs-property">maxBodyBytes</span> ?? <span class="hljs-number">2</span> * <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span>;
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-title function_">isSafeInteger</span>(maxBodyBytes) || maxBodyBytes &lt; <span class="hljs-number">1</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;maxBodyBytes must be positive&quot;</span>);
+
+  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">createServer</span>(<span class="hljs-function">(<span class="hljs-params">request, response</span>) =&gt;</span> {
+    <span class="hljs-built_in">void</span> <span class="hljs-title function_">handleRequest</span>(request, response).<span class="hljs-title function_">catch</span>(<span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">error</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> result = <span class="hljs-title function_">errorResponse</span>(error);
+      <span class="hljs-title function_">respond</span>(response, result.<span class="hljs-property">status</span>, result.<span class="hljs-property">body</span>);
+    });
+  });
+  server.<span class="hljs-property">requestTimeout</span> = <span class="hljs-number">30000</span>;
+  server.<span class="hljs-property">headersTimeout</span> = <span class="hljs-number">10000</span>;
+
+  <span class="hljs-keyword">async</span> <span class="hljs-keyword">function</span> <span class="hljs-title function_">handleRequest</span>(<span class="hljs-params"><span class="hljs-attr">request</span>: <span class="hljs-title class_">IncomingMessage</span>, <span class="hljs-attr">response</span>: <span class="hljs-keyword">import</span>(<span class="hljs-string">&quot;node:http&quot;</span>).<span class="hljs-title class_">ServerResponse</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+    <span class="hljs-keyword">const</span> path = <span class="hljs-keyword">new</span> <span class="hljs-title function_">URL</span>(request.<span class="hljs-property">url</span> ?? <span class="hljs-string">&quot;/&quot;</span>, <span class="hljs-string">&quot;http://judge-worker.internal&quot;</span>).<span class="hljs-property">pathname</span>;
+    <span class="hljs-keyword">if</span> (request.<span class="hljs-property">method</span> === <span class="hljs-string">&quot;GET&quot;</span> &amp;&amp; path === <span class="hljs-string">&quot;/health&quot;</span>) {
+      <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">200</span>, { <span class="hljs-attr">status</span>: <span class="hljs-string">&quot;ok&quot;</span> });
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">if</span> (request.<span class="hljs-property">method</span> === <span class="hljs-string">&quot;GET&quot;</span> &amp;&amp; path === <span class="hljs-string">&quot;/ready&quot;</span>) {
+      <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">const</span> checks = <span class="hljs-keyword">await</span> options.<span class="hljs-property">readiness</span>.<span class="hljs-title function_">check</span>();
+        <span class="hljs-title function_">respond</span>(response, checks.<span class="hljs-property">ready</span> ? <span class="hljs-number">200</span> : <span class="hljs-number">503</span>, { <span class="hljs-attr">ready</span>: checks.<span class="hljs-property">ready</span>, checks });
+      } <span class="hljs-keyword">catch</span> {
+        <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">503</span>, { <span class="hljs-attr">ready</span>: <span class="hljs-literal">false</span>, <span class="hljs-attr">checks</span>: { <span class="hljs-attr">docker</span>: <span class="hljs-literal">false</span> } });
+      }
+      <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-keyword">const</span> visible = request.<span class="hljs-property">method</span> === <span class="hljs-string">&quot;POST&quot;</span> &amp;&amp; path === <span class="hljs-string">&quot;/v1/run-visible&quot;</span>;
+    <span class="hljs-keyword">const</span> sealed = request.<span class="hljs-property">method</span> === <span class="hljs-string">&quot;POST&quot;</span> &amp;&amp; path === <span class="hljs-string">&quot;/v1/evaluate-sealed&quot;</span>;
+    <span class="hljs-keyword">if</span> (!visible &amp;&amp; !sealed) {
+      <span class="hljs-title function_">respond</span>(response, path.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;/v1/&quot;</span>) ? <span class="hljs-number">405</span> : <span class="hljs-number">404</span>, { <span class="hljs-attr">error</span>: path.<span class="hljs-title function_">startsWith</span>(<span class="hljs-string">&quot;/v1/&quot;</span>) ? <span class="hljs-string">&quot;method not allowed&quot;</span> : <span class="hljs-string">&quot;not found&quot;</span> });
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title function_">authenticated</span>(request, options.<span class="hljs-property">token</span>)) {
+      <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">401</span>, { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;unauthorized&quot;</span> });
+      <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-keyword">let</span> readiness;
+    <span class="hljs-keyword">try</span> {
+      readiness = <span class="hljs-keyword">await</span> options.<span class="hljs-property">readiness</span>.<span class="hljs-title function_">check</span>();
+    } <span class="hljs-keyword">catch</span> {
+      <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">503</span>, { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge unavailable&quot;</span> });
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">if</span> (!readiness.<span class="hljs-property">ready</span>) {
+      <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">503</span>, { <span class="hljs-attr">error</span>: <span class="hljs-string">&quot;judge unavailable&quot;</span> });
+      <span class="hljs-keyword">return</span>;
+    }
+
+    <span class="hljs-keyword">const</span> body = <span class="hljs-keyword">await</span> <span class="hljs-title function_">readJsonBody</span>(request, maxBodyBytes);
+    <span class="hljs-keyword">if</span> (visible) {
+      <span class="hljs-keyword">const</span> input = <span class="hljs-title function_">parseVisibleRequest</span>(body);
+      <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> options.<span class="hljs-property">queue</span>.<span class="hljs-title function_">run</span>(<span class="hljs-function">() =&gt;</span> options.<span class="hljs-property">judge</span>.<span class="hljs-title function_">runVisible</span>(
+        input.<span class="hljs-property">language</span>, input.<span class="hljs-property">driver</span>, input.<span class="hljs-property">source</span>, input.<span class="hljs-property">tests</span>, input.<span class="hljs-property">limits</span>,
+      ));
+      <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">200</span>, result);
+      <span class="hljs-keyword">return</span>;
+    }
+    <span class="hljs-keyword">const</span> input = <span class="hljs-title function_">parseSealedRequest</span>(body);
+    <span class="hljs-keyword">const</span> result = <span class="hljs-keyword">await</span> options.<span class="hljs-property">queue</span>.<span class="hljs-title function_">run</span>(<span class="hljs-function">() =&gt;</span> options.<span class="hljs-property">judge</span>.<span class="hljs-title function_">evaluateSealed</span>(input));
+    <span class="hljs-title function_">respond</span>(response, <span class="hljs-number">200</span>, result);
+  }
+
+  <span class="hljs-keyword">return</span> server;
+}
+</template>
+<template id="source-751066cc12adb6bb" data-source-path="services/judge-worker/src/job-queue.ts"><span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">QueueFullError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">super</span>(<span class="hljs-string">&quot;judge queue is full&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = <span class="hljs-string">&quot;QueueFullError&quot;</span>;
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">QueueWaitTimeoutError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">super</span>(<span class="hljs-string">&quot;judge queue wait timed out&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = <span class="hljs-string">&quot;QueueWaitTimeoutError&quot;</span>;
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">QueueExecutionTimeoutError</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_ inherited__">Error</span> {
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">super</span>(<span class="hljs-string">&quot;judge job timed out&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">name</span> = <span class="hljs-string">&quot;QueueExecutionTimeoutError&quot;</span>;
+  }
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">BoundedJobQueueOptions</span> {
+  <span class="hljs-attr">concurrency</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">maxQueueSize</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-built_in">number</span>;
+}
+
+<span class="hljs-keyword">type</span> <span class="hljs-title class_">JobState</span> = <span class="hljs-string">&quot;queued&quot;</span> | <span class="hljs-string">&quot;active&quot;</span> | <span class="hljs-string">&quot;finished&quot;</span>;
+
+<span class="hljs-keyword">interface</span> <span class="hljs-title class_">Job</span>&lt;T&gt; {
+  <span class="hljs-attr">work</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;T&gt; | T;
+  <span class="hljs-attr">resolve</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">value</span>: T</span>) =&gt;</span> <span class="hljs-built_in">void</span>;
+  <span class="hljs-attr">reject</span>: <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">reason</span>: <span class="hljs-title class_">Error</span></span>) =&gt;</span> <span class="hljs-built_in">void</span>;
+  <span class="hljs-attr">state</span>: <span class="hljs-title class_">JobState</span>;
+  <span class="hljs-attr">callerSettled</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">queueTimer</span>?: <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">Timeout</span>;
+  <span class="hljs-attr">executionTimer</span>?: <span class="hljs-title class_">NodeJS</span>.<span class="hljs-property">Timeout</span>;
+}
+
+<span class="hljs-comment">/**
+ * Bounds actual active judge work separately from waiting callers. An active
+ * job that times out to its caller keeps its slot until the underlying work
+ * really settles, so timeout handling cannot accidentally exceed concurrency.
+ */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">BoundedJobQueue</span> {
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">options</span>: <span class="hljs-title class_">BoundedJobQueueOptions</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">waiting</span>: <span class="hljs-title class_">Job</span>&lt;<span class="hljs-built_in">unknown</span>&gt;[] = [];
+  <span class="hljs-keyword">private</span> active = <span class="hljs-number">0</span>;
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">BoundedJobQueueOptions</span></span>) {
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-title function_">isSafeInteger</span>(options.<span class="hljs-property">concurrency</span>) || options.<span class="hljs-property">concurrency</span> &lt; <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RangeError</span>(<span class="hljs-string">&quot;concurrency must be a positive integer&quot;</span>);
+    }
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-title function_">isSafeInteger</span>(options.<span class="hljs-property">maxQueueSize</span>) || options.<span class="hljs-property">maxQueueSize</span> &lt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RangeError</span>(<span class="hljs-string">&quot;maxQueueSize must be a non-negative integer&quot;</span>);
+    }
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(options.<span class="hljs-property">queueTimeoutMs</span>) || options.<span class="hljs-property">queueTimeoutMs</span> &lt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RangeError</span>(<span class="hljs-string">&quot;queueTimeoutMs must be non-negative&quot;</span>);
+    }
+    <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-built_in">isFinite</span>(options.<span class="hljs-property">executionTimeoutMs</span>) || options.<span class="hljs-property">executionTimeoutMs</span> &lt; <span class="hljs-number">1</span>) {
+      <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">RangeError</span>(<span class="hljs-string">&quot;executionTimeoutMs must be positive&quot;</span>);
+    }
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span> = options;
+  }
+
+  run&lt;T&gt;(<span class="hljs-attr">work</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;T&gt; | T): <span class="hljs-title class_">Promise</span>&lt;T&gt; {
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span> &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">concurrency</span>) <span class="hljs-keyword">return</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">startNow</span>(work);
+    <span class="hljs-keyword">if</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">waiting</span>.<span class="hljs-property">length</span> &gt;= <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">maxQueueSize</span>) <span class="hljs-keyword">return</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">QueueFullError</span>());
+
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;T&gt;(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> <span class="hljs-attr">job</span>: <span class="hljs-title class_">Job</span>&lt;T&gt; = { work, resolve, reject, <span class="hljs-attr">state</span>: <span class="hljs-string">&quot;queued&quot;</span>, <span class="hljs-attr">callerSettled</span>: <span class="hljs-literal">false</span> };
+      job.<span class="hljs-property">queueTimer</span> = <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">if</span> (job.<span class="hljs-property">state</span> !== <span class="hljs-string">&quot;queued&quot;</span>) <span class="hljs-keyword">return</span>;
+        <span class="hljs-keyword">const</span> index = <span class="hljs-variable language_">this</span>.<span class="hljs-property">waiting</span>.<span class="hljs-title function_">indexOf</span>(job <span class="hljs-keyword">as</span> <span class="hljs-title class_">Job</span>&lt;<span class="hljs-built_in">unknown</span>&gt;);
+        <span class="hljs-keyword">if</span> (index &gt;= <span class="hljs-number">0</span>) <span class="hljs-variable language_">this</span>.<span class="hljs-property">waiting</span>.<span class="hljs-title function_">splice</span>(index, <span class="hljs-number">1</span>);
+        job.<span class="hljs-property">state</span> = <span class="hljs-string">&quot;finished&quot;</span>;
+        job.<span class="hljs-property">callerSettled</span> = <span class="hljs-literal">true</span>;
+        <span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">QueueWaitTimeoutError</span>());
+      }, <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">queueTimeoutMs</span>);
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">waiting</span>.<span class="hljs-title function_">push</span>(job <span class="hljs-keyword">as</span> <span class="hljs-title class_">Job</span>&lt;<span class="hljs-built_in">unknown</span>&gt;);
+    });
+  }
+
+  <span class="hljs-keyword">private</span> startNow&lt;T&gt;(<span class="hljs-attr">work</span>: <span class="hljs-function">() =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;T&gt; | T): <span class="hljs-title class_">Promise</span>&lt;T&gt; {
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>&lt;T&gt;(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+      <span class="hljs-keyword">const</span> <span class="hljs-attr">job</span>: <span class="hljs-title class_">Job</span>&lt;T&gt; = { work, resolve, reject, <span class="hljs-attr">state</span>: <span class="hljs-string">&quot;active&quot;</span>, <span class="hljs-attr">callerSettled</span>: <span class="hljs-literal">false</span> };
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span>++;
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">start</span>(job);
+    });
+  }
+
+  <span class="hljs-keyword">private</span> <span class="hljs-title function_">pump</span>(): <span class="hljs-built_in">void</span> {
+    <span class="hljs-keyword">while</span> (<span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span> &lt; <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">concurrency</span> &amp;&amp; <span class="hljs-variable language_">this</span>.<span class="hljs-property">waiting</span>.<span class="hljs-property">length</span> &gt; <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">const</span> next = <span class="hljs-variable language_">this</span>.<span class="hljs-property">waiting</span>.<span class="hljs-title function_">shift</span>();
+      <span class="hljs-keyword">if</span> (!next || next.<span class="hljs-property">state</span> !== <span class="hljs-string">&quot;queued&quot;</span>) <span class="hljs-keyword">continue</span>;
+      <span class="hljs-keyword">if</span> (next.<span class="hljs-property">queueTimer</span>) <span class="hljs-built_in">clearTimeout</span>(next.<span class="hljs-property">queueTimer</span>);
+      next.<span class="hljs-property">state</span> = <span class="hljs-string">&quot;active&quot;</span>;
+      <span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span>++;
+      <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">start</span>(next);
+    }
+  }
+
+  <span class="hljs-keyword">private</span> start&lt;T&gt;(<span class="hljs-attr">job</span>: <span class="hljs-title class_">Job</span>&lt;T&gt;): <span class="hljs-built_in">void</span> {
+    job.<span class="hljs-property">executionTimer</span> = <span class="hljs-built_in">setTimeout</span>(<span class="hljs-function">() =&gt;</span> {
+      <span class="hljs-keyword">if</span> (job.<span class="hljs-property">callerSettled</span>) <span class="hljs-keyword">return</span>;
+      job.<span class="hljs-property">callerSettled</span> = <span class="hljs-literal">true</span>;
+      job.<span class="hljs-title function_">reject</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">QueueExecutionTimeoutError</span>());
+    }, <span class="hljs-variable language_">this</span>.<span class="hljs-property">options</span>.<span class="hljs-property">executionTimeoutMs</span>);
+
+    <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">resolve</span>()
+      .<span class="hljs-title function_">then</span>(job.<span class="hljs-property">work</span>)
+      .<span class="hljs-title function_">then</span>(
+        <span class="hljs-function">(<span class="hljs-params">result</span>) =&gt;</span> {
+          <span class="hljs-keyword">if</span> (!job.<span class="hljs-property">callerSettled</span>) {
+            job.<span class="hljs-property">callerSettled</span> = <span class="hljs-literal">true</span>;
+            job.<span class="hljs-title function_">resolve</span>(result);
+          }
+        },
+        <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">error</span>: <span class="hljs-built_in">unknown</span></span>) =&gt;</span> {
+          <span class="hljs-keyword">if</span> (!job.<span class="hljs-property">callerSettled</span>) {
+            job.<span class="hljs-property">callerSettled</span> = <span class="hljs-literal">true</span>;
+            job.<span class="hljs-title function_">reject</span>(error <span class="hljs-keyword">instanceof</span> <span class="hljs-title class_">Error</span> ? error : <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;judge job failed&quot;</span>));
+          }
+        },
+      )
+      .<span class="hljs-title function_">finally</span>(<span class="hljs-function">() =&gt;</span> {
+        <span class="hljs-keyword">if</span> (job.<span class="hljs-property">executionTimer</span>) <span class="hljs-built_in">clearTimeout</span>(job.<span class="hljs-property">executionTimer</span>);
+        job.<span class="hljs-property">state</span> = <span class="hljs-string">&quot;finished&quot;</span>;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-property">active</span>--;
+        <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">pump</span>();
+      });
+  }
+}
+</template>
+<template id="source-d6e914cd95e4e14e" data-source-path="services/judge-worker/src/main.ts"><span class="hljs-keyword">import</span> { <span class="hljs-title class_">ContainerJudge</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;arena-game-engine&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">BoundedJobQueue</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./job-queue.js&quot;</span>;
+<span class="hljs-keyword">import</span> { createJudgeWorkerServer } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./http-server.js&quot;</span>;
+<span class="hljs-keyword">import</span> { <span class="hljs-title class_">DockerImageReadiness</span> } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;./readiness.js&quot;</span>;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">integerEnv</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">fallback</span>: <span class="hljs-built_in">number</span>, <span class="hljs-attr">minimum</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-built_in">number</span> {
+  <span class="hljs-keyword">const</span> raw = process.<span class="hljs-property">env</span>[name];
+  <span class="hljs-keyword">if</span> (raw === <span class="hljs-literal">undefined</span> || raw.<span class="hljs-title function_">trim</span>() === <span class="hljs-string">&quot;&quot;</span>) <span class="hljs-keyword">return</span> fallback;
+  <span class="hljs-keyword">if</span> (!<span class="hljs-regexp">/^\d+$/</span>.<span class="hljs-title function_">test</span>(raw.<span class="hljs-title function_">trim</span>())) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be an integer`</span>);
+  <span class="hljs-keyword">const</span> value = <span class="hljs-title class_">Number</span>(raw);
+  <span class="hljs-keyword">if</span> (!<span class="hljs-title class_">Number</span>.<span class="hljs-title function_">isSafeInteger</span>(value) || value &lt; minimum) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> must be at least <span class="hljs-subst">${minimum}</span>`</span>);
+  <span class="hljs-keyword">return</span> value;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">requiredEnv</span>(<span class="hljs-params"><span class="hljs-attr">name</span>: <span class="hljs-built_in">string</span></span>): <span class="hljs-built_in">string</span> {
+  <span class="hljs-keyword">const</span> value = process.<span class="hljs-property">env</span>[name]?.<span class="hljs-title function_">trim</span>();
+  <span class="hljs-keyword">if</span> (!value) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">`<span class="hljs-subst">${name}</span> is required`</span>);
+  <span class="hljs-keyword">return</span> value;
+}
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">start</span>(<span class="hljs-params"></span>): <span class="hljs-built_in">void</span> {
+  <span class="hljs-keyword">const</span> token = <span class="hljs-title function_">requiredEnv</span>(<span class="hljs-string">&quot;JUDGE_WORKER_TOKEN&quot;</span>);
+  <span class="hljs-keyword">const</span> dockerBin = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE_DOCKER_BIN</span>?.<span class="hljs-title function_">trim</span>() || <span class="hljs-string">&quot;docker&quot;</span>;
+  <span class="hljs-keyword">const</span> pythonImage = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE_PYTHON_IMAGE</span>?.<span class="hljs-title function_">trim</span>() || <span class="hljs-string">&quot;python:3.12-slim&quot;</span>;
+  <span class="hljs-keyword">const</span> gccImage = process.<span class="hljs-property">env</span>.<span class="hljs-property">JUDGE_GCC_IMAGE</span>?.<span class="hljs-title function_">trim</span>() || <span class="hljs-string">&quot;gcc:14-bookworm&quot;</span>;
+  <span class="hljs-keyword">const</span> port = <span class="hljs-title function_">integerEnv</span>(<span class="hljs-string">&quot;JUDGE_WORKER_PORT&quot;</span>, <span class="hljs-number">3010</span>, <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> concurrency = <span class="hljs-title function_">integerEnv</span>(<span class="hljs-string">&quot;JUDGE_WORKER_CONCURRENCY&quot;</span>, <span class="hljs-number">2</span>, <span class="hljs-number">1</span>);
+  <span class="hljs-keyword">const</span> maxQueueSize = <span class="hljs-title function_">integerEnv</span>(<span class="hljs-string">&quot;JUDGE_WORKER_MAX_QUEUE&quot;</span>, <span class="hljs-number">8</span>, <span class="hljs-number">0</span>);
+
+  <span class="hljs-keyword">const</span> judge = <span class="hljs-keyword">new</span> <span class="hljs-title class_">ContainerJudge</span>({
+    dockerBin,
+    <span class="hljs-attr">images</span>: { <span class="hljs-title class_">Python</span>: pythonImage, <span class="hljs-string">&quot;C++&quot;</span>: gccImage, <span class="hljs-attr">C</span>: gccImage },
+  });
+  <span class="hljs-keyword">const</span> readiness = <span class="hljs-keyword">new</span> <span class="hljs-title class_">DockerImageReadiness</span>({
+    dockerBin,
+    <span class="hljs-attr">images</span>: { <span class="hljs-attr">python</span>: pythonImage, <span class="hljs-attr">gcc</span>: gccImage },
+  });
+  <span class="hljs-keyword">const</span> queue = <span class="hljs-keyword">new</span> <span class="hljs-title class_">BoundedJobQueue</span>({
+    concurrency,
+    maxQueueSize,
+    <span class="hljs-attr">queueTimeoutMs</span>: <span class="hljs-title function_">integerEnv</span>(<span class="hljs-string">&quot;JUDGE_WORKER_QUEUE_TIMEOUT_MS&quot;</span>, <span class="hljs-number">30000</span>, <span class="hljs-number">0</span>),
+    <span class="hljs-attr">executionTimeoutMs</span>: <span class="hljs-title function_">integerEnv</span>(<span class="hljs-string">&quot;JUDGE_WORKER_JOB_TIMEOUT_MS&quot;</span>, <span class="hljs-number">900000</span>, <span class="hljs-number">1</span>),
+  });
+  <span class="hljs-keyword">const</span> server = <span class="hljs-title function_">createJudgeWorkerServer</span>({ token, judge, queue, readiness });
+
+  server.<span class="hljs-title function_">listen</span>(port, <span class="hljs-string">&quot;0.0.0.0&quot;</span>, <span class="hljs-function">() =&gt;</span> {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-string">`[judge-worker] listening on internal port <span class="hljs-subst">${port}</span>`</span>);
+  });
+  <span class="hljs-keyword">const</span> <span class="hljs-title function_">shutdown</span> = (<span class="hljs-params"></span>) =&gt; server.<span class="hljs-title function_">close</span>(<span class="hljs-function">() =&gt;</span> process.<span class="hljs-title function_">exit</span>(<span class="hljs-number">0</span>));
+  process.<span class="hljs-title function_">once</span>(<span class="hljs-string">&quot;SIGTERM&quot;</span>, shutdown);
+  process.<span class="hljs-title function_">once</span>(<span class="hljs-string">&quot;SIGINT&quot;</span>, shutdown);
+}
+
+<span class="hljs-keyword">try</span> {
+  <span class="hljs-title function_">start</span>();
+} <span class="hljs-keyword">catch</span> (error) {
+  <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">error</span>(<span class="hljs-string">`[judge-worker] startup failed: <span class="hljs-subst">${error <span class="hljs-keyword">instanceof</span> <span class="hljs-built_in">Error</span> ? error.message : <span class="hljs-string">&quot;configuration error&quot;</span>}</span>`</span>);
+  process.<span class="hljs-property">exitCode</span> = <span class="hljs-number">1</span>;
+}
+</template>
+<template id="source-d6972f22a23c365f" data-source-path="services/judge-worker/src/readiness.ts"><span class="hljs-keyword">import</span> { execFile } <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;node:child_process&quot;</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">ReadinessSnapshot</span> {
+  <span class="hljs-attr">ready</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">docker</span>: <span class="hljs-built_in">boolean</span>;
+  <span class="hljs-attr">images</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">boolean</span>&gt;;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">JudgeReadinessProbe</span> {
+  <span class="hljs-title function_">check</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ReadinessSnapshot</span>&gt;;
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">type</span> <span class="hljs-title class_">DockerCommand</span> = <span class="hljs-function">(<span class="hljs-params"><span class="hljs-attr">dockerBin</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">args</span>: <span class="hljs-built_in">string</span>[], <span class="hljs-attr">timeoutMs</span>: <span class="hljs-built_in">number</span></span>) =&gt;</span> <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;;
+
+<span class="hljs-keyword">function</span> <span class="hljs-title function_">executeDocker</span>(<span class="hljs-params"><span class="hljs-attr">dockerBin</span>: <span class="hljs-built_in">string</span>, <span class="hljs-attr">args</span>: <span class="hljs-built_in">string</span>[], <span class="hljs-attr">timeoutMs</span>: <span class="hljs-built_in">number</span></span>): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt; {
+  <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Promise</span>(<span class="hljs-function">(<span class="hljs-params">resolve, reject</span>) =&gt;</span> {
+    <span class="hljs-title function_">execFile</span>(dockerBin, args, { <span class="hljs-attr">timeout</span>: timeoutMs, <span class="hljs-attr">maxBuffer</span>: <span class="hljs-number">1024</span> * <span class="hljs-number">1024</span> }, <span class="hljs-function">(<span class="hljs-params">error</span>) =&gt;</span> {
+      <span class="hljs-keyword">if</span> (error) <span class="hljs-title function_">reject</span>(error);
+      <span class="hljs-keyword">else</span> <span class="hljs-title function_">resolve</span>();
+    });
+  });
+}
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">interface</span> <span class="hljs-title class_">DockerImageReadinessOptions</span> {
+  <span class="hljs-attr">dockerBin</span>?: <span class="hljs-built_in">string</span>;
+  <span class="hljs-attr">images</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;;
+  <span class="hljs-attr">timeoutMs</span>?: <span class="hljs-built_in">number</span>;
+  <span class="hljs-attr">run</span>?: <span class="hljs-title class_">DockerCommand</span>;
+}
+
+<span class="hljs-comment">/** Checks both the Docker daemon and every image that ContainerJudge may use. */</span>
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">DockerImageReadiness</span> <span class="hljs-keyword">implements</span> <span class="hljs-title class_">JudgeReadinessProbe</span> {
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">dockerBin</span>: <span class="hljs-built_in">string</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">images</span>: <span class="hljs-title class_">Record</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">timeoutMs</span>: <span class="hljs-built_in">number</span>;
+  <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> <span class="hljs-attr">run</span>: <span class="hljs-title class_">DockerCommand</span>;
+
+  <span class="hljs-title function_">constructor</span>(<span class="hljs-params"><span class="hljs-attr">options</span>: <span class="hljs-title class_">DockerImageReadinessOptions</span></span>) {
+    <span class="hljs-keyword">if</span> (<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(options.<span class="hljs-property">images</span>).<span class="hljs-property">length</span> === <span class="hljs-number">0</span>) <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Error</span>(<span class="hljs-string">&quot;at least one judge image is required&quot;</span>);
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">dockerBin</span> = options.<span class="hljs-property">dockerBin</span> ?? <span class="hljs-string">&quot;docker&quot;</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">images</span> = { ...options.<span class="hljs-property">images</span> };
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span> = options.<span class="hljs-property">timeoutMs</span> ?? <span class="hljs-number">3000</span>;
+    <span class="hljs-variable language_">this</span>.<span class="hljs-property">run</span> = options.<span class="hljs-property">run</span> ?? executeDocker;
+  }
+
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">check</span>(): <span class="hljs-title class_">Promise</span>&lt;<span class="hljs-title class_">ReadinessSnapshot</span>&gt; {
+    <span class="hljs-keyword">let</span> docker = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">try</span> {
+      <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">run</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">dockerBin</span>, [<span class="hljs-string">&quot;info&quot;</span>, <span class="hljs-string">&quot;--format&quot;</span>, <span class="hljs-string">&quot;{{.ServerVersion}}&quot;</span>], <span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span>);
+      docker = <span class="hljs-literal">true</span>;
+    } <span class="hljs-keyword">catch</span> {
+      <span class="hljs-keyword">return</span> {
+        <span class="hljs-attr">ready</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">docker</span>: <span class="hljs-literal">false</span>,
+        <span class="hljs-attr">images</span>: <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">keys</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">images</span>).<span class="hljs-title function_">map</span>(<span class="hljs-function">(<span class="hljs-params">name</span>) =&gt;</span> [name, <span class="hljs-literal">false</span>])),
+      };
+    }
+
+    <span class="hljs-keyword">const</span> imageEntries = <span class="hljs-keyword">await</span> <span class="hljs-title class_">Promise</span>.<span class="hljs-title function_">all</span>(<span class="hljs-title class_">Object</span>.<span class="hljs-title function_">entries</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">images</span>).<span class="hljs-title function_">map</span>(<span class="hljs-title function_">async</span> ([name, image]) =&gt; {
+      <span class="hljs-keyword">try</span> {
+        <span class="hljs-keyword">await</span> <span class="hljs-variable language_">this</span>.<span class="hljs-title function_">run</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">dockerBin</span>, [<span class="hljs-string">&quot;image&quot;</span>, <span class="hljs-string">&quot;inspect&quot;</span>, image], <span class="hljs-variable language_">this</span>.<span class="hljs-property">timeoutMs</span>);
+        <span class="hljs-keyword">return</span> [name, <span class="hljs-literal">true</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>;
+      } <span class="hljs-keyword">catch</span> {
+        <span class="hljs-keyword">return</span> [name, <span class="hljs-literal">false</span>] <span class="hljs-keyword">as</span> <span class="hljs-keyword">const</span>;
+      }
+    }));
+    <span class="hljs-keyword">const</span> imageStatus = <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">fromEntries</span>(imageEntries);
+    <span class="hljs-keyword">return</span> {
+      <span class="hljs-attr">ready</span>: docker &amp;&amp; <span class="hljs-title class_">Object</span>.<span class="hljs-title function_">values</span>(imageStatus).<span class="hljs-title function_">every</span>(<span class="hljs-title class_">Boolean</span>),
+      docker,
+      <span class="hljs-attr">images</span>: imageStatus,
+    };
+  }
+}
 </template>
   </div>
   <dialog class="source-dialog" id="source-dialog" aria-labelledby="source-dialog-title" aria-describedby="source-dialog-help">

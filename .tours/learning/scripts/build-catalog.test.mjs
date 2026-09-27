@@ -652,6 +652,23 @@ test("normal page generation leaves frozen baselines untouched; explicit accepta
     assert.match(refreshedMarkdown, /Git worktree: dirty;/);
     assert.match(refreshedMarkdown, /Historical test evidence/);
     assert.match(refreshedMarkdown, /not rerun during that refresh/);
+
+    const acceptedAgain = await acceptReviewedSnapshot({
+      repoRoot,
+      learningDir,
+      files: new Map([[sourcePath, sha256(source)]]),
+      gitHead: "f".repeat(40),
+      recordedAt: "2026-09-27T13:00:00.000Z",
+      auditData: rendered.data,
+      worktreeStatus: "clean",
+      reviewedLessons: ["0001-submit-journey"],
+    });
+    assert.equal(acceptedAgain.snapshot.gitHead, "f".repeat(40));
+    const refreshedAgainMarkdown = await readFile(baselineMarkdownPath, "utf8");
+    assert.match(refreshedAgainMarkdown, /Recorded: 2026-09-27/);
+    assert.match(refreshedAgainMarkdown, /Git worktree: clean;/);
+    assert.equal((refreshedAgainMarkdown.match(/^## Historical test evidence \(not rerun by snapshot refresh\)$/gm) ?? []).length, 1);
+    assert.match(refreshedAgainMarkdown, /These test results were captured on 2026-09-25\. The reference baseline was refreshed on 2026-09-27; tests were not rerun during that refresh\./);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }

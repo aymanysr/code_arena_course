@@ -25,21 +25,39 @@
       "description": "At startup, GameService asks the engine to recover persisted matches and pending evaluations before serving requests. Follow ArenaEngine.recover() to see how it repairs transient state and re-drives pending work. Recovery is a designed path, not a guarantee that every failure is impossible."
     },
     {
+      "file": "packages/arena-game/src/engine.ts",
+      "line": 164,
+      "title": "4. Live Match events follow the committed save",
+      "description": "A command buffers its events while the Match is being changed. The engine publishes them only after the authority save returns, attaching the committed revision. Delivery is transient; this code does not provide a durable event log or outbox."
+    },
+    {
+      "file": "packages/arena-game/test/post-commit-events.test.ts",
+      "line": 20,
+      "title": "5. Test that failed saves publish no terminal event",
+      "description": "The focused tests verify failed-save suppression, the committed revision, and listener isolation. A listener failure does not undo the saved Match; a reconnect recovers state from a snapshot instead of replaying every missed event."
+    },
+    {
+      "file": "packages/arena-game/src/engine.ts",
+      "line": 845,
+      "title": "6. Reconnect reads the authoritative snapshot",
+      "description": "Game asks ArenaEngine for a fresh member-filtered snapshot after reconnect. The snapshot contains the persisted revision and current Reveal/final result, so transient socket events can remain hints rather than the source of truth."
+    },
+    {
       "file": "packages/arena-game/src/team-collaboration.ts",
       "line": 151,
-      "title": "4. A team edit changes the document revision",
+      "title": "7. A team edit changes the document revision",
       "description": "applyUpdate accepts a team document change during coding. A real change increments the document revision and invalidates readiness, so approvals for an older version cannot authorize submission of newer code."
     },
     {
       "file": "services/game/src/game/team-chat.gateway.ts",
       "line": 30,
-      "title": "5. Chat is not the editor or the game engine",
+      "title": "8. Chat is not the editor or the game engine",
       "description": "The gateway uses a separate /chat namespace. Its comments state that chat does not mutate match state, the shared document, or readiness. Important current limitation: this file keeps recent chat history in process memory, so it is not durable history across a service restart."
     },
     {
       "file": "frontend/src/arena/sidecars.ts",
       "line": 78,
-      "title": "6. The browser cleans up live connections",
+      "title": "9. The browser cleans up live connections",
       "description": "The sidecar lifecycle owns the collaboration and chat clients separately from the main game transport. Follow clearCollab and clearChat: when a match or round changes, old connections are disconnected so they do not keep affecting the new screen."
     },
     {

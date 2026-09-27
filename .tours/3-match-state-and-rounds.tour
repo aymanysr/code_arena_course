@@ -20,30 +20,42 @@
     },
     {
       "file": "packages/arena-game/src/round-lifecycle.ts",
-      "line": 56,
+      "line": 57,
       "title": "3. Moving from one phase to another",
       "description": "RoundLifecycle groups the rules for starting a round, entering coding, closing submissions, revealing results, and advancing. For example, beginReveal closes the round to new submissions while already-running evaluations can settle during the grace window."
     },
     {
       "file": "packages/arena-game/src/round-lifecycle.ts",
-      "line": 98,
+      "line": 120,
       "title": "4. The reveal is a snapshot",
       "description": "createReveal builds an immutable result containing this round's scores, group results, totals, and publish time. Keeping a snapshot makes the published result stable even as the next round begins."
     },
     {
       "file": "packages/arena-game/src/round-lifecycle.ts",
-      "line": 152,
+      "line": 186,
       "title": "5. How a verdict becomes a score",
       "description": "scoreVerdict converts test outcomes and group weights into a score. Infrastructure problems are not treated as ordinary competitive failures. The exact arithmetic is kept in the lifecycle/domain code rather than in the screen."
     },
     {
+      "file": "packages/arena-game/src/engine.ts",
+      "line": 1115,
+      "title": "6. A Match deadline saves Reveal, then completes the Match",
+      "description": "After expiry, the server closes the current Round; accepted work can settle only inside the bounded reveal grace. It saves the Reveal and terminal MATCH_COMPLETE state, emits events after the save, and computes the final score from saved Round records. Expiry in MATCH_FOUND or ROUND_INTRO still creates a zero-score Reveal; later Rounds remain at zero."
+    },
+    {
+      "file": "packages/arena-game/test/deadline-closure.test.ts",
+      "line": 10,
+      "title": "7. Check deadline closure with a fixed clock",
+      "description": "These cases cover exact-deadline rejection, a zero-score Reveal before coding, a pre-deadline Submit that settles within grace, and a late result that is excluded. A terminal Match needs no player action to commit."
+    },
+    {
       "file": "packages/arena-game/test/round-lifecycle.test.ts",
       "line": 43,
-      "title": "6. Check the rules with examples",
+      "title": "8. Check Round rules with examples",
       "description": "This file tests lifecycle and scoring rules with small MatchRecord examples. Try reading one test as a sentence: given this initial phase and these outcomes, when this method runs, what should change?"
     },
     {
-      "title": "Checkpoint — draw the round from memory",
+      "title": "Checkpoint — draw the Round from memory",
       "description": "Write down the phase sequence you remember from coding to the next round. Then explain which data belongs to one RoundState and which belongs to the whole MatchRecord. Tour 4 looks inside judging and sandbox boundaries."
     }
   ]
