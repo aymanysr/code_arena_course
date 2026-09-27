@@ -24,6 +24,12 @@ export interface MatchLockOptions {
   skipFinalSave?: boolean;
 }
 
+export interface MatchLockResult<T> {
+  value: T;
+  /** Revision read back after the command's durable writes. */
+  revision?: number;
+}
+
 /**
  * Match authority owns the shared command mechanics around Match state:
  * membership resolution, per-Match serialization, and revision stamping.
@@ -44,7 +50,7 @@ export class MatchAuthority {
    * module performs the durable write and this module supplies the revision
    * used by events emitted during the command.
    */
-  async withLock<T>(matchId: string, fn: () => Promise<T>, options: MatchLockOptions = {}): Promise<T> {
+  async withLock<T>(matchId: string, fn: () => Promise<T>, options: MatchLockOptions = {}): Promise<MatchLockResult<T>> {
     const prev = this.matchLocks.get(matchId) ?? Promise.resolve();
     let release!: () => void;
     const mine = new Promise<void>((resolve) => {
@@ -65,7 +71,7 @@ export class MatchAuthority {
         fresh.revision = this.lockRevision.get(matchId) ?? fresh.revision + 1;
         await this.saveMatch(fresh);
       }
-      return result;
+      return { value: result, revision: fresh?.revision };
     } finally {
       release();
       this.lockRevision.delete(matchId);

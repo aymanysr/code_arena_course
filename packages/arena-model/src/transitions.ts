@@ -55,19 +55,20 @@ export function isEditable(phase: RoundPhase): boolean {
   return phase === "CODING";
 }
 
-/** Cause gating CODING -> SCORE_REVEAL: the game determined the round's reveal condition was met. */
-export type RevealCause = "REVEAL_CONDITION_MET";
+/** Cause gating disclosure of a sealed Round result. */
+export type RevealCause = "REVEAL_CONDITION_MET" | "MATCH_DEADLINE";
 
 /**
- * ponytail: explicit reveal action — the only way into SCORE_REVEAL.
- * Evaluation completion alone never reveals; only this game-owned call
- * publishes hidden group information. After reveal, no resubmit edge exists.
+ * Normal reveal follows a completed coding Round. A Match deadline can also
+ * publish the current Round while it is found, in intro, or coding. Evaluation
+ * completion alone never reveals hidden group information.
  */
 export function publishRoundReveal(from: RoundPhase, cause: RevealCause): RoundPhase {
-  if (from !== "CODING" || cause !== "REVEAL_CONDITION_MET") {
-    throw new Error(`illegal reveal ${String(from)} with cause ${String(cause)}`);
+  if (cause === "REVEAL_CONDITION_MET" && from === "CODING") return "SCORE_REVEAL";
+  if (cause === "MATCH_DEADLINE" && (from === "MATCH_FOUND" || from === "ROUND_INTRO" || from === "CODING")) {
+    return "SCORE_REVEAL";
   }
-  return "SCORE_REVEAL";
+  throw new Error(`illegal reveal ${String(from)} with cause ${String(cause)}`);
 }
 
 /**

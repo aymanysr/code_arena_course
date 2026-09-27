@@ -1,5 +1,6 @@
-import { useEffect, useState, useTransition } from "react";
-import type { LobbyClient, LobbySideId, PrivateRoomMember, QueueEntry, RoomWithMembers } from "../arena/lobby.js";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import type { LobbyClient, PrivateRoomMember } from "../arena/lobby.js";
+import { LobbySession } from "../arena/lobby-session.js";
 import type { MatchMode } from "../arena/types.js";
 
 export function LobbyPage({
@@ -13,151 +14,37 @@ export function LobbyPage({
   onMatchFound: (matchId: string) => void;
   initialMode?: MatchMode;
 }) {
-  const [mode, setMode] = useState<MatchMode>(initialMode);
-  const [queueEntry, setQueueEntry] = useState<QueueEntry | null>(null);
-  const [roomData, setRoomData] = useState<RoomWithMembers | null>(null);
+  const session = useMemo(() => new LobbySession(client, onMatchFound, initialMode), [client, initialMode, onMatchFound]);
+  const state = useSyncExternalStore(session.subscribe, session.getSnapshot, session.getSnapshot);
+  const { mode, roomData, error } = state;
   const [inviteInput, setInviteInput] = useState("");
-  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [, startTransition] = useTransition();
 
-  // Socket subscription
   useEffect(() => {
-    let disposed = false;
-    const recover = () => {
-      void client.getActive().then((active) => {
-        if (disposed) return;
-        if (active.queue?.status === "matched" && active.queue.matchedMatchId) {
-          onMatchFound(active.queue.matchedMatchId);
-        } else if (active.room?.room.status === "matched" && active.room.room.matchId) {
-          onMatchFound(active.room.room.matchId);
-        } else {
-          setQueueEntry(active.queue?.status === "waiting" ? active.queue : null);
-          setRoomData(active.room?.room.status === "open" ? active.room : null);
-          if (active.queue?.status === "waiting") setMode(active.queue.mode);
-          if (active.room?.room.status === "open") {
-            setMode(active.room.room.mode);
-            client.joinRoomChannel(active.room.room.id);
-          }
-        }
-      }).catch((err: unknown) => {
-        if (!disposed) setError(err instanceof Error ? err.message : "Failed to recover lobby");
-      });
-    };
-    const unsub = client.connectSocket({
-      onConnect: recover,
-      onRoomUpdated: (data) => {
-        setRoomData(data.room.status === "open" ? { room: data.room, members: data.members } : null);
-        setError(null);
-      },
-      onMatchFound: (data) => onMatchFound(data.matchId),
-      onQueueMatched: (data) => onMatchFound(data.matchId),
-    });
+    void session.start();
+    return () => session.stop();
+  }, [session]);
 
-    return () => {
-      disposed = true;
-      unsub();
-    };
-  }, [client, onMatchFound]);
-
-  // Public Queue Actions
-  const handleJoinQueue = async () => {
-    setError(null);
-    try {
-      const entry = await client.joinQueue(mode);
-      if (entry.status === "matched" && entry.matchedMatchId) onMatchFound(entry.matchedMatchId);
-      else setQueueEntry(entry);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to join queue");
-    }
-  };
-
-  const handleCancelQueue = async () => {
-    setError(null);
-    try {
-      const res = await client.cancelQueue();
-      if (res.matched && res.matchId) {
-        onMatchFound(res.matchId);
-      } else {
-        setQueueEntry(null);
-      }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to cancel queue");
-    }
-  };
-
-  // Private Room Actions
-  const handleCreateRoom = async () => {
-    setError(null);
-    try {
-      const res = await client.createRoom(mode);
-      setRoomData(res);
-      client.joinRoomChannel(res.room.id);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to create room");
-    }
-  };
+  const handleCreateRoom = () => void session.createRoom();
 
   const handleJoinRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inviteInput.trim()) return;
-    setError(null);
-    try {
-      const res = await client.joinRoom(inviteInput.trim());
-      setRoomData(res);
-      client.joinRoomChannel(res.room.id);
-      setInviteInput("");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to join room");
-    }
+    if (await session.joinRoom(inviteInput.trim())) setInviteInput("");
   };
 
-  const handleSwitchSide = async (targetSide: LobbySideId) => {
-    if (!roomData) return;
-    setError(null);
-    try {
-      const res = await client.setSide(roomData.room.id, targetSide);
-      setRoomData(res);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to change side");
-    }
-  };
+  const handleSwitchSide = (targetSide: "left" | "right") => void session.setSide(targetSide);
 
-  const handleToggleReady = async () => {
+  const handleToggleReady = () => {
     if (!roomData) return;
     const myMember = roomData.members.find((m) => m.userId === userId);
     if (!myMember) return;
-    setError(null);
-    try {
-      const res = await client.setReady(roomData.room.id, !myMember.ready);
-      setRoomData(res);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to toggle ready");
-    }
+    void session.setReady(!myMember.ready);
   };
 
-  const handleLeaveRoom = async () => {
-    if (!roomData) return;
-    setError(null);
-    try {
-      client.leaveRoomChannel(roomData.room.id);
-      await client.leaveRoom(roomData.room.id);
-      setRoomData(null);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to leave room");
-    }
-  };
+  const handleLeaveRoom = () => void session.leaveRoom();
 
-  const handleStartRoom = async () => {
-    if (!roomData) return;
-    setError(null);
-    try {
-      const res = await client.startRoom(roomData.room.id);
-      onMatchFound(res.matchId);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to start room");
-    }
-  };
+  const handleStartRoom = () => void session.startRoom();
 
   const copyCode = () => {
     if (!roomData) return;
@@ -185,19 +72,19 @@ export function LobbyPage({
       {/* Header */}
       <div className="mb-6 flex items-center justify-between border-b border-neutral-200 pb-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-neutral-900">Code Arena Matchmaking</h1>
+          <h1 className="text-xl font-bold tracking-tight text-neutral-900">Code Arena Lobby</h1>
           <p className="font-mono text-xs text-neutral-500">
             Player: <span className="text-neutral-800">{userId}</span>
           </p>
         </div>
 
-        {/* Mode Selector (disabled during queue or in room) */}
+        {/* Mode Selector (disabled while in a room) */}
         <div className="flex gap-1 rounded border border-neutral-200 bg-neutral-50 p-1" role="group" aria-label="Game Mode">
           {(["1v1", "2v2"] as const).map((m) => (
             <button
               key={m}
               type="button"
-              disabled={queueEntry !== null || roomData !== null}
+              disabled={roomData !== null}
               aria-pressed={mode === m}
               className={`rounded px-3 py-1 font-mono text-xs font-medium transition-colors ${
                 mode === m
@@ -205,7 +92,7 @@ export function LobbyPage({
                   : "text-neutral-600 hover:bg-neutral-200 hover:text-neutral-900 disabled:opacity-50"
               }`}
               onClick={() => {
-                startTransition(() => setMode(m));
+                session.setMode(m);
               }}
             >
               {m}
@@ -221,25 +108,7 @@ export function LobbyPage({
         </div>
       )}
 
-      {/* VIEW 1: QUEUE SEARCHING */}
-      {queueEntry && (
-        <div className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-teal-700 border-r-transparent align-[-0.125em]" />
-            <h2 className="text-lg font-semibold text-neutral-900">Finding {queueEntry.mode} Opponent…</h2>
-            <p className="mt-1 font-mono text-xs text-neutral-500">Searching public queue (FIFO matchmaking)</p>
-            <button
-              type="button"
-              onClick={handleCancelQueue}
-              className="mt-6 rounded border border-neutral-300 bg-white px-4 py-1.5 font-mono text-xs font-medium text-neutral-700 hover:bg-neutral-50"
-            >
-              Cancel Search
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* VIEW 2: PRIVATE LOBBY ROOM */}
+      {/* PRIVATE LOBBY ROOM */}
       {roomData && (
         <div className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
           {/* Room Top Bar */}
@@ -439,69 +308,45 @@ export function LobbyPage({
         </div>
       )}
 
-      {/* VIEW 3: INITIAL ENTRY (NOT IN QUEUE OR ROOM) */}
-      {!queueEntry && !roomData && (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Quick Play Queue */}
-          <div className="flex flex-col justify-between rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-            <div>
-              <div className="mb-2 inline-block rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs font-medium text-teal-700">
-                Automated Matchmaking
-              </div>
-              <h2 className="text-base font-semibold text-neutral-900">Quick Play Queue</h2>
-              <p className="mt-1 text-xs text-neutral-500">
-                Join the public queue for a {mode} match. The matchmaker forms an authoritative duel as soon as enough
-                players join.
-              </p>
+      {/* INVITATION-ONLY ENTRY */}
+      {!roomData && (
+        <div className="mx-auto w-full max-w-xl rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
+          <div>
+            <div className="mb-2 inline-block rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs font-medium text-neutral-700">
+              Invitation Code
             </div>
-            <button
-              type="button"
-              onClick={handleJoinQueue}
-              className="mt-6 w-full rounded bg-teal-700 px-4 py-2 font-mono text-xs font-bold text-white hover:bg-teal-600"
-            >
-              Find {mode} Match
-            </button>
+            <h2 className="text-base font-semibold text-neutral-900">Private Custom Room</h2>
+            <p className="mt-1 text-xs text-neutral-500">
+              Create a private room to play with friends, pick teams, and start when everyone is ready.
+            </p>
           </div>
 
-          {/* Private Room */}
-          <div className="flex flex-col justify-between rounded-lg border border-neutral-200 bg-white p-6 shadow-sm">
-            <div>
-              <div className="mb-2 inline-block rounded bg-neutral-100 px-2 py-0.5 font-mono text-xs font-medium text-neutral-700">
-                Invitation Code
-              </div>
-              <h2 className="text-base font-semibold text-neutral-900">Private Custom Room</h2>
-              <p className="mt-1 text-xs text-neutral-500">
-                Create a private room to play with friends, pick teams, and start when everyone is ready.
-              </p>
-            </div>
+          <div className="mt-6 space-y-3">
+            <button
+              type="button"
+              onClick={handleCreateRoom}
+              className="w-full rounded border border-neutral-300 bg-white px-4 py-2 font-mono text-xs font-medium text-neutral-800 hover:bg-neutral-50"
+            >
+              Create {mode} Room
+            </button>
 
-            <div className="mt-6 space-y-3">
+            <form onSubmit={handleJoinRoom} className="flex gap-2">
+              <input
+                type="text"
+                maxLength={6}
+                placeholder="INVITE CODE"
+                value={inviteInput}
+                onChange={(e) => setInviteInput(e.target.value.toUpperCase())}
+                className="w-full rounded border border-neutral-300 px-3 py-1.5 font-mono text-xs uppercase placeholder:text-neutral-400 focus:border-teal-700 focus:outline-none"
+              />
               <button
-                type="button"
-                onClick={handleCreateRoom}
-                className="w-full rounded border border-neutral-300 bg-white px-4 py-2 font-mono text-xs font-medium text-neutral-800 hover:bg-neutral-50"
+                type="submit"
+                disabled={!inviteInput.trim()}
+                className="rounded bg-neutral-800 px-3 py-1.5 font-mono text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-50"
               >
-                Create {mode} Room
+                Join
               </button>
-
-              <form onSubmit={handleJoinRoom} className="flex gap-2">
-                <input
-                  type="text"
-                  maxLength={6}
-                  placeholder="INVITE CODE"
-                  value={inviteInput}
-                  onChange={(e) => setInviteInput(e.target.value.toUpperCase())}
-                  className="w-full rounded border border-neutral-300 px-3 py-1.5 font-mono text-xs uppercase placeholder:text-neutral-400 focus:border-teal-700 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  disabled={!inviteInput.trim()}
-                  className="rounded bg-neutral-800 px-3 py-1.5 font-mono text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-50"
-                >
-                  Join
-                </button>
-              </form>
-            </div>
+            </form>
           </div>
         </div>
       )}

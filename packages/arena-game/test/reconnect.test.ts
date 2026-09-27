@@ -602,6 +602,47 @@ describe("boot recovery across a simulated process death (ticket 11 §10)", () =
     expect(snap.sides.right?.submissions).toBe(0);
   });
 
+  it("supersedes an expired pending evaluation during recovery without rerunning the judge", async () => {
+    const graceMs = 25;
+    const { engine1, engine2, judge, left, matchId, stores, advance } = await twoEngines(
+      [{ score: 100 }],
+      { revealGraceMs: graceMs },
+    );
+    const match = await stores.matches.load(matchId);
+    const round = match!.rounds[0]!;
+    round.activities.left = "evaluating";
+    await stores.matches.save(match!);
+    await stores.submissions.append({
+      submissionId: "expired-recovery-submission",
+      evaluationId: "expired-recovery-evaluation",
+      matchId,
+      roundId: round.roundId,
+      sideId: "left",
+      problemVersionId: round.problemVersionId,
+      language: "Python",
+      source: SOLVED_PY,
+      sourceHash: "expired-recovery-hash",
+      documentRevision: null,
+      submittedAt: match!.startedAt + match!.durationMs - 1,
+      elapsedMatchMs: match!.durationMs - 1,
+      status: "pending",
+      score: null,
+      scoreBp: null,
+      groups: null,
+      testStatuses: null,
+      failureCode: null,
+    });
+    advance(match!.durationMs + graceMs + 1);
+
+    const report = await engine2.recover();
+
+    expect(judge.evalCalls).toBe(0);
+    expect(report).toEqual({ matches: 1, retried: 0, failed: 0 });
+    expect((await stores.submissions.getByEvaluationId("expired-recovery-evaluation"))?.status).toBe("superseded");
+    expect((await engine2.snapshot(left, matchId)).roundPhase).toBe("MATCH_COMPLETE");
+    await engine1.setPresence(matchId, "left", "offline");
+  });
+
   it("interrupted reveal flip unwinds cleanly; late verdict still counts", async () => {
     const { engine1, engine2, judge, left, right, matchId } = await twoEngines(
       [{ score: 100 }, { defer: true }, { defer: true }],

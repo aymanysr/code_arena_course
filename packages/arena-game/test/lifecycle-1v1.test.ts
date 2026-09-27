@@ -45,16 +45,20 @@ describe("09 engine-level 1v1 integration (bank + judge + clock + events)", () =
     }
   });
 
-  it("match timeout rejects play but preserves reveal and finalization", async () => {
+  it("match timeout rejects play and saves its Reveal and final result without player action", async () => {
     const fx = await setup([{ score: 100 }]);
     const { engine, left, right, matchId } = fx;
     await engine.submit(left, matchId, { code: SOLVED_PY, language: "Python" });
     fx.advance(31 * 60 * 1000);
     const snap = await engine.snapshot(left, matchId);
     expect(snap.expired).toBe(true);
+    expect(snap.roundPhase).toBe("MATCH_COMPLETE");
+    expect(snap.reveal?.scores.left).toBe(100);
+    expect(snap.final?.scores.left).toBe(100);
     await expect(engine.run(right, matchId, { code: SOLVED_PY, language: "Python" })).rejects.toThrow(/expired/);
     await expect(engine.submit(right, matchId, { code: SOLVED_PY, language: "Python" })).rejects.toThrow(/expired/);
     const reveal = await engine.publishReveal(left, matchId);
     expect(reveal.scores.left).toBe(100);
+    expect((await engine.finalResult(left, matchId)).scores.left).toBe(100);
   });
 });

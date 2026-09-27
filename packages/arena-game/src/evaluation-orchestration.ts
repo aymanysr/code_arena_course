@@ -45,6 +45,7 @@ export interface InFlightEvaluation extends EvaluationIdentity {
  */
 export class EvaluationInFlightRegistry {
   private readonly entries = new Map<string, InFlightEvaluation>();
+  private readonly settledFailures = new Map<string, unknown>();
 
   get(evaluationId: string): InFlightEvaluation | undefined {
     return this.entries.get(evaluationId);
@@ -62,7 +63,20 @@ export class EvaluationInFlightRegistry {
 
   settle(evaluationId: string, tracked: InFlightEvaluation, completion: EvaluationCompletion): void {
     if (this.entries.get(evaluationId) === tracked) this.entries.delete(evaluationId);
+    if (completion.ok) {
+      this.settledFailures.delete(evaluationId);
+    } else {
+      this.settledFailures.set(evaluationId, completion.error);
+      if (this.settledFailures.size > 256) {
+        const oldest = this.settledFailures.keys().next().value;
+        if (oldest !== undefined) this.settledFailures.delete(oldest);
+      }
+    }
     tracked.resolve(completion);
+  }
+
+  failureFor(evaluationId: string): unknown {
+    return this.settledFailures.get(evaluationId);
   }
 
   forRound(
@@ -94,7 +108,6 @@ export interface EvaluationRunInput {
   source: string;
   groups: SealedGroup[];
   documentRevision: DocumentRevision | null;
-  now: number;
   tracked: InFlightEvaluation;
 }
 
@@ -131,6 +144,8 @@ export interface EvaluationOrchestratorOptions {
   authority: MatchAuthority;
   roundLifecycle: RoundLifecycle;
   clock: () => number;
+  /** Time after Match expiry during which already-accepted evaluations may count. */
+  deadlineGraceMs: number;
   limits: JudgeLimits;
   telemetry?: EvaluationTelemetry;
   host: EvaluationOrchestrationHost;
@@ -160,6 +175,10 @@ export class EvaluationOrchestrator {
 
   settle(evaluationId: string, tracked: InFlightEvaluation, completion: EvaluationCompletion): void {
     this.inFlight.settle(evaluationId, tracked, completion);
+  }
+
+  failureFor(evaluationId: string): unknown {
+    return this.inFlight.failureFor(evaluationId);
   }
 
   forRound(
@@ -249,7 +268,13 @@ export class EvaluationOrchestrator {
         await this.options.host.withMatchLock(
           input.matchId,
           async () => {
-            await this.commitStoredEvaluation(claim!, input.matchId, input.evaluationId, verdict, input.now);
+            await this.commitStoredEvaluation(
+              claim!,
+              input.matchId,
+              input.evaluationId,
+              verdict,
+              this.options.clock(),
+            );
           },
           { skipFinalSave: true },
         );
@@ -283,12 +308,18 @@ export class EvaluationOrchestrator {
       try {
         const match = await this.options.persistence.loadMatch(stored.matchId);
         const round = match?.rounds.find((candidate) => candidate.roundId === stored.roundId);
+        const matchDeadline = match ? match.startedAt + match.durationMs : undefined;
+        const withinDeadlineGrace =
+          matchDeadline !== undefined &&
+          stored.submittedAt < matchDeadline &&
+          this.options.clock() <= matchDeadline + this.options.deadlineGraceMs;
         const live =
           match &&
           match.roundPhase === "CODING" &&
           round &&
           round.roundId === match.rounds[match.currentRound - 1]?.roundId &&
-          !round.cutoffPassed;
+          !round.cutoffPassed &&
+          withinDeadlineGrace;
         if (!live) {
           await this.options.host.withMatchLock(stored.matchId, async () => {
             const gone = await this.options.persistence.findSubmissionByEvaluationId(stored.evaluationId);
@@ -429,15 +460,18 @@ export class EvaluationOrchestrator {
       throw new JudgeInfraError("judge returned non-competitive verdict set");
     }
     const { score, scoreBp, groups: groupResults, testStatuses: statuses } = scored;
+    const matchDeadline = match.startedAt + match.durationMs;
+    const withinDeadlineGrace = stored.submittedAt < matchDeadline && now <= matchDeadline + this.options.deadlineGraceMs;
     if (
       match.roundPhase === "CODING" &&
       round.roundId === this.options.host.currentRound(match).roundId &&
       !round.cutoffPassed &&
-      !round.superseded.includes(evaluationId)
+      !round.superseded.includes(evaluationId) &&
+      withinDeadlineGrace
     ) {
       const attempts = (round.attempts[side] ?? 0) + 1;
       round.attempts[side] = attempts;
-      const counted: CountedResult = { score, scoringTimeMs: now - match.startedAt };
+      const counted: CountedResult = { score, scoringTimeMs: stored.elapsedMatchMs };
       round.counted[side] = counted;
       stored.status = "completed";
       stored.score = score;

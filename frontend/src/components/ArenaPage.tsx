@@ -38,8 +38,10 @@ export function ArenaPage({ transport }: { transport: ArenaTransport }) {
   const starter = snapshot.problem.starters[snapshot.language as "Python"] ?? "";
   const [code, setCode] = useState(() => loadDraft(transport, snapshot.round, snapshot.problem.id, snapshot.language) ?? starter);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [deadlineResultScopeKey, setDeadlineResultScopeKey] = useState<string | null>(null);
   const fixtureControls = transport.fixtureControls?.() ?? null;
   const terminal = snapshot.roundPhase === "MATCH_COMPLETE";
+  const matchScopeKey = transport.scopeKey();
   const sidecarLifecycle = useMemo(() => createArenaSidecarLifecycle(), []);
 
   // Ticket 15: live 2v2 binds the team Y.Doc (one provider per round —
@@ -241,7 +243,29 @@ export function ArenaPage({ transport }: { transport: ArenaTransport }) {
           </>
         )}
         {snapshot.roundPhase === "MATCH_COMPLETE" && snapshot.reveal && (
-          <MatchResult reveal={snapshot.reveal} round={snapshot.round} matchFinal={snapshot.matchFinal} />
+          <>
+            {snapshot.remainingSeconds <= 0 ? (
+              deadlineResultScopeKey === matchScopeKey ? (
+                <>
+                  <RoundScoreReveal reveal={snapshot.reveal} round={snapshot.round} />
+                  <MatchResult reveal={snapshot.reveal} round={snapshot.round} matchFinal={snapshot.matchFinal} />
+                </>
+              ) : (
+                <>
+                  <RoundScoreReveal reveal={snapshot.reveal} round={snapshot.round} />
+                  <button
+                    type="button"
+                    className="rounded bg-teal-700 px-4 py-2 text-sm font-medium text-white"
+                    onClick={() => setDeadlineResultScopeKey(matchScopeKey)}
+                  >
+                    See final result
+                  </button>
+                </>
+              )
+            ) : (
+              <MatchResult reveal={snapshot.reveal} round={snapshot.round} matchFinal={snapshot.matchFinal} />
+            )}
+          </>
         )}
         {fixtureControls && (
           <div className="flex flex-wrap gap-2 border-t border-neutral-200 pt-2" aria-label="Mock controls">

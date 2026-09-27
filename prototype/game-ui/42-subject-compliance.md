@@ -1,9 +1,9 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-27 (judging-boundary follow-up; module rows intentionally NOT flipped — team sign-off required)
+Last reviewed: 2026-09-27 (Match deadline, Lobby, and event-convergence follow-up; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
-Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, plus UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking).
+Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), and production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior.
 
 PIVOT 2026-09-23: the production game is Code Arena (1v1/2v2 code battles) and `09-arena.html` is frozen as its approved interaction reference (see `.scratch/ft-transcendence-wayfinder/decisions-2026-09-23.md` and `.scratch/code-arena/spec.md`). The campus puzzle-race direction, its role/stage/clue mechanics, and the puzzle-specific prototypes below are historical evidence, not the production path. `CONTEXT.md` now carries the Code Arena glossary.
 
@@ -55,6 +55,43 @@ approved interaction reference:
 - Neither extraction is claimed as a completed 42 subject module. The
   real-time, remote-player, and user-interaction rows remain at their existing
   status until the required end-to-end and team-sign-off evidence is complete.
+
+## 2026-09-27 Match deadline, Lobby, and event-convergence slice
+
+Reviewed against `ft_transcendence.pdf` v21.2, especially the mandatory
+multi-user/concurrency/realtime requirements (printed p.8, PDF p.9), the
+responsive/accessibility and validation requirements (printed p.9, PDF p.10),
+and the complete web game, remote-player, and 3+ player obligations (printed
+p.16, PDF p.17). The slice keeps the Match server-authoritative, closes
+expired Matches durably after bounded judging grace, reconciles Lobby views
+from the active-state endpoint, and sends gameplay events only after their
+Match write commits. These behaviors support the existing claimed-module
+demonstrations but do not complete their full subject criteria.
+
+- The first-release Lobby is invitation-only per the approved Code Arena
+  specification. Public queue service/API code remains future-capability code;
+  the frontend no longer exposes queue entry and clears a recovered waiting
+  entry. The existing backend queue remains tested directly as an API.
+- Match deadline handling now rejects Run/Submit at expiry, counts an accepted
+  pre-deadline evaluation only when its durable result settles inside reveal
+  grace (including work owned by another Game process), saves the current
+  Round Reveal and final result, and leaves unplayed Rounds at zero. The UI
+  presents the saved Reveal before the terminal result without a player
+  advancing the Match.
+- Match events carry the revision read after commit. Failed Match writes
+  publish no event; listener exceptions do not roll back state. Events remain
+  transient and reconnect/refresh use the latest snapshot; no outbox or Match
+  schema change was introduced.
+- Verification in this workspace: deadline closure (7 tests), post-commit
+  events (2), Lobby reconciliation (6), terminal presentation (2), reconnect
+  regression, and the frontend suite (49) pass; frontend lint, workspace
+  typecheck/build, Playwright test discovery, and `git diff --check` pass. The
+  full workspace test command was attempted: 165 engine, 19 harness, 68 model,
+  and 49 frontend tests passed. Docker-backed judging tests could not access
+  the Docker socket; 12 Postgres checks were skipped because no test database
+  was available; local Game and judge-worker HTTP fixtures could not bind
+  `127.0.0.1` (`EPERM`). Those checks are not recorded as passing evidence. No
+  subject-module status row or point claim changes in this slice.
 
 ## Status key
 

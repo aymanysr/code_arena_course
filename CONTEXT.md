@@ -28,13 +28,15 @@ Supersedes the 2026-09-17 campus puzzle-race glossary (room, stage, role, clue c
 
 **Player status**: Gameplay state of one player. One of `coding`, `running`, `submitted`, `evaluating`, `locked in`, `disconnected`. It is the source of truth; presence never doubles as status.
 
-**Match phase**: The authoritative match state. `ROUND_INTRO` → `CODING` → (`RUNNING_TESTS` → `CODING`)* → `SUBMITTED` → `EVALUATING` → `SCORE_REVEAL` → next round or match end. Only `CODING` permits Run and Submit.
+**Match phase**: The authoritative match state. `ROUND_INTRO` → `CODING` → (`RUNNING_TESTS` → `CODING`)* → `SUBMITTED` → `EVALUATING` → `SCORE_REVEAL` → next round or match end. Only `CODING` permits Run and Submit, and the server rejects both at the exact Match deadline.
+
+**Match deadline**: The end of the one Match-wide server clock. A Submission accepted before the deadline may count if judging settles within the bounded reveal grace; the accepted time is used for the scoring-time tie-break. When grace ends, the server durably saves a Reveal for the current Round and completes the Match; unplayed Rounds count as zero. The UI shows that Reveal before the final result.
 
 **Match persistence**: The durable module for Match/Round records, Submissions, Reveals, shared team documents, and failure history. The Match authority decides whether a transition is valid; Match persistence decides how accepted state becomes durable. Presence, transport, Lobby queues, and judge execution remain outside this module. The first implementation preserves the current JSONB schema and uses Postgres and in-memory adapters behind the same interface.
 
 **Match authority**: The module that guards trusted-principal membership, serializes short Match commands, stamps committed revisions, and exposes the current Round. It is the final authorization point for gameplay commands. It does not execute judge work, speak Socket.IO, or know database adapter details; those concerns enter through explicit seams.
 
-**Round lifecycle**: The domain module behind `ArenaEngine` that owns Match/Round phase transitions, reveal preparation and publication state, round resets, Game-side verdict scoring, cumulative totals, and final-result tie-break calculation. It does not persist records, execute untrusted code, or emit transport events; the facade supplies those seams around its state decisions.
+**Round lifecycle**: The domain module behind `ArenaEngine` that owns Match/Round phase transitions, reveal preparation and publication state, round resets, Game-side verdict scoring, cumulative totals, and final-result tie-break calculation. The facade supplies the durable deadline closure and event-delivery seams. It does not persist records, execute untrusted code, or emit transport events.
 
 **Team collaboration**: The Game-owned 2v2 domain module behind `ArenaEngine` that owns Yjs document loading, authoritative source revisions, readiness invalidation, language resets, atomic document persistence/rollback, submission snapshots, and masked team views. It does not own Match locking or transport events; the facade supplies those seams around its document decisions.
 
@@ -59,6 +61,8 @@ authoritative state and does not replay the command automatically.
 queue wait, execution duration, outcome, and infrastructure errors. It never
 changes Match state and does not make scheduling decisions.
 
-**Lobby**: The pre-match gathering where players assemble sides and ready up. Entry flow (invitation code and/or matchmaking) is still an open production decision; the reference starts at round intro.
+**Lobby**: The invitation-code pre-match gathering where players assemble sides and ready up. Public-queue backend code remains available for a future release but is hidden from the first-release entry flow; a recovered waiting queue entry is canceled. Lobby socket changes are hints to fetch the latest authoritative state, and stale fetch responses are discarded. The reference starts at round intro.
+
+**Match event**: A transient live update published after the Match write commits and stamped with the committed revision. Reconnect and refresh recover missed updates from the latest authoritative snapshot; this release does not keep a durable event outbox.
 
 _Avoid_: Using room, stage, role, or clue card (retired puzzle-race terms). Using run to mean grading. Exposing hidden tests or scores before the reveal.

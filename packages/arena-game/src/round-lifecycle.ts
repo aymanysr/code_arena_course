@@ -4,6 +4,7 @@ import {
   groupEarnedBp,
   matchSum,
   publishRoundReveal,
+  type RevealCause,
   roundScoreBp,
   roundScoreFromBp,
 } from "arena-model";
@@ -95,6 +96,27 @@ export class RoundLifecycle {
     }
   }
 
+  prepareDeadlineReveal(
+    match: MatchRecord,
+    settledEvaluationIds: ReadonlySet<string>,
+    inFlightEvaluationIds: readonly string[],
+  ): void {
+    if (match.roundPhase === "CODING") {
+      this.prepareReveal(match, settledEvaluationIds, inFlightEvaluationIds);
+      return;
+    }
+    if (match.roundPhase !== "MATCH_FOUND" && match.roundPhase !== "ROUND_INTRO") {
+      throw new IllegalStateError(`deadline reveal rejected in ${match.roundPhase}`);
+    }
+    const round = this.currentRound(match);
+    round.cutoffPassed = true;
+    for (const evaluationId of inFlightEvaluationIds) {
+      if (!settledEvaluationIds.has(evaluationId) && !round.superseded.includes(evaluationId)) {
+        round.superseded.push(evaluationId);
+      }
+    }
+  }
+
   createReveal(match: MatchRecord, input: RevealInput): RevealSnapshot {
     const round = this.currentRound(match);
     return Object.freeze({
@@ -107,11 +129,23 @@ export class RoundLifecycle {
     }) as RevealSnapshot;
   }
 
-  commitReveal(match: MatchRecord, snapshot: RevealSnapshot): void {
+  commitReveal(match: MatchRecord, snapshot: RevealSnapshot, cause: RevealCause = "REVEAL_CONDITION_MET"): void {
     const round = this.currentRound(match);
     round.reveal = snapshot;
     round.closing = false;
-    match.roundPhase = publishRoundReveal("CODING", "REVEAL_CONDITION_MET");
+    match.roundPhase = publishRoundReveal(match.roundPhase, cause);
+  }
+
+  finishAtDeadline(match: MatchRecord): boolean {
+    if (match.roundPhase === "MATCH_COMPLETE") return false;
+    if (match.roundPhase !== "SCORE_REVEAL" && match.roundPhase !== "ROUND_COMPLETE") {
+      throw new IllegalStateError(`cannot finish expired Match in ${match.roundPhase}`);
+    }
+    if (!canTransition(match.roundPhase, "MATCH_COMPLETE")) {
+      throw new IllegalStateError(`cannot finish expired Match in ${match.roundPhase}`);
+    }
+    match.roundPhase = "MATCH_COMPLETE";
+    return true;
   }
 
   advance(match: MatchRecord): RoundAdvance {

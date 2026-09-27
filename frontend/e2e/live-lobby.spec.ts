@@ -3,7 +3,7 @@ import { chromium, expect, test } from "@playwright/test";
 const WEB = process.env.E2E_WEB_URL ?? "http://localhost:4173";
 
 test.describe("Live Entry & Lobby E2E", () => {
-  test("renders entry lobby with mode selection, quick play, and private room options", async () => {
+  test("renders invitation-only entry with mode selection and private room options", async () => {
     const browser = await chromium.launch();
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -11,7 +11,7 @@ test.describe("Live Entry & Lobby E2E", () => {
     await page.goto(`${WEB}/?live=1&user=test-entry-user`);
 
     // Verify main lobby heading and elements
-    await expect(page.getByRole("heading", { name: "Code Arena Matchmaking" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Code Arena Lobby" })).toBeVisible();
     await expect(page.getByText("Player: test-entry-user")).toBeVisible();
 
     // Mode selector
@@ -24,12 +24,14 @@ test.describe("Live Entry & Lobby E2E", () => {
     // Switching mode
     await btn2v2.click();
     await expect(btn2v2).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByRole("button", { name: "Find 2v2 Match" })).toBeVisible();
+    await expect(page.getByText("Quick Play Queue")).not.toBeVisible();
+    await expect(page.getByRole("button", { name: /Find .* Match/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Create 2v2 Room" })).toBeVisible();
 
     // Switch back to 1v1
     await btn1v1.click();
-    await expect(page.getByRole("button", { name: "Find 1v1 Match" })).toBeVisible();
+    await expect(page.getByText("Quick Play Queue")).not.toBeVisible();
+    await expect(page.getByRole("button", { name: /Find .* Match/ })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Create 1v1 Room" })).toBeVisible();
 
     await browser.close();
@@ -104,60 +106,32 @@ test.describe("Live Entry & Lobby E2E", () => {
     await browser.close();
   });
 
-  test("public queue: two players join queue and are matched into a game", async () => {
-    const browser = await chromium.launch();
-    const p1Context = await browser.newContext();
-    const p2Context = await browser.newContext();
+  test("public queue remains available through its server API for a future release", async ({ request }) => {
+    const game = process.env.E2E_GAME_URL ?? "http://localhost:3220";
+    const firstUser = `queue-first-${Date.now()}`;
+    const secondUser = `queue-second-${Date.now()}`;
+    const first = await request.post(`${game}/lobby/queue`, {
+      headers: { "x-dev-user-id": firstUser },
+      data: { mode: "1v1" },
+    });
+    expect(first.status()).toBe(201);
+    expect((await first.json()).entry.status).toBe("waiting");
 
-    const p1Page = await p1Context.newPage();
-    const p2Page = await p2Context.newPage();
-
-    const p1Id = `qp1-${Date.now()}`;
-    const p2Id = `qp2-${Date.now()}`;
-
-    // Player 1 joins queue
-    await p1Page.goto(`${WEB}/?live=1&user=${p1Id}`);
-    await p1Page.getByRole("button", { name: "Find 1v1 Match" }).click();
-    await expect(p1Page.getByText("Finding 1v1 Opponent…")).toBeVisible();
-    await expect(p1Page.getByRole("button", { name: "Cancel Search" })).toBeVisible();
-
-    // Player 2 joins queue
-    await p2Page.goto(`${WEB}/?live=1&user=${p2Id}`);
-    await p2Page.getByRole("button", { name: "Find 1v1 Match" }).click();
-
-    // Both players match and enter Arena!
-    await expect(p1Page.getByRole("heading", { name: "Code Arena", exact: true })).toBeVisible({ timeout: 10000 });
-    await expect(p2Page.getByRole("heading", { name: "Code Arena", exact: true })).toBeVisible({ timeout: 10000 });
-
-    // Verify both are in the same match
-    const p1Match = new URL(p1Page.url()).searchParams.get("match");
-    const p2Match = new URL(p2Page.url()).searchParams.get("match");
-    expect(p1Match).toBeTruthy();
-    expect(p2Match).toBeTruthy();
-    expect(p1Match).toBe(p2Match);
-    await p1Page.getByRole("button", { name: "Start round", exact: true }).click();
-    await p1Page.getByRole("button", { name: "Run", exact: true }).click();
-    await expect(p1Page.getByText("Not run").first()).not.toBeVisible();
-    await Promise.all([
-      p1Page.getByRole("button", { name: "Submit", exact: true }).click(),
-      p2Page.getByRole("button", { name: "Submit", exact: true }).click(),
-    ]);
-    await expect(p1Page.getByText("Scores revealed")).toBeVisible();
-    await expect(p2Page.getByText("Scores revealed")).toBeVisible();
-    console.log(JSON.stringify({ entry: "1v1 queue", users: [p1Id, p2Id], matchId: p1Match }));
-
-    await browser.close();
+    const second = await request.post(`${game}/lobby/queue`, {
+      headers: { "x-dev-user-id": secondUser },
+      data: { mode: "1v1" },
+    });
+    expect(second.status()).toBe(201);
+    expect((await second.json()).entry.status).toBe("matched");
   });
 });
 
 test("queued player matched while offline recovers the same Arena on reload", async ({ browser, request }) => {
   const user = `offline-${Date.now()}`;
-  const page = await browser.newPage();
-  await page.goto(`${WEB}/?live=1&user=${user}`);
-  await page.getByRole("button", { name: "Find 1v1 Match" }).click();
-  await expect(page.getByRole("button", { name: "Cancel Search" })).toBeVisible();
-  await page.close();
   const game = process.env.E2E_GAME_URL ?? "http://localhost:3220";
+  await request.post(`${game}/lobby/queue`, {
+    headers: { "x-dev-user-id": user }, data: { mode: "1v1" },
+  });
   await request.post(`${game}/lobby/queue`, {
     headers: { "x-dev-user-id": `${user}-opponent` }, data: { mode: "1v1" },
   });
@@ -168,67 +142,62 @@ test("queued player matched while offline recovers the same Arena on reload", as
   await recovered.close();
 });
 
-for (const entry of ["queue", "private"] as const) {
-  test(`2v2 ${entry}: four players enter one Arena with isolated collaboration and chat`, async ({ browser, request }) => {
-    const users = [0, 1, 2, 3].map(i => `${entry}-${Date.now()}-${i}`);
-    const pages = await Promise.all(users.map(() => browser.newPage()));
-    const game = process.env.E2E_GAME_URL ?? "http://localhost:3220";
-    let code = "";
-    for (let i = 0; i < 4; i++) {
-      const p = pages[i]!;
-      await p.goto(`${WEB}/?live=1&user=${users[i]}`);
-      await p.getByRole("button", { name: "2v2", exact: true }).click();
-      if (entry === "queue") {
-        await p.getByRole("button", { name: "Find 2v2 Match" }).click();
-        if (i < 3) await expect(p.getByRole("button", { name: "Cancel Search" })).toBeVisible();
-      } else if (i === 0) {
-        await p.getByRole("button", { name: "Create 2v2 Room" }).click();
-        code = (await p.locator("span.font-mono.text-base.font-bold").textContent())!.trim();
-      } else {
-        await p.getByPlaceholder("INVITE CODE").fill(code);
-        await p.getByRole("button", { name: "Join", exact: true }).click();
-        await expect(p.getByRole("button", { name: "Ready Up" })).toBeVisible();
-      }
+test("2v2 private: four players enter one Arena with isolated collaboration and chat", async ({ browser, request }) => {
+  const users = [0, 1, 2, 3].map(i => `private-${Date.now()}-${i}`);
+  const pages = await Promise.all(users.map(() => browser.newPage()));
+  const game = process.env.E2E_GAME_URL ?? "http://localhost:3220";
+  let code = "";
+  for (let i = 0; i < 4; i++) {
+    const page = pages[i]!;
+    await page.goto(`${WEB}/?live=1&user=${users[i]}`);
+    await page.getByRole("button", { name: "2v2", exact: true }).click();
+    if (i === 0) {
+      await page.getByRole("button", { name: "Create 2v2 Room" }).click();
+      code = (await page.locator("span.font-mono.text-base.font-bold").textContent())!.trim();
+    } else {
+      await page.getByPlaceholder("INVITE CODE").fill(code);
+      await page.getByRole("button", { name: "Join", exact: true }).click();
+      await expect(page.getByRole("button", { name: "Ready Up" })).toBeVisible();
     }
-    if (entry === "private") {
-      const overflow = await request.post(`${game}/lobby/rooms/join`, { headers: { "x-dev-user-id": `extra-${Date.now()}` }, data: { code } });
-      expect(overflow.status()).toBe(409);
-      for (const p of pages) {
-        await p.getByRole("button", { name: "Ready Up" }).click();
-        await expect(p.getByRole("button", { name: "Cancel Ready" })).toBeVisible();
-      }
-      await pages[0]!.getByRole("button", { name: "Start Match", exact: true }).click();
-    }
-    for (const p of pages) await expect(p.getByRole("heading", { name: "Code Arena", exact: true })).toBeVisible();
-    const matchId = new URL(pages[0]!.url()).searchParams.get("match");
-    expect(matchId).toBeTruthy();
-    for (const p of pages) expect(new URL(p.url()).searchParams.get("match")).toBe(matchId);
-    for (let i = 0; i < 4; i++) {
-      const res = await request.get(`${game}/matches/${matchId}/snapshot`, { headers: { "x-dev-user-id": users[i]! } });
-      const snap = await res.json();
-      expect(snap.roundPhase).toBe("MATCH_FOUND");
-    }
-    await pages[0]!.getByRole("button", { name: "Start round", exact: true }).click();
-    for (const p of pages) await expect(p.getByText(/Shared doc r1 · live/)).toBeVisible();
-    for (const [author, teammate, opponent, marker] of [[0, 1, 2, "alpha-only"], [2, 3, 0, "beta-only"]] as const) {
-      const editor = pages[author]!.getByLabel(/Solution editor/);
-      await editor.fill(`# ${marker}`);
-      await expect(pages[teammate]!.getByLabel(/Solution editor/)).toContainText(marker);
-      await expect(pages[opponent]!.getByLabel(/Solution editor/)).not.toContainText(marker);
-      await pages[author]!.getByRole("textbox", { name: "Team message" }).fill(marker);
-      await pages[author]!.getByRole("button", { name: "Send team message" }).click();
-      await expect(pages[teammate]!.getByLabel("Team chat").getByRole("listitem").filter({ hasText: marker })).toBeVisible();
-      await expect(pages[opponent]!.getByLabel("Team chat").getByRole("listitem").filter({ hasText: marker })).not.toBeVisible();
-    }
-    for (const p of pages.slice(0, 2)) {
-      await p.getByLabel("You are ready").click();
-      await expect(p.getByLabel("You are ready")).toBeChecked();
-    }
-    await expect(pages[0]!.getByRole("button", { name: "Submit Team Solution" })).toBeEnabled();
-    console.log(JSON.stringify({ entry, users, matchId, teams: [users.slice(0, 2), users.slice(2)] }));
-    await Promise.all(pages.map(p => p.close()));
+  }
+  const overflow = await request.post(`${game}/lobby/rooms/join`, {
+    headers: { "x-dev-user-id": `extra-${Date.now()}` }, data: { code },
   });
-}
+  expect(overflow.status()).toBe(409);
+  for (const page of pages) {
+    await page.getByRole("button", { name: "Ready Up" }).click();
+    await expect(page.getByRole("button", { name: "Cancel Ready" })).toBeVisible();
+  }
+  await pages[0]!.getByRole("button", { name: "Start Match", exact: true }).click();
+  for (const page of pages) await expect(page.getByRole("heading", { name: "Code Arena", exact: true })).toBeVisible();
+  const matchId = new URL(pages[0]!.url()).searchParams.get("match");
+  expect(matchId).toBeTruthy();
+  for (const page of pages) expect(new URL(page.url()).searchParams.get("match")).toBe(matchId);
+  for (let i = 0; i < 4; i++) {
+    const response = await request.get(`${game}/matches/${matchId}/snapshot`, { headers: { "x-dev-user-id": users[i]! } });
+    const snapshot = await response.json();
+    expect(snapshot.roundPhase).toBe("MATCH_FOUND");
+  }
+  await pages[0]!.getByRole("button", { name: "Start round", exact: true }).click();
+  for (const page of pages) await expect(page.getByText(/Shared doc r1 · live/)).toBeVisible();
+  for (const [author, teammate, opponent, marker] of [[0, 1, 2, "alpha-only"], [2, 3, 0, "beta-only"]] as const) {
+    const editor = pages[author]!.getByLabel(/Solution editor/);
+    await editor.fill(`# ${marker}`);
+    await expect(pages[teammate]!.getByLabel(/Solution editor/)).toContainText(marker);
+    await expect(pages[opponent]!.getByLabel(/Solution editor/)).not.toContainText(marker);
+    await pages[author]!.getByRole("textbox", { name: "Team message" }).fill(marker);
+    await pages[author]!.getByRole("button", { name: "Send team message" }).click();
+    await expect(pages[teammate]!.getByLabel("Team chat").getByRole("listitem").filter({ hasText: marker })).toBeVisible();
+    await expect(pages[opponent]!.getByLabel("Team chat").getByRole("listitem").filter({ hasText: marker })).not.toBeVisible();
+  }
+  for (const page of pages.slice(0, 2)) {
+    await page.getByLabel("You are ready").click();
+    await expect(page.getByLabel("You are ready")).toBeChecked();
+  }
+  await expect(pages[0]!.getByRole("button", { name: "Submit Team Solution" })).toBeEnabled();
+  console.log(JSON.stringify({ entry: "private", users, matchId, teams: [users.slice(0, 2), users.slice(2)] }));
+  await Promise.all(pages.map(page => page.close()));
+});
 
 test("private membership survives reload and offline match start", async ({ browser, request }) => {
   const game = process.env.E2E_GAME_URL ?? "http://localhost:3220";

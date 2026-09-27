@@ -44,6 +44,7 @@ export class GameService implements OnModuleInit, OnModuleDestroy {
   private readonly evaluationTelemetry = new InMemoryEvaluationTelemetry();
   private readonly matchSocketPresence: MatchSocketPresence;
   private graceTimer?: NodeJS.Timeout;
+  private deadlineTimer?: NodeJS.Timeout;
 
   constructor() {
     this.matchSocketPresence = new MatchSocketPresence({
@@ -131,7 +132,13 @@ export class GameService implements OnModuleInit, OnModuleDestroy {
     // pending-evaluation re-drive under original ids.
     const recovered = await this.engine.recover();
     console.log(`[game] boot recovery: ${recovered.matches} matches, ${recovered.retried} retried, ${recovered.failed} failed`);
-    // Explicit server-owned grace sweep (§11): never from socket callbacks.
+    // Match deadline closure has a short sweep interval so an expired Match
+    // reaches its saved terminal result without waiting for a player action.
+    this.deadlineTimer = setInterval(() => {
+      void this.engine.sweepExpiredMatches().catch(() => {});
+    }, 1000);
+    this.deadlineTimer.unref();
+    // Reconnect grace and retained queue matchmaking use their slower cadence.
     this.graceTimer = setInterval(() => {
       void this.engine.sweepGrace().catch(() => {});
       for (const mode of ["1v1", "2v2"] as const) {
@@ -143,6 +150,7 @@ export class GameService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleDestroy(): Promise<void> {
     if (this.graceTimer) clearInterval(this.graceTimer);
+    if (this.deadlineTimer) clearInterval(this.deadlineTimer);
     await this.stores?.close();
   }
 
