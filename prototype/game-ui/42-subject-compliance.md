@@ -1,6 +1,6 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-27 (Match deadline, Lobby, event-convergence, and source-linked course review; module rows intentionally unchanged — team sign-off required)
+Last reviewed: 2026-09-28 (guided learning-course design; prior Match deadline, Lobby, event-convergence, and source-linked course reviews retained; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
 Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus the source-linked learning-course review for Lessons 1–14. Lesson 11's current chat sources were reviewed and required no refresh. Course content and focused tests do not change a subject-module claim.
@@ -14,6 +14,29 @@ Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player
 ## Maintenance rule
 
 `AGENTS.md` requires every project artifact and change to adhere to `ft_transcendence.pdf`, with conflicts resolved in favor of the PDF. This matrix must be reviewed after every project change and updated in the same change whenever evidence, scope, module claims, assumptions, or compliance status changes. A checked prototype behavior is design evidence only; it is not implementation evidence for a production module.
+
+## 2026-09-28 guided learning-course design review
+
+The [guided build-course design](../../docs/superpowers/specs/2026-09-28-guided-code-arena-build-course-design.md)
+records the approved C-to-TypeScript teaching direction, visual lesson format,
+dusk theme, practice-workspace phase, and eventual transition into the team's
+repository. The written specification is awaiting learner review; the complete
+guided course and target implementation are not delivered by this change.
+
+Reviewed the PDF's mandatory application, concurrency, validation, identity,
+HTTPS, and accessibility requirements (printed pp.8–9), game/remote-player/
+multiplayer and dependent-module requirements (pp.16–17), and README obligations
+(pp.27–29). The course distinguishes the reference game, simplified exercises,
+practice checks, and target-repository evidence. It preserves invitation-first
+Lobby scope, the Match-wide deadline, explicit Judge-provider selection, and
+Game-owned process-local team-chat history. Team authentication, deployment,
+policies, and final integration remain explicit external dependencies.
+
+The read-only catalog check matched source snapshot `4edc506dd9158d21` with
+201 in-scope files, 381 current lesson links, and no uncovered, stale, or
+unclassified files. This is course-reference coverage only. No game test run,
+new runtime capability, completed subject module, or team sign-off is claimed;
+module rows remain unchanged.
 
 ## 2026-09-25 architecture-slice review
 
