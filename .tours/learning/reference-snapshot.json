@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-09-27T20:51:48.490Z",
-  "gitHead": "44bde4f5e64871959937fa24e938f3c571bac58b",
-  "snapshotId": "4edc506dd9158d21",
+  "recordedAt": "2026-09-28T12:18:03.084Z",
+  "gitHead": "36f1b9c5812f7113e96c9a52db2df02f8dcc2932",
+  "snapshotId": "f10f2ef7328398f8",
   "files": [
     {
       "path": ".env.example",
@@ -258,11 +258,11 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "2b5d1efb6e34b5d6b8091cbcefed6a38da4e9f165a5d3e8c0c64be9598e34950"
+      "sha256": "9a73e2f313bbea1dfd8510897dff91e4f7fd9b6d9ec899d36acab495bc9798d7"
     },
     {
       "path": "package.json",
-      "sha256": "d27a695cdae23bef3bea737164932456d391c6b198f10d9b6a0bd87e2fc52191"
+      "sha256": "b091a5849227cf1253b52db8ef8597357369941ae91373d9aa8c9f04cd1a9ffd"
     },
     {
       "path": "packages/arena-game/package.json",
@@ -810,18 +810,6 @@
     }
   ],
   "lessonReviews": [
-    "0001-submit-journey",
-    "0002-reveal-cutoff",
-    "0003-rounds-and-final-score",
-    "0004-lobby-to-match",
-    "0005-problem-editor-run",
-    "0006-evaluation-retries",
-    "0007-judge-boundary",
-    "0008-persistence-recovery",
-    "0009-live-connection",
-    "0010-team-collaboration",
-    "0012-arena-screen",
-    "0013-running-the-project",
-    "0014-rewrite-with-tests"
+    "0013-running-the-project"
   ]
 }

@@ -47,6 +47,22 @@ course home/source map outputs stale. That check is not reported as passing.
 No baseline was accepted or generated course page changed during planning; the
 existing reviewed-evidence refresh procedure remains required during execution.
 
+## Guided course implementation — shared interface
+
+The isolated guided-build-course checkout now implements the validated 68-lesson
+route, a static dusk/light lesson layout, workspace profile validation, and
+workspace-separated progress data. Only the authored orientation is currently
+available; later lessons remain explicitly planned. These are learning-platform
+capabilities, not completed game modules or target-repository checks.
+
+Reviewed the mandatory accessibility, validation, identity, and game requirements
+against the PDF. The course executes no player programs and adds no production
+identity or deployment claim. Root manifest changes declare the already-installed
+esbuild version as a direct development dependency for offline course bundling;
+Lesson 13's root workspace/command explanation remains accurate without prose
+changes. Package-lock and compliance-document checksum changes are explicitly
+reviewed documentation/tooling evidence. Existing module rows remain unchanged.
+
 ## 2026-09-25 architecture-slice review
 
 The following production seams were reviewed against the PDF requirements and

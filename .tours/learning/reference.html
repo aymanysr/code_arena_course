@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A guided route through the current Code Arena game, its source, and its tests.">
+  <title>Learn Code Arena</title>
+  <style>
+@layer reset, base, layout, components, utilities;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  body,
+  h1,
+  h2,
+  h3,
+  p,
+  ul,
+  ol,
+  figure {
+    margin: 0;
+  }
+}
+
+@layer base {
+  :root {
+    color-scheme: light dark;
+    --bg: #f2f1e9;
+    --surface: #fffdf7;
+    --surface-soft: #e9eee8;
+    --border: #cdd6d1;
+    --border-strong: #9eafa7;
+    --text: #172623;
+    --text-dim: #465a53;
+    --teal: #086a60;
+    --teal-soft: #d9eee7;
+    --amber: #8a5a0a;
+    --amber-soft: #f6e9c9;
+    --red: #922e27;
+    --red-soft: #f8e1dc;
+    --shadow: 0 1rem 2.5rem rgb(30 50 44 / 8%);
+    --font-body: "DM Sans", "Avenir Next", system-ui, sans-serif;
+    --font-code: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+    font-family: var(--font-body);
+    font-size: 100%;
+    line-height: 1.55;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  body {
+    min-width: 20rem;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  a {
+    color: var(--teal);
+    text-decoration-thickness: 0.08em;
+    text-underline-offset: 0.16em;
+  }
+
+  a:hover {
+    color: var(--amber);
+  }
+
+  :where(a, button, input, select):focus-visible {
+    outline: 3px solid var(--amber);
+    outline-offset: 3px;
+  }
+
+  code,
+  kbd,
+  .mono {
+    font-family: var(--font-code);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+
+  h1,
+  h2,
+  h3 {
+    line-height: 1.12;
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111b1a;
+      --surface: #1a2926;
+      --surface-soft: #243733;
+      --border: #3c554e;
+      --border-strong: #69857a;
+      --text: #e7f0eb;
+      --text-dim: #bccbc3;
+      --teal: #73d1ba;
+      --teal-soft: #1e433a;
+      --amber: #f0c36e;
+      --amber-soft: #41351e;
+      --red: #ffaaa0;
+      --red-soft: #482522;
+      --shadow: 0 1rem 2.5rem rgb(0 0 0 / 24%);
+    }
+  }
+}
+
+@layer layout {
+  .page {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding-block: clamp(1.5rem, 4vw, 4rem) 5rem;
+  }
+
+  .course-header {
+    width: min(100% - 2rem, 72rem);
+    margin-inline: auto;
+    padding-block: 0.5rem;
+  }
+
+  .course-header nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  .course-header a {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding-inline: 0.7rem;
+    border-radius: 0.45rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .course-header a[aria-current="page"] {
+    background: var(--teal-soft);
+    color: var(--text);
+  }
+
+  .hero {
+    max-width: 62ch;
+    padding: 0;
+  }
+
+  .course-home-intro {
+    max-width: 62ch;
+  }
+
+  .course-home h1 {
+    max-width: 18ch;
+    margin-block: 0.65rem 0.8rem;
+    font-size: clamp(2.2rem, 6vw, 4.25rem);
+    letter-spacing: -0.045em;
+  }
+
+  .course-home-lede {
+    max-width: 58ch;
+    color: var(--text-dim);
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+  }
+
+  .course-start {
+    margin-block-start: 1.2rem;
+  }
+
+  .course-home-snapshot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: 0.8rem;
+  }
+
+  .course-home-note {
+    margin-block-start: 0.35rem;
+  }
+
+  .course-batches {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    margin-block-start: clamp(2rem, 5vw, 3.5rem);
+  }
+
+  .section {
+    margin-block-start: clamp(1.5rem, 4vw, 2.5rem);
+  }
+
+  .page#lesson {
+    width: min(100% - 2rem, 54rem);
+  }
+
+  .page#lesson > .section {
+    max-width: 68ch;
+    margin-block-start: 2.25rem;
+    padding-block-start: 1.5rem;
+    border-block-start: 1px solid var(--border);
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-block-start: 0.75rem;
+  }
+
+  .split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .flow-list {
+    display: grid;
+    gap: 0.8rem;
+    list-style: none;
+    padding: 0;
+  }
+
+  .table-scroll {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+    overscroll-behavior-inline: contain;
+  }
+
+  @media (max-width: 54rem) {
+    .metrics {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .split {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .course-batches {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .page {
+      width: min(100% - 1rem, 72rem);
+    }
+
+    .course-header {
+      width: min(100% - 1rem, 72rem);
+    }
+
+    .page#lesson {
+      width: min(100% - 1rem, 54rem);
+    }
+
+    .metrics {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+@layer components {
+  .skip-link {
+    position: fixed;
+    inset-block-start: 0.5rem;
+    inset-inline-start: 0.5rem;
+    z-index: 5;
+    transform: translateY(-160%);
+    padding: 0.7rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--text);
+    color: var(--surface);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
+  .eyebrow,
+  .kicker {
+    color: var(--teal);
+    font-family: var(--font-code);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    max-width: 20ch;
+    margin-block: 0.65rem 0.8rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .hero-copy {
+    max-width: 67ch;
+    color: var(--text-dim);
+    font-size: clamp(1rem, 1.3vw, 1.2rem);
+  }
+
+  .nav-row,
+  .button-row,
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 0.75rem;
+  }
+
+  .nav-row {
+    margin-block-start: 1rem;
+  }
+
+  .primary-button {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.65rem 0.9rem;
+    border: 1px solid var(--teal);
+    border-radius: 0.55rem;
+    background: var(--teal);
+    color: var(--surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .primary-button:hover {
+    background: var(--text);
+    color: var(--surface);
+  }
+
+  .course-batch {
+    min-width: 0;
+    padding: clamp(1rem, 2.8vw, 1.4rem);
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+  }
+
+  .course-batch h2 {
+    margin-block-end: 0.5rem;
+    font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+  }
+
+  .course-batch-description {
+    max-width: 52ch;
+    margin-block-end: 1rem;
+    color: var(--text-dim);
+  }
+
+  .course-lesson-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .course-lesson-link {
+    display: grid;
+    min-block-size: 3.25rem;
+    grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 0.55rem;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .course-lesson-link:hover {
+    border-color: var(--border-strong);
+    background: var(--surface-soft);
+    color: var(--text);
+  }
+
+  .course-lesson-number {
+    color: var(--teal);
+    font-family: var(--font-code);
+    font-variant-numeric: tabular-nums;
+    font-weight: 750;
+  }
+
+  .course-lesson-copy {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    font-weight: 650;
+  }
+
+  .course-lesson-arrow {
+    color: var(--amber);
+    font-size: 1.2rem;
+    text-align: end;
+  }
+
+  .course-lesson-activity {
+    margin-inline-start: 3.15rem;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+  }
+
+  .course-storage-unavailable {
+    max-width: 68ch;
+    margin-block-start: 1rem;
+    padding: 0.7rem 0.9rem;
+    border-inline-start: 3px solid var(--amber);
+    background: var(--amber-soft);
+    color: var(--text);
+  }
+
+  .focus-panel {
+    border-block: 1px solid var(--border);
+  }
+
+  .focus-panel > summary {
+    display: flex;
+    min-block-size: 3.25rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.65rem;
+    color: var(--text);
+    font-size: 1rem;
+  }
+
+  .focus-panel > summary::marker {
+    color: var(--teal);
+  }
+
+  .focus-panel-content {
+    padding-block: 0.5rem 1rem;
+  }
+
+  .card {
+    min-width: 0;
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.85rem;
+    background: var(--surface-soft);
+  }
+
+  .metric {
+    display: grid;
+    gap: 0.2rem;
+    align-content: start;
+    min-height: 5rem;
+    padding-block: 0.5rem;
+    border-block-end: 1px solid var(--border);
+  }
+
+  .metric strong {
+    font-family: var(--font-code);
+    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .metric span {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+
+  .section h2 {
+    margin-block-end: 0.7rem;
+    font-size: clamp(1.5rem, 3.4vw, 2.2rem);
+    letter-spacing: -0.035em;
+  }
+
+  .section-intro {
+    max-width: 75ch;
+    margin-block-end: 1.1rem;
+    color: var(--text-dim);
+  }
+
+  .page#lesson > .hero {
+    max-width: 68ch;
+  }
+
+  .page#lesson .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page#lesson .source-step {
+    grid-template-columns: 2.2rem minmax(0, 1fr);
+    gap: 0.8rem;
+    padding: 1.1rem 0;
+    border: 0;
+    border-block-end: 1px solid var(--border);
+    border-radius: 0;
+    background: transparent;
+  }
+
+  .page#lesson .step-number {
+    width: auto;
+    aspect-ratio: auto;
+    justify-content: start;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--teal);
+  }
+
+  .page#lesson .concept-note {
+    border: 0;
+    border-inline-start: 3px solid var(--amber);
+    border-radius: 0;
+    background: var(--amber-soft);
+  }
+
+  .page#lesson .lesson-navigation {
+    max-width: 68ch;
+    justify-content: space-between;
+    margin-block-start: 2rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--border);
+  }
+
+  .page#lesson .lesson-navigation a {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.45rem;
+  }
+
+  .page#lesson .lesson-navigation [data-primary-course-nav] {
+    padding: 0.55rem 0.9rem;
+    border-radius: 0.55rem;
+    background: var(--teal);
+    color: var(--surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .page#lesson .lesson-navigation [data-primary-course-nav]:hover {
+    background: var(--text);
+  }
+
+  .page#lesson > .footer-note {
+    max-width: 68ch;
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 1.8rem;
+    padding: 0.2rem 0.55rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .status-current {
+    color: var(--teal);
+    background: var(--teal-soft);
+  }
+
+  .status-stale {
+    color: var(--red);
+    background: var(--red-soft);
+  }
+
+  .status-open {
+    color: var(--amber);
+    background: var(--amber-soft);
+  }
+
+  .filters {
+    margin-block: 1.1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+  }
+
+  label {
+    display: grid;
+    gap: 0.3rem;
+    min-width: min(100%, 14rem);
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-weight: 650;
+  }
+
+  input,
+  select,
+  button {
+    min-block-size: 2.75rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.55rem;
+    font: inherit;
+  }
+
+  input,
+  select {
+    min-width: 14rem;
+    padding-inline: 0.75rem;
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  button {
+    padding: 0.55rem 0.9rem;
+    background: var(--teal);
+    color: var(--surface);
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  button:hover {
+    filter: brightness(1.08);
+  }
+
+  button[aria-pressed="true"] {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+
+  .secondary-button {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .feedback {
+    min-height: 3rem;
+    margin-block: 0.9rem;
+    padding: 0.8rem 1rem;
+    border-inline-start: 4px solid var(--border-strong);
+    border-radius: 0.35rem;
+    background: var(--surface-soft);
+  }
+
+  .feedback[data-kind="correct"] {
+    border-color: var(--teal);
+  }
+
+  .feedback[data-kind="hint"] {
+    border-color: var(--amber);
+  }
+
+  .data-table {
+    width: 100%;
+    min-width: 66rem;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+  }
+
+  .data-table caption {
+    padding: 0.9rem 1rem;
+    color: var(--text-dim);
+    text-align: start;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.8rem 0.9rem;
+    border-block-end: 1px solid var(--border);
+    text-align: start;
+    vertical-align: top;
+  }
+
+  .data-table th {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 1;
+    background: var(--surface-soft);
+    color: var(--text-dim);
+    font-family: var(--font-code);
+    font-size: 0.76rem;
+  }
+
+  .data-table tr[hidden] {
+    display: none;
+  }
+
+  .file-link {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--teal);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+    text-align: start;
+  }
+
+  .file-link:hover {
+    background: transparent;
+    color: var(--amber);
+    filter: none;
+    text-decoration: underline;
+  }
+
+  .file-link code {
+    overflow-wrap: anywhere;
+  }
+
+  .reference-link {
+    min-block-size: 2.75rem;
+    padding: 0.25rem 0;
+    border: 0;
+    background: transparent;
+    color: var(--teal);
+    font-size: 0.86rem;
+    font-weight: 650;
+    text-align: start;
+  }
+
+  .reference-link:hover {
+    background: transparent;
+    color: var(--amber);
+    filter: none;
+    text-decoration: underline;
+  }
+
+  .source-dialog {
+    position: fixed;
+    inset-block-start: 1rem;
+    inset-inline-start: auto;
+    inset-inline-end: 1rem;
+    width: min(34rem, calc(100% - 2rem));
+    max-width: none;
+    max-height: 72vh;
+    max-height: 72dvh;
+    margin: 0;
+    padding: clamp(0.85rem, 2vw, 1.5rem);
+    border: 1px solid var(--border-strong);
+    border-radius: 1rem;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .source-dialog::backdrop {
+    background: rgb(8 14 13 / 8%);
+  }
+
+  .source-dialog-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: start;
+    gap: 1rem;
+    padding-block-end: 0.8rem;
+    border-block-end: 1px solid var(--border);
+  }
+
+  .source-dialog-heading {
+    min-width: 0;
+  }
+
+  .source-dialog h2 {
+    margin-block: 0.25rem;
+    font-size: clamp(1.15rem, 2.5vw, 1.65rem);
+    overflow-wrap: anywhere;
+  }
+
+  .source-dialog-path code {
+    overflow-wrap: anywhere;
+  }
+
+  .source-dialog-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .source-dialog-actions form {
+    margin: 0;
+  }
+
+  .source-editor-link {
+    display: inline-flex;
+    min-block-size: 3rem;
+    align-items: center;
+    padding: 0.55rem 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 0.55rem;
+    background: var(--teal);
+    color: var(--surface);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .source-editor-link:hover {
+    color: var(--surface);
+  }
+
+  .source-dialog-help {
+    margin-block-start: 0.75rem;
+    color: var(--text-dim);
+    font-size: 0.86rem;
+  }
+
+  .source-code-figure {
+    min-width: 0;
+    margin-block-start: 0.8rem;
+  }
+
+  .source-code-figure figcaption {
+    margin-block-end: 0.4rem;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .source-code {
+    max-block-size: min(48vh, 36rem);
+    max-block-size: min(48dvh, 36rem);
+    min-width: 0;
+    max-width: 100%;
+    overflow: auto;
+    margin: 0;
+    padding-block: 0.7rem;
+    border: 1px solid #496159;
+    border-radius: 0.65rem;
+    background: #111b1a;
+    color: #e7f0eb;
+    font-family: var(--font-code);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    overscroll-behavior: contain;
+  }
+
+  .source-code code {
+    display: block;
+    min-width: max-content;
+    font: inherit;
+    overflow-wrap: normal;
+  }
+
+  .source-line {
+    display: grid;
+    min-width: 100%;
+    grid-template-columns: 3.5rem max-content;
+  }
+
+  .source-line-number {
+    position: sticky;
+    inset-inline-start: 0;
+    padding-inline: 0.55rem 0.7rem;
+    border-inline-end: 1px solid #496159;
+    background: #111b1a;
+    color: #b9cbc2;
+    text-align: end;
+    user-select: none;
+    white-space: pre;
+  }
+
+  .source-line-text {
+    padding-inline: 0.8rem;
+    white-space: pre;
+  }
+
+  .source-line-text .hljs-comment,
+  .source-line-text .hljs-quote {
+    color: #8b9aa8;
+    font-style: italic;
+  }
+
+  .source-line-text .hljs-keyword,
+  .source-line-text .hljs-selector-tag,
+  .source-line-text .hljs-doctag {
+    color: #c792ea;
+  }
+
+  .source-line-text .hljs-string,
+  .source-line-text .hljs-regexp,
+  .source-line-text .hljs-addition {
+    color: #c3e88d;
+  }
+
+  .source-line-text .hljs-number,
+  .source-line-text .hljs-literal,
+  .source-line-text .hljs-symbol,
+  .source-line-text .hljs-bullet {
+    color: #f78c6c;
+  }
+
+  .source-line-text .hljs-title,
+  .source-line-text .hljs-section,
+  .source-line-text .hljs-selector-id {
+    color: #82aaff;
+  }
+
+  .source-line-text .hljs-type,
+  .source-line-text .hljs-built_in,
+  .source-line-text .hljs-class .hljs-title {
+    color: #ffcb6b;
+  }
+
+  .source-line-text .hljs-attr,
+  .source-line-text .hljs-attribute,
+  .source-line-text .hljs-variable,
+  .source-line-text .hljs-property {
+    color: #f07178;
+  }
+
+  .source-line-text .hljs-meta,
+  .source-line-text .hljs-punctuation,
+  .source-line-text .hljs-operator {
+    color: #89ddff;
+  }
+
+  .source-line-text .hljs-deletion {
+    color: #f07178;
+  }
+
+  .source-line.is-reference-line {
+    background: #244238;
+  }
+
+  .source-line.is-reference-line .source-line-number {
+    background: #244238;
+    color: #f0c36e;
+  }
+
+  @media (max-width: 34rem) {
+    .source-dialog {
+      inset-block-start: 0.5rem;
+      inset-inline-end: 0.5rem;
+      width: calc(100% - 1rem);
+      max-height: calc(100vh - 1rem);
+      max-height: calc(100dvh - 1rem);
+      padding: 0.75rem;
+    }
+
+    .source-dialog-header {
+      display: grid;
+    }
+
+    .source-dialog-actions {
+      width: 100%;
+    }
+
+    .source-code {
+      max-block-size: 42vh;
+      max-block-size: 42dvh;
+      font-size: 0.74rem;
+    }
+  }
+
+  .data-table small,
+  .quiet {
+    display: block;
+    margin-block-start: 0.25rem;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+  }
+
+  details {
+    min-width: 12rem;
+  }
+
+  summary {
+    min-block-size: 2rem;
+    cursor: pointer;
+    font-weight: 650;
+  }
+
+  details ul {
+    max-height: 18rem;
+    overflow: auto;
+    padding-inline-start: 1.3rem;
+  }
+
+  .source-step {
+    display: grid;
+    grid-template-columns: 3.2rem minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.9rem;
+    background: var(--surface);
+  }
+
+  .step-number {
+    display: grid;
+    place-items: center;
+    width: 2.8rem;
+    aspect-ratio: 1;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    background: var(--teal-soft);
+    color: var(--teal);
+    font-family: var(--font-code);
+    font-weight: 800;
+  }
+
+  .source-step h3 {
+    margin-block: 0.1rem 0.35rem;
+    font-size: 1.1rem;
+  }
+
+  .source-step p {
+    color: var(--text-dim);
+  }
+
+  .source-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    margin-block-start: 0.6rem;
+  }
+
+  .concept-note {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-inline-start: 5px solid var(--amber);
+    border-radius: 0.8rem;
+    background: var(--amber-soft);
+  }
+
+  .concept-note h3 {
+    margin-block-end: 0.35rem;
+  }
+
+  .quiz-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-block-start: 1rem;
+  }
+
+  .stage-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    margin-block: 1rem;
+  }
+
+  .stage-pill {
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+  }
+
+  .stage-pill[aria-current="step"] {
+    border-color: var(--teal);
+    background: var(--teal-soft);
+    color: var(--text);
+    font-weight: 750;
+  }
+
+  .footer-note {
+    margin-block-start: 2rem;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.86rem;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
+}
+
+@layer utilities {
+  .mt-1 {
+    margin-block-start: 1rem;
+  }
+
+  .mt-2 {
+    margin-block-start: 2rem;
+  }
+
+  .flow-arrow {
+    color: var(--amber);
+    font-family: var(--font-code);
+    font-weight: 800;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .status,
+  .card,
+  .source-step,
+  .concept-note,
+  .source-dialog,
+  .source-code,
+  input,
+  select,
+  button {
+    border: 1px solid CanvasText;
+  }
+
+  .source-line.is-reference-line,
+  .source-line.is-reference-line .source-line-number {
+    background: Highlight;
+    color: HighlightText;
+  }
+}
+
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#course">Skip to the course</a>
+  <header class="course-header">
+    <nav aria-label="Course navigation">
+      <a aria-current="page" href="index.html">Learn</a>
+      <a href="source-map.html">Explore code</a>
+    </nav>
+  </header>
+  <main class="page course-home" id="course" tabindex="-1">
+    <div class="course-home-intro">
+      <p class="eyebrow">A guided route through this exact codebase</p>
+      <h1>Understand the game, one behavior at a time.</h1>
+      <p class="course-home-lede">Start with one player action. Follow the code that owns its rule, then inspect the test that supports the explanation.</p>
+      <p class="course-start"><a class="primary-button" data-course-start href="lessons/0001-follow-one-submit.html">Start Lesson 1 <span aria-hidden="true">→</span></a></p>
+      <p class="quiet course-home-snapshot" data-course-snapshot><span class="status status-current">Snapshot internally consistent</span> <span>Source snapshot <code>f10f2ef7328398f8</code></span></p>
+      <p class="quiet course-home-note">A self-check can guide study; it is not proof of mastery.</p>
+    </div>
+    <div class="course-batches" id="course-batches" aria-label="Learning path">
+      <section class="course-batch" aria-labelledby="course-batch-1-title">
+      <h2 id="course-batch-1-title">Follow one Match</h2>
+      <p class="course-batch-description">Start from player actions and trace what the game decides.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0001-submit-journey" href="lessons/0001-follow-one-submit.html"><span class="course-lesson-number" aria-hidden="true">01</span><span class="course-lesson-copy">Lesson 1: A click is a request. The Match engine decides what it means.</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0001-submit-journey">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0002-reveal-cutoff" href="lessons/0002-reveal-cutoff.html"><span class="course-lesson-number" aria-hidden="true">02</span><span class="course-lesson-copy">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0002-reveal-cutoff">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0003-rounds-and-final-score" href="lessons/0003-rounds-and-final-score.html"><span class="course-lesson-number" aria-hidden="true">03</span><span class="course-lesson-copy">Lesson 3: What resets each Round—and what decides the Match?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0003-rounds-and-final-score">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0004-lobby-to-match" href="lessons/0004-lobby-to-match.html"><span class="course-lesson-number" aria-hidden="true">04</span><span class="course-lesson-copy">Lesson 4: The Lobby gathers players; Game creates the Match</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0004-lobby-to-match">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0005-problem-editor-run" href="lessons/0005-problem-editor-run.html"><span class="course-lesson-number" aria-hidden="true">05</span><span class="course-lesson-copy">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0005-problem-editor-run">Not started</span></p></li></ol>
+    </section>
+<section class="course-batch" aria-labelledby="course-batch-2-title">
+      <h2 id="course-batch-2-title">Understand the boundaries</h2>
+      <p class="course-batch-description">See which layer owns each responsibility and where the evidence stops.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0006-evaluation-retries" href="lessons/0006-evaluation-retries.html"><span class="course-lesson-number" aria-hidden="true">06</span><span class="course-lesson-copy">Lesson 6: A retry is the same Evaluation only when its identity matches</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0006-evaluation-retries">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0007-judge-boundary" href="lessons/0007-judge-boundary.html"><span class="course-lesson-number" aria-hidden="true">07</span><span class="course-lesson-copy">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0007-judge-boundary">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0008-persistence-recovery" href="lessons/0008-persistence-recovery.html"><span class="course-lesson-number" aria-hidden="true">08</span><span class="course-lesson-copy">Lesson 8: What survives when the Game service restarts?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0008-persistence-recovery">Not started</span></p></li></ol>
+    </section>
+<section class="course-batch" aria-labelledby="course-batch-3-title">
+      <h2 id="course-batch-3-title">Follow live multiplayer behavior</h2>
+      <p class="course-batch-description">Trace reconnect, shared work, chat, and the Arena screen.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0009-live-connection" href="lessons/0009-live-connection.html"><span class="course-lesson-number" aria-hidden="true">09</span><span class="course-lesson-copy">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0009-live-connection">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0010-team-collaboration" href="lessons/0010-team-collaboration.html"><span class="course-lesson-number" aria-hidden="true">10</span><span class="course-lesson-copy">Lesson 10: An edit changes the revision—and resets both Ready approvals</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0010-team-collaboration">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0011-team-chat" href="lessons/0011-team-chat.html"><span class="course-lesson-number" aria-hidden="true">11</span><span class="course-lesson-copy">Lesson 11: Team chat is a side channel—not editor state or Match state</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0011-team-chat">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0012-arena-screen" href="lessons/0012-arena-screen.html"><span class="course-lesson-number" aria-hidden="true">12</span><span class="course-lesson-copy">Lesson 12: The Arena screen is a view of Match state—not another game engine</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0012-arena-screen">Not started</span></p></li></ol>
+    </section>
+<section class="course-batch" aria-labelledby="course-batch-4-title">
+      <h2 id="course-batch-4-title">Operate and rebuild the reference</h2>
+      <p class="course-batch-description">Run the project, read its evidence, and define parity gates for a rewrite.</p>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0013-running-the-project" href="lessons/0013-running-the-project.html"><span class="course-lesson-number" aria-hidden="true">13</span><span class="course-lesson-copy">Lesson 13: The local play script and Compose stack are not the same thing</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0013-running-the-project">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0014-rewrite-with-tests" href="lessons/0014-rewrite-with-tests.html"><span class="course-lesson-number" aria-hidden="true">14</span><span class="course-lesson-copy">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0014-rewrite-with-tests">Not started</span></p></li></ol>
+    </section>
+    </div>
+  </main>
+  <p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>
+<script type="module">
+export const COURSE_ACTIVITY_KEY = "code-arena-learning:activity:v1";
+
+const ACTIVITY_STATUSES = new Set(["started", "self-check-recorded"]);
+
+const emptyActivity = () => ({ version: 1, lastLessonId: null, lessons: {} });
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function readCourseActivity(storage, validLessonIds = []) {
+  if (!storage || typeof storage.getItem !== "function") return emptyActivity();
+
+  let raw;
+  try {
+    raw = storage.getItem(COURSE_ACTIVITY_KEY);
+  } catch {
+    return emptyActivity();
+  }
+  if (raw === null || raw === undefined || raw === "") return emptyActivity();
+
+  try {
+    const parsed = JSON.parse(raw);
+    const validIds = new Set(validLessonIds);
+    if (!isRecord(parsed) || parsed.version !== 1 || !isRecord(parsed.lessons)) return emptyActivity();
+    if (parsed.lastLessonId !== null && (typeof parsed.lastLessonId !== "string" || !validIds.has(parsed.lastLessonId))) {
+      return emptyActivity();
+    }
+
+    const lessons = {};
+    for (const [lessonId, status] of Object.entries(parsed.lessons)) {
+      if (!validIds.has(lessonId) || !ACTIVITY_STATUSES.has(status)) return emptyActivity();
+      lessons[lessonId] = status;
+    }
+    if (parsed.lastLessonId !== null && !Object.hasOwn(lessons, parsed.lastLessonId)) return emptyActivity();
+    return { version: 1, lastLessonId: parsed.lastLessonId, lessons };
+  } catch {
+    return emptyActivity();
+  }
+}
+
+export function writeCourseActivity(storage, activity) {
+  if (!storage || typeof storage.setItem !== "function") return false;
+  try {
+    storage.setItem(COURSE_ACTIVITY_KEY, JSON.stringify(activity));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function markLessonActivity(activity, lessonId, status) {
+  if (typeof lessonId !== "string" || lessonId.length === 0 || !ACTIVITY_STATUSES.has(status)) return activity;
+  const lessons = { ...(isRecord(activity?.lessons) ? activity.lessons : {}) };
+  const prior = lessons[lessonId];
+  lessons[lessonId] = prior === "self-check-recorded" && status === "started"
+    ? prior
+    : status;
+  return { version: 1, lastLessonId: lessonId, lessons };
+}
+
+export function resolveContinueLesson(activity, orderedLessons = []) {
+  const ordered = [...orderedLessons].sort((left, right) => left.order - right.order);
+  const lastLesson = ordered.find((lesson) => lesson.id === activity?.lastLessonId);
+  if (lastLesson && ACTIVITY_STATUSES.has(activity?.lessons?.[lastLesson.id])) return lastLesson;
+  return ordered[0] ?? null;
+}
+
+function activityLabel(status) {
+  if (status === "self-check-recorded") return "Self-check recorded";
+  if (status === "started") return "Started";
+  return "Not started";
+}
+
+function encodePath(output) {
+  return String(output).split("/").map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+export function installCourseActivity(root, storage, orderedLessons = []) {
+  const validLessons = [...orderedLessons]
+    .filter((lesson) => typeof lesson?.id === "string" && Number.isSafeInteger(lesson.order))
+    .sort((left, right) => left.order - right.order);
+  const validIds = validLessons.map(({ id }) => id);
+  const query = (selector) => root?.querySelector?.(selector) ?? null;
+  const queryAll = (selector) => [...(root?.querySelectorAll?.(selector) ?? [])];
+  const unavailableTarget = query("[data-course-storage-unavailable]");
+
+  const showUnavailable = () => {
+    if (!unavailableTarget) return;
+    unavailableTarget.hidden = false;
+    unavailableTarget.textContent = "This browser blocked local progress storage. The course still works; lesson links, predictions, and source previews remain available.";
+  };
+
+  let storageAvailable = Boolean(storage && typeof storage.getItem === "function" && typeof storage.setItem === "function");
+  if (storageAvailable) {
+    try {
+      storage.getItem(COURSE_ACTIVITY_KEY);
+    } catch {
+      storageAvailable = false;
+    }
+  }
+  if (!storageAvailable) showUnavailable();
+
+  let activity = readCourseActivity(storage, validIds);
+  const save = (nextActivity) => {
+    activity = nextActivity;
+    if (!writeCourseActivity(storage, activity)) showUnavailable();
+  };
+
+  const startLink = query("[data-course-start]");
+  if (startLink) {
+    const continueLesson = resolveContinueLesson(activity, validLessons);
+    if (continueLesson && activity.lastLessonId === continueLesson.id && activity.lessons[continueLesson.id]) {
+      startLink.href = encodePath(continueLesson.output);
+      startLink.textContent = `Continue Lesson ${continueLesson.order}`;
+    }
+    for (const statusTarget of queryAll("[data-course-activity-status]")) {
+      const status = activity.lessons[statusTarget.dataset.courseActivityStatus];
+      statusTarget.textContent = activityLabel(status);
+    }
+  }
+
+  const bodyLessonId = root?.body?.dataset?.courseLesson ?? query("[data-course-lesson]")?.dataset?.courseLesson;
+  if (bodyLessonId && validIds.includes(bodyLessonId)) {
+    save(markLessonActivity(activity, bodyLessonId, "started"));
+    for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+      statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+    }
+    for (const selfCheck of queryAll("[data-course-self-check]")) {
+      selfCheck.addEventListener("click", () => {
+        save(markLessonActivity(activity, bodyLessonId, "self-check-recorded"));
+        for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+          statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+        }
+      });
+    }
+  }
+
+  return { activity, storageAvailable };
+}
+const courseLessons = [{"id":"0001-submit-journey","order":1,"output":"lessons/0001-follow-one-submit.html"},{"id":"0002-reveal-cutoff","order":2,"output":"lessons/0002-reveal-cutoff.html"},{"id":"0003-rounds-and-final-score","order":3,"output":"lessons/0003-rounds-and-final-score.html"},{"id":"0004-lobby-to-match","order":4,"output":"lessons/0004-lobby-to-match.html"},{"id":"0005-problem-editor-run","order":5,"output":"lessons/0005-problem-editor-run.html"},{"id":"0006-evaluation-retries","order":6,"output":"lessons/0006-evaluation-retries.html"},{"id":"0007-judge-boundary","order":7,"output":"lessons/0007-judge-boundary.html"},{"id":"0008-persistence-recovery","order":8,"output":"lessons/0008-persistence-recovery.html"},{"id":"0009-live-connection","order":9,"output":"lessons/0009-live-connection.html"},{"id":"0010-team-collaboration","order":10,"output":"lessons/0010-team-collaboration.html"},{"id":"0011-team-chat","order":11,"output":"lessons/0011-team-chat.html"},{"id":"0012-arena-screen","order":12,"output":"lessons/0012-arena-screen.html"},{"id":"0013-running-the-project","order":13,"output":"lessons/0013-running-the-project.html"},{"id":"0014-rewrite-with-tests","order":14,"output":"lessons/0014-rewrite-with-tests.html"}];
+let courseStorage = null;
+try { courseStorage = globalThis.localStorage ?? null; } catch {}
+installCourseActivity(document, courseStorage, courseLessons);
+</script>
+</body>
+</html>

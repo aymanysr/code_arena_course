@@ -1,3 +1,4 @@
+import { loadBuildCourse, renderBuildOutputs, bundleBuildRuntime } from './build-course.mjs';
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
@@ -1327,10 +1328,21 @@ export async function renderCatalogOutputs(repoRoot, learningDir, coverageMap, o
     );
     files.set(path.join(learningDir, lesson.output), page);
   }
-  return {
-    data,
-    files,
-  };
+  if (options.guidedCourse !== false) {
+    let exists = false;
+    try { await stat(path.join(learningDir, "learning-path.json")); exists = true; }
+    catch (error) { if (error.code !== "ENOENT") throw error; }
+    if (exists) {
+      const course = await loadBuildCourse(learningDir, data);
+      let runtimeSource = "";
+      try { await stat(path.join(learningDir, "assets/build-runtime.mjs")); runtimeSource = await bundleBuildRuntime(learningDir); }
+      catch (error) { if (error.code !== "ENOENT") throw error; }
+      files.set(path.join(learningDir, "reference.html"), files.get(path.join(learningDir, "index.html")));
+      const guided = await renderBuildOutputs({ learningDir, referenceData: data, course, runtimeSource });
+      for (const [output, contents] of guided) files.set(output, contents);
+    }
+  }
+  return { data, files };
 }
 
 async function main() {

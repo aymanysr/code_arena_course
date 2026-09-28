@@ -22,7 +22,7 @@ async function createRenderedFixture() {
   fixtureDirectory = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-experience-"));
   const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
   lessonOutput = coverageMap.lessons.find((lesson) => lesson.id === lessonId).output;
-  const rendered = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, { tours: [] });
+  const rendered = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, { tours: [], guidedCourse: false });
   for (const [outputPath, contents] of rendered.files) {
     const relativeOutput = path.relative(learningDir, outputPath);
     const destination = path.join(fixtureDirectory, relativeOutput);
@@ -83,7 +83,7 @@ after(async () => {
   if (fixtureDirectory) await rm(fixtureDirectory, { recursive: true, force: true });
 });
 
-test("a complete first lesson session works from a direct file and local server", async (t) => {
+test("a complete legacy reference lesson session works from a direct file and local server", async (t) => {
   for (const mode of ["file", "server"]) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
     const page = await context.newPage();
