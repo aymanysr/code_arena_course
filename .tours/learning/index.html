@@ -410,6 +410,21 @@
     text-align: end;
   }
 
+  .course-lesson-activity {
+    margin-inline-start: 3.15rem;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+  }
+
+  .course-storage-unavailable {
+    max-width: 68ch;
+    margin-block-start: 1rem;
+    padding: 0.7rem 0.9rem;
+    border-inline-start: 3px solid var(--amber);
+    background: var(--amber-soft);
+    color: var(--text);
+  }
+
   .focus-panel {
     border-block: 1px solid var(--border);
   }
@@ -508,7 +523,7 @@
     background: var(--amber-soft);
   }
 
-  .page#lesson > .nav-row {
+  .page#lesson .lesson-navigation {
     max-width: 68ch;
     justify-content: space-between;
     margin-block-start: 2rem;
@@ -516,10 +531,15 @@
     border-block-start: 1px solid var(--border);
   }
 
-  .page#lesson > .nav-row a:last-child {
+  .page#lesson .lesson-navigation a {
     display: inline-flex;
     min-block-size: 2.75rem;
     align-items: center;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.45rem;
+  }
+
+  .page#lesson .lesson-navigation [data-primary-course-nav] {
     padding: 0.55rem 0.9rem;
     border-radius: 0.55rem;
     background: var(--teal);
@@ -528,7 +548,7 @@
     text-decoration: none;
   }
 
-  .page#lesson > .nav-row a:last-child:hover {
+  .page#lesson .lesson-navigation [data-primary-course-nav]:hover {
     background: var(--text);
   }
 
@@ -1130,34 +1150,181 @@
       <section class="course-batch" aria-labelledby="course-batch-1-title">
       <h2 id="course-batch-1-title">Follow one Match</h2>
       <p class="course-batch-description">Start from player actions and trace what the game decides.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0001-submit-journey" href="lessons/0001-follow-one-submit.html"><span class="course-lesson-number" aria-hidden="true">01</span><span class="course-lesson-copy">Lesson 1: A click is a request. The Match engine decides what it means.</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0002-reveal-cutoff" href="lessons/0002-reveal-cutoff.html"><span class="course-lesson-number" aria-hidden="true">02</span><span class="course-lesson-copy">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0003-rounds-and-final-score" href="lessons/0003-rounds-and-final-score.html"><span class="course-lesson-number" aria-hidden="true">03</span><span class="course-lesson-copy">Lesson 3: What resets each Round—and what decides the Match?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0004-lobby-to-match" href="lessons/0004-lobby-to-match.html"><span class="course-lesson-number" aria-hidden="true">04</span><span class="course-lesson-copy">Lesson 4: The Lobby gathers players; Game creates the Match</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0005-problem-editor-run" href="lessons/0005-problem-editor-run.html"><span class="course-lesson-number" aria-hidden="true">05</span><span class="course-lesson-copy">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0001-submit-journey" href="lessons/0001-follow-one-submit.html"><span class="course-lesson-number" aria-hidden="true">01</span><span class="course-lesson-copy">Lesson 1: A click is a request. The Match engine decides what it means.</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0001-submit-journey">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0002-reveal-cutoff" href="lessons/0002-reveal-cutoff.html"><span class="course-lesson-number" aria-hidden="true">02</span><span class="course-lesson-copy">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0002-reveal-cutoff">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0003-rounds-and-final-score" href="lessons/0003-rounds-and-final-score.html"><span class="course-lesson-number" aria-hidden="true">03</span><span class="course-lesson-copy">Lesson 3: What resets each Round—and what decides the Match?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0003-rounds-and-final-score">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0004-lobby-to-match" href="lessons/0004-lobby-to-match.html"><span class="course-lesson-number" aria-hidden="true">04</span><span class="course-lesson-copy">Lesson 4: The Lobby gathers players; Game creates the Match</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0004-lobby-to-match">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0005-problem-editor-run" href="lessons/0005-problem-editor-run.html"><span class="course-lesson-number" aria-hidden="true">05</span><span class="course-lesson-copy">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0005-problem-editor-run">Not started</span></p></li></ol>
     </section>
 <section class="course-batch" aria-labelledby="course-batch-2-title">
       <h2 id="course-batch-2-title">Understand the boundaries</h2>
       <p class="course-batch-description">See which layer owns each responsibility and where the evidence stops.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0006-evaluation-retries" href="lessons/0006-evaluation-retries.html"><span class="course-lesson-number" aria-hidden="true">06</span><span class="course-lesson-copy">Lesson 6: A retry is the same Evaluation only when its identity matches</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0007-judge-boundary" href="lessons/0007-judge-boundary.html"><span class="course-lesson-number" aria-hidden="true">07</span><span class="course-lesson-copy">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0008-persistence-recovery" href="lessons/0008-persistence-recovery.html"><span class="course-lesson-number" aria-hidden="true">08</span><span class="course-lesson-copy">Lesson 8: What survives when the Game service restarts?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0006-evaluation-retries" href="lessons/0006-evaluation-retries.html"><span class="course-lesson-number" aria-hidden="true">06</span><span class="course-lesson-copy">Lesson 6: A retry is the same Evaluation only when its identity matches</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0006-evaluation-retries">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0007-judge-boundary" href="lessons/0007-judge-boundary.html"><span class="course-lesson-number" aria-hidden="true">07</span><span class="course-lesson-copy">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0007-judge-boundary">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0008-persistence-recovery" href="lessons/0008-persistence-recovery.html"><span class="course-lesson-number" aria-hidden="true">08</span><span class="course-lesson-copy">Lesson 8: What survives when the Game service restarts?</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0008-persistence-recovery">Not started</span></p></li></ol>
     </section>
 <section class="course-batch" aria-labelledby="course-batch-3-title">
       <h2 id="course-batch-3-title">Follow live multiplayer behavior</h2>
       <p class="course-batch-description">Trace reconnect, shared work, chat, and the Arena screen.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0009-live-connection" href="lessons/0009-live-connection.html"><span class="course-lesson-number" aria-hidden="true">09</span><span class="course-lesson-copy">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0010-team-collaboration" href="lessons/0010-team-collaboration.html"><span class="course-lesson-number" aria-hidden="true">10</span><span class="course-lesson-copy">Lesson 10: An edit changes the revision—and resets both Ready approvals</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0011-team-chat" href="lessons/0011-team-chat.html"><span class="course-lesson-number" aria-hidden="true">11</span><span class="course-lesson-copy">Lesson 11: Team chat is a side channel—not editor state or Match state</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0012-arena-screen" href="lessons/0012-arena-screen.html"><span class="course-lesson-number" aria-hidden="true">12</span><span class="course-lesson-copy">Lesson 12: The Arena screen is a view of Match state—not another game engine</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0009-live-connection" href="lessons/0009-live-connection.html"><span class="course-lesson-number" aria-hidden="true">09</span><span class="course-lesson-copy">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0009-live-connection">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0010-team-collaboration" href="lessons/0010-team-collaboration.html"><span class="course-lesson-number" aria-hidden="true">10</span><span class="course-lesson-copy">Lesson 10: An edit changes the revision—and resets both Ready approvals</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0010-team-collaboration">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0011-team-chat" href="lessons/0011-team-chat.html"><span class="course-lesson-number" aria-hidden="true">11</span><span class="course-lesson-copy">Lesson 11: Team chat is a side channel—not editor state or Match state</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0011-team-chat">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0012-arena-screen" href="lessons/0012-arena-screen.html"><span class="course-lesson-number" aria-hidden="true">12</span><span class="course-lesson-copy">Lesson 12: The Arena screen is a view of Match state—not another game engine</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0012-arena-screen">Not started</span></p></li></ol>
     </section>
 <section class="course-batch" aria-labelledby="course-batch-4-title">
       <h2 id="course-batch-4-title">Operate and rebuild the reference</h2>
       <p class="course-batch-description">Run the project, read its evidence, and define parity gates for a rewrite.</p>
-      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0013-running-the-project" href="lessons/0013-running-the-project.html"><span class="course-lesson-number" aria-hidden="true">13</span><span class="course-lesson-copy">Lesson 13: The local play script and Compose stack are not the same thing</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li>
-<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0014-rewrite-with-tests" href="lessons/0014-rewrite-with-tests.html"><span class="course-lesson-number" aria-hidden="true">14</span><span class="course-lesson-copy">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a></li></ol>
+      <ol class="course-lesson-list"><li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0013-running-the-project" href="lessons/0013-running-the-project.html"><span class="course-lesson-number" aria-hidden="true">13</span><span class="course-lesson-copy">Lesson 13: The local play script and Compose stack are not the same thing</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0013-running-the-project">Not started</span></p></li>
+<li class="course-lesson"><a class="course-lesson-link" data-lesson-link="0014-rewrite-with-tests" href="lessons/0014-rewrite-with-tests.html"><span class="course-lesson-number" aria-hidden="true">14</span><span class="course-lesson-copy">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</span><span class="course-lesson-arrow" aria-hidden="true">→</span></a><p class="course-lesson-activity"><span data-course-activity-status="0014-rewrite-with-tests">Not started</span></p></li></ol>
     </section>
     </div>
   </main>
+  <p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>
+<script type="module">
+export const COURSE_ACTIVITY_KEY = "code-arena-learning:activity:v1";
+
+const ACTIVITY_STATUSES = new Set(["started", "self-check-recorded"]);
+
+const emptyActivity = () => ({ version: 1, lastLessonId: null, lessons: {} });
+
+function isRecord(value) {
+  return value !== null && typeof value === "object" && !Array.isArray(value);
+}
+
+export function readCourseActivity(storage, validLessonIds = []) {
+  if (!storage || typeof storage.getItem !== "function") return emptyActivity();
+
+  let raw;
+  try {
+    raw = storage.getItem(COURSE_ACTIVITY_KEY);
+  } catch {
+    return emptyActivity();
+  }
+  if (raw === null || raw === undefined || raw === "") return emptyActivity();
+
+  try {
+    const parsed = JSON.parse(raw);
+    const validIds = new Set(validLessonIds);
+    if (!isRecord(parsed) || parsed.version !== 1 || !isRecord(parsed.lessons)) return emptyActivity();
+    if (parsed.lastLessonId !== null && (typeof parsed.lastLessonId !== "string" || !validIds.has(parsed.lastLessonId))) {
+      return emptyActivity();
+    }
+
+    const lessons = {};
+    for (const [lessonId, status] of Object.entries(parsed.lessons)) {
+      if (!validIds.has(lessonId) || !ACTIVITY_STATUSES.has(status)) return emptyActivity();
+      lessons[lessonId] = status;
+    }
+    if (parsed.lastLessonId !== null && !Object.hasOwn(lessons, parsed.lastLessonId)) return emptyActivity();
+    return { version: 1, lastLessonId: parsed.lastLessonId, lessons };
+  } catch {
+    return emptyActivity();
+  }
+}
+
+export function writeCourseActivity(storage, activity) {
+  if (!storage || typeof storage.setItem !== "function") return false;
+  try {
+    storage.setItem(COURSE_ACTIVITY_KEY, JSON.stringify(activity));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function markLessonActivity(activity, lessonId, status) {
+  if (typeof lessonId !== "string" || lessonId.length === 0 || !ACTIVITY_STATUSES.has(status)) return activity;
+  const lessons = { ...(isRecord(activity?.lessons) ? activity.lessons : {}) };
+  const prior = lessons[lessonId];
+  lessons[lessonId] = prior === "self-check-recorded" && status === "started"
+    ? prior
+    : status;
+  return { version: 1, lastLessonId: lessonId, lessons };
+}
+
+export function resolveContinueLesson(activity, orderedLessons = []) {
+  const ordered = [...orderedLessons].sort((left, right) => left.order - right.order);
+  const lastLesson = ordered.find((lesson) => lesson.id === activity?.lastLessonId);
+  if (lastLesson && ACTIVITY_STATUSES.has(activity?.lessons?.[lastLesson.id])) return lastLesson;
+  return ordered[0] ?? null;
+}
+
+function activityLabel(status) {
+  if (status === "self-check-recorded") return "Self-check recorded";
+  if (status === "started") return "Started";
+  return "Not started";
+}
+
+function encodePath(output) {
+  return String(output).split("/").map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+export function installCourseActivity(root, storage, orderedLessons = []) {
+  const validLessons = [...orderedLessons]
+    .filter((lesson) => typeof lesson?.id === "string" && Number.isSafeInteger(lesson.order))
+    .sort((left, right) => left.order - right.order);
+  const validIds = validLessons.map(({ id }) => id);
+  const query = (selector) => root?.querySelector?.(selector) ?? null;
+  const queryAll = (selector) => [...(root?.querySelectorAll?.(selector) ?? [])];
+  const unavailableTarget = query("[data-course-storage-unavailable]");
+
+  const showUnavailable = () => {
+    if (!unavailableTarget) return;
+    unavailableTarget.hidden = false;
+    unavailableTarget.textContent = "This browser blocked local progress storage. The course still works; lesson links, predictions, and source previews remain available.";
+  };
+
+  let storageAvailable = Boolean(storage && typeof storage.getItem === "function" && typeof storage.setItem === "function");
+  if (storageAvailable) {
+    try {
+      storage.getItem(COURSE_ACTIVITY_KEY);
+    } catch {
+      storageAvailable = false;
+    }
+  }
+  if (!storageAvailable) showUnavailable();
+
+  let activity = readCourseActivity(storage, validIds);
+  const save = (nextActivity) => {
+    activity = nextActivity;
+    if (!writeCourseActivity(storage, activity)) showUnavailable();
+  };
+
+  const startLink = query("[data-course-start]");
+  if (startLink) {
+    const continueLesson = resolveContinueLesson(activity, validLessons);
+    if (continueLesson && activity.lastLessonId === continueLesson.id && activity.lessons[continueLesson.id]) {
+      startLink.href = encodePath(continueLesson.output);
+      startLink.textContent = `Continue Lesson ${continueLesson.order}`;
+    }
+    for (const statusTarget of queryAll("[data-course-activity-status]")) {
+      const status = activity.lessons[statusTarget.dataset.courseActivityStatus];
+      statusTarget.textContent = activityLabel(status);
+    }
+  }
+
+  const bodyLessonId = root?.body?.dataset?.courseLesson ?? query("[data-course-lesson]")?.dataset?.courseLesson;
+  if (bodyLessonId && validIds.includes(bodyLessonId)) {
+    save(markLessonActivity(activity, bodyLessonId, "started"));
+    for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+      statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+    }
+    for (const selfCheck of queryAll("[data-course-self-check]")) {
+      selfCheck.addEventListener("click", () => {
+        save(markLessonActivity(activity, bodyLessonId, "self-check-recorded"));
+        for (const statusTarget of queryAll("[data-course-self-check-status]")) {
+          statusTarget.textContent = activityLabel(activity.lessons[bodyLessonId]);
+        }
+      });
+    }
+  }
+
+  return { activity, storageAvailable };
+}
+const courseLessons = [{"id":"0001-submit-journey","order":1,"output":"lessons/0001-follow-one-submit.html"},{"id":"0002-reveal-cutoff","order":2,"output":"lessons/0002-reveal-cutoff.html"},{"id":"0003-rounds-and-final-score","order":3,"output":"lessons/0003-rounds-and-final-score.html"},{"id":"0004-lobby-to-match","order":4,"output":"lessons/0004-lobby-to-match.html"},{"id":"0005-problem-editor-run","order":5,"output":"lessons/0005-problem-editor-run.html"},{"id":"0006-evaluation-retries","order":6,"output":"lessons/0006-evaluation-retries.html"},{"id":"0007-judge-boundary","order":7,"output":"lessons/0007-judge-boundary.html"},{"id":"0008-persistence-recovery","order":8,"output":"lessons/0008-persistence-recovery.html"},{"id":"0009-live-connection","order":9,"output":"lessons/0009-live-connection.html"},{"id":"0010-team-collaboration","order":10,"output":"lessons/0010-team-collaboration.html"},{"id":"0011-team-chat","order":11,"output":"lessons/0011-team-chat.html"},{"id":"0012-arena-screen","order":12,"output":"lessons/0012-arena-screen.html"},{"id":"0013-running-the-project","order":13,"output":"lessons/0013-running-the-project.html"},{"id":"0014-rewrite-with-tests","order":14,"output":"lessons/0014-rewrite-with-tests.html"}];
+let courseStorage = null;
+try { courseStorage = globalThis.localStorage ?? null; } catch {}
+installCourseActivity(document, courseStorage, courseLessons);
+</script>
 </body>
 </html>

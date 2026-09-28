@@ -2,7 +2,7 @@
 
 Date: 2026-09-28
 
-Status: written design awaiting learner review. The learning direction and the visual lesson sample were approved in conversation. This document specifies the complete course; it does not claim that the course or the learner's game has been implemented.
+Status: written design approved by the learner on 2026-09-28. The learning direction and the visual lesson sample were also approved in conversation. This document specifies the complete course; it does not claim that the course or the learner's game has been implemented.
 
 ## 1. Purpose and agreed starting point
 
@@ -273,4 +273,4 @@ This is the master design for the learning experience. Implementation should be 
 
 Each unit needs its own concrete implementation tasks and verification. The first unit does not permit reporting the complete course delivered. The first prototype does not establish that the lesson shell has been integrated into `.tours/learning/`.
 
-Next gate: the learner reviews this written design. After approval, prepare the implementation plan and agree its execution method. No product implementation is authorized merely by this document's existence.
+Next gate: review the [implementation plan](../plans/2026-09-28-guided-code-arena-build-course.md). The learner has already chosen Native execution; preserve that choice. The design approval is recorded, and implementation follows the plan-review gate.

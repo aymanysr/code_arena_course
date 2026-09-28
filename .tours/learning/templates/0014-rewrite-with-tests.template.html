@@ -52,8 +52,8 @@
     <section class="section" aria-labelledby="evidence-title">
       <p class="kicker">Sort tests by the boundary they exercise</p>
       <h2 id="evidence-title">One green layer cannot stand in for all the others</h2>
-      <div class="card">
-        <table class="w-full">
+      <div class="table-scroll" role="region" aria-label="Test evidence comparison" tabindex="0">
+        <table class="data-table">
           <thead><tr><th scope="col">Evidence layer</th><th scope="col">Useful for</th><th scope="col">Not proof of</th></tr></thead>
           <tbody>
             <tr><th scope="row">Domain/unit</th><td>Rules, transitions, scoring, isolation, deterministic retries</td><td>HTTP, sockets, real persistence, or container isolation</td></tr>

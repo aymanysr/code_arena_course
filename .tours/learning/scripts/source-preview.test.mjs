@@ -328,6 +328,9 @@ test("source map keeps full-file previews contained on desktop and 320px mobile"
     for (const width of [1280, 320]) {
       await page.setViewportSize({ width, height: width === 320 ? 640 : 900 });
       await page.goto(url);
+      assert.equal(await page.getByRole("link", { name: "Back to Course Home" }).getAttribute("href"), "index.html");
+      assert.equal(await page.getByRole("link", { name: "Explore code" }).getAttribute("aria-current"), "page");
+      assert.equal(await page.locator("[data-course-self-check], [data-course-activity-status], #lesson-progress").count(), 0);
       await page.locator("#source-inventory > summary").click();
       await page.getByRole("button", { name: `Open code preview for ${filePath}`, exact: true }).click();
       await page.waitForFunction(() => document.querySelector("#source-dialog").open);

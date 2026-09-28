@@ -416,7 +416,7 @@ export async function auditTemplateLinks({ lessons, scope, learningDir, repoRoot
 }
 
 // ponytail: order is checked, not generated — coverage-map.json owns 1..N.
-// Compare lesson destinations exactly; non-lesson links (for example, the final README link) are allowed.
+// README may list lesson destinations in order or delegate the list to generated Course Home.
 export async function auditCourseOrder({ lessons, learningDir }) {
   const issues = [];
   const ordered = [...(lessons ?? [])].sort((left, right) => left.order - right.order);
@@ -428,14 +428,18 @@ export async function auditCourseOrder({ lessons, learningDir }) {
   const expectedOutputs = ordered.map((lesson) => lesson.output.split("/").pop());
   let readmeOutputs = [];
   let readmeExists = false;
+  let readmeDelegatesToCourseHome = false;
   try {
     const readme = await readFile(path.join(learningDir, "README.md"), "utf8");
     readmeExists = true;
     readmeOutputs = [...readme.matchAll(/lessons\/([^\s)\]]+\.html)/g)].map((match) => match[1]);
+    readmeDelegatesToCourseHome = /\]\((?:\.\/)?index\.html(?:#[^)]+)?\)/.test(readme);
   } catch (error) {
     if (error?.code !== "ENOENT") throw error;
   }
-  if (readmeExists && JSON.stringify(readmeOutputs) !== JSON.stringify(expectedOutputs)) {
+  const readmeOrderMatches = JSON.stringify(readmeOutputs) === JSON.stringify(expectedOutputs);
+  const readmeDelegationMatches = readmeOutputs.length === 0 && readmeDelegatesToCourseHome;
+  if (readmeExists && !readmeOrderMatches && !readmeDelegationMatches) {
     issues.push({ kind: "readme-order", detail: `README lists ${readmeOutputs.join(",")} but coverage order is ${expectedOutputs.join(",")}` });
   }
   for (let index = 0; index < ordered.length; index++) {
@@ -927,10 +931,6 @@ function renderReferenceChecks(data) {
 }
 
 export function renderCatalogTemplate(template, stylesheet, data, repoRoot = REPO_ROOT) {
-  const firstLesson = [...(data.lessons ?? [])].sort((left, right) => left.order - right.order)[0];
-  const firstLessonHref = firstLesson
-    ? firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/")
-    : "#course-list";
   const status = catalogSnapshotStatus(data);
   const replacements = {
     "<!-- INLINE_COURSE_STYLES -->": `<style>\n${stylesheet}\n</style>`,
@@ -945,8 +945,6 @@ export function renderCatalogTemplate(template, stylesheet, data, repoRoot = REP
     "{{COUNT_UNCOVERED}}": String(data.summary.uncovered),
     "{{COUNT_EXCLUDED}}": String(data.summary.excluded),
     "{{COUNT_UNCLASSIFIED}}": String(data.summary.unclassified),
-    "{{FIRST_LESSON_URL}}": html(firstLessonHref),
-    "{{FIRST_LESSON_ACTION}}": firstLesson ? `Start Lesson ${firstLesson.order}` : "Browse lessons",
     "{{LESSON_LIST}}": renderLessonList(data, repoRoot),
     "{{FILE_ROWS}}": renderFileRows(data, repoRoot),
     "{{SOURCE_TEMPLATES}}": renderSourceTemplates(data),
