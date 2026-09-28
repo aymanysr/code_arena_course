@@ -17,3 +17,26 @@ export function validateWorkspaceProfile(raw){
   });
   return {id:raw.id,kind:raw.kind,root:raw.root,mappings};
 }
+export function quoteShellPath(value){if(typeof value!=='string'||/[\x00\r\n]/.test(value))throw Error('root: control character');return "'"+value.replaceAll("'","'\\''")+"'"}
+export function resolveBuildStep(step,lesson,rawProfile){
+  const profile=validateWorkspaceProfile(rawProfile),blockedBy=[],files=[];
+  const authored=step.checkIds.map(id=>lesson.checks.find(c=>c.id===id));
+  if(authored.some(c=>!c))throw Error('Unknown lesson check');
+  const needsRoot=step.files.some(f=>f.workspace==='active')||authored.some(c=>c.kind!=='explain'&&c.cwd!=='current-terminal');
+  if(needsRoot&&!profile.root)blockedBy.push(`Choose the ${profile.kind} folder before following file or command instructions.`);
+  for(const file of step.files){
+    if(file.workspace==='reference'||profile.kind==='practice'){files.push({...file});continue}
+    const mapped=profile.mappings.find(m=>m.role===file.role);
+    if(!mapped){blockedBy.push(`Map the team responsibility: ${file.role}`);continue}
+    if(mapped.dependency)blockedBy.push(`${file.role}: ${mapped.dependency}`);
+    files.push({...file,path:mapped.targetPath,action:{reuse:'read',create:'create',extend:'edit'}[mapped.action],owner:mapped.reason});
+  }
+  const checks=[];
+  for(const check of authored){
+    if(profile.kind==='practice'||check.kind==='explain'||check.cwd==='current-terminal'){checks.push({...check});continue}
+    const mapped=profile.mappings.flatMap(m=>m.checks).find(c=>c.checkId===check.id);
+    if(!mapped){blockedBy.push(`Map the team check: ${check.id}`);continue}
+    checks.push({...check,command:mapped.command,cwd:mapped.cwd});
+  }
+  return {workspace:profile.kind,root:profile.root,files,checks:blockedBy.length?checks.filter(c=>c.kind==='explain'||c.cwd==='current-terminal'):checks,blockedBy};
+}
