@@ -1,0 +1,1364 @@
+[
+  {
+    "id": "m01-tools",
+    "milestoneId": "M01",
+    "title": "Meet the tools before using them",
+    "why": "A tool error is easier to fix when you know which program has the job.",
+    "outcome": "Identify your editor, terminal, Node, npm, and Git.",
+    "prerequisites": [
+      "m00-workspaces"
+    ],
+    "references": [],
+    "steps": [
+      {
+        "phase": "orient",
+        "title": "Start with what you know",
+        "question": "What replaces the C toolchain?",
+        "explanation": [
+          "In C, you edit source files, compile them, then run the program. Here you will edit TypeScript, check its types, produce JavaScript, then run that JavaScript with Node.",
+          "Your editor changes files. Your terminal runs commands. Node runs JavaScript outside a browser. npm installs local tools and runs named scripts. Git records changes."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-tools-orient"
+      },
+      {
+        "phase": "see",
+        "title": "Follow the toolchain",
+        "question": "Which program does each job?",
+        "explanation": [
+          "Follow one file from your editor to the output. TypeScript checking and running are two different actions."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "Source \u2192 check \u2192 build \u2192 run",
+          "code": [
+            "editor \u2192 src/demo.ts",
+            "tsc --noEmit \u2192 check types",
+            "tsc \u2192 dist/src/demo.js",
+            "node dist/src/demo.js \u2192 output"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Edit",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Edit"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Write source"
+                }
+              ],
+              "codeLines": [
+                1
+              ],
+              "explanation": "The editor saves text. Saving does not prove that the program is correct."
+            },
+            {
+              "id": "frame-1",
+              "label": "Check",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Check"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Find type mistakes"
+                }
+              ],
+              "codeLines": [
+                2
+              ],
+              "explanation": "tsc --noEmit checks without writing output files."
+            },
+            {
+              "id": "frame-2",
+              "label": "Build",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Build"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Produce JavaScript"
+                }
+              ],
+              "codeLines": [
+                3
+              ],
+              "explanation": "tsc writes JavaScript into dist/."
+            },
+            {
+              "id": "frame-3",
+              "label": "Run",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Run"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Execute JavaScript"
+                }
+              ],
+              "codeLines": [
+                4
+              ],
+              "explanation": "Node reads the generated JavaScript file. This is different from opening a web page."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m01-tools-see"
+      },
+      {
+        "phase": "understand",
+        "title": "A command runs in a folder",
+        "question": "What does your terminal know?",
+        "explanation": [
+          "Your terminal always has a current directory. pwd prints it. A command such as npm install uses files in that directory.",
+          "Open a terminal in the editor you already use. If you prefer the macOS Terminal app, that works too. The course does not need a special editor."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-tools-understand"
+      },
+      {
+        "phase": "try",
+        "title": "Check before installing",
+        "question": "Which tools are already available?",
+        "explanation": [
+          "Run the version checks below one at a time. A printed version means the program was found. \u201ccommand not found\u201d means the shell cannot find it.",
+          "If Node or npm is missing on macOS, open the official Node download page (https://nodejs.org/en/download), choose the LTS installer for your Mac, install it, reopen the terminal, and rerun the checks. Node includes npm. If Git is missing, run git --version and follow macOS\u2019s developer-tools prompt.",
+          "The practice configuration uses TypeScript 5.9.3 and Vitest 4.1.11. Their declared Node ranges include Node 24 and 26; this course\u2019s rehearsal uses Node 26.10.0. Keep the version you checked in your notes."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-tools-try"
+      },
+      {
+        "phase": "build",
+        "title": "Inspect your tools",
+        "question": "What versions and folder do you have?",
+        "explanation": [
+          "Run each command separately. Do not paste your shell prompt or any output as part of the command.",
+          "If a check fails, fix only that tool, reopen your terminal if needed, then run the same check again."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "package.json",
+            "workspace": "reference",
+            "path": "package.json",
+            "action": "read",
+            "owner": "The reference manifest shows what a package file looks like.",
+            "change": "Inspect its name and scripts after checking your tools.",
+            "pattern": "A manifest describes the project; it does not run by itself."
+          }
+        ],
+        "checkIds": [
+          "m01-tools-versions"
+        ],
+        "prerequisiteCheckIds": [
+          "m00-workspaces-explain"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-tools-build"
+      },
+      {
+        "phase": "check",
+        "title": "Name the jobs",
+        "question": "Can you explain which tool runs the program?",
+        "explanation": [
+          "Record the version output and your current folder. Saying \u201cTypeScript runs the program\u201d hides an important distinction: in this path tsc checks/builds, and Node runs the emitted JavaScript."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [
+          "m01-tools-versions"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Create a separate practice folder and confirm its root.",
+        "transfer": "If node --version succeeds but npm install says package.json is missing, which thing would you check first?",
+        "id": "m01-tools-check"
+      }
+    ],
+    "checks": [
+      {
+        "id": "m01-tools-versions",
+        "command": "pwd\nnode --version\nnpm --version\ngit --version",
+        "cwd": "current-terminal",
+        "expected": "pwd prints your current folder; the other commands each print a version.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "command not found: node (or npm/git)",
+            "diagnostic": "Install only the missing tool using its official installer, reopen the terminal, then rerun its version command.",
+            "meaning": "No project code needs changing for a missing executable."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m01-folder",
+    "milestoneId": "M01",
+    "title": "Create a clear practice folder",
+    "why": "You need to know where commands will read and write before installing tools.",
+    "outcome": "Create only the folders you need and identify the practice root.",
+    "prerequisites": [
+      "m01-tools"
+    ],
+    "references": [],
+    "steps": [
+      {
+        "phase": "orient",
+        "title": "Keep practice separate",
+        "question": "What should be empty at the start?",
+        "explanation": [
+          "In Finder, choose a parent folder you control, such as your Projects folder. Create a new folder named code-arena-practice inside it. Do not create it inside the reference checkout.",
+          "If that folder already contains work, inspect it first. Choose a different empty practice folder if its contents are unrelated. Never delete existing work to make the instructions fit."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-folder-orient"
+      },
+      {
+        "phase": "see",
+        "title": "Grow the tree gradually",
+        "question": "What belongs at the top?",
+        "explanation": [
+          "You do not need the full game\u2019s folder tree yet. Start with source, tests, and your notes."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "Your first small workspace",
+          "code": [
+            "code-arena-practice/",
+            "  src/",
+            "  test/",
+            "  learning-notes.md"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Root",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Root"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Project home"
+                }
+              ],
+              "codeLines": [
+                1
+              ],
+              "explanation": "This is the path you select in the workspace bar."
+            },
+            {
+              "id": "frame-1",
+              "label": "Source",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Source"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Code you write"
+                }
+              ],
+              "codeLines": [
+                2
+              ],
+              "explanation": "src is short for source. The small rule will live here."
+            },
+            {
+              "id": "frame-2",
+              "label": "Tests",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Tests"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Calls and expectations"
+                }
+              ],
+              "codeLines": [
+                3
+              ],
+              "explanation": "A test calls your code and compares a result."
+            },
+            {
+              "id": "frame-3",
+              "label": "Notes",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Notes"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Your reasoning"
+                }
+              ],
+              "codeLines": [
+                4
+              ],
+              "explanation": "Record why a decision makes sense and which check you ran."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m01-folder-see"
+      },
+      {
+        "phase": "understand",
+        "title": "Choose the actual root",
+        "question": "How will commands find your files?",
+        "explanation": [
+          "Use Change workspace to enter the absolute path of the folder you just created. Saving that path does not create or inspect files. You still make changes in your editor and terminal.",
+          "Open that folder in your editor. Open its terminal, or use the cd line shown by the course. Then run pwd and compare the output with the workspace bar."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-folder-understand"
+      },
+      {
+        "phase": "try",
+        "title": "Catch a wrong folder early",
+        "question": "Does your terminal show the same root?",
+        "explanation": [
+          "If pwd shows the reference repository or your home directory, stop before creating files. Use cd to enter your chosen practice folder.",
+          "An absolute path starts at /. A relative path such as src starts from your current directory. Spaces in a path are fine when it is quoted."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-folder-try"
+      },
+      {
+        "phase": "build",
+        "title": "Confirm the root",
+        "question": "Are you in your practice folder?",
+        "explanation": [
+          "Create learning-notes.md at the top level using your editor. Write the actual root path and one sentence about what you want to understand."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "learning-notes.md",
+            "workspace": "active",
+            "path": "learning-notes.md",
+            "action": "create",
+            "owner": "Notes belong at the root so you can find them before knowing the code layout.",
+            "change": "Write your root path and one learning question.",
+            "pattern": "A .md file is plain text; a line starting with # is a heading."
+          }
+        ],
+        "checkIds": [
+          "m01-folder-root"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-tools-versions"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-folder-build-root"
+      },
+      {
+        "phase": "build",
+        "title": "Create source and test folders",
+        "question": "Where will code and checks go?",
+        "explanation": [
+          "From the confirmed root, create src and test. You can use the editor\u2019s New Folder action or type mkdir -p src test. The -p flag leaves an existing directory intact.",
+          "No game files go here yet. An empty test directory is expected at this point."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "src",
+            "workspace": "active",
+            "path": "src",
+            "action": "create",
+            "owner": "Source belongs together.",
+            "change": "Create the src directory.",
+            "pattern": "A directory groups related files."
+          },
+          {
+            "role": "test",
+            "workspace": "active",
+            "path": "test",
+            "action": "create",
+            "owner": "Checks have a separate home.",
+            "change": "Create the test directory.",
+            "pattern": "Tests import source code instead of duplicating it."
+          }
+        ],
+        "checkIds": [
+          "m01-folder-dirs"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-folder-root"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-folder-build-dirs"
+      },
+      {
+        "phase": "build",
+        "title": "Start local history",
+        "question": "What will Git record?",
+        "explanation": [
+          "Git records versions of your files. In this new empty project, git init starts local history; it does not create a remote repository or contact your friend.",
+          "Run git status --short to see untracked files. Do not commit node_modules, generated dist output, or secrets; the next lesson creates ignore rules."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "learning-notes.md",
+            "workspace": "active",
+            "path": "learning-notes.md",
+            "action": "edit",
+            "owner": "Notes track the reasoning behind your changes.",
+            "change": "Add the result of the folder check.",
+            "pattern": "Git can record plain-text notes with source changes."
+          }
+        ],
+        "checkIds": [
+          "m01-folder-git"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-folder-dirs"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-folder-build-git"
+      },
+      {
+        "phase": "check",
+        "title": "Point at each home",
+        "question": "Can you find the root, source and tests?",
+        "explanation": [
+          "Confirm the workspace bar and pwd agree. Seeing an untracked notes file is normal; you have created it but have not committed it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [
+          "m01-folder-dirs",
+          "m01-folder-git"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Describe the tools and scripts in package.json before installing them.",
+        "transfer": "If src appears inside another src folder, what current-directory mistake could have caused that?",
+        "id": "m01-folder-check"
+      }
+    ],
+    "checks": [
+      {
+        "id": "m01-folder-root",
+        "command": "pwd\nls learning-notes.md",
+        "cwd": ".",
+        "expected": "pwd matches the workspace root; ls prints learning-notes.md.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "The command does not give the expected result.",
+            "diagnostic": "Run pwd and check the file path before editing the rule.",
+            "meaning": "A wrong folder and a wrong rule need different fixes."
+          }
+        ]
+      },
+      {
+        "id": "m01-folder-dirs",
+        "command": "ls -d src test",
+        "cwd": ".",
+        "expected": "Both src and test are listed.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "No such file or directory",
+            "diagnostic": "Run pwd; inspect the editor tree at that same root.",
+            "meaning": "Create the missing directory at the root, not inside another source folder."
+          }
+        ]
+      },
+      {
+        "id": "m01-folder-git",
+        "command": "git init\ngit status --short",
+        "cwd": ".",
+        "expected": "Git initializes local history and status lists your untracked notes.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "The command does not give the expected result.",
+            "diagnostic": "Run pwd and check the file path before editing the rule.",
+            "meaning": "A wrong folder and a wrong rule need different fixes."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m01-package",
+    "milestoneId": "M01",
+    "title": "Give your project its tools",
+    "why": "A named script makes a check repeatable; a manifest says which tools it uses.",
+    "outcome": "Explain package.json, install local tools, and keep generated files out of Git.",
+    "prerequisites": [
+      "m01-folder"
+    ],
+    "references": [],
+    "steps": [
+      {
+        "phase": "orient",
+        "title": "Describe this project",
+        "question": "What is a package.json file?",
+        "explanation": [
+          "package.json is a JSON document at the project root. It names the project, lists tools, and gives short names to commands.",
+          "JSON uses double quotes around property names and strings. It does not allow comments or trailing commas. You are describing configuration, not writing TypeScript here."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-package-orient"
+      },
+      {
+        "phase": "see",
+        "title": "Trace one script",
+        "question": "What happens when you run typecheck?",
+        "explanation": [
+          "npm run typecheck looks up scripts.typecheck, then runs the locally installed tsc command. The script\u2019s name is yours; the command on its right does the work."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "Named script \u2192 local tool",
+          "code": [
+            "npm run typecheck",
+            "\"typecheck\": \"tsc --noEmit\"",
+            "node_modules/.bin/tsc --noEmit"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Request",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Request"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Choose a script"
+                }
+              ],
+              "codeLines": [
+                1
+              ],
+              "explanation": "npm receives the script name."
+            },
+            {
+              "id": "frame-1",
+              "label": "Lookup",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Lookup"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Read package.json"
+                }
+              ],
+              "codeLines": [
+                2
+              ],
+              "explanation": "The value says which command to run."
+            },
+            {
+              "id": "frame-2",
+              "label": "Execute",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Execute"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Use the local tool"
+                }
+              ],
+              "codeLines": [
+                3
+              ],
+              "explanation": "Each project can pin its own tool version. You do not need a global TypeScript install."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m01-package-see"
+      },
+      {
+        "phase": "understand",
+        "title": "Know the fields",
+        "question": "Why are these dependencies development tools?",
+        "explanation": [
+          "private prevents accidental npm publishing. type: module selects import/export modules. scripts names commands. devDependencies lists tools used to build and test this project.",
+          "TypeScript provides tsc. Vitest runs tests. @types/node describes Node APIs for the checker; those descriptions are not runtime code. package-lock.json records the resolved install for repeatability."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-package-understand"
+      },
+      {
+        "phase": "try",
+        "title": "Predict an install",
+        "question": "Will installing tools write your game?",
+        "explanation": [
+          "No. npm install downloads the declared tools into node_modules and writes a lockfile. It does not implement Match, Run, or Submit.",
+          "Do not run npm test yet: there is no test file. \u201cNo test files found\u201d would not mean your rule is correct."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-package-try"
+      },
+      {
+        "phase": "build",
+        "title": "Write the manifest",
+        "question": "Can npm read your project description?",
+        "explanation": [
+          "Create package.json at the root using the shown configuration. Configuration can be copied; it is not the game solution. Check the braces, commas, and double quotes.",
+          "Run npm install at the confirmed practice root. Then inspect the installed top-level tool versions."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "create",
+            "owner": "Package scripts describe this whole small project.",
+            "change": "Enter the shown manifest.",
+            "pattern": "JSON objects contain named properties; script values are command strings."
+          }
+        ],
+        "checkIds": [
+          "m01-package-install"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-folder-dirs"
+        ],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "package.json",
+          "code": [
+            "{",
+            "  \"name\": \"code-arena-practice\",",
+            "  \"private\": true,",
+            "  \"type\": \"module\",",
+            "  \"scripts\": {",
+            "    \"typecheck\": \"tsc --noEmit\",",
+            "    \"build\": \"tsc\",",
+            "    \"demo\": \"node dist/src/demo.js\",",
+            "    \"test\": \"vitest run\"",
+            "  },",
+            "  \"devDependencies\": {",
+            "    \"@types/node\": \"22.20.4\",",
+            "    \"typescript\": \"5.9.3\",",
+            "    \"vitest\": \"4.1.11\"",
+            "  }",
+            "}"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Configuration",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Configuration"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Type this configuration"
+                }
+              ],
+              "codeLines": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16
+              ],
+              "explanation": "Configuration sets up the tools. Your game functions are still yours to write."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m01-package-build-manifest"
+      },
+      {
+        "phase": "build",
+        "title": "Ignore generated files",
+        "question": "Which files should Git skip?",
+        "explanation": [
+          "Create .gitignore at the root with one entry per line: node_modules/, dist/, .env. A leading dot is part of the filename.",
+          "Keep package.json and package-lock.json under version control. The first describes your intent; the lockfile records exact resolved versions."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": ".gitignore",
+            "workspace": "active",
+            "path": ".gitignore",
+            "action": "create",
+            "owner": "Ignore rules apply to generated files and local secrets.",
+            "change": "Add node_modules/, dist/, and .env on separate lines.",
+            "pattern": "Each line names a path Git should leave untracked."
+          }
+        ],
+        "checkIds": [
+          "m01-package-git"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-package-install"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-package-build-ignore"
+      },
+      {
+        "phase": "check",
+        "title": "Read a script",
+        "question": "Can you explain a command before running it?",
+        "explanation": [
+          "Record which directory npm used and which versions it installed. Do not hide an install error by moving on to the next lesson."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [
+          "m01-package-install",
+          "m01-package-git"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Configure TypeScript and run one function you write.",
+        "transfer": "If you rename the typecheck script to check-types, what command would you type? Would the TypeScript tool itself change?",
+        "id": "m01-package-check"
+      }
+    ],
+    "checks": [
+      {
+        "id": "m01-package-install",
+        "command": "npm install\nnpm ls --depth=0",
+        "cwd": ".",
+        "expected": "The install succeeds; the list shows TypeScript 5.9.3, Vitest 4.1.11, and @types/node 22.20.4.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "EJSONPARSE or package.json not found",
+            "diagnostic": "Run pwd and open package.json at that root. Check double quotes and commas.",
+            "meaning": "A parse or folder error happens before any game code is run."
+          },
+          {
+            "symptom": "Registry, DNS, certificate, or network error",
+            "diagnostic": "Check the network connection and retry npm install. Keep the error text if it still fails.",
+            "meaning": "The tools have not been installed yet. Do not bypass certificate checks or treat later command failures as game bugs."
+          }
+        ]
+      },
+      {
+        "id": "m01-package-git",
+        "command": "git status --short\ngit check-ignore node_modules/",
+        "cwd": ".",
+        "expected": "The status includes your configuration/notes but not thousands of dependency files; check-ignore prints node_modules/.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "The command does not give the expected result.",
+            "diagnostic": "Run pwd and check the file path before editing the rule.",
+            "meaning": "A wrong folder and a wrong rule need different fixes."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m01-first-run",
+    "milestoneId": "M01",
+    "title": "Write a function and run it",
+    "why": "A working tiny program makes the later test runner and game rules less mysterious.",
+    "outcome": "Write a small timing decision, build it, and run a caller.",
+    "prerequisites": [
+      "m01-package"
+    ],
+    "references": [],
+    "steps": [
+      {
+        "phase": "orient",
+        "title": "One decision only",
+        "question": "Is there time left in a teaching example?",
+        "explanation": [
+          "For this first example, the input is secondsLeft, a number. Return true only when it is greater than zero. At zero or below, return false.",
+          "This is a teaching simplification. The real game uses a server-owned Match deadline plus membership, phase, and grace rules. We will build those later."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-first-run-orient"
+      },
+      {
+        "phase": "see",
+        "title": "Use your C knowledge",
+        "question": "Which parts of the function have the same job?",
+        "explanation": [
+          "Compare an unrelated positive-number helper in C and TypeScript. The parameter, comparison, and returned boolean have matching jobs; their syntax differs."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "C \u2192 TypeScript: the same decision",
+          "code": [
+            "// C: bool isPositive(int value) { return value > 0; }",
+            "// TypeScript:",
+            "function isPositive(value: number): boolean {",
+            "  return value > 0;",
+            "}"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Input",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Input"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "A number enters"
+                }
+              ],
+              "codeLines": [
+                1,
+                3
+              ],
+              "explanation": "C puts the type before the name. TypeScript annotates the name with a colon and type."
+            },
+            {
+              "id": "frame-1",
+              "label": "Decision",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Decision"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Compare with zero"
+                }
+              ],
+              "codeLines": [
+                4
+              ],
+              "explanation": "The comparison itself has the same shape here."
+            },
+            {
+              "id": "frame-2",
+              "label": "Output",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Output"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Return true or false"
+                }
+              ],
+              "codeLines": [
+                3,
+                4
+              ],
+              "explanation": "The : boolean annotation documents and checks the result type. It does not execute a runtime check."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m01-first-run-see"
+      },
+      {
+        "phase": "understand",
+        "title": "Build and run separately",
+        "question": "Why does the caller import a .js filename?",
+        "explanation": [
+          "Your source is .ts. In this NodeNext setup, TypeScript produces .js files in dist/. Node executes those JavaScript files. A relative import names the emitted .js file so Node can find it.",
+          "export makes a function available to another module. import names what the caller needs. A module is a file with imports or exports; you do not create C-style header files for this example."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-first-run-understand"
+      },
+      {
+        "phase": "try",
+        "title": "Predict the output",
+        "question": "What should a call with 12 print?",
+        "explanation": [
+          "It should print true. A call with 0 should print false. Say why before writing the function.",
+          "The return statement gives a value back to the caller. console.log displays a value in the terminal; it is useful in the small caller, not necessary inside the decision function."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m01-first-run-try"
+      },
+      {
+        "phase": "build",
+        "title": "Configure the compiler",
+        "question": "Where should generated JavaScript go?",
+        "explanation": [
+          "Create tsconfig.json at the root. The configuration below checks strictly, includes src and test files, and writes generated files under dist.",
+          "Do not run a build yet if no .ts source file exists. First set up the configuration, then write the rule in the next step."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "config.typescript",
+            "workspace": "active",
+            "path": "tsconfig.json",
+            "action": "create",
+            "owner": "The compiler configuration covers this project.",
+            "change": "Enter the shown configuration.",
+            "pattern": "rootDir describes source layout; outDir separates generated output."
+          }
+        ],
+        "checkIds": [
+          "m01-first-run-config"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-package-install"
+        ],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "tsconfig.json",
+          "code": [
+            "{",
+            "  \"compilerOptions\": {",
+            "    \"target\": \"ES2022\",",
+            "    \"module\": \"NodeNext\",",
+            "    \"moduleResolution\": \"NodeNext\",",
+            "    \"strict\": true,",
+            "    \"rootDir\": \".\",",
+            "    \"outDir\": \"dist\",",
+            "    \"skipLibCheck\": true",
+            "  },",
+            "  \"include\": [",
+            "    \"src/**/*.ts\",",
+            "    \"test/**/*.ts\"",
+            "  ]",
+            "}"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Configuration",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Configuration"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Type this configuration"
+                }
+              ],
+              "codeLines": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15
+              ],
+              "explanation": "Configuration sets up the tools. Your game functions are still yours to write."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m01-first-run-build-config"
+      },
+      {
+        "phase": "build",
+        "title": "Write your decision",
+        "question": "Can you express the boundary in one function?",
+        "explanation": [
+          "Create src/submit-window.ts. Export a function named isSubmitWindowOpen. Its parameter is secondsLeft: number and its return type is boolean.",
+          "Write the comparison yourself: time must be strictly greater than zero. Keep the function free of terminal output. The caller will display the returned value."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "The input is secondsLeft; the output is one boolean.",
+          "Equality with zero must be false.",
+          "The isPositive example uses a strict comparison.",
+          "Export your function, annotate its number input and boolean return, and return the strict comparison with zero."
+        ],
+        "files": [
+          {
+            "role": "rule.submit-window",
+            "workspace": "active",
+            "path": "src/submit-window.ts",
+            "action": "create",
+            "owner": "src holds the rules you write.",
+            "change": "Write the exported boolean timing decision.",
+            "pattern": "Inputs enter through parameters; return provides the answer."
+          }
+        ],
+        "checkIds": [
+          "m01-first-run-types"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-first-run-config"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-first-run-build-rule"
+      },
+      {
+        "phase": "build",
+        "title": "Write a caller",
+        "question": "How do you see the returned value?",
+        "explanation": [
+          "Create src/demo.ts. Import isSubmitWindowOpen from ./submit-window.js. Call it with 12, 0, and -2, and print each returned value with console.log.",
+          "Run the type check, build, then demo. If you edit the source later, build again before running demo so you do not read stale output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "src.demo",
+            "workspace": "active",
+            "path": "src/demo.ts",
+            "action": "create",
+            "owner": "The demo is a small caller beside the source rule.",
+            "change": "Import the function and print three calls.",
+            "pattern": "A named import connects one module to another."
+          }
+        ],
+        "checkIds": [
+          "m01-first-run-demo"
+        ],
+        "prerequisiteCheckIds": [
+          "m01-first-run-types"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m01-first-run-build-demo"
+      },
+      {
+        "phase": "check",
+        "title": "Explain the whole path",
+        "question": "What did each command actually do?",
+        "explanation": [
+          "Expect three outputs: true, false, false. Explain which source line made zero false and which script produced the JavaScript.",
+          "Look at dist/src/submit-window.js. Type annotations are gone. Keep editing src; generated dist files are overwritten by the next build."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [
+          "m01-first-run-demo"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Turn these boundary expectations into repeatable tests.",
+        "transfer": "Change the caller to use 1 instead of 12. Predict the result, rebuild, and run it. Why should the result stay the same?",
+        "id": "m01-first-run-check"
+      }
+    ],
+    "checks": [
+      {
+        "id": "m01-first-run-config",
+        "command": "node -e \"JSON.parse(require('fs').readFileSync('tsconfig.json','utf8')); console.log('Valid JSON')\"",
+        "cwd": ".",
+        "expected": "The terminal prints Valid JSON. This checks JSON syntax only.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "The command does not give the expected result.",
+            "diagnostic": "Run pwd and check the file path before editing the rule.",
+            "meaning": "A wrong folder and a wrong rule need different fixes."
+          }
+        ]
+      },
+      {
+        "id": "m01-first-run-types",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The TypeScript checker exits with no errors.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Function is missing a return or an exported name cannot be found",
+            "diagnostic": "Open src/submit-window.ts and check the function name, export keyword, and return statement.",
+            "meaning": "The checker checks source structure. A clean check does not prove the boundary rule is right."
+          }
+        ]
+      },
+      {
+        "id": "m01-first-run-demo",
+        "command": "npm run typecheck\nnpm run build\nnpm run demo",
+        "cwd": ".",
+        "expected": "All commands succeed; the demo prints true, false, false in that order.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Cannot find module or old output",
+            "diagnostic": "Check ./submit-window.js in src/demo.ts, then run npm run build before npm run demo.",
+            "meaning": "In NodeNext, the import names the emitted .js file even though you edit .ts."
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -4,8 +4,8 @@ This record identifies the direct reference files used by the six CodeTours. It 
 
 ## Snapshot
 
-- Recorded: 2026-09-27
-- Git HEAD: `44bde4f5e64871959937fa24e938f3c571bac58b`
+- Recorded: 2026-09-28
+- Git HEAD: `15ae4b8343bfd3a332d956a1c4c7962685de3086`
 - Git worktree: dirty; the recorded file hashes capture working-tree content independently of HEAD.
 - Integrity list: [`reference-baseline.sha256`](reference-baseline.sha256), covering 60 direct inputs: all six tours, their anchored source files and named test/spec references, relevant package/test configuration, the Code Arena spec and relevant ADRs, and the 42-subject compliance matrix.
 - Tour links checked: all 58 file-and-line anchors resolve in current files.
@@ -31,7 +31,7 @@ The detailed explanations and evidence links are in [Tour 6](6-rebuild-the-game.
 
 ## Historical test evidence (not rerun by snapshot refresh)
 
-These test results were captured on 2026-09-25. The reference baseline was refreshed on 2026-09-27; tests were not rerun during that refresh. The arena-game and Game-service runs had local Docker access; the frontend unit run did not need Docker.
+These test results were captured on 2026-09-25. The reference baseline was refreshed on 2026-09-28; tests were not rerun during that refresh. The arena-game and Game-service runs had local Docker access; the frontend unit run did not need Docker.
 
 | Command | Result |
 | --- | --- |

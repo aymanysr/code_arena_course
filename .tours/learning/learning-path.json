@@ -7,7 +7,7 @@
       "id": "M00",
       "title": "See the destination",
       "why": "**See the destination.** Play/watch one reference journey; identify Match, Round, Problem, Run, Submit, Reveal; locate browser, server, storage, and Judge on a simple map. Distinguish reference from practice and team workspaces.",
-      "enables": "Learner can explain what the game does and point to the responsibility they are about to build. No source hunt is required.",
+      "enables": "Know what the game does before creating files.",
       "prerequisites": [],
       "lessonIds": [
         "m00-destination",
@@ -19,7 +19,7 @@
       "id": "M01",
       "title": "Set up a practice workspace",
       "why": "**Set up a practice workspace.** Explain root/current directory, editor, terminal, Git status, Node, package manager, package manifest, dependency install, TypeScript tools, and the first run command. Verify versions and each command before proceeding.",
-      "enables": "One tiny learner-authored function runs in the practice workspace; learner knows which files they created and what the command executed.",
+      "enables": "Run one function in your own practice folder.",
       "prerequisites": [
         "M00"
       ],
@@ -35,7 +35,7 @@
       "id": "M02",
       "title": "Move from C to TypeScript and tests",
       "why": "**Move from C to TypeScript and tests.** Functions/parameters/returns; annotations and type erasure; `number` versus C integer types; booleans/strings; objects and arrays; unions, missing values, imports/exports, and basic errors as needed. Explain a test as a function call plus an expected result.",
-      "enables": "Learner changes a small rule, writes a boundary test, sees a meaningful failure, fixes the rule, and explains the result.",
+      "enables": "Test a boundary and explain a changed case.",
       "prerequisites": [
         "M01"
       ],
@@ -52,7 +52,7 @@
       "id": "M03",
       "title": "Represent the game and change its state",
       "why": "**Represent the game and change its state.** Player/side IDs, Match/Round records, allowed phase transitions, membership, injected time, and the difference between a pure decision and a state change. Introduce interfaces as contracts when the first substitute is needed.",
-      "enables": "A local Match with one active Round accepts an allowed action and rejects a wrong player/phase/time. No network or real Judge is required.",
+      "enables": "Represent a Match and reject an invalid action.",
       "prerequisites": [
         "M02"
       ],
@@ -68,7 +68,7 @@
       "id": "M04",
       "title": "Give players a Problem and a visible Run",
       "why": "**Give players a Problem and a visible Run.** Problem data and validation; statement/starter languages; separate visible and hidden data; a fake Judge; a Run request and result. Introduce promises/`async`/`await` and error paths around this concrete dependency.",
-      "enables": "Learner can Run visible examples, explain why Run does not change the score, and verify that public data does not expose hidden tests.",
+      "enables": "Run public examples without changing the score.",
       "prerequisites": [
         "M03"
       ],
@@ -83,7 +83,7 @@
       "id": "M05",
       "title": "Submit, evaluate, score, and reveal",
       "why": "**Submit, evaluate, score, and reveal.** Acceptance and pending receipt; request identity and duplicate protection; fake-Judge success/failure; counted scores; normal Reveal; Round resets; summed Match scores and tie-breaks; Match deadline and bounded reveal grace. Teach these as separate slices.",
-      "enables": "A tested local 1v1 Match completes across Rounds. Boundary, failed-evaluation, and repeated-request cases have explicit checks.",
+      "enables": "Finish a local Match with tested scoring and deadlines.",
       "prerequisites": [
         "M04"
       ],
@@ -104,7 +104,7 @@
       "id": "M06",
       "title": "Expose a small server API",
       "why": "**Expose a small server API.** Process/port; HTTP request/response; JSON; route/controller/service; runtime input validation; trusted identity seam; status/error responses. Explain the reference framework's modules and dependency injection only as the small route needs them.",
-      "enables": "A request calls the learner's existing rule; invalid shape and unauthorized gameplay requests fail for explained reasons. Development identity is visibly a temporary seam.",
+      "enables": "Call your rules through a small server API.",
       "prerequisites": [
         "M05"
       ],
@@ -120,7 +120,7 @@
       "id": "M07",
       "title": "Build the screen around working behavior",
       "why": "**Build the screen around working behavior.** HTML/CSS and browser events; then TypeScript components, props/state, rendering, effects/cleanup, forms, editor integration, and requests. Begin with one input/button/result; expand to Problem/editor/Run/Submit/Reveal/final result. Introduce a transport interface when separating the screen from the connection.",
-      "enables": "One browser can complete the local game flow through the server. Loading, rejection, error, keyboard, and narrow-screen states are explained and checked.",
+      "enables": "Use one browser to play through your local game.",
       "prerequisites": [
         "M06"
       ],
@@ -138,7 +138,7 @@
       "id": "M08",
       "title": "Save and recover the game",
       "why": "**Save and recover the game.** Memory store versus database; schema/relations and JSONB where used; persistence interface and Postgres adapter; transactions/revisions; durable evaluation ownership; work outside short locks; restart and failed-write recovery; publish events only after commit.",
-      "enables": "Restart preserves accepted state; conflicting writes and duplicate work are checked with the real database. In-memory checks remain labeled separately.",
+      "enables": "Recover saved state and reject stale writes.",
       "prerequisites": [
         "M05",
         "M06",
@@ -158,7 +158,7 @@
       "id": "M09",
       "title": "Run code through the real Judge boundary",
       "why": "**Run code through the real Judge boundary.** First explain why player programs need isolation. Connect explicit provider selection, worker API, per-case containers, languages, limits, sealed data, queue/readiness, and infrastructure failures. Compare real results with the fake-Judge contract.",
-      "enables": "Real C/C++/Python cases run through the configured boundary; required resource, secrecy, malformed-output, and failure checks have recorded results or visible blockers.",
+      "enables": "Run player programs through an isolated Judge.",
       "prerequisites": [
         "M08"
       ],
@@ -175,7 +175,7 @@
       "id": "M10",
       "title": "Create a private Lobby and connect two players",
       "why": "**Create a private Lobby and connect two players.** Invite code, side assignment, Ready and host Start; durable Match creation; HTTP versus socket events; trusted socket identity; membership, revisions, first/last-socket presence, stale replies, disconnect/reconnect, and authoritative refresh.",
-      "enables": "Two clients enter by invitation and play the same Match. A disconnected client recovers the correct state. The public queue remains an explained retained capability, not the default entry.",
+      "enables": "Invite a second player and recover after reconnect.",
       "prerequisites": [
         "M07",
         "M08",
@@ -195,7 +195,7 @@
       "id": "M11",
       "title": "Make 2v2 safe and understandable",
       "why": "**Make 2v2 safe and understandable.** Team membership; shared document and revisions; collaboration protocol; round-scoped clients; both-player readiness; readiness invalidation after edits; submission of the agreed document snapshot.",
-      "enables": "Four clients play with two isolated team documents. Edits, readiness, reconnect, Round changes, and accepted source have explicit checks.",
+      "enables": "Keep two teams\u2019 code and readiness separate.",
       "prerequisites": [
         "M10"
       ],
@@ -211,7 +211,7 @@
       "id": "M12",
       "title": "Add Game-owned team chat and client cleanup",
       "why": "**Add Game-owned team chat and client cleanup.** Match scope versus Round scope; chat membership and team isolation; messages/pings; history limits and errors; preservation/disposal of chat and collaboration clients.",
-      "enables": "Teammates communicate without cross-team leakage or stale clients. The learner can explain that the reference history is process-local, not durable storage.",
+      "enables": "Chat with teammates and clean up old clients.",
       "prerequisites": [
         "M11"
       ],
@@ -226,7 +226,7 @@
       "id": "M13",
       "title": "Integrate, operate, and prove the complete game",
       "why": "**Integrate, operate, and prove the complete game.** Team-repo mapping; real identity/navigation/configuration contracts; Docker/Compose, environment examples, private worker, Nginx/TLS, service readiness, real multiplayer browser journeys, error recovery, README/contributions, and behavior-by-behavior comparison with the reference.",
-      "enables": "The agreed game scope runs in the team app with recorded target-repo checks. Every incomplete dependency and environment-blocked check remains visible.",
+      "enables": "Check your implementation inside the team app.",
       "prerequisites": [
         "M12"
       ],
@@ -246,7 +246,7 @@
     {
       "id": "m00-destination",
       "milestoneId": "M00",
-      "title": "Destination",
+      "title": "See what you will build",
       "status": "ready",
       "prerequisites": [],
       "output": "build/m00-destination.html"
@@ -254,8 +254,8 @@
     {
       "id": "m00-workspaces",
       "milestoneId": "M00",
-      "title": "Workspaces",
-      "status": "planned",
+      "title": "Know which folder is yours",
+      "status": "ready",
       "prerequisites": [
         "m00-destination"
       ],
@@ -264,8 +264,8 @@
     {
       "id": "m01-tools",
       "milestoneId": "M01",
-      "title": "Tools",
-      "status": "planned",
+      "title": "Meet the tools before using them",
+      "status": "ready",
       "prerequisites": [
         "m00-workspaces"
       ],
@@ -274,8 +274,8 @@
     {
       "id": "m01-folder",
       "milestoneId": "M01",
-      "title": "Folder",
-      "status": "planned",
+      "title": "Create a clear practice folder",
+      "status": "ready",
       "prerequisites": [
         "m01-tools"
       ],
@@ -284,8 +284,8 @@
     {
       "id": "m01-package",
       "milestoneId": "M01",
-      "title": "Package",
-      "status": "planned",
+      "title": "Give your project its tools",
+      "status": "ready",
       "prerequisites": [
         "m01-folder"
       ],
@@ -294,8 +294,8 @@
     {
       "id": "m01-first-run",
       "milestoneId": "M01",
-      "title": "First run",
-      "status": "planned",
+      "title": "Write a function and run it",
+      "status": "ready",
       "prerequisites": [
         "m01-package"
       ],

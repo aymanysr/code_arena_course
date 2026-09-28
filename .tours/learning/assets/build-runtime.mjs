@@ -26,6 +26,14 @@ export function mountBuildCourse(root,course,lesson,storage){
   function renderGuidance(step,node){
     const profile=state.profiles.find(p=>p.id===state.activeWorkspace),resolved=resolveBuildStep(step,lesson,profile);
     const target=node.querySelector('[data-file-guidance]');target.replaceChildren();
+    if(step.prerequisiteCheckIds.length){const before=el('aside',undefined,'prechecks');before.dataset.prechecks='';before.append(el('h3','Before this step'));
+      for(const id of step.prerequisiteCheckIds){const owner=course.lessons.find(l=>l.checks.some(c=>c.id===id));if(!owner)continue;
+        const prior=resolveBuildStep({files:[],checkIds:[id]},owner,profile);
+        if(prior.blockedBy.length)before.append(el('p',prior.blockedBy.join(' ')));
+        for(const c of prior.checks)before.append(el('p',`${owner.title}: ${c.expected}`),el('pre',c.command));
+      }target.append(before);
+    }
+
     for(const message of resolved.blockedBy)target.append(el('p',message,'notice'));
     for(const f of resolved.files){const card=el('article',undefined,'file-card');card.append(el('p',f.workspace==='reference'?'REFERENCE · READ ONLY':`${resolved.workspace.toUpperCase()} · ${f.action.toUpperCase()}`,'eyebrow'));const title=el('h3');title.append(el('code',f.path));card.append(title,el('p',f.owner),el('p',f.change),el('p',`Pattern: ${f.pattern}`,'muted'));if(f.workspace==='reference'){const link=el('a','Find this file in the source map');link.href=prefix+'source-map.html';card.append(link)}target.append(card)}
     const checks=node.querySelector('[data-check-guidance]');if(!checks)return;checks.replaceChildren();

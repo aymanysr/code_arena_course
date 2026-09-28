@@ -51,8 +51,11 @@ existing reviewed-evidence refresh procedure remains required during execution.
 
 The isolated guided-build-course checkout now implements the validated 68-lesson
 route, a static dusk/light lesson layout, workspace profile validation, and
-workspace-separated progress data. Only the authored orientation is currently
-available; later lessons remain explicitly planned. These are learning-platform
+workspace-separated progress data. Six authored M00/M01 lessons now cover orientation and real practice setup;
+later lessons remain explicitly planned. Fresh-directory install, typecheck,
+build, and demo were rehearsed on Node 26.10.0, including a reproduced and
+repaired missing-export error. Practice uses patched Vitest 4.1.11 after a
+concrete dependency audit; this does not change the reference game tooling. These are learning-platform
 capabilities, not completed game modules or target-repository checks.
 
 Reviewed the mandatory accessibility, validation, identity, and game requirements

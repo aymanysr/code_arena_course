@@ -275,5 +275,250 @@
         "transfer": "If a player edits after submitting, should the accepted source change? Explain why a locked snapshot matters."
       }
     ]
+  },
+  {
+    "id": "m00-workspaces",
+    "milestoneId": "M00",
+    "title": "Know which folder is yours",
+    "why": "You need a safe place to write before following any file instruction.",
+    "outcome": "Tell the reference, practice, and team folders apart.",
+    "prerequisites": [
+      "m00-destination"
+    ],
+    "references": [],
+    "steps": [
+      {
+        "phase": "orient",
+        "title": "Three different jobs",
+        "question": "Where will you write your code?",
+        "explanation": [
+          "The coded game you already have is the reference. Read it to understand a decision and compare behavior.",
+          "Your practice folder will hold your own code. The team repository will be the final home when your friend creates it. You can begin without it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m00-workspaces-orient"
+      },
+      {
+        "phase": "see",
+        "title": "Three labeled folders",
+        "question": "Which folder changes today?",
+        "explanation": [
+          "Select each label in this diagram. A folder\u2019s role tells you whether you should read it or edit it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "visual": {
+          "kind": "trace",
+          "title": "Read here. Build there.",
+          "code": [
+            "reference game/  \u2192 read its behavior",
+            "code-arena-practice/  \u2192 write your version",
+            "team repository/  \u2192 map later"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Reference",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Reference"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Read"
+                }
+              ],
+              "codeLines": [
+                1
+              ],
+              "explanation": "Keep the reference implementation available for comparison. Do not turn its finished files into your exercise answer."
+            },
+            {
+              "id": "frame-1",
+              "label": "Practice",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Practice"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Write"
+                }
+              ],
+              "codeLines": [
+                2
+              ],
+              "explanation": "Start with a separate empty folder. Each new file will have an explained job."
+            },
+            {
+              "id": "frame-2",
+              "label": "Team",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Team"
+                },
+                {
+                  "label": "Meaning",
+                  "value": "Not available yet"
+                }
+              ],
+              "codeLines": [
+                3
+              ],
+              "explanation": "We will inspect its real folders and commands before moving any work."
+            }
+          ],
+          "cases": []
+        },
+        "id": "m00-workspaces-see"
+      },
+      {
+        "phase": "understand",
+        "title": "A root is a starting folder",
+        "question": "Why do instructions keep showing the root?",
+        "explanation": [
+          "A relative path such as src/rule.ts starts inside a project root. The same path can exist in two different projects.",
+          "The workspace bar names which project you are using. The terminal command pwd shows the folder your terminal is currently inside. Check both before editing."
+        ],
+        "vocabulary": [
+          {
+            "term": "Root",
+            "meaning": "The top folder of the project you are working in."
+          },
+          {
+            "term": "Relative path",
+            "meaning": "A location measured from a starting folder, such as src/rule.ts."
+          }
+        ],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m00-workspaces-understand"
+      },
+      {
+        "phase": "try",
+        "title": "Choose a home",
+        "question": "Your friend has no repo yet. Are you blocked?",
+        "explanation": [
+          "No. A pure rule can be written and tested in practice first. A pure rule makes a decision from its inputs without needing a server or database.",
+          "Later, the same idea can move into a team-owned file. A practice test passing will not count as a team-repository test."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use this result in the next step.",
+        "id": "m00-workspaces-try"
+      },
+      {
+        "phase": "build",
+        "title": "Record your choice",
+        "question": "Which workspace is active?",
+        "explanation": [
+          "Keep Practice selected in the workspace bar. You will choose and create its folder in the setup lessons.",
+          "Write a note: \u201cI read the reference. I write my practice code. The team repo is still waiting.\u201d Do not create a team folder just to satisfy a card."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [
+          {
+            "role": "CONTEXT.md",
+            "workspace": "reference",
+            "path": "CONTEXT.md",
+            "action": "read",
+            "owner": "The reference glossary defines our game words.",
+            "change": "Read the workspace explanation here; no code change is needed.",
+            "pattern": "Separate a source you read from a project you edit."
+          }
+        ],
+        "checkIds": [
+          "m00-workspaces-explain"
+        ],
+        "prerequisiteCheckIds": [
+          "m00-destination-explain"
+        ],
+        "next": "Use this result in the next step.",
+        "id": "m00-workspaces-build"
+      },
+      {
+        "phase": "check",
+        "title": "Explain the difference",
+        "question": "Can you name the three roles?",
+        "explanation": [
+          "Read the active workspace label. Explain why copying an old passed check into the team workspace would be misleading."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Restate the input and the expected result.",
+          "Locate the file and value named in this step.",
+          "Compare the small example with the change you are making.",
+          "Read the expected output. If yours differs, use the diagnostic before changing more code."
+        ],
+        "files": [],
+        "checkIds": [
+          "m00-workspaces-explain"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Check your editor, terminal, Node, npm, and Git.",
+        "transfer": "Imagine the team already has a test folder named spec/. Should you create test/ anyway? Explain what you would inspect first.",
+        "id": "m00-workspaces-check"
+      }
+    ],
+    "checks": [
+      {
+        "id": "m00-workspaces-explain",
+        "command": "Explain aloud",
+        "cwd": "current-terminal",
+        "expected": "Reference is read-only guidance; practice is your code; team paths need inspection.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "The command does not give the expected result.",
+            "diagnostic": "Run pwd and check the file path before editing the rule.",
+            "meaning": "A wrong folder and a wrong rule need different fixes."
+          }
+        ]
+      }
+    ]
   }
 ]

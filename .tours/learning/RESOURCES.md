@@ -35,3 +35,10 @@
 ## Gaps
 
 - The complete course now has 14 linked lessons. The source map tracks every in-scope file as lesson-taught or support-only; rerun its check after the reference game changes and review any affected lesson, test, or CodeTour before freezing a newer snapshot.
+
+## Guided foundations — primary tool references
+
+- [Install Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/) — official macOS/Windows installer and LTS guidance.
+- [TypeScript modules](https://www.typescriptlang.org/docs/handbook/2/modules.html) — import/export boundaries.
+- [NodeNext module resolution](https://www.typescriptlang.org/docs/handbook/modules/theory.html) — why emitted JavaScript filenames matter.
+- [Vitest advisory and patched versions](https://github.com/advisories/GHSA-82fw-gwwq-j7x9) — practice pins patched 4.1.11; reference dependency versions are a separate project decision.
