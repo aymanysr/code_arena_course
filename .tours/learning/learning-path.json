@@ -1,0 +1,1361 @@
+{
+  "version": 2,
+  "revision": "guided-2026-09-28-1",
+  "sourceSnapshotId": "4edc506dd9158d21",
+  "milestones": [
+    {
+      "id": "M00",
+      "title": "See the destination",
+      "why": "**See the destination.** Play/watch one reference journey; identify Match, Round, Problem, Run, Submit, Reveal; locate browser, server, storage, and Judge on a simple map. Distinguish reference from practice and team workspaces.",
+      "enables": "Learner can explain what the game does and point to the responsibility they are about to build. No source hunt is required.",
+      "prerequisites": [],
+      "lessonIds": [
+        "m00-destination",
+        "m00-workspaces"
+      ],
+      "content": "content/M00.json"
+    },
+    {
+      "id": "M01",
+      "title": "Set up a practice workspace",
+      "why": "**Set up a practice workspace.** Explain root/current directory, editor, terminal, Git status, Node, package manager, package manifest, dependency install, TypeScript tools, and the first run command. Verify versions and each command before proceeding.",
+      "enables": "One tiny learner-authored function runs in the practice workspace; learner knows which files they created and what the command executed.",
+      "prerequisites": [
+        "M00"
+      ],
+      "lessonIds": [
+        "m01-tools",
+        "m01-folder",
+        "m01-package",
+        "m01-first-run"
+      ],
+      "content": "content/M01.json"
+    },
+    {
+      "id": "M02",
+      "title": "Move from C to TypeScript and tests",
+      "why": "**Move from C to TypeScript and tests.** Functions/parameters/returns; annotations and type erasure; `number` versus C integer types; booleans/strings; objects and arrays; unions, missing values, imports/exports, and basic errors as needed. Explain a test as a function call plus an expected result.",
+      "enables": "Learner changes a small rule, writes a boundary test, sees a meaningful failure, fixes the rule, and explains the result.",
+      "prerequisites": [
+        "M01"
+      ],
+      "lessonIds": [
+        "m02-boundary",
+        "m02-types-runtime",
+        "m02-records",
+        "m02-modules",
+        "m02-transfer"
+      ],
+      "content": "content/M02.json"
+    },
+    {
+      "id": "M03",
+      "title": "Represent the game and change its state",
+      "why": "**Represent the game and change its state.** Player/side IDs, Match/Round records, allowed phase transitions, membership, injected time, and the difference between a pure decision and a state change. Introduce interfaces as contracts when the first substitute is needed.",
+      "enables": "A local Match with one active Round accepts an allowed action and rejects a wrong player/phase/time. No network or real Judge is required.",
+      "prerequisites": [
+        "M02"
+      ],
+      "lessonIds": [
+        "m03-records",
+        "m03-transitions",
+        "m03-membership",
+        "m03-clock"
+      ],
+      "content": "content/M03.json"
+    },
+    {
+      "id": "M04",
+      "title": "Give players a Problem and a visible Run",
+      "why": "**Give players a Problem and a visible Run.** Problem data and validation; statement/starter languages; separate visible and hidden data; a fake Judge; a Run request and result. Introduce promises/`async`/`await` and error paths around this concrete dependency.",
+      "enables": "Learner can Run visible examples, explain why Run does not change the score, and verify that public data does not expose hidden tests.",
+      "prerequisites": [
+        "M03"
+      ],
+      "lessonIds": [
+        "m04-problem",
+        "m04-judge-port",
+        "m04-run"
+      ],
+      "content": "content/M04.json"
+    },
+    {
+      "id": "M05",
+      "title": "Submit, evaluate, score, and reveal",
+      "why": "**Submit, evaluate, score, and reveal.** Acceptance and pending receipt; request identity and duplicate protection; fake-Judge success/failure; counted scores; normal Reveal; Round resets; summed Match scores and tie-breaks; Match deadline and bounded reveal grace. Teach these as separate slices.",
+      "enables": "A tested local 1v1 Match completes across Rounds. Boundary, failed-evaluation, and repeated-request cases have explicit checks.",
+      "prerequisites": [
+        "M04"
+      ],
+      "lessonIds": [
+        "m05-accept",
+        "m05-pending",
+        "m05-retry",
+        "m05-score",
+        "m05-reveal",
+        "m05-round-reset",
+        "m05-final-result",
+        "m05-deadline",
+        "m05-complete-match"
+      ],
+      "content": "content/M05.json"
+    },
+    {
+      "id": "M06",
+      "title": "Expose a small server API",
+      "why": "**Expose a small server API.** Process/port; HTTP request/response; JSON; route/controller/service; runtime input validation; trusted identity seam; status/error responses. Explain the reference framework's modules and dependency injection only as the small route needs them.",
+      "enables": "A request calls the learner's existing rule; invalid shape and unauthorized gameplay requests fail for explained reasons. Development identity is visibly a temporary seam.",
+      "prerequisites": [
+        "M05"
+      ],
+      "lessonIds": [
+        "m06-http",
+        "m06-controller",
+        "m06-validation",
+        "m06-identity"
+      ],
+      "content": "content/M06.json"
+    },
+    {
+      "id": "M07",
+      "title": "Build the screen around working behavior",
+      "why": "**Build the screen around working behavior.** HTML/CSS and browser events; then TypeScript components, props/state, rendering, effects/cleanup, forms, editor integration, and requests. Begin with one input/button/result; expand to Problem/editor/Run/Submit/Reveal/final result. Introduce a transport interface when separating the screen from the connection.",
+      "enables": "One browser can complete the local game flow through the server. Loading, rejection, error, keyboard, and narrow-screen states are explained and checked.",
+      "prerequisites": [
+        "M06"
+      ],
+      "lessonIds": [
+        "m07-browser-basics",
+        "m07-react-state",
+        "m07-transport",
+        "m07-editor-run",
+        "m07-submit-reveal",
+        "m07-local-journey"
+      ],
+      "content": "content/M07.json"
+    },
+    {
+      "id": "M08",
+      "title": "Save and recover the game",
+      "why": "**Save and recover the game.** Memory store versus database; schema/relations and JSONB where used; persistence interface and Postgres adapter; transactions/revisions; durable evaluation ownership; work outside short locks; restart and failed-write recovery; publish events only after commit.",
+      "enables": "Restart preserves accepted state; conflicting writes and duplicate work are checked with the real database. In-memory checks remain labeled separately.",
+      "prerequisites": [
+        "M05",
+        "M06",
+        "M07"
+      ],
+      "lessonIds": [
+        "m08-store-port",
+        "m08-postgres",
+        "m08-transactions",
+        "m08-claims",
+        "m08-events",
+        "m08-recovery"
+      ],
+      "content": "content/M08.json"
+    },
+    {
+      "id": "M09",
+      "title": "Run code through the real Judge boundary",
+      "why": "**Run code through the real Judge boundary.** First explain why player programs need isolation. Connect explicit provider selection, worker API, per-case containers, languages, limits, sealed data, queue/readiness, and infrastructure failures. Compare real results with the fake-Judge contract.",
+      "enables": "Real C/C++/Python cases run through the configured boundary; required resource, secrecy, malformed-output, and failure checks have recorded results or visible blockers.",
+      "prerequisites": [
+        "M08"
+      ],
+      "lessonIds": [
+        "m09-isolation",
+        "m09-provider",
+        "m09-case-runner",
+        "m09-worker",
+        "m09-replace-fake"
+      ],
+      "content": "content/M09.json"
+    },
+    {
+      "id": "M10",
+      "title": "Create a private Lobby and connect two players",
+      "why": "**Create a private Lobby and connect two players.** Invite code, side assignment, Ready and host Start; durable Match creation; HTTP versus socket events; trusted socket identity; membership, revisions, first/last-socket presence, stale replies, disconnect/reconnect, and authoritative refresh.",
+      "enables": "Two clients enter by invitation and play the same Match. A disconnected client recovers the correct state. The public queue remains an explained retained capability, not the default entry.",
+      "prerequisites": [
+        "M07",
+        "M08",
+        "M09"
+      ],
+      "lessonIds": [
+        "m10-invite",
+        "m10-start",
+        "m10-socket-auth",
+        "m10-presence",
+        "m10-reconnect",
+        "m10-two-clients"
+      ],
+      "content": "content/M10.json"
+    },
+    {
+      "id": "M11",
+      "title": "Make 2v2 safe and understandable",
+      "why": "**Make 2v2 safe and understandable.** Team membership; shared document and revisions; collaboration protocol; round-scoped clients; both-player readiness; readiness invalidation after edits; submission of the agreed document snapshot.",
+      "enables": "Four clients play with two isolated team documents. Edits, readiness, reconnect, Round changes, and accepted source have explicit checks.",
+      "prerequisites": [
+        "M10"
+      ],
+      "lessonIds": [
+        "m11-document",
+        "m11-ready",
+        "m11-round-lifetime",
+        "m11-four-clients"
+      ],
+      "content": "content/M11.json"
+    },
+    {
+      "id": "M12",
+      "title": "Add Game-owned team chat and client cleanup",
+      "why": "**Add Game-owned team chat and client cleanup.** Match scope versus Round scope; chat membership and team isolation; messages/pings; history limits and errors; preservation/disposal of chat and collaboration clients.",
+      "enables": "Teammates communicate without cross-team leakage or stale clients. The learner can explain that the reference history is process-local, not durable storage.",
+      "prerequisites": [
+        "M11"
+      ],
+      "lessonIds": [
+        "m12-chat",
+        "m12-sidecars",
+        "m12-live-chat"
+      ],
+      "content": "content/M12.json"
+    },
+    {
+      "id": "M13",
+      "title": "Integrate, operate, and prove the complete game",
+      "why": "**Integrate, operate, and prove the complete game.** Team-repo mapping; real identity/navigation/configuration contracts; Docker/Compose, environment examples, private worker, Nginx/TLS, service readiness, real multiplayer browser journeys, error recovery, README/contributions, and behavior-by-behavior comparison with the reference.",
+      "enables": "The agreed game scope runs in the team app with recorded target-repo checks. Every incomplete dependency and environment-blocked check remains visible.",
+      "prerequisites": [
+        "M12"
+      ],
+      "lessonIds": [
+        "m13-inspect-team",
+        "m13-map-rule",
+        "m13-integrate",
+        "m13-compose",
+        "m13-tls",
+        "m13-parity",
+        "m13-handover"
+      ],
+      "content": "content/M13.json"
+    }
+  ],
+  "lessons": [
+    {
+      "id": "m00-destination",
+      "milestoneId": "M00",
+      "title": "Destination",
+      "status": "ready",
+      "prerequisites": [],
+      "output": "build/m00-destination.html"
+    },
+    {
+      "id": "m00-workspaces",
+      "milestoneId": "M00",
+      "title": "Workspaces",
+      "status": "planned",
+      "prerequisites": [
+        "m00-destination"
+      ],
+      "output": "build/m00-workspaces.html"
+    },
+    {
+      "id": "m01-tools",
+      "milestoneId": "M01",
+      "title": "Tools",
+      "status": "planned",
+      "prerequisites": [
+        "m00-workspaces"
+      ],
+      "output": "build/m01-tools.html"
+    },
+    {
+      "id": "m01-folder",
+      "milestoneId": "M01",
+      "title": "Folder",
+      "status": "planned",
+      "prerequisites": [
+        "m01-tools"
+      ],
+      "output": "build/m01-folder.html"
+    },
+    {
+      "id": "m01-package",
+      "milestoneId": "M01",
+      "title": "Package",
+      "status": "planned",
+      "prerequisites": [
+        "m01-folder"
+      ],
+      "output": "build/m01-package.html"
+    },
+    {
+      "id": "m01-first-run",
+      "milestoneId": "M01",
+      "title": "First run",
+      "status": "planned",
+      "prerequisites": [
+        "m01-package"
+      ],
+      "output": "build/m01-first-run.html"
+    },
+    {
+      "id": "m02-boundary",
+      "milestoneId": "M02",
+      "title": "Boundary",
+      "status": "planned",
+      "prerequisites": [
+        "m01-first-run"
+      ],
+      "output": "build/m02-boundary.html"
+    },
+    {
+      "id": "m02-types-runtime",
+      "milestoneId": "M02",
+      "title": "Types runtime",
+      "status": "planned",
+      "prerequisites": [
+        "m02-boundary"
+      ],
+      "output": "build/m02-types-runtime.html"
+    },
+    {
+      "id": "m02-records",
+      "milestoneId": "M02",
+      "title": "Records",
+      "status": "planned",
+      "prerequisites": [
+        "m02-types-runtime"
+      ],
+      "output": "build/m02-records.html"
+    },
+    {
+      "id": "m02-modules",
+      "milestoneId": "M02",
+      "title": "Modules",
+      "status": "planned",
+      "prerequisites": [
+        "m02-records"
+      ],
+      "output": "build/m02-modules.html"
+    },
+    {
+      "id": "m02-transfer",
+      "milestoneId": "M02",
+      "title": "Transfer",
+      "status": "planned",
+      "prerequisites": [
+        "m02-modules"
+      ],
+      "output": "build/m02-transfer.html"
+    },
+    {
+      "id": "m03-records",
+      "milestoneId": "M03",
+      "title": "Records",
+      "status": "planned",
+      "prerequisites": [
+        "m02-transfer"
+      ],
+      "output": "build/m03-records.html"
+    },
+    {
+      "id": "m03-transitions",
+      "milestoneId": "M03",
+      "title": "Transitions",
+      "status": "planned",
+      "prerequisites": [
+        "m03-records"
+      ],
+      "output": "build/m03-transitions.html"
+    },
+    {
+      "id": "m03-membership",
+      "milestoneId": "M03",
+      "title": "Membership",
+      "status": "planned",
+      "prerequisites": [
+        "m03-transitions"
+      ],
+      "output": "build/m03-membership.html"
+    },
+    {
+      "id": "m03-clock",
+      "milestoneId": "M03",
+      "title": "Clock",
+      "status": "planned",
+      "prerequisites": [
+        "m03-membership"
+      ],
+      "output": "build/m03-clock.html"
+    },
+    {
+      "id": "m04-problem",
+      "milestoneId": "M04",
+      "title": "Problem",
+      "status": "planned",
+      "prerequisites": [
+        "m03-clock"
+      ],
+      "output": "build/m04-problem.html"
+    },
+    {
+      "id": "m04-judge-port",
+      "milestoneId": "M04",
+      "title": "Judge port",
+      "status": "planned",
+      "prerequisites": [
+        "m04-problem"
+      ],
+      "output": "build/m04-judge-port.html"
+    },
+    {
+      "id": "m04-run",
+      "milestoneId": "M04",
+      "title": "Run",
+      "status": "planned",
+      "prerequisites": [
+        "m04-judge-port"
+      ],
+      "output": "build/m04-run.html"
+    },
+    {
+      "id": "m05-accept",
+      "milestoneId": "M05",
+      "title": "Accept",
+      "status": "planned",
+      "prerequisites": [
+        "m04-run"
+      ],
+      "output": "build/m05-accept.html"
+    },
+    {
+      "id": "m05-pending",
+      "milestoneId": "M05",
+      "title": "Pending",
+      "status": "planned",
+      "prerequisites": [
+        "m05-accept"
+      ],
+      "output": "build/m05-pending.html"
+    },
+    {
+      "id": "m05-retry",
+      "milestoneId": "M05",
+      "title": "Retry",
+      "status": "planned",
+      "prerequisites": [
+        "m05-pending"
+      ],
+      "output": "build/m05-retry.html"
+    },
+    {
+      "id": "m05-score",
+      "milestoneId": "M05",
+      "title": "Score",
+      "status": "planned",
+      "prerequisites": [
+        "m05-retry"
+      ],
+      "output": "build/m05-score.html"
+    },
+    {
+      "id": "m05-reveal",
+      "milestoneId": "M05",
+      "title": "Reveal",
+      "status": "planned",
+      "prerequisites": [
+        "m05-score"
+      ],
+      "output": "build/m05-reveal.html"
+    },
+    {
+      "id": "m05-round-reset",
+      "milestoneId": "M05",
+      "title": "Round reset",
+      "status": "planned",
+      "prerequisites": [
+        "m05-reveal"
+      ],
+      "output": "build/m05-round-reset.html"
+    },
+    {
+      "id": "m05-final-result",
+      "milestoneId": "M05",
+      "title": "Final result",
+      "status": "planned",
+      "prerequisites": [
+        "m05-round-reset"
+      ],
+      "output": "build/m05-final-result.html"
+    },
+    {
+      "id": "m05-deadline",
+      "milestoneId": "M05",
+      "title": "Deadline",
+      "status": "planned",
+      "prerequisites": [
+        "m05-final-result"
+      ],
+      "output": "build/m05-deadline.html"
+    },
+    {
+      "id": "m05-complete-match",
+      "milestoneId": "M05",
+      "title": "Complete match",
+      "status": "planned",
+      "prerequisites": [
+        "m05-deadline"
+      ],
+      "output": "build/m05-complete-match.html"
+    },
+    {
+      "id": "m06-http",
+      "milestoneId": "M06",
+      "title": "Http",
+      "status": "planned",
+      "prerequisites": [
+        "m05-complete-match"
+      ],
+      "output": "build/m06-http.html"
+    },
+    {
+      "id": "m06-controller",
+      "milestoneId": "M06",
+      "title": "Controller",
+      "status": "planned",
+      "prerequisites": [
+        "m06-http"
+      ],
+      "output": "build/m06-controller.html"
+    },
+    {
+      "id": "m06-validation",
+      "milestoneId": "M06",
+      "title": "Validation",
+      "status": "planned",
+      "prerequisites": [
+        "m06-controller"
+      ],
+      "output": "build/m06-validation.html"
+    },
+    {
+      "id": "m06-identity",
+      "milestoneId": "M06",
+      "title": "Identity",
+      "status": "planned",
+      "prerequisites": [
+        "m06-validation"
+      ],
+      "output": "build/m06-identity.html"
+    },
+    {
+      "id": "m07-browser-basics",
+      "milestoneId": "M07",
+      "title": "Browser basics",
+      "status": "planned",
+      "prerequisites": [
+        "m06-identity"
+      ],
+      "output": "build/m07-browser-basics.html"
+    },
+    {
+      "id": "m07-react-state",
+      "milestoneId": "M07",
+      "title": "React state",
+      "status": "planned",
+      "prerequisites": [
+        "m07-browser-basics"
+      ],
+      "output": "build/m07-react-state.html"
+    },
+    {
+      "id": "m07-transport",
+      "milestoneId": "M07",
+      "title": "Transport",
+      "status": "planned",
+      "prerequisites": [
+        "m07-react-state"
+      ],
+      "output": "build/m07-transport.html"
+    },
+    {
+      "id": "m07-editor-run",
+      "milestoneId": "M07",
+      "title": "Editor run",
+      "status": "planned",
+      "prerequisites": [
+        "m07-transport"
+      ],
+      "output": "build/m07-editor-run.html"
+    },
+    {
+      "id": "m07-submit-reveal",
+      "milestoneId": "M07",
+      "title": "Submit reveal",
+      "status": "planned",
+      "prerequisites": [
+        "m07-editor-run"
+      ],
+      "output": "build/m07-submit-reveal.html"
+    },
+    {
+      "id": "m07-local-journey",
+      "milestoneId": "M07",
+      "title": "Local journey",
+      "status": "planned",
+      "prerequisites": [
+        "m07-submit-reveal"
+      ],
+      "output": "build/m07-local-journey.html"
+    },
+    {
+      "id": "m08-store-port",
+      "milestoneId": "M08",
+      "title": "Store port",
+      "status": "planned",
+      "prerequisites": [
+        "m05-complete-match",
+        "m06-identity",
+        "m07-local-journey"
+      ],
+      "output": "build/m08-store-port.html"
+    },
+    {
+      "id": "m08-postgres",
+      "milestoneId": "M08",
+      "title": "Postgres",
+      "status": "planned",
+      "prerequisites": [
+        "m08-store-port"
+      ],
+      "output": "build/m08-postgres.html"
+    },
+    {
+      "id": "m08-transactions",
+      "milestoneId": "M08",
+      "title": "Transactions",
+      "status": "planned",
+      "prerequisites": [
+        "m08-postgres"
+      ],
+      "output": "build/m08-transactions.html"
+    },
+    {
+      "id": "m08-claims",
+      "milestoneId": "M08",
+      "title": "Claims",
+      "status": "planned",
+      "prerequisites": [
+        "m08-transactions"
+      ],
+      "output": "build/m08-claims.html"
+    },
+    {
+      "id": "m08-events",
+      "milestoneId": "M08",
+      "title": "Events",
+      "status": "planned",
+      "prerequisites": [
+        "m08-claims"
+      ],
+      "output": "build/m08-events.html"
+    },
+    {
+      "id": "m08-recovery",
+      "milestoneId": "M08",
+      "title": "Recovery",
+      "status": "planned",
+      "prerequisites": [
+        "m08-events"
+      ],
+      "output": "build/m08-recovery.html"
+    },
+    {
+      "id": "m09-isolation",
+      "milestoneId": "M09",
+      "title": "Isolation",
+      "status": "planned",
+      "prerequisites": [
+        "m08-recovery"
+      ],
+      "output": "build/m09-isolation.html"
+    },
+    {
+      "id": "m09-provider",
+      "milestoneId": "M09",
+      "title": "Provider",
+      "status": "planned",
+      "prerequisites": [
+        "m09-isolation"
+      ],
+      "output": "build/m09-provider.html"
+    },
+    {
+      "id": "m09-case-runner",
+      "milestoneId": "M09",
+      "title": "Case runner",
+      "status": "planned",
+      "prerequisites": [
+        "m09-provider"
+      ],
+      "output": "build/m09-case-runner.html"
+    },
+    {
+      "id": "m09-worker",
+      "milestoneId": "M09",
+      "title": "Worker",
+      "status": "planned",
+      "prerequisites": [
+        "m09-case-runner"
+      ],
+      "output": "build/m09-worker.html"
+    },
+    {
+      "id": "m09-replace-fake",
+      "milestoneId": "M09",
+      "title": "Replace fake",
+      "status": "planned",
+      "prerequisites": [
+        "m09-worker"
+      ],
+      "output": "build/m09-replace-fake.html"
+    },
+    {
+      "id": "m10-invite",
+      "milestoneId": "M10",
+      "title": "Invite",
+      "status": "planned",
+      "prerequisites": [
+        "m07-local-journey",
+        "m08-recovery",
+        "m09-replace-fake"
+      ],
+      "output": "build/m10-invite.html"
+    },
+    {
+      "id": "m10-start",
+      "milestoneId": "M10",
+      "title": "Start",
+      "status": "planned",
+      "prerequisites": [
+        "m10-invite"
+      ],
+      "output": "build/m10-start.html"
+    },
+    {
+      "id": "m10-socket-auth",
+      "milestoneId": "M10",
+      "title": "Socket auth",
+      "status": "planned",
+      "prerequisites": [
+        "m10-start"
+      ],
+      "output": "build/m10-socket-auth.html"
+    },
+    {
+      "id": "m10-presence",
+      "milestoneId": "M10",
+      "title": "Presence",
+      "status": "planned",
+      "prerequisites": [
+        "m10-socket-auth"
+      ],
+      "output": "build/m10-presence.html"
+    },
+    {
+      "id": "m10-reconnect",
+      "milestoneId": "M10",
+      "title": "Reconnect",
+      "status": "planned",
+      "prerequisites": [
+        "m10-presence"
+      ],
+      "output": "build/m10-reconnect.html"
+    },
+    {
+      "id": "m10-two-clients",
+      "milestoneId": "M10",
+      "title": "Two clients",
+      "status": "planned",
+      "prerequisites": [
+        "m10-reconnect"
+      ],
+      "output": "build/m10-two-clients.html"
+    },
+    {
+      "id": "m11-document",
+      "milestoneId": "M11",
+      "title": "Document",
+      "status": "planned",
+      "prerequisites": [
+        "m10-two-clients"
+      ],
+      "output": "build/m11-document.html"
+    },
+    {
+      "id": "m11-ready",
+      "milestoneId": "M11",
+      "title": "Ready",
+      "status": "planned",
+      "prerequisites": [
+        "m11-document"
+      ],
+      "output": "build/m11-ready.html"
+    },
+    {
+      "id": "m11-round-lifetime",
+      "milestoneId": "M11",
+      "title": "Round lifetime",
+      "status": "planned",
+      "prerequisites": [
+        "m11-ready"
+      ],
+      "output": "build/m11-round-lifetime.html"
+    },
+    {
+      "id": "m11-four-clients",
+      "milestoneId": "M11",
+      "title": "Four clients",
+      "status": "planned",
+      "prerequisites": [
+        "m11-round-lifetime"
+      ],
+      "output": "build/m11-four-clients.html"
+    },
+    {
+      "id": "m12-chat",
+      "milestoneId": "M12",
+      "title": "Chat",
+      "status": "planned",
+      "prerequisites": [
+        "m11-four-clients"
+      ],
+      "output": "build/m12-chat.html"
+    },
+    {
+      "id": "m12-sidecars",
+      "milestoneId": "M12",
+      "title": "Sidecars",
+      "status": "planned",
+      "prerequisites": [
+        "m12-chat"
+      ],
+      "output": "build/m12-sidecars.html"
+    },
+    {
+      "id": "m12-live-chat",
+      "milestoneId": "M12",
+      "title": "Live chat",
+      "status": "planned",
+      "prerequisites": [
+        "m12-sidecars"
+      ],
+      "output": "build/m12-live-chat.html"
+    },
+    {
+      "id": "m13-inspect-team",
+      "milestoneId": "M13",
+      "title": "Inspect team",
+      "status": "planned",
+      "prerequisites": [
+        "m12-live-chat"
+      ],
+      "output": "build/m13-inspect-team.html"
+    },
+    {
+      "id": "m13-map-rule",
+      "milestoneId": "M13",
+      "title": "Map rule",
+      "status": "planned",
+      "prerequisites": [
+        "m13-inspect-team"
+      ],
+      "output": "build/m13-map-rule.html"
+    },
+    {
+      "id": "m13-integrate",
+      "milestoneId": "M13",
+      "title": "Integrate",
+      "status": "planned",
+      "prerequisites": [
+        "m13-map-rule"
+      ],
+      "output": "build/m13-integrate.html"
+    },
+    {
+      "id": "m13-compose",
+      "milestoneId": "M13",
+      "title": "Compose",
+      "status": "planned",
+      "prerequisites": [
+        "m13-integrate"
+      ],
+      "output": "build/m13-compose.html"
+    },
+    {
+      "id": "m13-tls",
+      "milestoneId": "M13",
+      "title": "Tls",
+      "status": "planned",
+      "prerequisites": [
+        "m13-compose"
+      ],
+      "output": "build/m13-tls.html"
+    },
+    {
+      "id": "m13-parity",
+      "milestoneId": "M13",
+      "title": "Parity",
+      "status": "planned",
+      "prerequisites": [
+        "m13-tls"
+      ],
+      "output": "build/m13-parity.html"
+    },
+    {
+      "id": "m13-handover",
+      "milestoneId": "M13",
+      "title": "Handover",
+      "status": "planned",
+      "prerequisites": [
+        "m13-parity"
+      ],
+      "output": "build/m13-handover.html"
+    }
+  ],
+  "behaviors": [
+    {
+      "id": "behavior-01",
+      "title": "Basic rules, state, membership, timing",
+      "lessonIds": [
+        "m02-boundary",
+        "m02-types-runtime",
+        "m02-records",
+        "m02-modules",
+        "m02-transfer",
+        "m03-records",
+        "m03-transitions",
+        "m03-membership",
+        "m03-clock"
+      ],
+      "referenceLessonIds": [
+        "0003-rounds-and-final-score"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Explain state and reject an action for the correct reason with an injected clock."
+    },
+    {
+      "id": "behavior-02",
+      "title": "Problems, starter code, visible/hidden separation",
+      "lessonIds": [
+        "m04-problem",
+        "m04-judge-port",
+        "m04-run"
+      ],
+      "referenceLessonIds": [
+        "0005-problem-editor-run",
+        "0007-judge-boundary"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Render public Problem data and show that hidden inputs remain private."
+    },
+    {
+      "id": "behavior-03",
+      "title": "Visible Run and failures",
+      "lessonIds": [
+        "m04-problem",
+        "m04-judge-port",
+        "m04-run",
+        "m07-browser-basics",
+        "m07-react-state",
+        "m07-transport",
+        "m07-editor-run",
+        "m07-submit-reveal",
+        "m07-local-journey",
+        "m09-isolation",
+        "m09-provider",
+        "m09-case-runner",
+        "m09-worker",
+        "m09-replace-fake"
+      ],
+      "referenceLessonIds": [
+        "0005-problem-editor-run"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Run visible cases without changing score; explain compilation/runtime/infrastructure outcomes."
+    },
+    {
+      "id": "behavior-04",
+      "title": "Submit ownership and acceptance",
+      "lessonIds": [
+        "m05-accept",
+        "m05-pending",
+        "m05-retry",
+        "m05-score",
+        "m05-reveal",
+        "m05-round-reset",
+        "m05-final-result",
+        "m05-deadline",
+        "m05-complete-match",
+        "m06-http",
+        "m06-controller",
+        "m06-validation",
+        "m06-identity"
+      ],
+      "referenceLessonIds": [
+        "0001-submit-journey"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "An authorized valid action reaches evaluation; rejected actions do not."
+    },
+    {
+      "id": "behavior-05",
+      "title": "Evaluation identity, concurrency, failures",
+      "lessonIds": [
+        "m05-accept",
+        "m05-pending",
+        "m05-retry",
+        "m05-score",
+        "m05-reveal",
+        "m05-round-reset",
+        "m05-final-result",
+        "m05-deadline",
+        "m05-complete-match",
+        "m08-store-port",
+        "m08-postgres",
+        "m08-transactions",
+        "m08-claims",
+        "m08-events",
+        "m08-recovery"
+      ],
+      "referenceLessonIds": [
+        "0006-evaluation-retries"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Replay a same-identity request safely; reject conflicting reuse and avoid duplicate committed outcomes."
+    },
+    {
+      "id": "behavior-06",
+      "title": "Score, Reveal, Round reset, final result",
+      "lessonIds": [
+        "m05-accept",
+        "m05-pending",
+        "m05-retry",
+        "m05-score",
+        "m05-reveal",
+        "m05-round-reset",
+        "m05-final-result",
+        "m05-deadline",
+        "m05-complete-match",
+        "m07-browser-basics",
+        "m07-react-state",
+        "m07-transport",
+        "m07-editor-run",
+        "m07-submit-reveal",
+        "m07-local-journey"
+      ],
+      "referenceLessonIds": [
+        "0002-reveal-cutoff",
+        "0003-rounds-and-final-score"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Explain summed scores and tie-breaks; reveal only at the permitted time; reset the appropriate state."
+    },
+    {
+      "id": "behavior-07",
+      "title": "Match deadline and bounded grace",
+      "lessonIds": [
+        "m05-accept",
+        "m05-pending",
+        "m05-retry",
+        "m05-score",
+        "m05-reveal",
+        "m05-round-reset",
+        "m05-final-result",
+        "m05-deadline",
+        "m05-complete-match",
+        "m08-store-port",
+        "m08-postgres",
+        "m08-transactions",
+        "m08-claims",
+        "m08-events",
+        "m08-recovery"
+      ],
+      "referenceLessonIds": [
+        "0002-reveal-cutoff",
+        "0003-rounds-and-final-score"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Reject at the exact Match deadline, handle accepted work within grace, and finish durably with unplayed Rounds contributing zero."
+    },
+    {
+      "id": "behavior-08",
+      "title": "Persistence, revisions, restart",
+      "lessonIds": [
+        "m08-store-port",
+        "m08-postgres",
+        "m08-transactions",
+        "m08-claims",
+        "m08-events",
+        "m08-recovery"
+      ],
+      "referenceLessonIds": [
+        "0008-persistence-recovery"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Recover durable state and pending work; surface stale writes without silently replaying unsafe commands."
+    },
+    {
+      "id": "behavior-09",
+      "title": "Post-commit events",
+      "lessonIds": [
+        "m08-store-port",
+        "m08-postgres",
+        "m08-transactions",
+        "m08-claims",
+        "m08-events",
+        "m08-recovery",
+        "m10-invite",
+        "m10-start",
+        "m10-socket-auth",
+        "m10-presence",
+        "m10-reconnect",
+        "m10-two-clients"
+      ],
+      "referenceLessonIds": [
+        "0008-persistence-recovery",
+        "0009-live-connection"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Failed writes do not publish success; reconnect can recover missed events from authoritative state."
+    },
+    {
+      "id": "behavior-10",
+      "title": "Execution contract, isolation, provider selection",
+      "lessonIds": [
+        "m09-isolation",
+        "m09-provider",
+        "m09-case-runner",
+        "m09-worker",
+        "m09-replace-fake"
+      ],
+      "referenceLessonIds": [
+        "0007-judge-boundary",
+        "0013-running-the-project"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Distinguish fake-Judge logic checks from real execution checks; validate limits and sealing without silently falling back between providers."
+    },
+    {
+      "id": "behavior-11",
+      "title": "Worker capacity and readiness",
+      "lessonIds": [
+        "m09-isolation",
+        "m09-provider",
+        "m09-case-runner",
+        "m09-worker",
+        "m09-replace-fake",
+        "m13-inspect-team",
+        "m13-map-rule",
+        "m13-integrate",
+        "m13-compose",
+        "m13-tls",
+        "m13-parity",
+        "m13-handover"
+      ],
+      "referenceLessonIds": [
+        "0013-running-the-project",
+        "0014-rewrite-with-tests"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Explain and check bounded queue, timeout, readiness, and private deployment behavior."
+    },
+    {
+      "id": "behavior-12",
+      "title": "Invitation Lobby and Match creation",
+      "lessonIds": [
+        "m10-invite",
+        "m10-start",
+        "m10-socket-auth",
+        "m10-presence",
+        "m10-reconnect",
+        "m10-two-clients"
+      ],
+      "referenceLessonIds": [
+        "0004-lobby-to-match"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Verify host/full-side/Ready rules, concurrent joins/start, stale replies, and one Match handoff."
+    },
+    {
+      "id": "behavior-13",
+      "title": "Live connection, authorization, presence",
+      "lessonIds": [
+        "m10-invite",
+        "m10-start",
+        "m10-socket-auth",
+        "m10-presence",
+        "m10-reconnect",
+        "m10-two-clients"
+      ],
+      "referenceLessonIds": [
+        "0009-live-connection"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Reject nonmembers, count multiple sockets correctly, and reconnect without stale-state corruption."
+    },
+    {
+      "id": "behavior-14",
+      "title": "2v2 documents and readiness",
+      "lessonIds": [
+        "m11-document",
+        "m11-ready",
+        "m11-round-lifetime",
+        "m11-four-clients"
+      ],
+      "referenceLessonIds": [
+        "0010-team-collaboration"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Keep teams isolated, invalidate Ready after edits, and judge the agreed revision."
+    },
+    {
+      "id": "behavior-15",
+      "title": "Team chat and pings",
+      "lessonIds": [
+        "m12-chat",
+        "m12-sidecars",
+        "m12-live-chat"
+      ],
+      "referenceLessonIds": [
+        "0011-team-chat"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Enforce team membership and explain history limits without claiming durable chat."
+    },
+    {
+      "id": "behavior-16",
+      "title": "Browser screen and client lifetimes",
+      "lessonIds": [
+        "m07-browser-basics",
+        "m07-react-state",
+        "m07-transport",
+        "m07-editor-run",
+        "m07-submit-reveal",
+        "m07-local-journey",
+        "m10-invite",
+        "m10-start",
+        "m10-socket-auth",
+        "m10-presence",
+        "m10-reconnect",
+        "m10-two-clients",
+        "m11-document",
+        "m11-ready",
+        "m11-round-lifetime",
+        "m11-four-clients",
+        "m12-chat",
+        "m12-sidecars",
+        "m12-live-chat"
+      ],
+      "referenceLessonIds": [
+        "0012-arena-screen",
+        "0011-team-chat"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Complete the player journey; show correct deadline-Reveal order; clean up Round-scoped collaboration while preserving Match-scoped chat."
+    },
+    {
+      "id": "behavior-17",
+      "title": "Runtime/configuration/integration",
+      "lessonIds": [
+        "m01-tools",
+        "m01-folder",
+        "m01-package",
+        "m01-first-run",
+        "m06-http",
+        "m06-controller",
+        "m06-validation",
+        "m06-identity",
+        "m09-isolation",
+        "m09-provider",
+        "m09-case-runner",
+        "m09-worker",
+        "m09-replace-fake",
+        "m13-inspect-team",
+        "m13-map-rule",
+        "m13-integrate",
+        "m13-compose",
+        "m13-tls",
+        "m13-parity",
+        "m13-handover"
+      ],
+      "referenceLessonIds": [
+        "0013-running-the-project"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Run the actual target setup with documented prerequisites, ignored secrets, correct identity contracts, and HTTPS/WSS checks."
+    },
+    {
+      "id": "behavior-18",
+      "title": "Whole-game parity and failure journeys",
+      "lessonIds": [
+        "m13-inspect-team",
+        "m13-map-rule",
+        "m13-integrate",
+        "m13-compose",
+        "m13-tls",
+        "m13-parity",
+        "m13-handover"
+      ],
+      "referenceLessonIds": [
+        "0014-rewrite-with-tests"
+      ],
+      "checkIds": [],
+      "scope": "required",
+      "reason": "Record target outcomes for complete 1v1/2v2, disconnect/reconnect, failures, and cross-team isolation. Explain meaningful differences."
+    },
+    {
+      "id": "behavior-19",
+      "title": "Optional/deferred/reference-only code",
+      "lessonIds": [
+        "m13-inspect-team",
+        "m13-map-rule",
+        "m13-integrate",
+        "m13-compose",
+        "m13-tls",
+        "m13-parity",
+        "m13-handover"
+      ],
+      "referenceLessonIds": [
+        "0004-lobby-to-match",
+        "0007-judge-boundary",
+        "0013-running-the-project",
+        "0014-rewrite-with-tests"
+      ],
+      "checkIds": [],
+      "scope": "support",
+      "reason": "Every item has a reasoned disposition. Optional experiments and service skeletons cannot be presented as production features or silently required builds."
+    }
+  ],
+  "dispositions": []
+}

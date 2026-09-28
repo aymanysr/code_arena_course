@@ -1,0 +1,279 @@
+[
+  {
+    "id": "m00-destination",
+    "milestoneId": "M00",
+    "title": "See what you will build",
+    "why": "A file is easier to understand when you know its job in the game.",
+    "outcome": "Explain what a Match does and where each part runs.",
+    "prerequisites": [],
+    "references": [],
+    "checks": [
+      {
+        "id": "m00-destination-explain",
+        "kind": "explain",
+        "command": "Explain aloud",
+        "cwd": "current-terminal",
+        "expected": "Run checks visible examples without scoring. Submit uses hidden tests. The server owns the score.",
+        "failure": [
+          {
+            "symptom": "Run and Submit still feel the same",
+            "diagnostic": "Compare which tests each action can use.",
+            "meaning": "Visible examples help you practice; hidden tests decide the score."
+          }
+        ]
+      }
+    ],
+    "steps": [
+      {
+        "id": "m00-destination-orient",
+        "phase": "orient",
+        "title": "Start with the destination",
+        "question": "What are we building?",
+        "explanation": [
+          "Code Arena is a game where two sides solve the same programming Problem. A side is one player in 1v1, or two teammates in 2v2.",
+          "One Match contains three Rounds in the reference game. Each Round brings a new Problem. You will build the pieces in a separate practice folder before connecting them to your team\u2019s app."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name what the player sends.",
+          "Ask whether the examples are public or hidden.",
+          "A practice check gives feedback without changing a competition score.",
+          "Run checks public examples. Submit sends a locked program for hidden judging. Reveal shows the allowed score breakdown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Connect this idea to the next part."
+      },
+      {
+        "id": "m00-destination-see",
+        "phase": "see",
+        "title": "Follow one Round",
+        "question": "What does a player do?",
+        "explanation": [
+          "Read the Problem. Write a small program in the editor. Run the visible examples to find mistakes. Submit when you want the hidden tests to score your code.",
+          "At Reveal, both sides see the Round results. After the last Round, the game adds the scores and decides the winner."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name what the player sends.",
+          "Ask whether the examples are public or hidden.",
+          "A practice check gives feedback without changing a competition score.",
+          "Run checks public examples. Submit sends a locked program for hidden judging. Reveal shows the allowed score breakdown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Connect this idea to the next part.",
+        "visual": {
+          "kind": "trace",
+          "title": "One Round, one action at a time",
+          "code": [
+            "Read the Problem",
+            "Write code",
+            "Run visible examples",
+            "Submit a locked program",
+            "Reveal the score"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Read",
+              "values": [
+                {
+                  "label": "Action",
+                  "value": "Read"
+                },
+                {
+                  "label": "Score",
+                  "value": "No score change"
+                }
+              ],
+              "codeLines": [
+                1
+              ],
+              "explanation": "Both sides receive the same Problem."
+            },
+            {
+              "id": "frame-1",
+              "label": "Write",
+              "values": [
+                {
+                  "label": "Action",
+                  "value": "Write"
+                },
+                {
+                  "label": "Score",
+                  "value": "No score change"
+                }
+              ],
+              "codeLines": [
+                2
+              ],
+              "explanation": "The editor holds your current draft."
+            },
+            {
+              "id": "frame-2",
+              "label": "Run",
+              "values": [
+                {
+                  "label": "Action",
+                  "value": "Run"
+                },
+                {
+                  "label": "Score",
+                  "value": "No score change"
+                }
+              ],
+              "codeLines": [
+                3
+              ],
+              "explanation": "Visible examples return feedback without scoring."
+            },
+            {
+              "id": "frame-3",
+              "label": "Submit",
+              "values": [
+                {
+                  "label": "Action",
+                  "value": "Submit"
+                },
+                {
+                  "label": "Score",
+                  "value": "Hidden until Reveal"
+                }
+              ],
+              "codeLines": [
+                4
+              ],
+              "explanation": "The server accepts a snapshot and asks the Judge to evaluate it."
+            },
+            {
+              "id": "frame-4",
+              "label": "Reveal",
+              "values": [
+                {
+                  "label": "Action",
+                  "value": "Reveal"
+                },
+                {
+                  "label": "Score",
+                  "value": "Round result visible"
+                }
+              ],
+              "codeLines": [
+                5
+              ],
+              "explanation": "The allowed breakdown becomes visible to both sides."
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m00-destination-understand",
+        "phase": "understand",
+        "title": "Give each part one job",
+        "question": "Where does the work happen?",
+        "explanation": [
+          "The browser shows the editor and results. The server checks who may act and keeps the official Match state. The database saves accepted state.",
+          "A separate Judge runs player programs inside an isolated environment. Your browser and the Game server must not execute untrusted player code directly."
+        ],
+        "vocabulary": [
+          {
+            "term": "Server",
+            "meaning": "A running program that receives requests and owns the official game rules."
+          }
+        ],
+        "hints": [
+          "Name what the player sends.",
+          "Ask whether the examples are public or hidden.",
+          "A practice check gives feedback without changing a competition score.",
+          "Run checks public examples. Submit sends a locked program for hidden judging. Reveal shows the allowed score breakdown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Connect this idea to the next part."
+      },
+      {
+        "id": "m00-destination-try",
+        "phase": "try",
+        "title": "Predict a change",
+        "question": "Does pressing Run increase the score?",
+        "explanation": [
+          "Predict the answer before opening the hints. Run uses visible examples and never changes the score.",
+          "A helpful example: checking your answers on a practice sheet is different from handing in an exam."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name what the player sends.",
+          "Ask whether the examples are public or hidden.",
+          "A practice check gives feedback without changing a competition score.",
+          "Run checks public examples. Submit sends a locked program for hidden judging. Reveal shows the allowed score breakdown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Connect this idea to the next part."
+      },
+      {
+        "id": "m00-destination-build",
+        "phase": "build",
+        "title": "Draw your first game map",
+        "question": "Can you give each part its job?",
+        "explanation": [
+          "On paper or in the note box, draw four labeled boxes: Browser, Server, Database, Judge. Put the editor under Browser and official score under Server.",
+          "Do not create a code repository yet. The next lessons show exactly where your practice files will go."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name what the player sends.",
+          "Ask whether the examples are public or hidden.",
+          "A practice check gives feedback without changing a competition score.",
+          "Run checks public examples. Submit sends a locked program for hidden judging. Reveal shows the allowed score breakdown."
+        ],
+        "files": [
+          {
+            "role": "reference.glossary",
+            "workspace": "reference",
+            "path": "CONTEXT.md",
+            "action": "read",
+            "owner": "The project glossary defines the game words.",
+            "change": "Read Match, Round, Run, and Submission.",
+            "pattern": "Use one name for each responsibility."
+          }
+        ],
+        "checkIds": [
+          "m00-destination-explain"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Connect this idea to the next part."
+      },
+      {
+        "id": "m00-destination-check",
+        "phase": "check",
+        "title": "Explain the journey",
+        "question": "Can you explain it without the map?",
+        "explanation": [
+          "Say what happens from Run to Submit to Reveal. Use your own words. The check below records your explanation, not a finished game.",
+          "Next you will separate the reference code, your practice folder, and your friend\u2019s future repository."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name what the player sends.",
+          "Ask whether the examples are public or hidden.",
+          "A practice check gives feedback without changing a competition score.",
+          "Run checks public examples. Submit sends a locked program for hidden judging. Reveal shows the allowed score breakdown."
+        ],
+        "files": [],
+        "checkIds": [
+          "m00-destination-explain"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Connect this idea to the next part.",
+        "transfer": "If a player edits after submitting, should the accepted source change? Explain why a locked snapshot matters."
+      }
+    ]
+  }
+]
