@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';let api={};try{api=await import('../assets/build-visuals.mjs')}catch{}
+test('boundary choice exposes the equality mistake',()=>{assert.equal(typeof api.boundaryResult,'function');assert.equal(api.boundaryResult(0,'>='),true);assert.equal(api.boundaryResult(0,'>'),false);assert.equal(api.boundaryResult(-2,'>'),false);assert.equal(api.boundaryResult(12,'>'),true);assert.throws(()=>api.boundaryResult(NaN,'>'),/finite/)});
+test('a trace selects only authored frames',()=>{assert.equal(typeof api.selectFrame,'function');const visual={frames:[{id:'a',label:'Input'},{id:'b',label:'Result'}]};assert.equal(api.selectFrame(visual,'b').label,'Result');assert.throws(()=>api.selectFrame(visual,'missing'),/frame/)});
