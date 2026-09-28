@@ -129,6 +129,12 @@ test("a complete first lesson session works from a direct file and local server"
     await page.waitForTimeout(100);
     assert.ok(new URL(page.url()).pathname.endsWith("lessons/0000-before-lesson-one.html"), `${mode}: Start opens orientation`);
     assert.equal(await page.locator("#homes-title").isVisible(), true, `${mode}: orientation explains where code lives`);
+    await page.goto(route(mode, "source-map.html"));
+    assert.equal(await page.locator("#start-lesson").getAttribute("href"), "lessons/0000-before-lesson-one.html");
+    assert.equal((await page.locator("#start-lesson").innerText()).replace(/\s+/g, " ").trim(), "Start with the map →");
+    await page.locator("#start-lesson").click({ noWaitAfter: true });
+    await page.waitForTimeout(100);
+    assert.ok(new URL(page.url()).pathname.endsWith("lessons/0000-before-lesson-one.html"), `${mode}: source map Start opens orientation`);
     await page.goto(route(mode, lessonOutput));
     assert.ok(await page.locator("[data-build-card]").count() > 0, `${mode}: Lesson 1 has build context`);
     assert.match(await page.locator("[data-build-source]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);

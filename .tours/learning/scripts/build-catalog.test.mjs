@@ -532,7 +532,7 @@ test("renders catalog lessons and carries a validated optional build path", asyn
     assert.match(secondPage, /Source references match 1 pinned files/);
     assert.match(firstPage, /href="\.\.\/source-map\.html\?file=src%2Fengine\.ts&amp;line=1"/);
     assert.match(catalogPage, /class="hljs-keyword"/);
-    assert.match(catalogPage, /id="start-lesson" href="lessons\/first\.html"/);
+    assert.match(catalogPage, /id="start-lesson" href="lessons\/0000-before-lesson-one\.html">Start with the map/);
     assert.match(catalogPage, /<details class="focus-panel" id="course-list">/);
     assert.ok(catalogPage.indexOf('href="lessons/first.html"') < catalogPage.indexOf('href="lessons/second.html"'));
     assert.match(catalogPage, /lesson-progress[\s\S]*not a mastery score/);

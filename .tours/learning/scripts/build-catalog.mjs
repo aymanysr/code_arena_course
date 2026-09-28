@@ -935,9 +935,11 @@ function renderReferenceChecks(data) {
 
 export function renderCatalogTemplate(template, stylesheet, data, repoRoot = REPO_ROOT) {
   const firstLesson = [...(data.lessons ?? [])].sort((left, right) => left.order - right.order)[0];
-  const firstLessonHref = firstLesson
-    ? firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/")
-    : "#course-list";
+  const firstLessonHref = data.learningPath
+    ? data.learningPath.orientation.output.split("/").map((segment) => encodeURIComponent(segment)).join("/")
+    : firstLesson
+      ? firstLesson.output.split("/").map((segment) => encodeURIComponent(segment)).join("/")
+      : "#course-list";
   const status = catalogSnapshotStatus(data);
   const replacements = {
     "<!-- INLINE_COURSE_STYLES -->": `<style>\n${stylesheet}\n</style>`,
@@ -953,7 +955,9 @@ export function renderCatalogTemplate(template, stylesheet, data, repoRoot = REP
     "{{COUNT_EXCLUDED}}": String(data.summary.excluded),
     "{{COUNT_UNCLASSIFIED}}": String(data.summary.unclassified),
     "{{FIRST_LESSON_URL}}": html(firstLessonHref),
-    "{{FIRST_LESSON_ACTION}}": firstLesson ? `Start Lesson ${firstLesson.order}` : "Browse lessons",
+    "{{FIRST_LESSON_ACTION}}": data.learningPath
+      ? "Start with the map"
+      : firstLesson ? `Start Lesson ${firstLesson.order}` : "Browse lessons",
     "{{LESSON_LIST}}": renderLessonList(data, repoRoot),
     "{{FILE_ROWS}}": renderFileRows(data, repoRoot),
     "{{SOURCE_TEMPLATES}}": renderSourceTemplates(data),
