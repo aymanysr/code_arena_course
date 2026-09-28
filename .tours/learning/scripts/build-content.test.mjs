@@ -14,3 +14,4 @@ test('practice configuration checks, emits and runs a module while rejecting the
   assert.throws(()=>execFileSync('npm',['run','typecheck'],{cwd:dir,stdio:'pipe'}));
  }finally{await rm(dir,{recursive:true,force:true})}
 });
+test('the C-to-TypeScript path reaches an independent transfer task',async()=>{const course=await loadBuildCourse(learningDir,referenceData);for(const id of ['m02-boundary','m02-types-runtime','m02-records','m02-modules','m02-transfer'])assert.ok(course.lessons.some(l=>l.id===id),`${id} is authored`);const task=course.lessons.find(l=>l.id==='m02-transfer');assert.ok(task.steps.some(s=>s.phase==='build'&&s.files.some(f=>f.path==='src/limit.ts')))});

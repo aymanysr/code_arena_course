@@ -5,7 +5,7 @@ This record identifies the direct reference files used by the six CodeTours. It 
 ## Snapshot
 
 - Recorded: 2026-09-28
-- Git HEAD: `15ae4b8343bfd3a332d956a1c4c7962685de3086`
+- Git HEAD: `5a3f507d156b299fe20f10e4b42f9bedae9cd0c3`
 - Git worktree: dirty; the recorded file hashes capture working-tree content independently of HEAD.
 - Integrity list: [`reference-baseline.sha256`](reference-baseline.sha256), covering 60 direct inputs: all six tours, their anchored source files and named test/spec references, relevant package/test configuration, the Code Arena spec and relevant ADRs, and the 42-subject compliance matrix.
 - Tour links checked: all 58 file-and-line anchors resolve in current files.

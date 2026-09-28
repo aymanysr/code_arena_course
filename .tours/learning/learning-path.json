@@ -304,8 +304,8 @@
     {
       "id": "m02-boundary",
       "milestoneId": "M02",
-      "title": "Boundary",
-      "status": "planned",
+      "title": "Turn a boundary into a test",
+      "status": "ready",
       "prerequisites": [
         "m01-first-run"
       ],
@@ -314,8 +314,8 @@
     {
       "id": "m02-types-runtime",
       "milestoneId": "M02",
-      "title": "Types runtime",
-      "status": "planned",
+      "title": "Separate types from running code",
+      "status": "ready",
       "prerequisites": [
         "m02-boundary"
       ],
@@ -324,8 +324,8 @@
     {
       "id": "m02-records",
       "milestoneId": "M02",
-      "title": "Records",
-      "status": "planned",
+      "title": "Represent players and missing results",
+      "status": "ready",
       "prerequisites": [
         "m02-types-runtime"
       ],
@@ -334,8 +334,8 @@
     {
       "id": "m02-modules",
       "milestoneId": "M02",
-      "title": "Modules",
-      "status": "planned",
+      "title": "Move a rule without changing it",
+      "status": "ready",
       "prerequisites": [
         "m02-records"
       ],
@@ -344,8 +344,8 @@
     {
       "id": "m02-transfer",
       "milestoneId": "M02",
-      "title": "Transfer",
-      "status": "planned",
+      "title": "Write a changed rule on your own",
+      "status": "ready",
       "prerequisites": [
         "m02-modules"
       ],
