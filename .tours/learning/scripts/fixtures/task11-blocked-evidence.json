@@ -1,0 +1,33 @@
+{
+  "fixtureOnly": true,
+  "fixtureLabel": "Synthetic audit input: a passed unit check must not clear a blocked database gate.",
+  "expectedLessonGate": "pending",
+  "entries": [
+    {
+      "lessonId": "m08-postgres",
+      "checkId": "m08-postgres-roundtrip",
+      "workspace": "author-rehearsal",
+      "kind": "database",
+      "command": "npm run test:db -- test/postgres.test.ts",
+      "cwd": ".",
+      "result": "blocked",
+      "observed": "fixture: dedicated local PostgreSQL did not answer; test body did not run.",
+      "checkedAt": "2026-09-29T00:00:00.000Z",
+      "revision": "guided-2026-09-28-1",
+      "sourceSnapshotId": "f10f2ef7328398f8"
+    },
+    {
+      "lessonId": "m08-store-port",
+      "checkId": "m08-store-port-unit",
+      "workspace": "author-rehearsal",
+      "kind": "unit",
+      "command": "npm test -- test/store.test.ts",
+      "cwd": ".",
+      "result": "passed",
+      "observed": "fixture: memory adapter round-trip and stale revision assertion passed.",
+      "checkedAt": "2026-09-29T00:00:00.000Z",
+      "revision": "guided-2026-09-28-1",
+      "sourceSnapshotId": "f10f2ef7328398f8"
+    }
+  ]
+}

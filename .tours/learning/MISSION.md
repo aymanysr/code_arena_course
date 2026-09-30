@@ -2,24 +2,27 @@
 
 ## Why
 
-I want to understand the exact game implementation that is in this repository, then eventually recode the game myself so I can explain and take responsibility for what the vibe-coded version does.
+The goal is to understand the current game well enough to recode its behavior and explain the important decisions. The learner is comfortable with C and is new to TypeScript and web development, so the course starts with familiar ideas and adds one new boundary at a time.
 
 ## Success looks like
 
-- Trace important player actions through the actual UI, transport, services, game rules, storage, judge, and tests.
-- Find every in-scope game source file and know whether a lesson links to it, it changed since that lesson, or it still needs teaching.
-- Rebuild features in small slices and write my own tests against the observable behavior of the current reference.
-- When the original changes, review the impact report and relevant tests before accepting a newer reference; never let a lesson silently drift to different code.
+- Follow one player action from the screen through transport, Game rules, storage, Judge, and back.
+- Explain why each step exists, what must happen first, and which file owns the responsibility.
+- Create and test a small practice implementation before choosing a matching location in the teammate repository.
+- Compare changed cases with the reference and record exactly what each check proved.
+- Use the file-disposition and behavior reports to find unfinished learning work without treating a page status or passing mock as proof of the real game.
 
 ## Constraints
 
-- Teach me as a beginner: one concrete idea at a time, with predictions, hints, source links, and short retrieval checks.
-- Treat the current code and tests as the implementation reference. Specs, diagrams, prototypes, and passing tests are different kinds of evidence.
-- Start with [Course Home](index.html) and M00, which shows the destination and helps choose a workspace. Before coding game rules, open [Before Lesson 1](lessons/0000-before-lesson-one.html) and the [teammate-repo map](reference.html#build-path). Follow the dependency order and find the matching file owners in the team's repo. Use [Explore code](source-map.html) to inspect the reference; its source coverage describes freshness, not learning progress. Keep CodeTours for editor navigation in VS Code.
-- Prefer a guided path to a large graph. Keep this course in one folder and make uncovered work visible rather than claiming completeness early.
+- Follow the M00–M13 route in order. Move into the Team workspace only after inspecting its actual README, folders, scripts, identity, and service owners.
+- Before coding game rules, open [Before Lesson 1](lessons/0000-before-lesson-one.html) and the [teammate-repo map](reference.html#build-path). Use [Explore code](source-map.html) to inspect the reference implementation.
+- Keep reference, practice, and team paths and evidence separate. A temporary fixture demonstrates the mapping workflow; it does not prove the teammate repository.
+- Keep the game source and tests as the implementation reference. A specification, prototype, course lesson, or test run alone is not proof of another implementation.
+- Teach through a visual example, prediction, short build step, named check, and a changed-case transfer task.
+- Keep incomplete environment checks and the learner walkthrough visible until they actually happen.
 
 ## Out of scope
 
-- Presentation-ready diagrams for teammates.
-- Rewriting or changing game behavior as part of a learning lesson.
-- Treating self-check clicks, AI output, or an existing test suite as proof that a separate rewrite is equivalent.
+- Changing the reference game while writing a lesson.
+- Shipping a completed game for the learner to copy.
+- Treating a browser self-check, author rehearsal, or course coverage result as proof of subject-module completion.

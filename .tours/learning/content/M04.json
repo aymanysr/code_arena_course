@@ -1,0 +1,739 @@
+[
+  {
+    "id": "m04-problem",
+    "milestoneId": "M04",
+    "title": "Separate public Problem from hidden suite",
+    "why": "Players see the statement and examples. The server keeps the Hidden suite sealed. A leak breaks fairness.",
+    "outcome": "Validate bank input and project only public fields.",
+    "prerequisites": ["m03-clock"],
+    "references": [
+      {
+        "lessonId": "0005-problem-editor-run",
+        "path": "packages/arena-game/src/file-bank.ts",
+        "startLine": 23,
+        "endLine": 29
+      }
+    ],
+    "steps": [
+      {
+        "id": "m04-problem-orient",
+        "phase": "orient",
+        "title": "Two views of one Problem",
+        "question": "What may the browser receive?",
+        "explanation": [
+          "A Problem is a coding task with a statement, examples, constraints, and starter code per language. The reference supports C++, Python, and C.",
+          "The browser may receive title, description, examples, starters, and visible tests. It must never receive hidden cases, answers, weights, or private paths.",
+          "You need this now because Run uses visible cases while Submit later uses the Hidden suite."
+        ],
+        "vocabulary": [
+          {
+            "term": "Problem",
+            "meaning": "A coding task with statement, examples, constraints, and starter code."
+          },
+          {
+            "term": "Hidden suite",
+            "meaning": "Sealed tests that decide the score. Hidden during play; groups appear only at Reveal."
+          }
+        ],
+        "hints": [
+          "Answer: public fields only.",
+          "Find visible versus hidden.",
+          "Compare with public versus private in C headers.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the projection."
+      },
+      {
+        "id": "m04-problem-see",
+        "phase": "see",
+        "title": "See full bank versus public view",
+        "question": "Which fields disappear in public?",
+        "explanation": [
+          "Full bank holds visibleTests plus hiddenGroups with weights and expected outputs. Public view keeps statement, starters, and visible tests. Hidden groups vanish."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at hiddenGroups.",
+          "Point at the public visibleTests.",
+          "Compare with filtering an array.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn validation rules.",
+        "visual": {
+          "kind": "trace",
+          "title": "Projection drops hidden data",
+          "code": [
+            "bank = { visible: 2, hidden: 2 groups }",
+            "public = { visible: 2 }",
+            "hidden in public? no"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Bank",
+              "values": [
+                {
+                  "label": "Held",
+                  "value": "visible + hidden"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The server bank holds both parts."
+            },
+            {
+              "id": "frame-1",
+              "label": "Public",
+              "values": [
+                {
+                  "label": "Sent",
+                  "value": "visible only"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The browser receives only the public part."
+            },
+            {
+              "id": "frame-2",
+              "label": "Check",
+              "values": [
+                {
+                  "label": "Leak",
+                  "value": "none found"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Serialization plus forbidden-field search proves no leak."
+            }
+          ],
+          "cases": [
+            {
+              "input": "bank with hidden weights",
+              "expected": "public has no hidden text",
+              "reason": "Projection selects fields, never deletes after spread."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m04-problem-understand",
+        "phase": "understand",
+        "title": "Validate then project",
+        "question": "Why reject malformed bank input?",
+        "explanation": [
+          "Reference preview: packages/arena-game/src/file-bank.ts reads checked problem-bank JSON with examples, starters, visibleTests, and hiddenGroups. Reference preview: packages/arena-game/src/engine.ts defines BankProblem with visible, hidden, statement, starters. You read these now.",
+          "Your practice code first validates required fields and types, then builds the public view by selecting allowed fields. Do not use object spread followed by delete; that pattern risks leaving hidden text."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name one required and one forbidden field.",
+          "Find FileBank in the preview.",
+          "Compare with validating argv before use in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try valid and malformed by hand."
+      },
+      {
+        "id": "m04-problem-try",
+        "phase": "try",
+        "title": "Decide valid or rejected",
+        "question": "Does a bank without visibleTests pass? Does public output with weight pass?",
+        "explanation": [
+          "First fails validation. Second fails the leak check. Both are rejected with a clear reason."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write input and expected verdict.",
+          "Find the required list.",
+          "Compare with a compiler error for a missing field.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build validation and projection."
+      },
+      {
+        "id": "m04-problem-build",
+        "phase": "build",
+        "title": "Implement Problem validation",
+        "question": "Does malformed input fail and public output stay clean?",
+        "explanation": [
+          "Practice path: src/problem.ts. Reference path (read only): packages/arena-game/src/file-bank.ts. Future team path: checked problem bank wiring in M13."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: validateProblem throws on bad input; toPublicProblem selects safe fields.",
+          "Relevant value: test one good bank, one missing visibleTests, one public output scanned for hidden text.",
+          "Analogous example: like membership tests, one pass plus two rejections.",
+          "Walkthrough: define VisibleTest and BankProblem types locally; validate arrays and strings; toPublicProblem returns statement/starters/visible only; test serializes public output and asserts no hidden weight string appears."
+        ],
+        "files": [
+          {
+            "role": "domain.problem",
+            "workspace": "active",
+            "path": "src/problem.ts",
+            "action": "create",
+            "owner": "src/ owns Problem validation and projection.",
+            "change": "Add validateProblem and toPublicProblem with explicit field selection.",
+            "pattern": "Throw on malformed input; never copy hidden fields into public records."
+          },
+          {
+            "role": "test.problem",
+            "workspace": "active",
+            "path": "test/problem.test.ts",
+            "action": "create",
+            "owner": "test/ proves validation and no-leak.",
+            "change": "Test good bank passes, bad bank throws, public JSON has no hidden markers.",
+            "pattern": "Import from ../src/problem.js; use JSON.stringify plus forbidden-field asserts."
+          }
+        ],
+        "checkIds": ["m04-problem-unit"],
+        "prerequisiteCheckIds": ["m03-clock-unit"],
+        "next": "Check Problem handling and connect to Judge."
+      },
+      {
+        "id": "m04-problem-check",
+        "phase": "check",
+        "title": "Report validation and leak check",
+        "question": "What did the leak scan search for?",
+        "explanation": [
+          "Run the check at the practice root. Record the forbidden strings you scanned."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Name one forbidden field.",
+          "Compare with the membership deny.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m04-problem-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to the Judge port.",
+        "transfer": "In words, explain why selection beats spread-then-delete. Predict which new field would need a validation update."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m04-problem-unit",
+        "command": "npm test -- test/problem.test.ts",
+        "cwd": ".",
+        "expected": "Good bank passes; malformed bank throws; public JSON contains no hidden weights, answers, or private paths.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Public output contains hidden text",
+            "diagnostic": "Check toPublicProblem builds a new object with allowed fields only; search the test output for the hidden group name.",
+            "meaning": "A leak breaks fairness even if scoring is correct."
+          },
+          {
+            "symptom": "Bad bank does not throw",
+            "diagnostic": "Check required arrays and string fields before projection.",
+            "meaning": "Validation must run before use."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m04-judge-port",
+    "milestoneId": "M04",
+    "title": "Call Judge through a small port",
+    "why": "Game code must request execution without running player code itself. A fake Judge makes this safe to learn.",
+    "outcome": "Define RunRequest and RunResult, call a fake Judge, and handle success and infrastructure error.",
+    "prerequisites": ["m04-problem"],
+    "references": [
+      {
+        "lessonId": "0001-submit-journey",
+        "path": "packages/arena-game/src/judge.ts",
+        "startLine": 116,
+        "endLine": 123
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/judge.ts",
+        "startLine": 126,
+        "endLine": 132
+      }
+    ],
+    "steps": [
+      {
+        "id": "m04-judge-port-orient",
+        "phase": "orient",
+        "title": "A port separates Game from execution",
+        "question": "What does Judge = { run(request): Promise<result> } mean?",
+        "explanation": [
+          "Judge is a boundary. The Game sends a RunRequest with code, language, and visible cases. The Judge later returns a RunResult. The Game never executes player code directly.",
+          "This is dependency injection again: pass one Judge object into the caller. Real Nest decorators come later in M06. Mock Judge examples here never count as real Judge evidence."
+        ],
+        "vocabulary": [
+          {
+            "term": "Judge job",
+            "meaning": "Provider-side execution of one Evaluation. Only the durable Evaluation outcome changes Match state."
+          }
+        ],
+        "hints": [
+          "Answer: a contract for one async call.",
+          "Find run(request).",
+          "Compare with passing a Clock object.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See Promise states."
+      },
+      {
+        "id": "m04-judge-port-see",
+        "phase": "see",
+        "title": "See start, waiting, settled",
+        "question": "What does await do?",
+        "explanation": [
+          "Call starts and waits. await pauses your function until the Promise resolves or rejects, then continues. A resolved verdict can still report failure: a wrong answer (passed false), a compile_error, or a runtime_error. Only a broken worker rejects with an infrastructure error. Tests must clean up on every path."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the call.",
+          "Point at await.",
+          "Compare with waiting for a child process in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the local records.",
+        "visual": {
+          "kind": "trace",
+          "title": "Fake Judge resolves then rejects",
+          "code": [
+            "result = await judge.run(req) -> ok",
+            "await judge.run(bad) -> throw"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Success",
+              "values": [
+                {
+                  "label": "Result",
+                  "value": "case results"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The fake returns visible case results."
+            },
+            {
+              "id": "frame-1",
+              "label": "Failure",
+              "values": [
+                {
+                  "label": "Result",
+                  "value": "infrastructure error"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The fake throws a named error. Callers record it, not a zero score."
+            }
+          ],
+          "cases": [
+            {
+              "input": "valid request",
+              "expected": "resolved results",
+              "reason": "Happy path returns data."
+            },
+            {
+              "input": "broken worker",
+              "expected": "rejected error",
+              "reason": "Infrastructure failure is explicit."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m04-judge-port-understand",
+        "phase": "understand",
+        "title": "Local names with a later mapping",
+        "question": "Why define small local types first?",
+        "explanation": [
+          "Reference preview: packages/arena-game/src/judge.ts defines VisibleTest, CaseResult, ExecutionStatus (compile_error, runtime_error, and other verdicts), SealedTest, SealedGroup, JudgeInfraError, and limits. Your practice lesson defines the smallest local RunRequest and RunResult now, with a VerdictStatus of ok, compile_error, or runtime_error, and documents the mapping to JudgeAdapter types later. This keeps the first async lesson small.",
+          "Like a header file in C, the port names the inputs and outputs. The fake implements the same port for tests."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name request and result fields.",
+          "Find CaseResult in the preview.",
+          "Compare with a function prototype.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try resolve and reject by hand."
+      },
+      {
+        "id": "m04-judge-port-try",
+        "phase": "try",
+        "title": "Decide resolve or reject",
+        "question": "Good fake? Compile-broken code? Crashed code? Broken worker?",
+        "explanation": [
+          "Good code resolves with passed true. Wrong output resolves with passed false. Uncompilable code resolves with status compile_error. Crashing code resolves with status runtime_error. Only a broken worker rejects with an infrastructure error."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write request and expected path.",
+          "Find the fake controls.",
+          "Compare with return value versus error code.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the port and the fake."
+      },
+      {
+        "id": "m04-judge-port-build",
+        "phase": "build",
+        "title": "Add Judge port and fake",
+        "question": "Does your fake resolve verdicts with status and reject only on infrastructure error?",
+        "explanation": [
+          "Practice paths: src/judge.ts, test/fake-judge.ts. Reference path (read only): packages/arena-game/src/judge.ts. Real Judge wiring comes in M09; this fake never counts as real evidence."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: Judge interface plus controllable fake with verdict statuses (ok, compile_error, runtime_error) and a rejecting broken mode.",
+          "Relevant value: test one passing case, one failing case, one infrastructure throw.",
+          "Analogous example: like fixedClock, the fake returns canned values without real execution.",
+          "Walkthrough: define RunRequest { code, language, cases }, RunResult { results }; fakeJudge.fromResults and fakeJudge.broken(); test awaits both paths and asserts cleanup runs."
+        ],
+        "files": [
+          {
+            "role": "port.judge",
+            "workspace": "active",
+            "path": "src/judge.ts",
+            "action": "create",
+            "owner": "src/ owns the Judge contract.",
+            "change": "Define RunRequest, RunResult, Judge, plus mapping note to reference CaseResult.",
+            "pattern": "Async method only; no player code execution in Game files."
+          },
+          {
+            "role": "test.judge",
+            "workspace": "active",
+            "path": "test/fake-judge.ts",
+            "action": "create",
+            "owner": "test/ owns the controllable fake.",
+            "change": "Add a fake that resolves canned results or rejects with an infrastructure error.",
+            "pattern": "Explicit mode flag; delayed resolve uses promises, never real execution."
+          },
+          {
+            "role": "test.judge-check",
+            "workspace": "active",
+            "path": "test/judge.test.ts",
+            "action": "create",
+            "owner": "test/ proves both async paths.",
+            "change": "Test resolve, case failure, and rejection with cleanup.",
+            "pattern": "Import from ../src/judge.js and ./fake-judge.js; use await plus try/finally."
+          }
+        ],
+        "checkIds": ["m04-judge-port-unit"],
+        "prerequisiteCheckIds": ["m04-problem-unit"],
+        "next": "Check the port and connect to Run."
+      },
+      {
+        "id": "m04-judge-port-check",
+        "phase": "check",
+        "title": "Report async behavior",
+        "question": "How did rejection differ from a wrong answer?",
+        "explanation": [
+          "Run the check at the practice root. A wrong answer resolves with passed false. A broken worker rejects."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Name the rejected error.",
+          "Compare with a runtime error versus a wrong output.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m04-judge-port-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to Run.",
+        "transfer": "In words, explain when to use await versus plain return. Predict what happens if you forget to handle rejection."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m04-judge-port-unit",
+        "command": "npm test -- test/judge.test.ts",
+        "cwd": ".",
+        "expected": "Fake resolves passed, failed, compile_error and runtime_error verdicts with status kept; broken worker rejects with an infrastructure error; cleanup runs on every path.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Rejection becomes a hang",
+            "diagnostic": "Check the test awaits the Promise and uses try/finally; check the fake actually rejects.",
+            "meaning": "An unhandled rejection hides the infrastructure problem."
+          },
+          {
+            "symptom": "Compile or runtime failure throws",
+            "diagnostic": "Resolve verdicts with status compile_error or runtime_error and passed false; reserve throw for worker faults.",
+            "meaning": "Execution failures are verdicts with a status, not infrastructure errors."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m04-run",
+    "milestoneId": "M04",
+    "title": "Run visible cases without changing score",
+    "why": "Run is a neutral check against visible examples only. It never touches the Hidden suite and never changes the score.",
+    "outcome": "Run editor code through the fake Judge and keep score unchanged.",
+    "prerequisites": ["m04-judge-port"],
+    "references": [
+      {
+        "lessonId": "0005-problem-editor-run",
+        "path": "packages/arena-game/test/run-path.test.ts",
+        "startLine": 26,
+        "endLine": 35
+      }
+    ],
+    "steps": [
+      {
+        "id": "m04-run-orient",
+        "phase": "orient",
+        "title": "Run versus Submit",
+        "question": "What does Run change?",
+        "explanation": [
+          "Nothing about score. Run checks current code against visible examples. Submit sends a solution for Hidden suite evaluation and locks it.",
+          "You need Run now because players iterate with it during CODING before they ever submit."
+        ],
+        "vocabulary": [
+          {
+            "term": "Run",
+            "meaning": "A neutral check against visible examples. Never changes score or touches hidden tests."
+          }
+        ],
+        "hints": [
+          "Answer: no score.",
+          "Find visible cases.",
+          "Compare with a trial compile in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the Run flow."
+      },
+      {
+        "id": "m04-run-see",
+        "phase": "see",
+        "title": "See editor to results",
+        "question": "Where does the score stay?",
+        "explanation": [
+          "Editor source plus visible cases go to the Judge. Results return with a status: ok, compile_error, or runtime_error. Score stays at its old value on every verdict. Only a broken worker rejects, which the caller records as an infrastructure error without touching the score."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the source.",
+          "Point at the unchanged score.",
+          "Compare with printing test output.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the guards.",
+        "visual": {
+          "kind": "trace",
+          "title": "Run keeps score fixed",
+          "code": [
+            "run(src, visible) -> results",
+            "score before 0, after 0",
+            "submit(src) -> evaluation"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Run",
+              "values": [
+                {
+                  "label": "Uses",
+                  "value": "visible only"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Run never sends hidden data."
+            },
+            {
+              "id": "frame-1",
+              "label": "Score",
+              "values": [
+                {
+                  "label": "Score",
+                  "value": "0 stays 0"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Score is untouched by Run."
+            },
+            {
+              "id": "frame-2",
+              "label": "Submit",
+              "values": [
+                {
+                  "label": "Uses",
+                  "value": "hidden suite"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Submit is a different path with locking and scoring."
+            }
+          ],
+          "cases": [
+            {
+              "input": "run during CODING",
+              "expected": "results, score 0",
+              "reason": "Neutral check."
+            },
+            {
+              "input": "run after deadline",
+              "expected": "rejected, Judge not called",
+              "reason": "Guards run before execution."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m04-run-understand",
+        "phase": "understand",
+        "title": "Guards before Judge",
+        "question": "When must Run refuse without calling Judge?",
+        "explanation": [
+          "When phase is not CODING, when membership fails, or when now is at or past the Match deadline. The server rejects the same way. Only CODING permits Run.",
+          "Reference preview: packages/arena-model/src/transitions.ts canRun and packages/arena-game/test/run-path.test.ts show phase gating and visible-only behavior. You read them now; your practice run composes membership, phase, deadline, Problem projection, and the fake Judge."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name three guards.",
+          "Find canRun in the preview.",
+          "Compare with permission checks before open().",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try guard outcomes by hand."
+      },
+      {
+        "id": "m04-run-try",
+        "phase": "try",
+        "title": "Decide call or refuse",
+        "question": "Does Run in ROUND_INTRO call Judge? Does Run at deadline call Judge?",
+        "explanation": [
+          "No to both. Both refuse before the Judge. Only a member in CODING before the deadline reaches the fake."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write phase/time and expected call.",
+          "Find the guard order.",
+          "Compare with early validation.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build Run."
+      },
+      {
+        "id": "m04-run-build",
+        "phase": "build",
+        "title": "Implement visible Run",
+        "question": "Does Run return results without touching score or hidden data?",
+        "explanation": [
+          "Practice path: src/run.ts. Reference path (read only): run-path test and transitions. Future team path: server wiring in M06."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: run() checks member, CODING, deadline, then calls Judge with visible cases only.",
+          "Relevant value: test one success (score unchanged), compile_error and runtime_error verdicts (status kept, score unchanged), one illegal phase (Judge not called), one deadline equality (Judge not called).",
+          "Analogous example: like the membership gate, check guards first, then delegate.",
+          "Walkthrough: accept Clock and Judge as parameters; spy on fake calls; assert score object identity or value unchanged and hidden text absent."
+        ],
+        "files": [
+          {
+            "role": "workflow.run",
+            "workspace": "active",
+            "path": "src/run.ts",
+            "action": "create",
+            "owner": "src/ owns the Run workflow.",
+            "change": "Compose membership, phase, deadline, public projection, and Judge call.",
+            "pattern": "Guards throw; only valid requests reach judge.run."
+          },
+          {
+            "role": "test.run",
+            "workspace": "active",
+            "path": "test/run.test.ts",
+            "action": "create",
+            "owner": "test/ proves neutral behavior.",
+            "change": "Test success keeps score, illegal phase skips Judge, deadline skips Judge, errors separate.",
+            "pattern": "Import from ../src/run.js; count fake calls; compare score before/after."
+          }
+        ],
+        "checkIds": ["m04-run-unit"],
+        "prerequisiteCheckIds": ["m04-judge-port-unit"],
+        "next": "Check Run and connect to Submit."
+      },
+      {
+        "id": "m04-run-check",
+        "phase": "check",
+        "title": "Report neutral Run",
+        "question": "How did you prove the score never moved?",
+        "explanation": [
+          "Run the check at the practice root. Keep Mock Judge results separate from real Judge claims."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show score before and after.",
+          "Compare with Submit, which does change score later.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m04-run-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to Submit and scoring.",
+        "transfer": "In words, explain why Run must not call hidden evaluation. Predict what a UI must show during waiting versus after results."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m04-run-unit",
+        "command": "npm test -- test/run.test.ts",
+        "cwd": ".",
+        "expected": "Passed, failed, compile_error and runtime_error verdicts return with score unchanged and status kept; illegal phase and deadline never invoke Judge; infrastructure rejection recorded without score.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Judge called on illegal phase",
+            "diagnostic": "Check guard order: member, phase CODING, deadline, then judge.run; check the spy count.",
+            "meaning": "Guards must run before any execution."
+          },
+          {
+            "symptom": "Score changed after Run",
+            "diagnostic": "Check run() returns results without writing counted scores.",
+            "meaning": "Only Submit and evaluation may change score."
+          }
+        ]
+      }
+    ]
+  }
+]

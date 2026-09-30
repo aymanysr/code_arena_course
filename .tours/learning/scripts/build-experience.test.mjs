@@ -1,11 +1,551 @@
-import test,{before,after} from 'node:test';import assert from 'node:assert/strict';import {readFile,mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';import {createServer} from 'node:http';import path from 'node:path';import os from 'node:os';import {chromium} from 'playwright';import {renderCatalogOutputs} from './build-catalog.mjs';
-let browser,server,directory,base;
-before(async()=>{directory=await mkdtemp(path.join(os.tmpdir(),'guided-course-'));const learningDir=path.join(process.cwd(),'.tours/learning');const coverage=JSON.parse(await readFile(path.join(learningDir,'coverage-map.json'),'utf8'));const rendered=await renderCatalogOutputs(process.cwd(),learningDir,coverage,{tours:[]});for(const [file,contents]of rendered.files){const dest=path.join(directory,path.relative(learningDir,file));await mkdir(path.dirname(dest),{recursive:true});await writeFile(dest,contents)}server=createServer(async(req,res)=>{try{const url=new URL(req.url,'http://localhost');if(url.pathname==='/favicon.ico'){res.writeHead(204);res.end();return}const relative=url.pathname==='/'?'index.html':decodeURIComponent(url.pathname).slice(1);const filename=path.resolve(directory,relative);if(!filename.startsWith(directory+path.sep))throw Error('path');res.setHeader('content-type','text/html');res.end(await readFile(filename))}catch{res.writeHead(404);res.end('Not found')}});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));base=`http://127.0.0.1:${server.address().port}`;try{browser=await chromium.launch({channel:'chrome'})}catch{browser=await chromium.launch()}});
-after(async()=>{await browser?.close();if(server?.listening)await new Promise(r=>server.close(r));if(directory)await rm(directory,{recursive:true,force:true})});
-test('step navigation, theme, notes, resume and reset cancel work together',async t=>{const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto(`${base}/build/m00-destination.html`);await page.getByRole('button',{name:'Light theme',exact:true}).click();assert.equal(await page.locator('html').getAttribute('data-theme'),'light');await page.getByRole('button',{name:'Next step',exact:true}).click();assert.equal(await page.locator('[data-build-step]:visible').getAttribute('id'),'m00-destination-see');await page.getByRole('button',{name:'Submit',exact:true}).click();assert.match(await page.locator('[data-frame-explanation]:visible').innerText(),/snapshot/);await page.getByText('My notes for this step',{exact:true}).filter({visible:true}).click();await page.locator('[data-step-note]:visible').fill('<img src=x onerror=alert(1)>');await page.getByRole('button',{name:'Save note',exact:true}).filter({visible:true}).click();await page.reload();assert.equal(await page.locator('[data-build-step]:visible').getAttribute('id'),'m00-destination-see');await page.getByText('My notes for this step',{exact:true}).filter({visible:true}).click();assert.equal(await page.locator('[data-step-note]:visible').inputValue(),'<img src=x onerror=alert(1)>');assert.equal(await page.locator('img').count(),0);await page.getByText('Progress & backup',{exact:true}).click();await page.getByRole('button',{name:'Reset this workspace’s progress',exact:true}).click();await page.getByRole('button',{name:'Keep my progress',exact:true}).click();assert.equal(await page.locator('[data-step-note]:visible').inputValue(),'<img src=x onerror=alert(1)>');assert.deepEqual(errors,[])});
-test('unavailable team does not inherit practice reports',async t=>{const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage();await page.goto(`${base}/build/m00-destination.html#m00-destination-check`);await page.locator('[data-report-status]:visible').selectOption('passed');await page.getByRole('button',{name:'Record my result',exact:true}).filter({visible:true}).click();assert.match(await page.locator('[data-build-report]:visible').innerText(),/You reported: passed/);await page.getByRole('combobox',{name:'Active workspace'}).selectOption('team');assert.match(await page.locator('[data-workspace-label]').innerText(),/Team/);assert.equal(await page.locator('[data-build-report]:visible').innerText(),'Not checked yet');await page.getByRole('combobox',{name:'Active workspace'}).selectOption('practice');assert.match(await page.locator('[data-build-report]:visible').innerText(),/You reported: passed/)});
-test('narrow keyboard navigation works with saving denied and reduced motion',async t=>{const context=await browser.newContext({viewport:{width:390,height:844},reducedMotion:'reduce'});t.after(()=>context.close());await context.addInitScript(()=>{Storage.prototype.setItem=function(){throw Error('denied')}});const page=await context.newPage();await page.goto(`${base}/build/m00-destination.html`);await page.getByRole('button',{name:'Next step',exact:true}).focus();await page.keyboard.press('Enter');assert.equal(await page.locator('[data-build-step]:visible').getAttribute('id'),'m00-destination-see');assert.equal(await page.locator('[data-storage-warning]').isVisible(),true);assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.getByText('Progress & backup',{exact:true}).click();const download=page.waitForEvent('download');await page.getByRole('button',{name:'Export progress',exact:true}).click();assert.match((await download).suggestedFilename(),/\.json$/)});
-test('invalid import preserves the session and valid import requires confirmation',async t=>{const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage();await page.goto(`${base}/build/m00-destination.html#m00-destination-build`);await page.getByText('Progress & backup',{exact:true}).click();const saved=await page.evaluate(()=>localStorage.getItem('code-arena-learning:build:v1'));await page.locator('[data-import]').setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('{"version":99}')});await page.waitForFunction(()=>document.querySelector('[data-import-preview]').textContent.includes('rejected'));assert.equal(await page.evaluate(()=>localStorage.getItem('code-arena-learning:build:v1')),saved);await page.locator('[data-import]').setInputFiles({name:'progress.json',mimeType:'application/json',buffer:Buffer.from(saved)});await page.locator('[data-confirm-import]').waitFor({state:'visible'});assert.equal(await page.evaluate(()=>localStorage.getItem('code-arena-learning:build:v1')),saved);await page.getByRole('button',{name:'Replace with imported progress',exact:true}).click();assert.match(await page.locator('[data-import-preview]').innerText(),/imported/)});
-test('self-contained lessons work with no network and without JavaScript',async t=>{const {pathToFileURL}=await import('node:url');for(const javaScriptEnabled of [true,false]){const context=await browser.newContext({javaScriptEnabled});t.after(()=>context.close());await context.setOffline(true);const page=await context.newPage();await page.goto(pathToFileURL(path.join(directory,'build/m00-destination.html')).href);assert.match(await page.locator('h1').innerText(),/See what/);if(javaScriptEnabled){await page.getByRole('button',{name:'Next step',exact:true}).click();assert.equal(await page.locator('[data-build-step]:visible').count(),1)}else assert.equal(await page.locator('[data-build-step]:visible').count(),6)}});
-test('a coding step names its prerequisite check and keeps the workspace visible',async t=>{const context=await browser.newContext({viewport:{width:1280,height:900}});t.after(()=>context.close());const page=await context.newPage();await page.goto(`${base}/build/workspace.html`);await page.getByRole('textbox',{name:'Absolute folder path'}).fill('/tmp/my practice');await page.getByRole('button',{name:'Save workspace location',exact:true}).click();await page.goto(`${base}/build/m01-first-run.html#m01-first-run-build-rule`);assert.match(await page.locator('[data-prechecks]:visible').innerText(),/Valid JSON/);await page.locator('[data-step-navigation]').scrollIntoViewIfNeeded();const box=await page.locator('[data-workspace-label]').boundingBox();assert.ok(box&&box.y>=0&&box.y<900,'workspace stays visible beside scrolled instructions')});
-test('a wrong zero-boundary answer gives feedback without locking navigation',async t=>{const context=await browser.newContext();t.after(()=>context.close());const page=await context.newPage();await page.goto(`${base}/build/m02-boundary.html#m02-boundary-try`);await page.getByLabel('Seconds left',{exact:true}).fill('0');await page.getByLabel('Comparison',{exact:true}).selectOption('>=');await page.getByRole('button',{name:'Check this choice',exact:true}).click();assert.match(await page.locator('[data-boundary-feedback]:visible').innerText(),/Expected: false.*returns: true/);assert.equal(await page.getByRole('button',{name:'Next step',exact:true}).isEnabled(),true);await page.getByRole('button',{name:'Next step',exact:true}).click();assert.match(await page.locator('[data-build-step]:visible').getAttribute('id'),/build/)});
+import test, { before, after } from "node:test";
+import assert from "node:assert/strict";
+import { readFile, mkdtemp, mkdir, writeFile, rm } from "node:fs/promises";
+import { createServer } from "node:http";
+import path from "node:path";
+import os from "node:os";
+import { chromium } from "playwright";
+import { renderCatalogOutputs } from "./build-catalog.mjs";
+let browser, server, directory, base;
+before(async () => {
+  directory = await mkdtemp(path.join(os.tmpdir(), "guided-course-"));
+  const learningDir = path.join(process.cwd(), ".tours/learning");
+  const coverage = JSON.parse(
+    await readFile(path.join(learningDir, "coverage-map.json"), "utf8")
+  );
+  const rendered = await renderCatalogOutputs(
+    process.cwd(),
+    learningDir,
+    coverage,
+    { tours: [] }
+  );
+  for (const [file, contents] of rendered.files) {
+    const dest = path.join(directory, path.relative(learningDir, file));
+    await mkdir(path.dirname(dest), { recursive: true });
+    await writeFile(dest, contents);
+  }
+  server = createServer(async (req, res) => {
+    try {
+      const url = new URL(req.url, "http://localhost");
+      if (url.pathname === "/favicon.ico") {
+        res.writeHead(204);
+        res.end();
+        return;
+      }
+      const relative =
+        url.pathname === "/"
+          ? "index.html"
+          : decodeURIComponent(url.pathname).slice(1);
+      const filename = path.resolve(directory, relative);
+      if (!filename.startsWith(directory + path.sep)) throw Error("path");
+      res.setHeader("content-type", "text/html");
+      res.end(await readFile(filename));
+    } catch {
+      res.writeHead(404);
+      res.end("Not found");
+    }
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  base = `http://127.0.0.1:${server.address().port}`;
+  try {
+    browser = await chromium.launch({ channel: "chrome" });
+  } catch {
+    browser = await chromium.launch();
+  }
+});
+after(async () => {
+  await browser?.close();
+  if (server?.listening) await new Promise((r) => server.close(r));
+  if (directory) await rm(directory, { recursive: true, force: true });
+});
+test("step navigation, theme, notes, resume and reset cancel work together", async (t) => {
+  const context = await browser.newContext();
+  t.after(() => context.close());
+  const page = await context.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto(`${base}/build/m00-destination.html`);
+  await page.getByRole("button", { name: "Light theme", exact: true }).click();
+  assert.equal(await page.locator("html").getAttribute("data-theme"), "light");
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  assert.equal(
+    await page.locator("[data-build-step]:visible").getAttribute("id"),
+    "m00-destination-see"
+  );
+  await page.getByRole("button", { name: "Submit", exact: true }).click();
+  assert.match(
+    await page.locator("[data-frame-explanation]:visible").innerText(),
+    /snapshot/
+  );
+  await page
+    .getByText("Answer or notes for this step", { exact: true })
+    .filter({ visible: true })
+    .click();
+  await page
+    .locator("[data-step-note]:visible")
+    .fill("<img src=x onerror=alert(1)>");
+  await page
+    .getByRole("button", { name: "Save note", exact: true })
+    .filter({ visible: true })
+    .click();
+  await page.reload();
+  assert.equal(
+    await page.locator("[data-build-step]:visible").getAttribute("id"),
+    "m00-destination-see"
+  );
+  await page
+    .getByText("Answer or notes for this step", { exact: true })
+    .filter({ visible: true })
+    .click();
+  assert.equal(
+    await page.locator("[data-step-note]:visible").inputValue(),
+    "<img src=x onerror=alert(1)>"
+  );
+  assert.equal(await page.locator("img").count(), 0);
+  await page.getByText("Progress & backup", { exact: true }).click();
+  await page
+    .getByRole("button", {
+      name: "Reset this workspace’s progress",
+      exact: true,
+    })
+    .click();
+  await page
+    .getByRole("button", { name: "Keep my progress", exact: true })
+    .click();
+  assert.equal(
+    await page.locator("[data-step-note]:visible").inputValue(),
+    "<img src=x onerror=alert(1)>"
+  );
+  assert.deepEqual(errors, []);
+});
+test("unavailable team does not inherit practice reports", async (t) => {
+  const context = await browser.newContext();
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.goto(`${base}/build/m00-destination.html#m00-destination-check`);
+  await page.locator("[data-report-status]:visible").selectOption("passed");
+  await page
+    .getByRole("button", { name: "Record my result", exact: true })
+    .filter({ visible: true })
+    .click();
+  assert.match(
+    await page.locator("[data-build-report]:visible").innerText(),
+    /You reported: passed/
+  );
+  await page
+    .getByRole("combobox", { name: "Coding destination" })
+    .selectOption("team");
+  assert.match(
+    await page.locator("[data-workspace-label]").innerText(),
+    /Team/
+  );
+  assert.equal(
+    await page.locator("[data-build-report]:visible").innerText(),
+    "Not checked yet"
+  );
+  await page
+    .getByRole("combobox", { name: "Coding destination" })
+    .selectOption("practice");
+  assert.match(
+    await page.locator("[data-build-report]:visible").innerText(),
+    /You reported: passed/
+  );
+});
+test("narrow keyboard navigation works with saving denied and reduced motion", async (t) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    reducedMotion: "reduce",
+  });
+  t.after(() => context.close());
+  await context.addInitScript(() => {
+    Storage.prototype.setItem = function () {
+      throw Error("denied");
+    };
+  });
+  const page = await context.newPage();
+  await page.goto(`${base}/build/m00-destination.html`);
+  await page.getByRole("button", { name: "Next step", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  assert.equal(
+    await page.locator("[data-build-step]:visible").getAttribute("id"),
+    "m00-destination-see"
+  );
+  assert.equal(await page.locator("[data-storage-warning]").isVisible(), true);
+  assert.ok(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  );
+  await page.getByText("Progress & backup", { exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page
+    .getByRole("button", { name: "Export progress", exact: true })
+    .click();
+  assert.match((await download).suggestedFilename(), /\.json$/);
+});
+test("invalid import preserves the session and valid import requires confirmation", async (t) => {
+  const context = await browser.newContext();
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.goto(`${base}/build/m00-destination.html#m00-destination-build`);
+  await page.getByText("Progress & backup", { exact: true }).click();
+  const saved = await page.evaluate(() =>
+    localStorage.getItem("code-arena-learning:build:v1")
+  );
+  await page
+    .locator("[data-import]")
+    .setInputFiles({
+      name: "bad.json",
+      mimeType: "application/json",
+      buffer: Buffer.from('{"version":99}'),
+    });
+  await page.waitForFunction(() =>
+    document
+      .querySelector("[data-import-preview]")
+      .textContent.includes("rejected")
+  );
+  assert.equal(
+    await page.evaluate(() =>
+      localStorage.getItem("code-arena-learning:build:v1")
+    ),
+    saved
+  );
+  await page
+    .locator("[data-import]")
+    .setInputFiles({
+      name: "progress.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(saved),
+    });
+  await page.locator("[data-confirm-import]").waitFor({ state: "visible" });
+  assert.equal(
+    await page.evaluate(() =>
+      localStorage.getItem("code-arena-learning:build:v1")
+    ),
+    saved
+  );
+  await page
+    .getByRole("button", {
+      name: "Replace with imported progress",
+      exact: true,
+    })
+    .click();
+  assert.match(
+    await page.locator("[data-import-preview]").innerText(),
+    /imported/
+  );
+});
+test("self-contained lessons work with no network and without JavaScript", async (t) => {
+  const { pathToFileURL } = await import("node:url");
+  for (const javaScriptEnabled of [true, false]) {
+    const context = await browser.newContext({ javaScriptEnabled });
+    t.after(() => context.close());
+    await context.setOffline(true);
+    const page = await context.newPage();
+    await page.goto(
+      pathToFileURL(path.join(directory, "build/m00-destination.html")).href
+    );
+    assert.match(await page.locator("h1").innerText(), /See what/);
+    if (javaScriptEnabled) {
+      await page
+        .getByRole("button", { name: "Next step", exact: true })
+        .click();
+      assert.equal(await page.locator("[data-build-step]:visible").count(), 1);
+    } else
+      assert.equal(await page.locator("[data-build-step]:visible").count(), 6);
+  }
+});
+test("a coding step names its prerequisite check and keeps the workspace visible", async (t) => {
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.goto(`${base}/build/workspace.html`);
+  await page
+    .getByRole("textbox", { name: "Practice root folder" })
+    .fill("/tmp/my practice");
+  await page
+    .getByRole("button", { name: "Preview this map", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Save this workspace map", exact: true })
+    .click();
+  await page.goto(`${base}/build/m01-first-run.html#m01-first-run-build-rule`);
+  assert.match(
+    await page.locator("[data-prechecks]:visible").innerText(),
+    /Valid JSON/
+  );
+  await page.locator("[data-step-navigation]").scrollIntoViewIfNeeded();
+  const box = await page.locator("[data-workspace-label]").boundingBox();
+  assert.ok(
+    box && box.y >= 0 && box.y < 900,
+    "workspace stays visible beside scrolled instructions"
+  );
+});
+test("a workspace map and reports survive lesson navigation when browser storage is denied", async (t) => {
+  const context = await browser.newContext();
+  t.after(() => context.close());
+  await context.addInitScript(() => {
+    Storage.prototype.setItem = function () {
+      throw Error("denied");
+    };
+  });
+  const page = await context.newPage();
+  await page.goto(base + "/build/workspace.html");
+  await page
+    .getByLabel("Practice root folder", { exact: true })
+    .fill("/tmp/my practice");
+  await page
+    .getByRole("button", { name: "Preview this map", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Save this workspace map", exact: true })
+    .click();
+  assert.match(
+    await page.locator("[data-storage-warning]").innerText(),
+    /temporary copy/i
+  );
+  await page.goto(base + "/build/m01-first-run.html#m01-first-run-build-rule");
+  assert.match(
+    await page.locator("[data-workspace-label]").innerText(),
+    /\/tmp\/my practice/
+  );
+  assert.match(
+    await page.locator("[data-check-guidance]:visible").innerText(),
+    /cd '\/tmp\/my practice'/
+  );
+  await page.locator("[data-report-status]:visible").selectOption("passed");
+  await page
+    .locator("[data-check-guidance]:visible")
+    .getByRole("button", { name: "Record my result" })
+    .click();
+  await page.goto(base + "/build/m01-tools.html");
+  await page.goto(base + "/build/m01-first-run.html#m01-first-run-build-rule");
+  assert.match(
+    await page.locator("[data-workspace-label]").innerText(),
+    /\/tmp\/my practice/
+  );
+  assert.match(
+    await page.locator("[data-build-report]:visible").innerText(),
+    /You reported: passed/
+  );
+});
+test("a wrong zero-boundary answer gives feedback without locking navigation", async (t) => {
+  const context = await browser.newContext();
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.goto(`${base}/build/m02-boundary.html#m02-boundary-try`);
+  await page.getByLabel("Seconds left", { exact: true }).fill("0");
+  await page.getByLabel("Comparison", { exact: true }).selectOption(">=");
+  await page
+    .getByRole("button", { name: "Check this choice", exact: true })
+    .click();
+  assert.match(
+    await page.locator("[data-boundary-feedback]:visible").innerText(),
+    /Expected: false.*returns: true/
+  );
+  assert.equal(
+    await page
+      .getByRole("button", { name: "Next step", exact: true })
+      .isEnabled(),
+    true
+  );
+  await page.getByRole("button", { name: "Next step", exact: true }).click();
+  assert.match(
+    await page.locator("[data-build-step]:visible").getAttribute("id"),
+    /build/
+  );
+});
+test("deadline timeline frames show accept reject and terminal without console errors", async (t) => {
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+  });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  await page.goto(`${base}/build/m05-deadline.html#m05-deadline-see`);
+  assert.match(
+    await page.locator("[data-frame-explanation]:visible").innerText(),
+    /Accepted in time/
+  );
+  await page
+    .locator("[data-build-step]:visible")
+    .getByRole("button", { name: "Reject", exact: true })
+    .click();
+  assert.match(
+    await page.locator("[data-frame-explanation]:visible").innerText(),
+    /rejected/
+  );
+  await page
+    .locator("[data-build-step]:visible")
+    .getByRole("button", { name: "Terminal", exact: true })
+    .click();
+  assert.match(
+    await page.locator("[data-frame-explanation]:visible").innerText(),
+    /final/
+  );
+  assert.match(
+    await page.locator("[data-build-step]:visible").innerText(),
+    /99/
+  );
+  assert.match(
+    await page.locator("[data-build-step]:visible").innerText(),
+    /grace/
+  );
+  assert.deepEqual(errors, []);
+});
+
+test("team mapping previews before save, maps exact files, and never runs course commands", async (t) => {
+  const context = await browser.newContext();
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.goto(base + "/build/workspace.html");
+  await page
+    .getByLabel("Where are you working?", { exact: true })
+    .selectOption("team");
+  await page
+    .getByLabel("Team repository root", { exact: true })
+    .fill("/private/tmp/arena-course-task13-rehearsal-20260929/target fixture");
+  const candidate = page
+    .locator("[data-mapping-candidate] option")
+    .filter({ hasText: "rule.submit-window · src/submit-window.ts" });
+  const value = await candidate.first().getAttribute("value");
+  assert.ok(value);
+  await page
+    .getByLabel("Course file and responsibility", { exact: true })
+    .selectOption(value);
+  await page
+    .getByLabel("Path in the team repository", { exact: true })
+    .fill("packages/match-core/src/deadline-policy.mjs");
+  await page
+    .getByLabel("What will your team do with this file?", { exact: true })
+    .selectOption("reuse");
+  await page
+    .getByLabel("Why does this file belong there?", { exact: true })
+    .fill("<img src=x onerror=alert(1)>");
+  await page
+    .getByLabel("Course check to map (optional)", { exact: true })
+    .selectOption("m02-boundary-unit");
+  await page
+    .getByLabel("Team command for this check", { exact: true })
+    .fill("npm run test:policy");
+  await page
+    .getByLabel("Folder to run the team check from", { exact: true })
+    .fill("apps/game");
+  await page
+    .getByRole("button", { name: "Preview this map", exact: true })
+    .click();
+  assert.equal(await page.locator("[data-profile-preview]").isVisible(), true);
+  assert.match(
+    await page.locator("[data-workspace-label]").innerText(),
+    /Practice/
+  );
+  await page
+    .getByRole("button", { name: "Save this workspace map", exact: true })
+    .click();
+  assert.match(
+    await page.locator("[data-workspace-label]").innerText(),
+    /Team.*target fixture/
+  );
+  await page.goto(base + "/build/m02-boundary.html#m02-boundary-build");
+  const files = await page
+    .locator("[data-build-step]:visible [data-file-guidance]")
+    .innerText();
+  assert.match(files, /packages\/match-core\/src\/deadline-policy\.mjs/);
+  assert.match(files, /test\.submit-window for test\/submit-window\.test\.ts/);
+  assert.match(
+    await page
+      .locator("[data-build-step]:visible [data-check-guidance]")
+      .innerText(),
+    /TEAM COMMAND · UNVERIFIED/
+  );
+  assert.match(
+    await page
+      .locator("[data-build-step]:visible [data-check-guidance]")
+      .innerText(),
+    /npm run test:policy/
+  );
+  assert.match(
+    await page
+      .locator("[data-build-step]:visible [data-check-guidance]")
+      .innerText(),
+    /cd '\/private\/tmp\/arena-course-task13-rehearsal-20260929\/target fixture\/apps\/game'/
+  );
+  assert.equal(await page.locator("img").count(), 0);
+  assert.ok(
+    (
+      await page
+        .locator("[data-build-step]:visible [data-file-guidance]")
+        .innerText()
+    ).includes("<img src=x onerror=alert(1)>")
+  );
+});
+
+test("an empty team map blocks team commands while practice remains available", async (t) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+  });
+  t.after(() => context.close());
+  const page = await context.newPage();
+  await page.goto(base + "/build/workspace.html");
+  await page
+    .getByLabel("Practice root folder", { exact: true })
+    .fill("/tmp/practice");
+  await page
+    .getByRole("button", { name: "Preview this map", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Save this workspace map", exact: true })
+    .click();
+  await page
+    .getByLabel("Where are you working?", { exact: true })
+    .selectOption("team");
+  await page
+    .getByLabel("Team repository root", { exact: true })
+    .fill("/tmp/team");
+  await page
+    .getByRole("button", { name: "Preview this map", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Save this workspace map", exact: true })
+    .click();
+  await page.goto(base + "/build/m06-http.html#m06-http-build");
+  let guidance = await page
+    .locator("[data-build-step]:visible [data-file-guidance]")
+    .innerText();
+  assert.match(guidance, /domain\.match for src\/server\/main\.ts/);
+  assert.match(guidance, /test\.http for test\/server\.ts/);
+  assert.equal(
+    await page
+      .locator("[data-build-step]:visible [data-check-guidance] pre")
+      .count(),
+    0
+  );
+  assert.doesNotMatch(
+    await page
+      .locator("[data-build-step]:visible [data-check-guidance]")
+      .innerText(),
+    /npm run/
+  );
+  await page
+    .getByRole("combobox", { name: "Coding destination" })
+    .selectOption("practice");
+  assert.match(
+    await page
+      .locator("[data-build-step]:visible [data-file-guidance]")
+      .innerText(),
+    /src\/server\/main\.ts/
+  );
+  assert.ok(
+    (await page
+      .locator("[data-build-step]:visible [data-check-guidance] pre")
+      .count()) > 0
+  );
+  assert.ok(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth
+    )
+  );
+});

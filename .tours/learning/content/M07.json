@@ -1,0 +1,1898 @@
+[
+  {
+    "id": "m07-browser-basics",
+    "milestoneId": "M07",
+    "title": "Treat the browser as another process",
+    "why": "The screen runs far from the server. It renders elements, styles them, and listens for events.",
+    "outcome": "Build one labeled input, button, and output with keyboard operation.",
+    "prerequisites": ["m06-identity"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "frontend/index.html",
+        "startLine": 1,
+        "endLine": 12
+      },
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/src/main.tsx",
+        "startLine": 6,
+        "endLine": 10
+      }
+    ],
+    "steps": [
+      {
+        "id": "m07-browser-basics-orient",
+        "phase": "orient",
+        "title": "Elements, rules, listeners",
+        "question": "What are the browser's three pieces?",
+        "explanation": [
+          "HTML elements for structure, CSS rules for presentation, and event listeners for interaction. A wrong selector is found by inspecting the DOM, not by reinstalling packages.",
+          "Reference preview: frontend/index.html mounts the application root (lines 1-12); frontend/src/main.tsx renders into it (lines 6-10). Your practice page starts as plain HTML and gains structure later."
+        ],
+        "vocabulary": [
+          {
+            "term": "Element",
+            "meaning": "One named structure in the page, such as input or button."
+          },
+          {
+            "term": "Listener",
+            "meaning": "Function that runs when an event such as a click happens."
+          }
+        ],
+        "hints": [
+          "Name element, rule, listener.",
+          "Find the mount root.",
+          "Compare with printed form plus pen.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See one control trio."
+      },
+      {
+        "id": "m07-browser-basics-see",
+        "phase": "see",
+        "title": "See input, button, output",
+        "question": "How does the output know what to show?",
+        "explanation": [
+          "The listener reads the input, computes, and writes the output region. Labels connect each control to its purpose for sighted, keyboard, and screen-reader users alike."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the label.",
+          "Point at the listener.",
+          "Compare with a form.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn labeling.",
+        "visual": {
+          "kind": "trace",
+          "title": "Labeled control trio",
+          "code": [
+            "<label>Seconds <input></label>",
+            "<button>Check</button>",
+            "<output>waiting</output>"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Input",
+              "values": [
+                {
+                  "label": "Has",
+                  "value": "explicit label"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Labels name controls for everyone, including keyboard users."
+            },
+            {
+              "id": "frame-1",
+              "label": "Button",
+              "values": [
+                {
+                  "label": "Does",
+                  "value": "runs listener"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Buttons work with click, Enter, and Space by default."
+            },
+            {
+              "id": "frame-2",
+              "label": "Output",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "result text"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Results appear as text, never by color alone."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Tab to button, press Enter",
+              "expected": "listener runs",
+              "reason": "Native buttons are keyboard-operable."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m07-browser-basics-understand",
+        "phase": "understand",
+        "title": "Native first",
+        "question": "Why native controls before libraries?",
+        "explanation": [
+          "Native input, button, and output bring keyboard support, focus outlines, and semantics free. Libraries add styling and behavior later without re-teaching interaction."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name one free feature.",
+          "Find the label element.",
+          "Compare with standard tools.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try keyboard only by hand."
+      },
+      {
+        "id": "m07-browser-basics-try",
+        "phase": "try",
+        "title": "Operate without a mouse",
+        "question": "Can you Tab to the button and run it?",
+        "explanation": [
+          "Yes: Tab moves focus visibly, Enter activates. If focus is invisible, the CSS needs a focus outline, not a new library."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Press Tab and watch focus.",
+          "Press Enter.",
+          "Compare with mouse click.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the trio."
+      },
+      {
+        "id": "m07-browser-basics-setup-install",
+        "phase": "build",
+        "title": "Install the browser toolchain",
+        "question": "Which packages make the screens and the journey possible?",
+        "explanation": [
+          "React renders screens, Vite serves the browser app, and playwright-core drives Chrome in the real browser check. The @types packages let TypeScript check React names.",
+          "At the practice root, run npm install --save-exact react@19.3.0 react-dom@19.3.0, then npm install --save-dev --save-exact vite@7.3.6 @vitejs/plugin-react@4.7.0 @types/react@19.3.0 @types/react-dom@19.3.0 playwright-core@1.63.0. These versions match the reference lockfile.",
+          "Add dev:client as vite --host 127.0.0.1 --port 5173, test:ui as vitest run test/ui.test.tsx, and test:browser as node test/browser/run.mjs. Later lessons add each new UI test to test:ui and extend the browser runner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Dependency",
+            "meaning": "A package the project runs with, installed by npm and recorded in package.json."
+          },
+          {
+            "term": "Dev dependency",
+            "meaning": "A package used only for building, testing, or serving during development."
+          }
+        ],
+        "hints": [
+          "Goal: install the seven exact versions and add three named scripts.",
+          "Relevant value: npm ls --depth=0 prints the installed package versions.",
+          "Analogous example: like the M01 package list, each named dependency has one job.",
+          "Walkthrough: run the runtime install, run the development-tool install, edit scripts, and confirm package-lock.json is created."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns tool, script, and dependency names.",
+            "change": "Add the seven exact React/Vite/browser package versions and the dev:client, test:ui, and test:browser scripts.",
+            "pattern": "Use --save-exact; later lessons extend test:ui as each test file is added."
+          }
+        ],
+        "checkIds": ["m07-deps-install"],
+        "prerequisiteCheckIds": ["m06-identity-service"],
+        "next": "Configure Vite for the client folder."
+      },
+      {
+        "id": "m07-browser-basics-setup-vite",
+        "phase": "build",
+        "title": "Point Vite at the client folder",
+        "question": "Where does the browser entry page live?",
+        "explanation": [
+          "Create vite.config.ts at the practice root. Set root to src/client so Vite serves index.html beside the client files. Add the React plugin, output built files to ../../dist-client, and use port 5173 for dev:client.",
+          "Add a proxy for /practice-decision (the isolated validation lesson) and /game-decision (the identity-protected game route) to http://127.0.0.1:3002. The browser calls one local origin; Vite forwards either request to Nest. This avoids a cross-origin workaround."
+        ],
+        "vocabulary": [
+          {
+            "term": "Proxy",
+            "meaning": "A local forwarder: Vite passes one request to the server and returns its answer."
+          }
+        ],
+        "hints": [
+          "Goal: root, React plugin, build output, client port, and both API proxy paths appear in vite.config.ts.",
+          "Relevant value: npx vite --version prints 7.3.6; Vite later prints http://127.0.0.1:5173/.",
+          "Analogous example: like tsconfig for tsc, vite.config.ts tells Vite which folder and tools to use.",
+          "Walkthrough: create the config at the project root; make the output path relative to src/client; forward both /practice-decision and /game-decision to port 3002."
+        ],
+        "files": [
+          {
+            "role": "config.vite",
+            "workspace": "active",
+            "path": "vite.config.ts",
+            "action": "create",
+            "owner": "The practice root owns Vite configuration.",
+            "change": "Set the client root, React plugin, build output, dev port, and proxies for both server routes.",
+            "pattern": "Use root src/client; outDir ../../dist-client; proxy /practice-decision and /game-decision to port 3002."
+          }
+        ],
+        "checkIds": ["m07-vite-setup"],
+        "prerequisiteCheckIds": ["m07-deps-install"],
+        "next": "Add a small browser test runner."
+      },
+      {
+        "id": "m07-browser-basics-setup-vitest",
+        "phase": "build",
+        "title": "Keep tests at the project root",
+        "question": "Why did the server test disappear after adding Vite?",
+        "explanation": [
+          "vite.config.ts points Vite at src/client so the browser opens the right index.html. Vitest also reads that Vite config by default, then searches for test/service.test.ts under src/client and finds nothing.",
+          "Create a separate vitest.config.ts at the practice root. Import defineConfig from vitest/config and set root to process.cwd(). Vitest will find tests under test/ while Vite keeps its client root."
+        ],
+        "vocabulary": [
+          {
+            "term": "Test root",
+            "meaning": "The folder where a test runner begins looking for tests."
+          }
+        ],
+        "hints": [
+          "Goal: add vitest.config.ts beside package.json with root set to process.cwd().",
+          "Relevant value: npm run test:service should list test/service.test.ts instead of reporting no test files.",
+          "Analogous example: Vite owns the page folder; Vitest owns the test folder.",
+          "Walkthrough: import defineConfig from vitest/config, set root, save, and rerun the named service test."
+        ],
+        "files": [
+          {
+            "role": "config.vitest",
+            "workspace": "active",
+            "path": "vitest.config.ts",
+            "action": "create",
+            "owner": "The practice root owns test discovery.",
+            "change": "Set Vitest root to the project root so tests stay in test/ when Vite root points to src/client.",
+            "pattern": "Import defineConfig from vitest/config; set root: process.cwd()."
+          }
+        ],
+        "checkIds": ["m07-vitest-root"],
+        "prerequisiteCheckIds": ["m07-vite-setup"],
+        "next": "Make the browser check repeatable."
+      },
+      {
+        "id": "m07-browser-basics-setup-runner",
+        "phase": "build",
+        "title": "Make the browser check repeatable",
+        "question": "How does the test know which page to open?",
+        "explanation": [
+          "Create test/browser/run.mjs. It starts dev:client, waits for Vite to print its ready URL, sets BASE_URL, runs the browser spec passed after --, and always stops Vite. It does not start the API yet because the trio is local to the page.",
+          "A real browser needs Chrome installed. If Chrome is unavailable, report the browser check as blocked and keep the other checks separate."
+        ],
+        "vocabulary": [
+          {
+            "term": "BASE_URL",
+            "meaning": "The address of the page the browser test should open."
+          }
+        ],
+        "hints": [
+          "Goal: run.mjs starts Vite, sets BASE_URL, runs one named spec, and stops Vite.",
+          "Relevant value: node --check test/browser/run.mjs accepts its syntax.",
+          "Analogous example: like a test server helper, cleanup runs even after a failure.",
+          "Walkthrough: spawn dev:client, read its ready line, pass its URL to the test process, and close the child process in finally."
+        ],
+        "files": [
+          {
+            "role": "test.browser",
+            "workspace": "active",
+            "path": "test/browser/run.mjs",
+            "action": "create",
+            "owner": "test/browser/ owns repeatable browser setup and cleanup.",
+            "change": "Start Vite, set BASE_URL, run the named spec, and stop Vite.",
+            "pattern": "Propagate test exit status; always terminate the child process."
+          }
+        ],
+        "checkIds": ["m07-runner-setup"],
+        "prerequisiteCheckIds": ["m07-vite-setup"],
+        "next": "Build the labeled trio."
+      },
+      {
+        "id": "m07-browser-basics-build",
+        "phase": "build",
+        "title": "Add the labeled trio",
+        "question": "Does keyboard-only operation work?",
+        "explanation": [
+          "Practice paths: src/client/index.html, src/client/basic.ts, src/client/style.css, and test/browser/trio.spec.ts. Use a Vite page and TypeScript listener. Native browser controls give keyboard behavior before React adds more structure."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: labeled input, button, and output; basic.ts listens and echoes a verdict; focus stays visible.",
+          "Relevant value: npm run test:browser -- test/browser/trio.spec.ts drives Tab and Enter at wide and 390px widths.",
+          "Analogous example: like the HTTP lesson, follow one input to one visible answer.",
+          "Walkthrough: create index.html with the controls, load basic.ts as a module, style focus in style.css, then write the named browser spec."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/index.html",
+            "action": "create",
+            "owner": "src/client/ owns the browser entry page.",
+            "change": "Add labeled input, button, and output elements.",
+            "pattern": "Native elements first; each input has a label."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/basic.ts",
+            "action": "create",
+            "owner": "src/client/ owns the first interaction.",
+            "change": "Listen for the button action and update output text.",
+            "pattern": "Use addEventListener and textContent; do not write HTML strings."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/style.css",
+            "action": "create",
+            "owner": "src/client/ owns page presentation.",
+            "change": "Set a readable layout and visible focus outline.",
+            "pattern": "Text cues, 44px controls, reduced motion respected."
+          },
+          {
+            "role": "test.browser",
+            "workspace": "active",
+            "path": "test/browser/trio.spec.ts",
+            "action": "create",
+            "owner": "test/browser/ proves real keyboard operation.",
+            "change": "Open the served page, type a value, press Enter, and read the output.",
+            "pattern": "Use BASE_URL; close browser in teardown."
+          }
+        ],
+        "checkIds": ["m07-browser-basics-browser"],
+        "prerequisiteCheckIds": [
+          "m07-deps-install",
+          "m07-vite-setup",
+          "m07-runner-setup"
+        ],
+        "next": "Check keyboard use, then add React state."
+      },
+      {
+        "id": "m07-browser-basics-check",
+        "phase": "check",
+        "title": "Report keyboard operation",
+        "question": "What did keyboard-only reveal?",
+        "explanation": [
+          "Run the browser journey at the practice root. Record narrow-screen behavior too."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and observations.",
+          "Name the focused control.",
+          "Compare with mouse use.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m07-browser-basics-browser"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to component state.",
+        "transfer": "In words, explain why labels matter beyond looks. Predict what breaks first without them."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m07-browser-basics-browser",
+        "command": "npm run test:browser -- test/browser/trio.spec.ts",
+        "cwd": ".",
+        "expected": "Vite serves the trio; Chrome operates it by keyboard and reads verdict text at wide and 390px widths.",
+        "kind": "browser",
+        "failure": [
+          {
+            "symptom": "Vite cannot find the page",
+            "diagnostic": "Check vite.config.ts root and create index.html inside src/client/.",
+            "meaning": "Vite serves from its configured root."
+          },
+          {
+            "symptom": "Enter does nothing",
+            "diagnostic": "Use a native button and verify basic.ts attaches its listener after the page loads.",
+            "meaning": "Native buttons support keyboard activation."
+          }
+        ]
+      },
+      {
+        "id": "m07-deps-install",
+        "command": "npm install",
+        "cwd": ".",
+        "expected": "package-lock.json records React and React DOM 19.3.0, Vite 7.3.6, plugin-react 4.7.0, React types 19.3.0, and playwright-core 1.63.0.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "Version mismatch in the lockfile",
+            "diagnostic": "Check each version string is exact in package.json, then rerun npm install.",
+            "meaning": "Pinned versions keep rehearsals comparable."
+          },
+          {
+            "symptom": "Network failure during install",
+            "diagnostic": "Stay on this step and rerun npm install; do not skip to building.",
+            "meaning": "Later steps need these tools present."
+          }
+        ]
+      },
+      {
+        "id": "m07-vite-setup",
+        "command": "npx vite --version",
+        "cwd": ".",
+        "expected": "Vite prints 7.3.6; the client config is in the practice root and forwards both /practice-decision and /game-decision to port 3002.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "Vite not found",
+            "diagnostic": "Rerun the pinned install and check package.json lists vite 7.3.6.",
+            "meaning": "The client server is a local development dependency."
+          },
+          {
+            "symptom": "The game request gets a Vite 404",
+            "diagnostic": "Add /game-decision to the proxy beside /practice-decision.",
+            "meaning": "The browser must reach Nest through the same origin for both paths."
+          }
+        ]
+      },
+      {
+        "id": "m07-runner-setup",
+        "command": "node --check test/browser/run.mjs",
+        "cwd": ".",
+        "expected": "Node accepts the runner file syntax; the following browser check exercises its start/run/cleanup behavior.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "SyntaxError in run.mjs",
+            "diagnostic": "Check the spawn arguments and balanced braces in the runner.",
+            "meaning": "The runner must parse before it can launch the browser."
+          }
+        ]
+      },
+      {
+        "id": "m07-vitest-root",
+        "command": "npm run test:service",
+        "cwd": ".",
+        "expected": "Vitest finds and runs test/service.test.ts at the project root even though Vite serves from src/client.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "No test files found after adding vite.config.ts",
+            "diagnostic": "Confirm vitest.config.ts is at the root and sets root: process.cwd().",
+            "meaning": "Vitest otherwise inherits Vite's client root."
+          },
+          {
+            "symptom": "Vitest cannot load its config",
+            "diagnostic": "Import defineConfig from vitest/config and check the config file name.",
+            "meaning": "Vitest has its own test configuration."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m07-react-state",
+    "milestoneId": "M07",
+    "title": "Render from state, not by poking the DOM",
+    "why": "One state value renders every dependent part consistently. Direct DOM mutation alongside rendering causes drift.",
+    "outcome": "Replace the demo with a state-driven component.",
+    "prerequisites": ["m07-browser-basics"],
+    "references": [
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/src/App.tsx",
+        "startLine": 14,
+        "endLine": 42
+      },
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/src/components/TestPanel.tsx",
+        "startLine": 18,
+        "endLine": 22
+      }
+    ],
+    "steps": [
+      {
+        "id": "m07-react-state-orient",
+        "phase": "orient",
+        "title": "Event to state to render",
+        "question": "What updates the screen?",
+        "explanation": [
+          "State updates. An event changes state; rendering follows from state. Props carry data down from a parent; local state belongs to one component.",
+          "You replace the simple demo deliberately in this lesson. Running both side by side invites drift."
+        ],
+        "vocabulary": [
+          {
+            "term": "State",
+            "meaning": "Component-owned data. Changing it re-renders."
+          },
+          {
+            "term": "Props",
+            "meaning": "Parent-supplied data. Read-only inside the child."
+          }
+        ],
+        "hints": [
+          "Answer: state changes.",
+          "Find useState.",
+          "Compare with a variable redraw.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the flow."
+      },
+      {
+        "id": "m07-react-state-see",
+        "phase": "see",
+        "title": "See props down, events up",
+        "question": "Where does the verdict text live?",
+        "explanation": [
+          "In state. The input event updates it; the output renders it. The custom-input box in TestPanel works exactly this way."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the state.",
+          "Point at the render.",
+          "Compare with the basic trio.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the split.",
+        "visual": {
+          "kind": "trace",
+          "title": "State renders output",
+          "code": [
+            "event sets verdict='open'",
+            "render shows verdict",
+            "props pass problem in"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Event",
+              "values": [
+                {
+                  "label": "Sets",
+                  "value": "verdict state"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Events write state, never the DOM directly."
+            },
+            {
+              "id": "frame-1",
+              "label": "Render",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "verdict text"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Rendering reads state into elements."
+            },
+            {
+              "id": "frame-2",
+              "label": "Props",
+              "values": [
+                {
+                  "label": "Supply",
+                  "value": "problem data"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Parents pass data down as read-only props."
+            }
+          ],
+          "cases": [
+            {
+              "input": "direct DOM edit beside render",
+              "expected": "drift on next render",
+              "reason": "Render overwrites manual pokes."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m07-react-state-understand",
+        "phase": "understand",
+        "title": "One concept at a time",
+        "question": "What is introduced first?",
+        "explanation": [
+          "One JSX concept at a time: elements with props, then local state, then lists with keys. Effect subscriptions arrive with their cleanup explained at first use, never as unexplained boilerplate.",
+          "Reference preview: frontend/src/App.tsx composes screens from state (lines 14-42); TestPanel holds its custom input in useState (lines 18-22). Your practice App follows the same split."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name element, state, list.",
+          "Find useState in the preview.",
+          "Compare with struct plus functions.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try props versus state by hand."
+      },
+      {
+        "id": "m07-react-state-try",
+        "phase": "try",
+        "title": "Decide props or state",
+        "question": "Problem text: props or state? Draft verdict: props or state?",
+        "explanation": [
+          "Problem text arrives as props. The draft verdict lives in local state until sent."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write data and owner.",
+          "Find the data source.",
+          "Compare with arguments versus locals.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the component."
+      },
+      {
+        "id": "m07-react-state-setup-tsconfig",
+        "phase": "build",
+        "title": "Teach TypeScript about UI files",
+        "question": "What does each new setting do?",
+        "explanation": [
+          "Add jsx: react-jsx so TypeScript accepts JSX, add DOM to lib so browser names have types, and include .tsx files under src/ and test/. Create test/ui.test.tsx now with one tiny element and renderToString; you will edit this same test to render App next.",
+          "Keep the other M01 compiler settings unchanged. This check runs the .tsx test, so it proves the compiler and runner both accept the new file."
+        ],
+        "vocabulary": [
+          {
+            "term": "JSX",
+            "meaning": "HTML-like syntax inside TypeScript for describing UI. Compiled away, never shipped as written."
+          }
+        ],
+        "hints": [
+          "Goal: tsconfig has jsx react-jsx, DOM types, and src/test TSX include patterns; test/ui.test.tsx exists.",
+          "Relevant value: npm run test:ui reports the smoke render passing.",
+          "Analogous example: like adding include paths in M01, name which new files tsc should read.",
+          "Walkthrough: edit those tsconfig keys, create a tiny JSX test, and run the one-file UI script."
+        ],
+        "files": [
+          {
+            "role": "config.typescript",
+            "workspace": "active",
+            "path": "tsconfig.json",
+            "action": "edit",
+            "owner": "tsconfig.json owns what the compiler accepts.",
+            "change": "Add jsx react-jsx, DOM lib, and tsx include patterns.",
+            "pattern": "Keep target, module, strict, rootDir, outDir, skipLibCheck unchanged."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/ui.test.tsx",
+            "action": "create",
+            "owner": "test/ proves TSX setup before it tests the real component.",
+            "change": "Render one literal JSX element as a configuration smoke check.",
+            "pattern": "Use renderToString; edit this test for App in the next Build step."
+          }
+        ],
+        "checkIds": ["m07-tsx-config"],
+        "prerequisiteCheckIds": [
+          "m07-deps-install",
+          "m07-browser-basics-browser"
+        ],
+        "next": "Build the state-driven component."
+      },
+      {
+        "id": "m07-react-state-build",
+        "phase": "build",
+        "title": "Replace the demo with state",
+        "question": "Does a state update show new output?",
+        "explanation": [
+          "Practice paths: src/client/main.tsx, src/client/App.tsx, and test/ui.test.tsx. Edit the index.html made in the browser-trio lesson so it loads main.tsx. The setup step already enabled JSX."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: App takes a problem prop, holds verdict state, and has one control that updates it.",
+          "Relevant value: the UI test checks initial rendering; the browser journey later presses the control and reads the changed verdict.",
+          "Analogous example: like updating one C struct field before printing the struct again.",
+          "Walkthrough: mount App from main.tsx, pass its problem prop, store verdict with useState, and render the current verdict as text."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/main.tsx",
+            "action": "create",
+            "owner": "src/client/ owns mounting.",
+            "change": "Mount Arena into the page root.",
+            "pattern": "One mount call; no direct DOM edits beside it."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/App.tsx",
+            "action": "create",
+            "owner": "src/client/ owns the screen.",
+            "change": "Render problem props with verdict state and one updater.",
+            "pattern": "Props read-only; state updated through its setter."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/ui.test.tsx",
+            "action": "edit",
+            "owner": "test/ proves rendering.",
+            "change": "Replace the smoke element with an App rendering assertion for problem props and default verdict.",
+            "pattern": "Render to string; assert text before and after."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/index.html",
+            "action": "edit",
+            "owner": "src/client/ owns the Vite entry.",
+            "change": "Replace the trio script with a module entry that mounts App.",
+            "pattern": "Entry only; components live in their own files."
+          }
+        ],
+        "checkIds": ["m07-react-state-unit"],
+        "prerequisiteCheckIds": [
+          "m07-browser-basics-browser",
+          "m07-vite-setup"
+        ],
+        "next": "Check rendering and connect to transport."
+      },
+      {
+        "id": "m07-react-state-check",
+        "phase": "check",
+        "title": "Report rendering",
+        "question": "What proved state drove the output?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and outputs.",
+          "Show before and after text.",
+          "Compare with DOM poking.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m07-react-state-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to transport.",
+        "transfer": "In words, explain props versus state. Predict a bug from mutating props."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m07-react-state-unit",
+        "command": "npm run test:ui",
+        "cwd": ".",
+        "expected": "The UI test typechecks TSX and renders the problem prop with the default verdict; browser behavior is checked in the later journey.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Update shows nothing new",
+            "diagnostic": "Update through the state setter, not by mutating a variable; check the render reads state.",
+            "meaning": "Only setter calls re-render."
+          },
+          {
+            "symptom": "TSX fails to compile",
+            "diagnostic": "Check the JSX TypeScript settings step and the .tsx extension.",
+            "meaning": "Configuration enables the syntax."
+          }
+        ]
+      },
+      {
+        "id": "m07-tsx-config",
+        "command": "npm run test:ui",
+        "cwd": ".",
+        "expected": "The TSX smoke test typechecks and renders its literal element.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "JSX syntax or DOM names fail typecheck",
+            "diagnostic": "Check jsx, lib, and include in tsconfig.json.",
+            "meaning": "TypeScript must know both JSX and browser types."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m07-transport",
+    "milestoneId": "M07",
+    "title": "Talk to the server through one interface",
+    "why": "Screens depend on a transport interface, never on fetch details or either adapter.",
+    "outcome": "Add an HTTP transport with loading, error, and stale-reply handling.",
+    "prerequisites": ["m07-react-state"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "frontend/src/arena/transport.ts",
+        "startLine": 60,
+        "endLine": 94
+      }
+    ],
+    "steps": [
+      {
+        "id": "m07-transport-orient",
+        "phase": "orient",
+        "title": "Interface first, adapter second",
+        "question": "What do screens import?",
+        "explanation": [
+          "The Arena transport interface: snapshots and commands such as run and submit. SocketArenaTransport is the production adapter; MockArenaTransport is the fixture adapter. Arena UI modules depend on the interface, not on either adapter.",
+          "Reference preview: frontend/src/arena/transport.ts defines the transport seam with run, submit, setReady, and leave (lines 60-94). Your practice transport starts as an HTTP adapter with the same idea."
+        ],
+        "vocabulary": [
+          {
+            "term": "Arena transport",
+            "meaning": "Frontend interface for Match snapshots and commands. Screens depend on it, not on adapters."
+          }
+        ],
+        "hints": [
+          "Answer: the interface.",
+          "Find run and submit.",
+          "Compare with Judge port.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See request states."
+      },
+      {
+        "id": "m07-transport-see",
+        "phase": "see",
+        "title": "See loading, error, success",
+        "question": "What ends loading on failure?",
+        "explanation": [
+          "The error path. Loading shows during the request, ends on both success and error, and stale replies are discarded so an old answer never overwrites a newer one."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at loading.",
+          "Point at the discard.",
+          "Compare with waiting rooms.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn stale replies.",
+        "visual": {
+          "kind": "trace",
+          "title": "Stale reply discarded",
+          "code": [
+            "request 1 slow, request 2 fast",
+            "2 answers first -> shown",
+            "1 answers late -> discarded"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Race",
+              "values": [
+                {
+                  "label": "Order",
+                  "value": "2 before 1"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Two overlapping requests finish out of order."
+            },
+            {
+              "id": "frame-1",
+              "label": "Fresh",
+              "values": [
+                {
+                  "label": "Shown",
+                  "value": "answer 2"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The newest request's answer displays."
+            },
+            {
+              "id": "frame-2",
+              "label": "Stale",
+              "values": [
+                {
+                  "label": "Shown",
+                  "value": "still 2"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The late older answer is discarded, and loading already ended."
+            }
+          ],
+          "cases": [
+            {
+              "input": "network failure",
+              "expected": "diagnostic, no blind resubmit",
+              "reason": "Errors guide; they do not replay Submit."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m07-transport-understand",
+        "phase": "understand",
+        "title": "Sequence numbers discard stale work",
+        "question": "How is newness tracked?",
+        "explanation": [
+          "Each request takes the next sequence number; only the latest number's answer is kept. A network failure offers a diagnostic, never a blind Submit replay."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the counter.",
+          "Find the comparison.",
+          "Compare with revision numbers.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try ordering by hand."
+      },
+      {
+        "id": "m07-transport-try",
+        "phase": "try",
+        "title": "Decide show or discard",
+        "question": "Answer 1 arrives after answer 2: show or discard?",
+        "explanation": ["Discard. Answer 2 already represents newer intent."],
+        "vocabulary": [],
+        "hints": [
+          "Write numbers and verdict.",
+          "Find the latest counter.",
+          "Compare with Match revisions.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build transport."
+      },
+      {
+        "id": "m07-transport-build",
+        "phase": "build",
+        "title": "Add the HTTP adapter",
+        "question": "Do stale replies discard and errors end loading?",
+        "explanation": [
+          "Practice paths: src/client/transport.ts, src/client/http-transport.ts. Reference path (read only): arena/transport.ts."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: HttpTransport with request states plus sequence discard.",
+          "Relevant value: test success, error ends loading, stale discard, network diagnostic.",
+          "Analogous example: like Match revisions, newest wins.",
+          "Walkthrough: define Transport interface; adapter tracks a counter; test resolves two overlapping calls out of order."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns which UI test files test:ui runs.",
+            "change": "Add test/transport.test.ts to test:ui: vitest run test/ui.test.tsx test/transport.test.ts.",
+            "pattern": "List only test files that now exist, so a missing test cannot pass silently."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/transport.ts",
+            "action": "create",
+            "owner": "src/client/ owns the seam.",
+            "change": "Define the transport interface with snapshot and command shapes.",
+            "pattern": "Screens import this file only."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/http-transport.ts",
+            "action": "create",
+            "owner": "src/client/ owns the adapter.",
+            "change": "Implement fetch calls with loading/error/stale handling.",
+            "pattern": "Sequence counter; late answers dropped."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/transport.test.ts",
+            "action": "create",
+            "owner": "test/ proves ordering.",
+            "change": "Test success, error, stale discard, and diagnostic text.",
+            "pattern": "Controlled overlapping promises; no real network."
+          }
+        ],
+        "checkIds": ["m07-transport-unit"],
+        "prerequisiteCheckIds": ["m07-react-state-unit"],
+        "next": "Check transport and connect to panels."
+      },
+      {
+        "id": "m07-transport-check",
+        "phase": "check",
+        "title": "Report ordering",
+        "question": "What proved staleness discarded?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show the kept answer.",
+          "Compare with overwriting.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m07-transport-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to editor panels.",
+        "transfer": "In words, explain why screens must not import fetch directly. Predict a second adapter that fits the same interface."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m07-transport-unit",
+        "command": "npm run test:ui",
+        "cwd": ".",
+        "expected": "Success shows; error ends loading with a diagnostic; stale reply discarded; no blind Submit replay.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Stale answer overwrites fresh",
+            "diagnostic": "Compare sequence numbers and keep only the latest.",
+            "meaning": "Order is explicit, not hoped for."
+          },
+          {
+            "symptom": "Loading stuck after error",
+            "diagnostic": "End loading in both success and error branches.",
+            "meaning": "Every request settles its indicator."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m07-editor-run",
+    "milestoneId": "M07",
+    "title": "Edit code and Run without touching score",
+    "why": "The editor and visible tests are the iteration loop. Hidden data never enters the browser.",
+    "outcome": "Show Problem, edit code, and display Run results with no score change.",
+    "prerequisites": ["m07-transport"],
+    "references": [
+      {
+        "lessonId": "0005-problem-editor-run",
+        "path": "frontend/src/components/TestPanel.tsx",
+        "startLine": 18,
+        "endLine": 51
+      },
+      {
+        "lessonId": "0005-problem-editor-run",
+        "path": "frontend/src/components/ProblemPanel.tsx",
+        "startLine": 3,
+        "endLine": 27
+      }
+    ],
+    "steps": [
+      {
+        "id": "m07-editor-run-orient",
+        "phase": "orient",
+        "title": "Public data only crosses the wire",
+        "question": "What proves no hidden leak?",
+        "explanation": [
+          "The network payload. Show the response JSON containing statement, starters, and visible tests — and no hidden weights, answers, or private paths.",
+          "Reference preview: TestPanel renders visible tests with status dots and outputs (lines 18-51); ProblemPanel shows the statement (lines 3-27). CodeMirror lifecycle and language setup arrive as named steps, not magic."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Answer: the payload.",
+          "Find visible tests.",
+          "Compare with the M04 leak scan.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the loop."
+      },
+      {
+        "id": "m07-editor-run-see",
+        "phase": "see",
+        "title": "See statement, editor, results",
+        "question": "Where does Run output appear?",
+        "explanation": [
+          "In the TestPanel list with per-case status, leaving the score display untouched."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the statement.",
+          "Point at the results.",
+          "Compare with the trio.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn panel ownership.",
+        "visual": {
+          "kind": "trace",
+          "title": "Edit then Run",
+          "code": [
+            "problem public DTO -> editor",
+            "Run -> visible results",
+            "score display unchanged"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Problem",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "statement plus starters"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Public data renders the task."
+            },
+            {
+              "id": "frame-1",
+              "label": "Run",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "per-case results"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Run fills the test list."
+            },
+            {
+              "id": "frame-2",
+              "label": "Score",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "unchanged"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Score ignores Run by contract."
+            }
+          ],
+          "cases": [
+            {
+              "input": "hidden fixture text in payload",
+              "expected": "rejected lesson",
+              "reason": "Browsers receive public data only."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m07-editor-run-understand",
+        "phase": "understand",
+        "title": "Panels own their slice",
+        "question": "Which panel owns what?",
+        "explanation": [
+          "ProblemPanel owns the statement. CodeEditor owns the draft. TestPanel owns visible results. Each is a small component with props in and events up."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name three panels.",
+          "Find their props.",
+          "Compare with modules.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try ownership by hand."
+      },
+      {
+        "id": "m07-editor-run-try",
+        "phase": "try",
+        "title": "Assign new behavior",
+        "question": "A custom input box: which panel?",
+        "explanation": [
+          "TestPanel: it extends visible testing without touching scoring."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write behavior and owner.",
+          "Find visible testing.",
+          "Compare with single responsibility.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build panels."
+      },
+      {
+        "id": "m07-editor-run-build",
+        "phase": "build",
+        "title": "Add the three panels",
+        "question": "Do Run results show with payloads proven public?",
+        "explanation": [
+          "Practice paths: src/client/ProblemPanel.tsx, CodeEditor.tsx, TestPanel.tsx. State which browser data is private or public with the matching network payloads."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: render statement, draft editor, and results from transport data.",
+          "Relevant value: drive a Run through the fake transport; assert results plus unchanged score and hidden-free payload.",
+          "Analogous example: like the state lesson, props down and events up.",
+          "Walkthrough: build view-model helpers first and test them; wire components thinly on top."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns which UI test files test:ui runs.",
+            "change": "Add test/panels.test.ts to test:ui: vitest run test/ui.test.tsx test/transport.test.ts test/panels.test.ts.",
+            "pattern": "List only test files that now exist, so a missing test cannot pass silently."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/ProblemPanel.tsx",
+            "action": "create",
+            "owner": "src/client/ owns the statement view.",
+            "change": "Render title, description, examples, and starter.",
+            "pattern": "Public fields only."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/CodeEditor.tsx",
+            "action": "create",
+            "owner": "src/client/ owns the draft.",
+            "change": "Hold the draft in state with language setup.",
+            "pattern": "Draft never leaves except via Run or Submit."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/TestPanel.tsx",
+            "action": "create",
+            "owner": "src/client/ owns visible results.",
+            "change": "Render per-case status from Run answers.",
+            "pattern": "Score display untouched."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/panels.test.ts",
+            "action": "create",
+            "owner": "test/ proves the loop.",
+            "change": "Test statement render data, Run result mapping, and hidden-free payload scan.",
+            "pattern": "Pure view-model tests plus payload stringify scan."
+          }
+        ],
+        "checkIds": ["m07-editor-run-unit"],
+        "prerequisiteCheckIds": ["m07-transport-unit"],
+        "next": "Check panels and connect to Submit."
+      },
+      {
+        "id": "m07-editor-run-check",
+        "phase": "check",
+        "title": "Report the loop",
+        "question": "What did the payload scan search?",
+        "explanation": [
+          "Run the check at the practice root. Keep the hidden-absence proof with the result."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Name forbidden strings.",
+          "Compare with M04 scan.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m07-editor-run-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to Submit and Reveal.",
+        "transfer": "In words, explain why the editor draft stays local. Predict what Submit sends that Run does not."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m07-editor-run-unit",
+        "command": "npm run test:ui",
+        "cwd": ".",
+        "expected": "Statement renders from public data; Run maps to per-case results; payload scan finds no hidden markers; score unchanged.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Hidden text in payload",
+            "diagnostic": "Project only public fields into the browser DTO; scan the stringified payload.",
+            "meaning": "Leaks break fairness."
+          },
+          {
+            "symptom": "Score moves on Run",
+            "diagnostic": "Keep Run answers out of counted-score state.",
+            "meaning": "Run is neutral."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m07-submit-reveal",
+    "milestoneId": "M07",
+    "title": "Submit with reason, wait honestly, reveal fully",
+    "why": "Submit locks work; pending is not final; terminal Reveal precedes the result.",
+    "outcome": "Disable with explained reasons and show Reveal before the final result.",
+    "prerequisites": ["m07-editor-run"],
+    "references": [
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/src/components/RoundScoreReveal.tsx",
+        "startLine": 4,
+        "endLine": 43
+      },
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/src/components/MatchResult.tsx",
+        "startLine": 23,
+        "endLine": 29
+      }
+    ],
+    "steps": [
+      {
+        "id": "m07-submit-reveal-orient",
+        "phase": "orient",
+        "title": "Pending is a state, not a verdict",
+        "question": "When is Submit disabled?",
+        "explanation": [
+          "Outside CODING, while a request is pending, or with an explained reason such as missing readiness. Disabled controls name their reason in text.",
+          "Reference preview: RoundScoreReveal presents the per-round breakdown (lines 4-43); MatchResult presents the terminal outcome (lines 23-29). Reveal appears before the result."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name three disables.",
+          "Find the reason text.",
+          "Compare with locked doors with signs.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See receipt to Reveal."
+      },
+      {
+        "id": "m07-submit-reveal-see",
+        "phase": "see",
+        "title": "See pending receipt to Reveal",
+        "question": "What shows while waiting?",
+        "explanation": [
+          "The pending receipt with its identity and accepted time — explicitly not a score. Then the Reveal breakdown, then the final result."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at pending.",
+          "Point at Reveal.",
+          "Compare with receipt plus grades.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn revision conflicts.",
+        "visual": {
+          "kind": "trace",
+          "title": "Submit to Reveal to result",
+          "code": [
+            "submit -> pending receipt",
+            "reveal -> breakdown",
+            "result -> totals"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Pending",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "receipt, no score"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Waiting is explicit and scoreless."
+            },
+            {
+              "id": "frame-1",
+              "label": "Reveal",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "group breakdown"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Disclosure precedes the outcome."
+            },
+            {
+              "id": "frame-2",
+              "label": "Result",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "totals plus tie-breaks"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The result follows the Reveal, never before it."
+            }
+          ],
+          "cases": [
+            {
+              "input": "revision conflict (409)",
+              "expected": "refresh authoritative state, no replay",
+              "reason": "Stale commands never auto-retry."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m07-submit-reveal-understand",
+        "phase": "understand",
+        "title": "Refresh on conflict, never replay",
+        "question": "What follows a 409 Match revision conflict?",
+        "explanation": [
+          "An authoritative refresh and a visible notice. The frontend does not replay the command automatically; the player decides again with fresh state."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match revision conflict",
+            "meaning": "A stale snapshot attempted to save after a newer revision committed. Refresh state; never replay automatically."
+          }
+        ],
+        "hints": [
+          "Name refresh, not replay.",
+          "Find the 409 path.",
+          "Compare with reloading a page.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try conflict by hand."
+      },
+      {
+        "id": "m07-submit-reveal-try",
+        "phase": "try",
+        "title": "Decide disable text",
+        "question": "In ROUND_INTRO: what does Submit say?",
+        "explanation": [
+          "Why it is disabled: play has not started. Pending: shows the receipt. Conflict: offers refresh."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write state and text.",
+          "Find each reason.",
+          "Compare with error messages.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build panels."
+      },
+      {
+        "id": "m07-submit-reveal-build",
+        "phase": "build",
+        "title": "Add Submit, Reveal, Result",
+        "question": "Does Reveal precede the result with conflicts refreshing?",
+        "explanation": [
+          "Practice paths: src/client/SubmitPanel.tsx, RevealPanel.tsx, ResultPanel.tsx."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: disabled reasons, pending receipt view, Reveal breakdown, terminal result, conflict refresh.",
+          "Relevant value: drive submit→pending→reveal→result through the fake transport; inject a 409 and assert refresh without replay.",
+          "Analogous example: like transport states, every async state has a view.",
+          "Walkthrough: model panel state as a small union; test each state plus the conflict branch."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns which UI test files test:ui runs.",
+            "change": "Add test/flow.test.ts to test:ui: vitest run test/ui.test.tsx test/transport.test.ts test/panels.test.ts test/flow.test.ts.",
+            "pattern": "List only test files that now exist, so a missing test cannot pass silently."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/SubmitPanel.tsx",
+            "action": "create",
+            "owner": "src/client/ owns Submit view.",
+            "change": "Render disabled reasons, pending receipt, and conflict refresh.",
+            "pattern": "Reasons as text; no silent disabling."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/RevealPanel.tsx",
+            "action": "create",
+            "owner": "src/client/ owns Reveal view.",
+            "change": "Render group breakdown from Reveal data.",
+            "pattern": "Breakdown before result."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/ResultPanel.tsx",
+            "action": "create",
+            "owner": "src/client/ owns result view.",
+            "change": "Render totals with tie-break explanation.",
+            "pattern": "Result follows Reveal."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/flow.test.ts",
+            "action": "create",
+            "owner": "test/ proves the flow.",
+            "change": "Test disable reasons, pending view, Reveal order, and 409 refresh.",
+            "pattern": "State-union tests; replay counter stays zero on conflict."
+          }
+        ],
+        "checkIds": ["m07-submit-reveal-unit"],
+        "prerequisiteCheckIds": ["m07-editor-run-unit"],
+        "next": "Check the flow and connect to the journey."
+      },
+      {
+        "id": "m07-submit-reveal-check",
+        "phase": "check",
+        "title": "Report the flow",
+        "question": "What proved Reveal precedes result?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show the order.",
+          "Compare with result-first.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m07-submit-reveal-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to the full journey.",
+        "transfer": "In words, explain why pending must show the receipt. Predict what a player does on conflict."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m07-submit-reveal-unit",
+        "command": "npm run test:ui",
+        "cwd": ".",
+        "expected": "Disabled reasons shown; pending shows receipt without score; Reveal precedes result; 409 refreshes without replay.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Result before Reveal",
+            "diagnostic": "Gate the result view on a present Reveal.",
+            "meaning": "Order is contractual."
+          },
+          {
+            "symptom": "Conflict replays automatically",
+            "diagnostic": "Refresh state and wait for the player; assert the send counter is unchanged.",
+            "meaning": "Stale commands never replay."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m07-local-journey",
+    "milestoneId": "M07",
+    "title": "Play a local 1v1 in the browser",
+    "why": "The server, transport, and screens must work as one against the fake Judge.",
+    "outcome": "Complete a browser 1v1 with failure, keyboard, and narrow screen.",
+    "prerequisites": ["m07-submit-reveal"],
+    "references": [
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/e2e/live-1v1.spec.ts",
+        "startLine": 61,
+        "endLine": 131
+      }
+    ],
+    "steps": [
+      {
+        "id": "m07-local-journey-orient",
+        "phase": "orient",
+        "title": "Known pieces, one route",
+        "question": "What does the journey prove together?",
+        "explanation": [
+          "Problem display, Run without score change, Submit with receipt, pending, Reveal, and final result — through your server and fake Judge, in a real browser.",
+          "Reference preview: frontend/e2e/live-1v1.spec.ts drives a complete browser 1v1 (lines 61-131). Your practice journey is smaller but equally real: served page, real HTTP, fake Judge labeled."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "List the stages.",
+          "Find the spec flow.",
+          "Compare with the M05 journey.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the route map."
+      },
+      {
+        "id": "m07-local-journey-see",
+        "phase": "see",
+        "title": "See the whole screen journey",
+        "question": "Where can it fail honestly?",
+        "explanation": [
+          "At the server (stopped, 400, 401), at the Judge (fake failure), and at the network. Each has a diagnostic; none invents success."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at each failure.",
+          "Point at its message.",
+          "Compare with the M05 journey.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the setup.",
+        "visual": {
+          "kind": "trace",
+          "title": "Browser to server to fake Judge",
+          "code": [
+            "browser -> server /practice-decision",
+            "server -> rule -> answer",
+            "browser shows verdict text"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Page",
+              "values": [
+                {
+                  "label": "Does",
+                  "value": "send real HTTP"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "A served page talks to the practice server."
+            },
+            {
+              "id": "frame-1",
+              "label": "Server",
+              "values": [
+                {
+                  "label": "Does",
+                  "value": "validate and answer"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Validation, identity, and rules run for real."
+            },
+            {
+              "id": "frame-2",
+              "label": "Screen",
+              "values": [
+                {
+                  "label": "Shows",
+                  "value": "verdict plus failures"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Including a failed request with its diagnostic."
+            }
+          ],
+          "cases": [
+            {
+              "input": "stopped server",
+              "expected": "diagnostic, not a hang",
+              "reason": "Failures are first-class."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m07-local-journey-understand",
+        "phase": "understand",
+        "title": "Scripts name the journey",
+        "question": "Which commands run the journey?",
+        "explanation": [
+          "Five taught scripts with fixed roles. dev:server builds everything and serves the built client plus API on port 3002 (read its ready line). dev:client runs Vite on port 5173 for UI iteration with the fake transport. test:service runs the server suites. test:ui runs the client unit suites. test:browser orchestrates the full journey through run.mjs. Ports and ready output were checked in rehearsal."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the five scripts.",
+          "Find the ports.",
+          "Compare with npm scripts so far.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the scripts by hand."
+      },
+      {
+        "id": "m07-local-journey-try",
+        "phase": "try",
+        "title": "Run each script once",
+        "explanation": [
+          "Start dev:server and read its ready line, then stop it. Start dev:client, open the printed URL, and see the page. Run test:service, test:ui, and test:browser separately so each failure points at its layer."
+        ],
+        "question": "Which command failed, and what does its name tell you?",
+        "vocabulary": [],
+        "hints": [
+          "Run one suite at a time.",
+          "Read the ready line.",
+          "Compare suite names with layers.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the journey."
+      },
+      {
+        "id": "m07-local-journey-setup-runner",
+        "phase": "build",
+        "title": "Teach one command to run the journey",
+        "question": "What does test:browser do in order?",
+        "explanation": [
+          "Edit test/browser/run.mjs so test:browser starts both processes: the Nest API on port 3002 and Vite on port 5173. Wait for each ready line, pass the Vite URL as BASE_URL, run the named spec, then stop both processes even if a test fails.",
+          "Vite forwards /practice-decision to the API, so the page keeps one local URL. The local-game.spec.ts uses a real browser and real HTTP; the fake Judge stays labeled as a fake."
+        ],
+        "vocabulary": [
+          {
+            "term": "Orchestrator",
+            "meaning": "A script that runs other commands in order and reports one result."
+          }
+        ],
+        "hints": [
+          "Goal: runner starts API and client, waits for both, runs the requested spec, then closes both.",
+          "Relevant value: the spec opens BASE_URL and gets an HTTP response through Vite proxy.",
+          "Analogous example: like two C processes with separate jobs, the server and browser client have separate ports.",
+          "Walkthrough: extend the existing runner with the server process and proxy path; use finally to stop both child processes."
+        ],
+        "files": [
+          {
+            "role": "test.browser",
+            "workspace": "active",
+            "path": "test/browser/run.mjs",
+            "action": "edit",
+            "owner": "test/browser/ owns browser process setup and cleanup.",
+            "change": "Start both services, set BASE_URL from Vite readiness, run the named spec, and stop both services.",
+            "pattern": "Keep separate child handles; terminate both in finally and propagate the spec exit code."
+          }
+        ],
+        "checkIds": ["m07-runner-update"],
+        "prerequisiteCheckIds": ["m07-submit-reveal-unit"],
+        "next": "Assemble Arena and run the two-process journey."
+      },
+      {
+        "id": "m07-local-journey-build",
+        "phase": "build",
+        "title": "Complete the browser journey",
+        "question": "Does the browser complete a 1v1 loop with a failure included?",
+        "explanation": [
+          "Practice paths: src/client/Arena.tsx, test/browser/local-game.spec.ts (plus the runner from the previous step). The spec uses vitest with playwright-core: it requires BASE_URL, launches Chrome (channel chrome, stock Chromium fallback), and drives verdict, failure diagnostic, keyboard, and narrow viewport."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: served Arena page completes problem, Run, failed request with diagnostic, keyboard path, and narrow layout.",
+          "Relevant value: npm run test:browser performs the whole orchestration; the spec alone needs BASE_URL.",
+          "Analogous example: like the course's own browser tests, drive real pages.",
+          "Walkthrough: assemble Arena from prior panels; write the spec with BASE_URL from the environment; fail fast without it."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/client/Arena.tsx",
+            "action": "create",
+            "owner": "src/client/ owns the assembled screen.",
+            "change": "Compose prior panels into one Arena view.",
+            "pattern": "Reuse panels; add no new rules."
+          },
+          {
+            "role": "test.browser",
+            "workspace": "active",
+            "path": "test/browser/local-game.spec.ts",
+            "action": "create",
+            "owner": "test/ owns the journey.",
+            "change": "Drive the served page through the full local loop with failure, keyboard, and narrow viewport.",
+            "pattern": "Named spec; server address from setup; teardown closes all."
+          }
+        ],
+        "checkIds": ["m07-local-journey-browser"],
+        "prerequisiteCheckIds": ["m07-submit-reveal-unit"],
+        "next": "Check the journey and connect to persistence."
+      },
+      {
+        "id": "m07-local-journey-check",
+        "phase": "check",
+        "title": "Report the journey",
+        "question": "Which failure did the journey include?",
+        "explanation": [
+          "Run the browser suite at the practice root. Name the included failure and the viewports covered."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and result.",
+          "Name the failure.",
+          "Compare with unit-only proof.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m07-local-journey-browser"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to durable persistence.",
+        "transfer": "Without your files, describe the loop stages. Predict which stage persistence changes first."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m07-local-journey-browser",
+        "command": "npm run test:browser -- test/browser/local-game.spec.ts",
+        "cwd": ".",
+        "expected": "The runner starts Nest and Vite; the real browser completes the local 1v1 loop, including a failed request with a diagnostic, keyboard operation, and narrow screen.",
+        "kind": "browser",
+        "failure": [
+          {
+            "symptom": "Spec passes with the server stopped",
+            "diagnostic": "Start the practice server in setup; the first step must fail without it.",
+            "meaning": "The journey must be real."
+          },
+          {
+            "symptom": "Failure shows no diagnostic",
+            "diagnostic": "Render the error text from the transport state.",
+            "meaning": "Failures guide the player."
+          }
+        ]
+      },
+      {
+        "id": "m07-runner-update",
+        "command": "node --check test/browser/run.mjs",
+        "cwd": ".",
+        "expected": "The extended runner parses; the named browser check then proves both processes start and clean up.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "The browser test hangs after failure",
+            "diagnostic": "Put shutdown for both processes in a finally block.",
+            "meaning": "A failed test must not leave the API or Vite process behind."
+          }
+        ]
+      }
+    ]
+  }
+]

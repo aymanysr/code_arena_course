@@ -1,0 +1,2131 @@
+[
+  {
+    "id": "m05-accept",
+    "milestoneId": "M05",
+    "title": "Accept a Submission before judging",
+    "why": "Judging is slow. Acceptance is fast and decides what gets judged.",
+    "outcome": "Gate a Submit and lock an immutable receipt.",
+    "prerequisites": ["m04-run"],
+    "references": [
+      {
+        "lessonId": "0001-submit-journey",
+        "path": "packages/arena-game/test/submit-path.test.ts",
+        "startLine": 7,
+        "endLine": 16
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-accept-orient",
+        "phase": "orient",
+        "title": "Gates run before judging",
+        "question": "What is checked before any Judge call?",
+        "explanation": [
+          "Three gates: the actor is a member, the Match phase is CODING, and now is before the Match deadline. Only then is the source accepted.",
+          "Acceptance creates an immutable receipt with an identity, the frozen source, and the accepted time. Later edits to the editor never change the receipt. You need this now because slow judging must never double-count or judge a moving target."
+        ],
+        "vocabulary": [
+          {
+            "term": "Submission",
+            "meaning": "An explicit solution sent for hidden evaluation. Allowed only during CODING."
+          },
+          {
+            "term": "Receipt",
+            "meaning": "Practice record proving what source was accepted, with identity and time."
+          }
+        ],
+        "hints": [
+          "Answer: member, CODING, before deadline.",
+          "Find the three gates.",
+          "Compare with validation before opening a file in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the receipt."
+      },
+      {
+        "id": "m05-accept-see",
+        "phase": "see",
+        "title": "See gates to receipt",
+        "question": "What does the receipt freeze?",
+        "explanation": [
+          "Actor, side, source text, language, and accepted time. The editor may change afterwards; the receipt keeps the original."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the frozen source.",
+          "Point at the accepted time.",
+          "Compare with copying argv into local storage.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the gate order.",
+        "visual": {
+          "kind": "trace",
+          "title": "Accept then freeze",
+          "code": [
+            "submit(src v1) -> receipt(src v1, t=50)",
+            "edit editor to v2",
+            "receipt still src v1"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Accept",
+              "values": [
+                {
+                  "label": "Stored",
+                  "value": "source v1 at t=50"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Acceptance freezes the submitted source and time."
+            },
+            {
+              "id": "frame-1",
+              "label": "Edit",
+              "values": [
+                {
+                  "label": "Editor",
+                  "value": "now v2"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Later edits change only the editor."
+            },
+            {
+              "id": "frame-2",
+              "label": "Frozen",
+              "values": [
+                {
+                  "label": "Receipt",
+                  "value": "still v1"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Judging uses the receipt, never the live editor."
+            }
+          ],
+          "cases": [
+            {
+              "input": "submit v1 then edit to v2",
+              "expected": "receipt holds v1",
+              "reason": "Immutability prevents judging a moving target."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-accept-understand",
+        "phase": "understand",
+        "title": "Reject before judging",
+        "question": "Why must gates run before the Judge?",
+        "explanation": [
+          "Judge work costs time and money. An outsider, a wrong phase, or a past deadline must fail fast with a clear error and never reach the Judge.",
+          "Reference preview: packages/arena-game/test/submit-path.test.ts gates Submit on membership, phase, and time; packages/arena-game/test/cross-isolation.test.ts expects outsider Submit to throw NotMemberError. You read these now and build the small practice copy next."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the three rejections.",
+          "Find the gate tests in the preview.",
+          "Compare with early permission checks.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try allow and deny by hand."
+      },
+      {
+        "id": "m05-accept-try",
+        "phase": "try",
+        "title": "Decide accept or reject",
+        "question": "Member in CODING at 50/100: accept? Outsider, or ROUND_INTRO, or at 100: accept?",
+        "explanation": [
+          "First accepts. All others reject before judging: outsider is membership, ROUND_INTRO is phase, 100 is deadline equality."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write actor, phase, time, verdict.",
+          "Find each gate.",
+          "Compare with the m04 Run guards.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build acceptance."
+      },
+      {
+        "id": "m05-accept-build",
+        "phase": "build",
+        "title": "Implement Submit acceptance",
+        "question": "Does your receipt lock the accepted source?",
+        "explanation": [
+          "Practice path: src/submit.ts. Reference path (read only): submit-path test and match-authority. Future team path: server wiring in M06."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: submit() checks member, CODING, deadline, then returns a frozen receipt.",
+          "Relevant value: accept ana/CODING/50; reject zoe, ROUND_INTRO, and 100.",
+          "Analogous example: like run(), guards first, then build the result object.",
+          "Walkthrough: define SubmissionReceipt { requestId, source, language, acceptedAt }; freeze with object copy; test asserts receipt.source stays v1 after editor variable changes."
+        ],
+        "files": [
+          {
+            "role": "workflow.submit",
+            "workspace": "active",
+            "path": "src/submit.ts",
+            "action": "create",
+            "owner": "src/ owns Submit acceptance.",
+            "change": "Gate member, phase CODING, and deadline; return an immutable receipt.",
+            "pattern": "Throw before judging; freeze source by value, not by reference."
+          },
+          {
+            "role": "test.submit",
+            "workspace": "active",
+            "path": "test/submit.test.ts",
+            "action": "create",
+            "owner": "test/ proves accept and reject.",
+            "change": "Test one accept plus outsider, phase, and deadline rejections; prove receipt immutability.",
+            "pattern": "Import from ../src/submit.js; count that no Judge exists yet."
+          }
+        ],
+        "checkIds": ["m05-accept-unit"],
+        "prerequisiteCheckIds": ["m04-run-unit"],
+        "next": "Check acceptance and connect to pending evaluation."
+      },
+      {
+        "id": "m05-accept-check",
+        "phase": "check",
+        "title": "Report acceptance",
+        "question": "Which rejection did you verify first?",
+        "explanation": [
+          "Run the check at the practice root. No Judge runs in this lesson."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Name one rejection.",
+          "Compare with Run guards.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-accept-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to pending evaluation.",
+        "transfer": "In words, explain why the receipt must freeze the source. Predict what breaks if judging reads the live editor instead."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-accept-unit",
+        "command": "npm test -- test/submit.test.ts",
+        "cwd": ".",
+        "expected": "Accept returns a frozen receipt; outsider, wrong phase, and deadline equality all reject before judging.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Receipt changes after edit",
+            "diagnostic": "Copy the source string into the receipt; check the test mutates the editor variable after acceptance.",
+            "meaning": "Immutability is the whole point of the receipt."
+          },
+          {
+            "symptom": "Wrong-phase Submit reaches judging",
+            "diagnostic": "Check phase CODING is tested before receipt creation.",
+            "meaning": "Gates must precede any evaluation."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-pending",
+    "milestoneId": "M05",
+    "title": "Separate accepted from finished",
+    "why": "Judging takes time. The receipt is pending until a verdict settles it.",
+    "outcome": "Produce pending then settled outcomes with explicit failure recording.",
+    "prerequisites": ["m05-accept"],
+    "references": [
+      {
+        "lessonId": "0006-evaluation-retries",
+        "path": "packages/arena-game/src/evaluation-orchestration.ts",
+        "startLine": 199,
+        "endLine": 211
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-pending-orient",
+        "phase": "orient",
+        "title": "Pending is not scored",
+        "question": "What may you do with a pending receipt?",
+        "explanation": [
+          "Wait and show waiting. You may not score it, reveal it, or judge a second copy as a new result.",
+          "A finished Evaluation carries either a verdict (scores) or a recorded infrastructure error. An error is not a zero score; it is an explained failure."
+        ],
+        "vocabulary": [
+          {
+            "term": "Evaluation",
+            "meaning": "Practice record tracking one accepted receipt from pending to settled verdict or error."
+          }
+        ],
+        "hints": [
+          "Answer: show waiting only.",
+          "Find pending versus settled.",
+          "Compare with waiting for a child process.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the two endings."
+      },
+      {
+        "id": "m05-pending-see",
+        "phase": "see",
+        "title": "See pending to settled",
+        "question": "How does failure differ from zero?",
+        "explanation": [
+          "Success settles with per-group results. Infrastructure failure settles with a named error and no scores. Both leave pending."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at pending.",
+          "Point at the two endings.",
+          "Compare with exit code versus output.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the fake timing.",
+        "visual": {
+          "kind": "trace",
+          "title": "Pending then settled",
+          "code": [
+            "evaluate(receipt) -> pending",
+            "fake settles -> verdict",
+            "fake breaks -> recorded error"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Pending",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "waiting"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Acceptance returns immediately with pending."
+            },
+            {
+              "id": "frame-1",
+              "label": "Verdict",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "settled with scores"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "A resolved fake produces group results."
+            },
+            {
+              "id": "frame-2",
+              "label": "Error",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "settled with error"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "A rejected fake records the error; it never invents a zero."
+            }
+          ],
+          "cases": [
+            {
+              "input": "broken fake",
+              "expected": "recorded error, no scores",
+              "reason": "Failure is explicit."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-pending-understand",
+        "phase": "understand",
+        "title": "Controlled delay, no sleeps in assertions",
+        "question": "How do tests see pending without flakiness?",
+        "explanation": [
+          "The fake exposes its pending state synchronously, then settles on demand. Tests assert pending first, settle, then assert the ending. No timing sleeps.",
+          "Reference idea: packages/arena-game/src/evaluation-orchestration.ts accepts under a short Match lock, judges outside it, and commits under a fresh lock. Your practice version keeps the pending/settled split with the same vocabulary."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the two assertions.",
+          "Find the settle control.",
+          "Compare with the Judge port lesson.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try both endings by hand."
+      },
+      {
+        "id": "m05-pending-try",
+        "phase": "try",
+        "title": "Decide verdict or error",
+        "question": "Resolving fake: scores? Rejecting fake: scores or error?",
+        "explanation": [
+          "Scores for resolve. Recorded error with no scores for reject."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write fake mode and expected ending.",
+          "Find the two fake modes.",
+          "Compare with resolve versus reject.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build evaluation."
+      },
+      {
+        "id": "m05-pending-build",
+        "phase": "build",
+        "title": "Implement pending evaluation",
+        "question": "Does pending settle exactly once with no invented scores?",
+        "explanation": [
+          "Practice path: src/evaluation.ts. Reference path (read only): evaluation-orchestration. Mock Judge only; real Judge comes in M09."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: evaluate() returns pending, then settles via the fake with verdict or recorded error.",
+          "Relevant value: test pending visible first, then settled verdict, then settled error case.",
+          "Analogous example: like the Judge port, control the fake; add a pending record around it.",
+          "Walkthrough: define Evaluation { status: pending|settled }; settle awaits the fake inside try/catch; error path stores message and empty scores."
+        ],
+        "files": [
+          {
+            "role": "workflow.evaluation",
+            "workspace": "active",
+            "path": "src/evaluation.ts",
+            "action": "create",
+            "owner": "src/ owns pending/settled tracking.",
+            "change": "Add evaluate with pending return and explicit settle recording verdict or error.",
+            "pattern": "Never fabricate scores on error; record the failure."
+          },
+          {
+            "role": "test.evaluation",
+            "workspace": "active",
+            "path": "test/evaluation.test.ts",
+            "action": "create",
+            "owner": "test/ proves both endings.",
+            "change": "Assert pending first, then verdict scores, then recorded error with no scores.",
+            "pattern": "Import from ../src/evaluation.js; use controlled fake, no sleeps."
+          }
+        ],
+        "checkIds": ["m05-pending-unit"],
+        "prerequisiteCheckIds": ["m05-accept-unit"],
+        "next": "Check pending behavior and connect to retry."
+      },
+      {
+        "id": "m05-pending-check",
+        "phase": "check",
+        "title": "Report pending endings",
+        "question": "What proved error is not zero?",
+        "explanation": [
+          "Run the check at the practice root. Keep Mock Judge results labeled as practice."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show the recorded error.",
+          "Compare with a zero-score verdict.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-pending-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to safe retry.",
+        "transfer": "In words, explain why pending must be visible to the caller. Predict what a UI shows while waiting."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-pending-unit",
+        "command": "npm test -- test/evaluation.test.ts",
+        "cwd": ".",
+        "expected": "Pending observed before settle; verdict settles with scores; broken fake settles with recorded error and no scores.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Error becomes zero score",
+            "diagnostic": "Check the catch path stores the error message and leaves scores empty.",
+            "meaning": "A fabricated zero hides the infrastructure problem."
+          },
+          {
+            "symptom": "Pending never observed",
+            "diagnostic": "Assert the pending state before settling the fake.",
+            "meaning": "Callers need the waiting state."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-retry",
+    "milestoneId": "M05",
+    "title": "Retry safely with the same identity",
+    "why": "Networks fail. A retry must rejoin the original outcome, never double-count.",
+    "outcome": "Join same-identity retries and reject conflicting reuse.",
+    "prerequisites": ["m05-pending"],
+    "references": [
+      {
+        "lessonId": "0001-submit-journey",
+        "path": "packages/arena-game/test/submit-path.test.ts",
+        "startLine": 48,
+        "endLine": 64
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-retry-orient",
+        "phase": "orient",
+        "title": "Same identity, same content",
+        "question": "When may two requests share one outcome?",
+        "explanation": [
+          "Only when both carry the same request identity and the same submission data. Then the second joins the first instead of starting new Judge work.",
+          "A reused identity with different data is rejected. Changing the identifier to dodge uncertainty is not a safe fix."
+        ],
+        "vocabulary": [
+          {
+            "term": "Request identity",
+            "meaning": "Practice string naming one submission attempt. Retries reuse it; new attempts mint a new one."
+          }
+        ],
+        "hints": [
+          "Answer: same id plus same content.",
+          "Find the identity field.",
+          "Compare with a duplicate delivery.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See join versus reject."
+      },
+      {
+        "id": "m05-retry-see",
+        "phase": "see",
+        "title": "See one outcome for two callers",
+        "question": "How many Judge runs do concurrent duplicates cause?",
+        "explanation": [
+          "One. Both callers receive the same settled outcome. A conflicting reuse throws instead of judging."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the shared outcome.",
+          "Point at the conflicting throw.",
+          "Compare with caching one result.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the wait rule.",
+        "visual": {
+          "kind": "trace",
+          "title": "Duplicates join, conflicts reject",
+          "code": [
+            "A(id1, v1) + B(id1, v1) -> one outcome",
+            "C(id1, v2) -> rejected"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Join",
+              "values": [
+                {
+                  "label": "Judge runs",
+                  "value": "1 for A and B"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Same identity and content share one outcome."
+            },
+            {
+              "id": "frame-1",
+              "label": "Reject",
+              "values": [
+                {
+                  "label": "Result",
+                  "value": "conflict error"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Same identity with different data is rejected, never judged twice."
+            }
+          ],
+          "cases": [
+            {
+              "input": "same id, different source",
+              "expected": "rejected",
+              "reason": "Reuse must be exact."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-retry-understand",
+        "phase": "understand",
+        "title": "Wait outside the short lock",
+        "question": "Why must waiting leave the Match lock?",
+        "explanation": [
+          "The Match lock orders short mutations. Judge work is slow, so it runs outside the lock; a retry waits there too. Holding the lock while waiting would freeze the whole Match.",
+          "Reference idea: evaluation-orchestration accepts under the short lock, releases it before judging and waiting, then commits under a fresh lock. Your practice version models join-then-single-run with the same rule."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name what holds the lock.",
+          "Find the short-lock idea.",
+          "Compare with holding a door open.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try join and conflict by hand."
+      },
+      {
+        "id": "m05-retry-try",
+        "phase": "try",
+        "title": "Decide join, replay, or reject",
+        "question": "Same id/content while pending? Same id/content after error? Same id/new content?",
+        "explanation": [
+          "Join while pending. Replay the original error after failure. Reject on new content."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write identity, content, expected path.",
+          "Find the three branches.",
+          "Compare with the accept gates.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build retry."
+      },
+      {
+        "id": "m05-retry-build",
+        "phase": "build",
+        "title": "Add idempotent retry",
+        "question": "Do duplicates share one counted result?",
+        "explanation": [
+          "Practice paths: edit src/evaluation.ts and test/evaluation.test.ts. Reference idea (read only): same-identity retry in evaluation-orchestration."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: registry keyed by identity stores content plus outcome; duplicates join, conflicts throw.",
+          "Relevant value: fire two concurrent same-identity calls, assert one Judge run; replay an error; reject conflicting content.",
+          "Analogous example: like the receipt freeze, compare stored versus incoming content exactly.",
+          "Walkthrough: keep a Map of identity to record; on same content return the stored promise; on different content throw; count fake invocations."
+        ],
+        "files": [
+          {
+            "role": "workflow.evaluation",
+            "workspace": "active",
+            "path": "src/evaluation.ts",
+            "action": "edit",
+            "owner": "src/ owns retry joining.",
+            "change": "Add identity registry with join on same content and reject on conflict.",
+            "pattern": "One Judge run per identity; errors replay identically."
+          },
+          {
+            "role": "test.evaluation",
+            "workspace": "active",
+            "path": "test/evaluation.test.ts",
+            "action": "edit",
+            "owner": "test/ proves single counting.",
+            "change": "Add concurrent duplicate, error replay, and conflict rejection cases.",
+            "pattern": "Count fake calls; assert shared outcome object or equal value."
+          }
+        ],
+        "checkIds": ["m05-retry-unit"],
+        "prerequisiteCheckIds": ["m05-pending-unit"],
+        "next": "Check retry and connect to scoring."
+      },
+      {
+        "id": "m05-retry-check",
+        "phase": "check",
+        "title": "Report retry safety",
+        "question": "What proved only one result counted?",
+        "explanation": [
+          "Run the check at the practice root. Record the fake-call count."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and fake count.",
+          "Show the conflict error.",
+          "Compare with double scoring.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-retry-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to scoring.",
+        "transfer": "In words, explain why a new identifier is unsafe after an uncertain send. Predict what the caller should do instead."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-retry-unit",
+        "command": "npm test -- test/evaluation.test.ts",
+        "cwd": ".",
+        "expected": "Concurrent duplicates cause one Judge run with a shared outcome; original error replays; conflicting reuse is rejected.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Duplicates run Judge twice",
+            "diagnostic": "Check the registry returns the stored promise for same identity and content before starting new work.",
+            "meaning": "Double execution double-counts."
+          },
+          {
+            "symptom": "Conflict silently judges",
+            "diagnostic": "Compare incoming content with stored content and throw on mismatch.",
+            "meaning": "Exact reuse is the only safe join."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-score",
+    "milestoneId": "M05",
+    "title": "Score hidden groups with one rounding point",
+    "why": "Fair scores need integer math with a single rounding step.",
+    "outcome": "Compute whole-percent scores from weighted groups.",
+    "prerequisites": ["m05-retry"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-model/src/scoring.ts",
+        "startLine": 42,
+        "endLine": 53
+      },
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-model/src/scoring.ts",
+        "startLine": 56,
+        "endLine": 64
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-score-orient",
+        "phase": "orient",
+        "title": "Weights decide the score",
+        "question": "What must group weights total?",
+        "explanation": [
+          "Exactly 100. Each group contributes weight times passed over total. Equivalent ratios must score equally regardless of test count or order.",
+          "There is exactly one rounding point: basis points to whole percent at the end. Never round per case."
+        ],
+        "vocabulary": [
+          {
+            "term": "Basis points",
+            "meaning": "Integer hundredths of a percent. 10000 means 100 percent. Scores use integers only."
+          }
+        ],
+        "hints": [
+          "Answer: 100.",
+          "Find the weight sum.",
+          "Compare with percentages that must total 100.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the 43 case."
+      },
+      {
+        "id": "m05-score-see",
+        "phase": "see",
+        "title": "See partial groups make 43",
+        "question": "Why 43 and not 42 or 44?",
+        "explanation": [
+          "Group one: weight 40, 1 of 3 passed. Group two: weight 60, 1 of 2 passed. Integer basis points sum once, then a single rounding step gives 43."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at each group's share.",
+          "Point at the single rounding.",
+          "Compare with rounding only the final total.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the integer rule.",
+        "visual": {
+          "kind": "trace",
+          "title": "One rounding point",
+          "code": [
+            "earned = floor(40*1*100/3) + floor(60*1*100/2)",
+            "score = roundOnce(earned) -> 43"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Earn",
+              "values": [
+                {
+                  "label": "Basis",
+                  "value": "integer sum, no rounding yet"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Each group earns floored integer basis points."
+            },
+            {
+              "id": "frame-1",
+              "label": "Round",
+              "values": [
+                {
+                  "label": "Score",
+                  "value": "43 whole percent"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "One final step converts to whole percent."
+            }
+          ],
+          "cases": [
+            {
+              "input": "40:1/3 + 60:1/2",
+              "expected": "43",
+              "reason": "Single final rounding."
+            },
+            {
+              "input": "weights 90",
+              "expected": "rejected",
+              "reason": "Weights must total exactly 100."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-score-understand",
+        "phase": "understand",
+        "title": "Integers remove drift",
+        "question": "Why floor per group and round once?",
+        "explanation": [
+          "Floating point can drift across machines. Integer floor per group plus one final rounding keeps equal ratios equal everywhere.",
+          "Reference preview: packages/arena-model/src/scoring.ts defines groupEarnedBp with floor, roundScoreBp requiring weights sum 100, and roundScoreFromBp as the single rounding point. Your practice scoreGroups follows the same rule with local names."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the floor and the single round.",
+          "Find groupEarnedBp in the preview.",
+          "Compare with integer cents versus float dollars.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try scoring by hand."
+      },
+      {
+        "id": "m05-score-try",
+        "phase": "try",
+        "title": "Score two small cases",
+        "question": "Full marks in both groups? Half marks?",
+        "explanation": [
+          "Full gives 100. Half of each group gives 50. The 43 case above shows partial credit."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write weights, passed, total.",
+          "Find the formula.",
+          "Compare with averaging.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build scoring."
+      },
+      {
+        "id": "m05-score-build",
+        "phase": "build",
+        "title": "Implement group scoring",
+        "question": "Does 40:1/3 plus 60:1/2 give exactly 43?",
+        "explanation": [
+          "Practice path: src/scoring.ts. Reference path (read only): packages/arena-model/src/scoring.ts. Game owns scoring; the Judge only supplies verdicts."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: scoreGroups([{weight,passed,total}]) returns whole percent; weights must total 100.",
+          "Relevant value: assert 43 for the mixed case; assert throw for weights 90.",
+          "Analogous example: like validation, throw on bad counts before computing.",
+          "Walkthrough: floor each group's share, sum basis points, round once with halves up; test equal ratios from different totals give equal scores."
+        ],
+        "files": [
+          {
+            "role": "domain.scoring",
+            "workspace": "active",
+            "path": "src/scoring.ts",
+            "action": "create",
+            "owner": "src/ owns score math.",
+            "change": "Add integer group scoring with one final rounding step.",
+            "pattern": "Validate counts first; throw on bad weights or ranges."
+          },
+          {
+            "role": "test.scoring",
+            "workspace": "active",
+            "path": "test/scoring.test.ts",
+            "action": "create",
+            "owner": "test/ proves exact values.",
+            "change": "Test 43, full 100, equal-ratio equality, and weight/count rejections.",
+            "pattern": "Import from ../src/scoring.js; expect exact integers."
+          }
+        ],
+        "checkIds": ["m05-score-unit"],
+        "prerequisiteCheckIds": ["m05-retry-unit"],
+        "next": "Check scoring and connect to Reveal."
+      },
+      {
+        "id": "m05-score-check",
+        "phase": "check",
+        "title": "Report exact scores",
+        "question": "What proved one rounding point?",
+        "explanation": [
+          "Run the check at the practice root. Record the exact integers observed."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and the 43.",
+          "Show the rejected weights.",
+          "Compare with per-case rounding.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-score-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to Reveal.",
+        "transfer": "In words, explain why per-case rounding is unfair. Predict a pair of equal ratios that must tie."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-score-unit",
+        "command": "npm test -- test/scoring.test.ts",
+        "cwd": ".",
+        "expected": "Mixed groups score exactly 43; full marks 100; equal ratios tie; bad weights and counts throw.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "43 becomes 42 or 44",
+            "diagnostic": "Floor each group first, sum, then round once; check halves-up at the final step.",
+            "meaning": "Extra rounding points shift results."
+          },
+          {
+            "symptom": "Weights 90 accepted",
+            "diagnostic": "Require the weight sum to equal exactly 100 before scoring.",
+            "meaning": "Unnormalized weights are incomparable."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-reveal",
+    "milestoneId": "M05",
+    "title": "Disclose scores only at Reveal",
+    "why": "Hidden details stay sealed until evaluation finishes and the round is allowed to disclose them.",
+    "outcome": "Publish a permitted Reveal with group breakdown.",
+    "prerequisites": ["m05-score"],
+    "references": [
+      {
+        "lessonId": "0002-reveal-cutoff",
+        "path": "packages/arena-game/src/round-lifecycle.ts",
+        "startLine": 89,
+        "endLine": 96
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-reveal-orient",
+        "phase": "orient",
+        "title": "Sealed until permitted",
+        "question": "When may hidden groups appear?",
+        "explanation": [
+          "Only at Reveal, after evaluation settles and the round permits disclosure. A private verdict holds full details; the public Reveal holds only the permitted breakdown.",
+          "Evaluation failure is also explained at Reveal: what failed and what it means, without inventing scores."
+        ],
+        "vocabulary": [
+          {
+            "term": "Reveal",
+            "meaning": "Per-round score disclosure after evaluation. Hidden groups appear only here."
+          }
+        ],
+        "hints": [
+          "Answer: at permitted Reveal.",
+          "Find private versus public.",
+          "Compare with sealed exam results.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the disclosure."
+      },
+      {
+        "id": "m05-reveal-see",
+        "phase": "see",
+        "title": "See verdict to Reveal",
+        "question": "What is hidden before Reveal?",
+        "explanation": [
+          "Everything competitive: group names with weights and per-group results. After Reveal, both sides see the same breakdown."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the sealed verdict.",
+          "Point at the public breakdown.",
+          "Compare with publishing grades.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the permission.",
+        "visual": {
+          "kind": "trace",
+          "title": "Disclosure needs permission",
+          "code": [
+            "verdict sealed -> no Reveal yet",
+            "permit + settled -> Reveal",
+            "early peek -> rejected"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Sealed",
+              "values": [
+                {
+                  "label": "Visible",
+                  "value": "nothing competitive"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Before permission, disclosure is rejected."
+            },
+            {
+              "id": "frame-1",
+              "label": "Open",
+              "values": [
+                {
+                  "label": "Visible",
+                  "value": "scores plus groups"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Permission plus settlement publishes the breakdown."
+            }
+          ],
+          "cases": [
+            {
+              "input": "peek before settle",
+              "expected": "rejected",
+              "reason": "Disclosure needs both settlement and permission."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-reveal-understand",
+        "phase": "understand",
+        "title": "Two disclosures: success and failure",
+        "question": "What does a failed evaluation disclose?",
+        "explanation": [
+          "An explanation, not scores: which step failed, what it means, and that no score counted. Normal settlement discloses percentages plus the hidden-group breakdown.",
+          "Reference preview: packages/arena-game/src/round-lifecycle.ts prepares and publishes Reveals; SCORE_REVEAL fans out to next rounds. You read it now."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name both disclosures.",
+          "Find the reveal preparation.",
+          "Compare with an error report.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try disclosure decisions by hand."
+      },
+      {
+        "id": "m05-reveal-try",
+        "phase": "try",
+        "title": "Decide disclose or reject",
+        "question": "Settled plus permitted? Pending? Unpermitted?",
+        "explanation": ["First discloses. Others reject without leaking."],
+        "vocabulary": [],
+        "hints": [
+          "Write state and expected verdict.",
+          "Find the two requirements.",
+          "Compare with two locks.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build Reveal."
+      },
+      {
+        "id": "m05-reveal-build",
+        "phase": "build",
+        "title": "Implement Reveal disclosure",
+        "question": "Does early peeking fail with no leak?",
+        "explanation": [
+          "Practice path: src/lifecycle.ts. Reference path (read only): round-lifecycle."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: reveal() requires settled plus permitted, then returns scores with group breakdown.",
+          "Relevant value: test success breakdown, failure explanation, early peek rejection.",
+          "Analogous example: like acceptance gates, check requirements first, then disclose.",
+          "Walkthrough: store verdict sealed; reveal checks settled and permitted flags; test scans early rejection output for hidden text."
+        ],
+        "files": [
+          {
+            "role": "domain.lifecycle",
+            "workspace": "active",
+            "path": "src/lifecycle.ts",
+            "action": "create",
+            "owner": "src/ owns Reveal disclosure.",
+            "change": "Add settle plus permitted reveal with success and failure paths.",
+            "pattern": "Reject early peeks; never copy hidden data before permission."
+          },
+          {
+            "role": "test.lifecycle",
+            "workspace": "active",
+            "path": "test/lifecycle.test.ts",
+            "action": "create",
+            "owner": "test/ proves sealed-until-permitted.",
+            "change": "Test breakdown, failure explanation, and leak-free rejection.",
+            "pattern": "Import from ../src/lifecycle.js; stringify rejection output."
+          }
+        ],
+        "checkIds": ["m05-reveal-unit"],
+        "prerequisiteCheckIds": ["m05-score-unit"],
+        "next": "Check Reveal and connect to reset."
+      },
+      {
+        "id": "m05-reveal-check",
+        "phase": "check",
+        "title": "Report disclosure",
+        "question": "What did the early peek return?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show the rejection.",
+          "Compare with the Problem leak scan.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-reveal-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to Round reset.",
+        "transfer": "In words, explain why failure needs disclosure too. Predict what a player does after seeing a breakdown."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-reveal-unit",
+        "command": "npm test -- test/lifecycle.test.ts",
+        "cwd": ".",
+        "expected": "Settled plus permitted reveals breakdown; failure reveals explanation without scores; early peek rejected with no hidden text.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Early peek shows groups",
+            "diagnostic": "Check reveal() verifies settled and permitted before copying any hidden field.",
+            "meaning": "Disclosure needs both conditions."
+          },
+          {
+            "symptom": "Failure invents scores",
+            "diagnostic": "Return the recorded error with empty scores on the failure path.",
+            "meaning": "Failures explain; they do not score."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-round-reset",
+    "milestoneId": "M05",
+    "title": "Reset the Round, keep the Match",
+    "why": "Each Round needs fresh code, tests, and readiness. The Match keeps totals and the deadline.",
+    "outcome": "Advance to the next Problem with clean Round state.",
+    "prerequisites": ["m05-reveal"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-game/src/round-lifecycle.ts",
+        "startLine": 161,
+        "endLine": 170
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-round-reset-orient",
+        "phase": "orient",
+        "title": "Round scope versus Match scope",
+        "question": "What resets and what carries over?",
+        "explanation": [
+          "Reset: code, visible tests, readiness, per-side activities, Reveal. Keep: Match totals, attempt counts that matter for tie-breaks, and the one Match-wide deadline.",
+          "The next Round uses a new Problem. Readiness resets every Round."
+        ],
+        "vocabulary": [
+          {
+            "term": "Round",
+            "meaning": "One Problem inside a Match. Resets code, tests, and readiness; only Match score carries over."
+          },
+          {
+            "term": "Readiness",
+            "meaning": "2v2 submission gate. Both teammates Ready required; resets every Round."
+          }
+        ],
+        "hints": [
+          "List two resets and two keeps.",
+          "Find the scope words.",
+          "Compare with a new level keeping total score.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See before and after."
+      },
+      {
+        "id": "m05-round-reset-see",
+        "phase": "see",
+        "title": "See the reset record",
+        "question": "Which fields change on advance?",
+        "explanation": [
+          "Round id and Problem change; Round-scoped fields clear; Match totals and deadline stay identical."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the new Problem.",
+          "Point at the kept deadline.",
+          "Compare with swapping a level map.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the advance rule.",
+        "visual": {
+          "kind": "trace",
+          "title": "Advance keeps Match scope",
+          "code": [
+            "round r1/p1, totals {L:70}, deadline D",
+            "advance -> r2/p2, fresh fields",
+            "totals {L:70}, deadline D kept"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Before",
+              "values": [
+                {
+                  "label": "Round",
+                  "value": "r1 with p1"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Round one holds its Problem and fresh fields."
+            },
+            {
+              "id": "frame-1",
+              "label": "After",
+              "values": [
+                {
+                  "label": "Round",
+                  "value": "r2 with p2, cleared"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Round two has a new Problem and cleared fields."
+            },
+            {
+              "id": "frame-2",
+              "label": "Kept",
+              "values": [
+                {
+                  "label": "Match",
+                  "value": "totals and deadline kept"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Match-wide values never reset per Round."
+            }
+          ],
+          "cases": [
+            {
+              "input": "advance after Reveal",
+              "expected": "new Problem, kept totals",
+              "reason": "Scope separation."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-round-reset-understand",
+        "phase": "understand",
+        "title": "Advance only from Reveal",
+        "question": "When may the Match advance?",
+        "explanation": [
+          "Only after Reveal for the current Round. Advancing mid-coding would discard live work and hide scores. The Match deadline never refreshes per Round."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the required prior state.",
+          "Find the advance guard.",
+          "Compare with turning a page after grading.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try advance decisions by hand."
+      },
+      {
+        "id": "m05-round-reset-try",
+        "phase": "try",
+        "title": "Decide advance or reject",
+        "question": "From SCORE_REVEAL: advance? From CODING: advance?",
+        "explanation": ["First advances. Second rejects."],
+        "vocabulary": [],
+        "hints": [
+          "Write phase and verdict.",
+          "Find the guard.",
+          "Compare with transition guards.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build reset."
+      },
+      {
+        "id": "m05-round-reset-build",
+        "phase": "build",
+        "title": "Implement Round advance",
+        "question": "Does advance bring a fresh Round with kept totals?",
+        "explanation": [
+          "Practice paths: edit src/lifecycle.ts and test/lifecycle.test.ts."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: nextRound() requires Reveal, then returns a fresh Round with the next Problem.",
+          "Relevant value: assert new problem id, cleared activities/readiness/Reveal, kept totals and deadline.",
+          "Analogous example: like transitions, guard first, then produce new state.",
+          "Walkthrough: accept current Match record; throw unless Reveal present; build next Round with reset fields."
+        ],
+        "files": [
+          {
+            "role": "domain.lifecycle",
+            "workspace": "active",
+            "path": "src/lifecycle.ts",
+            "action": "edit",
+            "owner": "src/ owns Round advance.",
+            "change": "Add nextRound with Reveal guard and Round-scoped reset.",
+            "pattern": "Keep Match totals and deadline untouched."
+          },
+          {
+            "role": "test.lifecycle",
+            "workspace": "active",
+            "path": "test/lifecycle.test.ts",
+            "action": "edit",
+            "owner": "test/ proves reset and keep.",
+            "change": "Add advance cases for fresh fields and kept Match scope.",
+            "pattern": "Compare before/after records field by field."
+          }
+        ],
+        "checkIds": ["m05-round-reset-unit"],
+        "prerequisiteCheckIds": ["m05-reveal-unit"],
+        "next": "Check reset and connect to final result."
+      },
+      {
+        "id": "m05-round-reset-check",
+        "phase": "check",
+        "title": "Report reset",
+        "question": "Which kept value did you assert?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Name the kept deadline.",
+          "Compare with fresh code.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-round-reset-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to final result.",
+        "transfer": "In words, explain why readiness must reset. Predict a bug if it carried over."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-round-reset-unit",
+        "command": "npm test -- test/lifecycle.test.ts",
+        "cwd": ".",
+        "expected": "Advance requires Reveal; new Round has fresh code/tests/readiness/activities with kept totals and deadline. Mid-coding advance rejected.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Deadline changed on advance",
+            "diagnostic": "Copy the Match deadline unchanged into the next Round.",
+            "meaning": "There is one Match-wide clock."
+          },
+          {
+            "symptom": "Advance allowed mid-coding",
+            "diagnostic": "Require a present Reveal before building the next Round.",
+            "meaning": "Scores must disclose before moving on."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-final-result",
+    "milestoneId": "M05",
+    "title": "Decide the Match winner",
+    "why": "Tied totals need a fixed order: scores, then time, then submissions, then draw.",
+    "outcome": "Sum Round scores and break ties deterministically.",
+    "prerequisites": ["m05-round-reset"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-model/src/scoring.ts",
+        "startLine": 98,
+        "endLine": 108
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-final-result-orient",
+        "phase": "orient",
+        "title": "Sum first, then tie-breaks",
+        "question": "What decides when totals tie?",
+        "explanation": [
+          "Higher summed total wins. On equal totals, lower total scoring-submission time wins. Then fewer total submissions wins. Otherwise the Match is a draw.",
+          "Scoring time uses the accepted time of the final counted Submission per Round, server-sourced. This differs from the frozen reference display on purpose and is recorded in CONTEXT.md."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match",
+            "meaning": "One timed competition. Highest summed Round total wins; ties break by time, then submissions, then draw."
+          }
+        ],
+        "hints": [
+          "Recite the four steps.",
+          "Find scoring time.",
+          "Compare with ranking by points then goal difference.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See three tie cases."
+      },
+      {
+        "id": "m05-final-result-see",
+        "phase": "see",
+        "title": "See sum, time, count, draw",
+        "question": "Who wins each case?",
+        "explanation": [
+          "Higher sum wins outright. Equal sums defer to time, then count, then draw."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the sums.",
+          "Point at the times.",
+          "Compare with sorting by two keys.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the counted submission.",
+        "visual": {
+          "kind": "trace",
+          "title": "Tie-break order",
+          "code": [
+            "L 70+80=150 vs R 70+70=140 -> L",
+            "150 vs 150, time 90<120 -> faster",
+            "time tied, 2<3 subs -> fewer"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Sum",
+              "values": [
+                {
+                  "label": "Winner",
+                  "value": "higher total"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Unequal sums decide immediately."
+            },
+            {
+              "id": "frame-1",
+              "label": "Time",
+              "values": [
+                {
+                  "label": "Winner",
+                  "value": "lower scoring time"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Equal sums compare total scoring-submission time."
+            },
+            {
+              "id": "frame-2",
+              "label": "Count",
+              "values": [
+                {
+                  "label": "Winner",
+                  "value": "fewer submissions"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Still tied compares submission counts, else draw."
+            }
+          ],
+          "cases": [
+            {
+              "input": "totals differ",
+              "expected": "higher sum wins",
+              "reason": "Primary key."
+            },
+            {
+              "input": "sums and times equal, counts equal",
+              "expected": "draw",
+              "reason": "No further key."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-final-result-understand",
+        "phase": "understand",
+        "title": "Final counted submission matters",
+        "question": "Which Submission time counts?",
+        "explanation": [
+          "The accepted time of the final counted Submission per Round, not the first attempt or the Reveal time. Unplayed Rounds count zero. Reference preview: scoring tests plus round-lifecycle final-result cases use the same order."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the counted time.",
+          "Find final counted in the preview.",
+          "Compare with best valid attempt.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try three outcomes by hand."
+      },
+      {
+        "id": "m05-final-result-try",
+        "phase": "try",
+        "title": "Decide winner or draw",
+        "question": "150 vs 140? 150/90s vs 150/120s? All equal?",
+        "explanation": ["First side, faster side, draw."],
+        "vocabulary": [],
+        "hints": [
+          "Write sums, times, counts.",
+          "Find each key.",
+          "Compare with the visual.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build final result."
+      },
+      {
+        "id": "m05-final-result-build",
+        "phase": "build",
+        "title": "Implement Match totals",
+        "question": "Do equal totals break correctly?",
+        "explanation": [
+          "Practice paths: edit src/scoring.ts and test/scoring.test.ts."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: finalResult(rounds) sums per side, then applies time, count, draw.",
+          "Relevant value: test outright win, time-break, count-break, and exact draw.",
+          "Analogous example: like group scoring, validate inputs then compute in fixed order.",
+          "Walkthrough: accept per-round scores with scoring times and counts; sum; compare stepwise."
+        ],
+        "files": [
+          {
+            "role": "domain.scoring",
+            "workspace": "active",
+            "path": "src/scoring.ts",
+            "action": "edit",
+            "owner": "src/ owns final totals.",
+            "change": "Add finalResult with sum, time, count, draw order.",
+            "pattern": "Use final counted times only."
+          },
+          {
+            "role": "test.scoring",
+            "workspace": "active",
+            "path": "test/scoring.test.ts",
+            "action": "edit",
+            "owner": "test/ proves each key.",
+            "change": "Add time-break, count-break, and draw cases.",
+            "pattern": "One test per tie-break level."
+          }
+        ],
+        "checkIds": ["m05-final-result-unit"],
+        "prerequisiteCheckIds": ["m05-round-reset-unit"],
+        "next": "Check totals and connect to deadline."
+      },
+      {
+        "id": "m05-final-result-check",
+        "phase": "check",
+        "title": "Report winners",
+        "question": "Which draw case did you include?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show the draw inputs.",
+          "Compare with rounds-won myths.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-final-result-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to deadline closure.",
+        "transfer": "In words, explain why time uses accepted Submission time. Predict what changes if Reveal time were used."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-final-result-unit",
+        "command": "npm test -- test/scoring.test.ts",
+        "cwd": ".",
+        "expected": "Outright win, time-break, count-break, and exact draw all decided with final counted times.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Equal totals pick wrong side",
+            "diagnostic": "Compare summed totals first, then total scoring time ascending, then submission count ascending.",
+            "meaning": "Order matters; skipping a key corrupts ties."
+          },
+          {
+            "symptom": "Draw never happens",
+            "diagnostic": "Return draw only when sums, times, and counts all tie.",
+            "meaning": "Draw is the defined end of the order."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-deadline",
+    "milestoneId": "M05",
+    "title": "Close the Match at the deadline",
+    "why": "The Match ends exactly at its deadline, with a short grace for judging to settle.",
+    "outcome": "Reject late actions and finish terminally with saved Reveal.",
+    "prerequisites": ["m05-final-result"],
+    "references": [
+      {
+        "lessonId": "0002-reveal-cutoff",
+        "path": "packages/arena-game/test/deadline-closure.test.ts",
+        "startLine": 30,
+        "endLine": 37
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-deadline-orient",
+        "phase": "orient",
+        "title": "Exact end plus bounded grace",
+        "question": "What happens exactly at the deadline?",
+        "explanation": [
+          "New Run and Submit stop. An accepted Submission may still count if judging settles inside the bounded reveal grace, using its accepted time for tie-breaks.",
+          "When grace ends, the server durably saves a Reveal for the current Round and completes the Match. Unplayed Rounds count zero. The UI shows that Reveal before the final result."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match deadline",
+            "meaning": "The end of the one Match-wide server clock. New actions stop exactly there."
+          },
+          {
+            "term": "Reveal",
+            "meaning": "Saved per-round disclosure shown before the final result, even at deadline closure."
+          }
+        ],
+        "hints": [
+          "Answer: stop new actions.",
+          "Find grace.",
+          "Compare with a submission box closing.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the timeline."
+      },
+      {
+        "id": "m05-deadline-see",
+        "phase": "see",
+        "title": "See accept, grace, terminal",
+        "question": "Which late result counts?",
+        "explanation": [
+          "Accepted before the deadline and settled inside grace counts. Anything newer is rejected. After grace, the Match completes terminally and no later result replaces it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at accept time.",
+          "Point at grace end.",
+          "Compare with late postmarks.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the terminal rule.",
+        "visual": {
+          "kind": "trace",
+          "title": "Deadline with grace",
+          "code": [
+            "accept 99 < deadline 100 -> may count",
+            "new action at 100 -> rejected",
+            "settle past grace -> terminal kept"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Accept",
+              "values": [
+                {
+                  "label": "Time",
+                  "value": "99 before 100"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Accepted in time may count if judging settles inside grace."
+            },
+            {
+              "id": "frame-1",
+              "label": "Reject",
+              "values": [
+                {
+                  "label": "Time",
+                  "value": "100 equals end"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "New actions at or past the end are rejected."
+            },
+            {
+              "id": "frame-2",
+              "label": "Terminal",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "Reveal saved, Match complete"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "After grace the saved result is final; late arrivals cannot replace it."
+            }
+          ],
+          "cases": [
+            {
+              "input": "submit at 100",
+              "expected": "rejected",
+              "reason": "Equality is closed."
+            },
+            {
+              "input": "settle exactly at deadline + grace (130 of 100 + 30)",
+              "expected": "counts",
+              "reason": "The practice cutoff is inclusive; label this simulation, since production waits out grace with a timer race."
+            },
+            {
+              "input": "settle one unit past the cutoff (131 of 100 + 30)",
+              "expected": "terminal kept",
+              "reason": "Grace bounds waiting."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-deadline-understand",
+        "phase": "understand",
+        "title": "Terminal means unreplaceable",
+        "question": "Why save a Reveal before completing?",
+        "explanation": [
+          "So players see the current Round's breakdown before the final result, even when time ran out. The persisted Reveal-before-terminal order is demonstrated with durability in M08; this milestone checks local rules only.",
+          "Reference preview: deadline-closure tests reject Run/Submit at expiry, sweep expired Matches once, and keep unplayed Rounds at zero. No statement here claims each Round gets a fresh clock."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the saved order.",
+          "Find sweepExpiredMatches in the preview.",
+          "Compare with saving before exiting.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try boundary times by hand."
+      },
+      {
+        "id": "m05-deadline-try",
+        "phase": "try",
+        "title": "Decide count or reject",
+        "question": "Accept at 99 settle in grace? New Submit at 100? Settle after grace?",
+        "explanation": ["Counts, rejected, terminal kept."],
+        "vocabulary": [],
+        "hints": [
+          "Write time and expected path.",
+          "Find each boundary.",
+          "Compare with the Clock lesson.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build deadline closure."
+      },
+      {
+        "id": "m05-deadline-build",
+        "phase": "build",
+        "title": "Implement deadline and grace",
+        "question": "Do late actions fail and terminal results stick?",
+        "explanation": [
+          "Practice path: src/deadline.ts. Reference path (read only): deadline-closure tests."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: guard new actions with now < deadline; settleInGrace(settleTime, deadline, graceMs) returns settleTime <= deadline + graceMs; close() saves Reveal then completes exactly once.",
+          "Relevant value: test accept-99, reject-100, settle exactly at the cutoff counts (130 of 100 + 30), one unit past it kept terminal, unplayed zero.",
+          "Analogous example: like transitions, terminal is preserved once set.",
+          "Walkthrough: model closeAt and graceEnd numbers; close() is idempotent; second close returns the same terminal."
+        ],
+        "files": [
+          {
+            "role": "domain.lifecycle",
+            "workspace": "active",
+            "path": "src/deadline.ts",
+            "action": "create",
+            "owner": "src/ owns deadline closure.",
+            "change": "Add deadline guard, inclusive settleInGrace cutoff, plus idempotent terminal close with saved Reveal.",
+            "pattern": "Use injected times; no real waiting."
+          },
+          {
+            "role": "test.lifecycle",
+            "workspace": "active",
+            "path": "test/deadline.test.ts",
+            "action": "create",
+            "owner": "test/ proves boundaries.",
+            "change": "Test exact-deadline rejection, inclusive grace cutoff (counts at, superseded one past), terminal idempotence, unplayed zero.",
+            "pattern": "Import from ../src/deadline.js; controlled clocks only."
+          }
+        ],
+        "checkIds": ["m05-deadline-unit"],
+        "prerequisiteCheckIds": ["m05-final-result-unit"],
+        "next": "Check deadline and connect to the full Match."
+      },
+      {
+        "id": "m05-deadline-check",
+        "phase": "check",
+        "title": "Report closure",
+        "question": "What proved terminal idempotence?",
+        "explanation": [
+          "Run the check at the practice root. Simulation only; durability arrives in M08."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show double close.",
+          "Compare with retry joining.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-deadline-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to the complete Match.",
+        "transfer": "In words, explain grace in one sentence. Predict what happens to an unplayed Round."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-deadline-unit",
+        "command": "npm test -- test/deadline.test.ts",
+        "cwd": ".",
+        "expected": "New actions rejected at equality; settle exactly at the inclusive cutoff counts, one unit past it stays terminal; close saves Reveal, completes once, and ignores later results; unplayed zero.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Submit at 100 accepted",
+            "diagnostic": "Guard with now < deadline, not <=.",
+            "meaning": "Equality is closed."
+          },
+          {
+            "symptom": "Second close changes result",
+            "diagnostic": "Return the stored terminal on repeat closes.",
+            "meaning": "Terminal is final."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m05-complete-match",
+    "milestoneId": "M05",
+    "title": "Play a full local Match",
+    "why": "The pieces must work together across three Rounds with failure and retry.",
+    "outcome": "Finish a fake-Judge Match and replay a changed sequence.",
+    "prerequisites": ["m05-deadline"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-game/test/submit-path.test.ts",
+        "startLine": 18,
+        "endLine": 25
+      }
+    ],
+    "steps": [
+      {
+        "id": "m05-complete-match-orient",
+        "phase": "orient",
+        "title": "Three Rounds, one story",
+        "question": "What does the journey include?",
+        "explanation": [
+          "Accept, pending, retry, scoring, Reveal, reset, totals, and deadline across three Rounds, including one failed evaluation with retry.",
+          "The fake Judge stands in for real execution. This lesson states which checks remain fake and what persistence adds next in M08."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "List the stages.",
+          "Find the failed Round.",
+          "Compare with running all prior tests in order.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the journey map."
+      },
+      {
+        "id": "m05-complete-match-see",
+        "phase": "see",
+        "title": "See the whole journey",
+        "question": "Where did retry save the Match?",
+        "explanation": [
+          "Round two fails then retries to a verdict; all three Rounds Reveal; totals and tie-breaks decide; deadline never fires mid-journey here."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the failed Round.",
+          "Point at the retry.",
+          "Compare with the milestone map.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn what stays fake.",
+        "visual": {
+          "kind": "trace",
+          "title": "Three-Round journey",
+          "code": [
+            "R1 accept->verdict->reveal 70",
+            "R2 fail->retry->verdict->reveal 80",
+            "R3 reveal 60 -> totals decide"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "R1",
+              "values": [
+                {
+                  "label": "Score",
+                  "value": "70 revealed"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "A clean Round scores and reveals."
+            },
+            {
+              "id": "frame-1",
+              "label": "R2",
+              "values": [
+                {
+                  "label": "Score",
+                  "value": "80 after retry"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Failure retries to the same counted outcome."
+            },
+            {
+              "id": "frame-2",
+              "label": "End",
+              "values": [
+                {
+                  "label": "Totals",
+                  "value": "decide winner"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Three Reveals sum to the final result."
+            }
+          ],
+          "cases": [
+            {
+              "input": "changed problem order",
+              "expected": "same rules, new totals",
+              "reason": "The journey generalizes."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m05-complete-match-understand",
+        "phase": "understand",
+        "title": "Fake scope, honestly labeled",
+        "question": "What does this journey not prove?",
+        "explanation": [
+          "Durability, real isolation, network play, and terminal persistence. Those arrive in M08, M09, and M10. This journey proves local rules compose."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name two unproven areas.",
+          "Find the M08/M09 pointers.",
+          "Compare with unit versus integration.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try a changed sequence by hand."
+      },
+      {
+        "id": "m05-complete-match-try",
+        "phase": "try",
+        "title": "Change the sequence",
+        "question": "What if Round two never failed?",
+        "explanation": [
+          "Same totals shape with fewer attempts. The rules do not depend on the failure happening."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Rewrite the Round list.",
+          "Find the attempt counts.",
+          "Compare with the main journey.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the journey test."
+      },
+      {
+        "id": "m05-complete-match-build",
+        "phase": "build",
+        "title": "Compose the local Match",
+        "question": "Does the full journey pass plus a changed sequence?",
+        "explanation": [
+          "Practice path: test/local-match.test.ts composing prior modules. Fake Judge only."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: drive accept, settle, score, Reveal, reset across three Rounds with one failure plus retry.",
+          "Relevant value: assert three Reveals, summed totals, and tie-break fields.",
+          "Analogous example: chain the small functions you already tested.",
+          "Walkthrough: import prior src modules; run the scripted journey; then rerun with changed scores and assert new totals."
+        ],
+        "files": [
+          {
+            "role": "workflow.evaluation",
+            "workspace": "active",
+            "path": "test/local-match.test.ts",
+            "action": "create",
+            "owner": "test/ owns the journey.",
+            "change": "Compose three Rounds with failure/retry plus an independent changed sequence.",
+            "pattern": "Reuse src modules; fake Judge labeled in comments."
+          }
+        ],
+        "checkIds": ["m05-complete-match-unit"],
+        "prerequisiteCheckIds": ["m05-deadline-unit"],
+        "next": "Check the journey and connect to HTTP."
+      },
+      {
+        "id": "m05-complete-match-check",
+        "phase": "check",
+        "title": "Report the journey",
+        "question": "Which checks remain fake?",
+        "explanation": [
+          "Run the check at the practice root. Name the fake scope in your report."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "List fake versus next real areas.",
+          "Compare with M08 promises.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m05-complete-match-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to server and screen.",
+        "transfer": "Without your files, describe the journey stages. Predict which stage persistence changes first."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m05-complete-match-unit",
+        "command": "npm test -- test/local-match.test.ts",
+        "cwd": ".",
+        "expected": "Three-Round fake journey passes with failure plus retry; changed sequence passes with new totals; fake scope labeled.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Changed sequence fails",
+            "diagnostic": "Reuse the composed helpers with new inputs instead of hard-coded totals.",
+            "meaning": "The journey must generalize."
+          },
+          {
+            "symptom": "Failure Round scores zero silently",
+            "diagnostic": "Route the failure through retry to a real verdict or a recorded error.",
+            "meaning": "Failures are explicit."
+          }
+        ]
+      }
+    ]
+  }
+]

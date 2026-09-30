@@ -1,0 +1,919 @@
+[
+  {
+    "id": "m12-chat",
+    "milestoneId": "M12",
+    "title": "Keep team chat inside the Game-owned Match",
+    "why": "Chat needs authorization, validation and a destination. In this release the Game service owns Match team chat; a durable Chat service is deferred. Start with scope and limits before adding its socket.",
+    "outcome": "Validate messages and quick pings, derive sender and room from the trusted principal, cap per-team history, and state that history is process-local.",
+    "prerequisites": ["m11-four-clients"],
+    "references": [
+      {
+        "lessonId": "0011-team-chat",
+        "path": "services/game/src/game/team-chat.gateway.ts",
+        "startLine": 65,
+        "endLine": 102
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "services/game/src/game/team-chat.gateway.ts",
+        "startLine": 109,
+        "endLine": 181
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "services/game/src/game/team-chat.test.ts",
+        "startLine": 259,
+        "endLine": 356
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/chat.ts",
+        "startLine": 21,
+        "endLine": 85
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/chat.ts",
+        "startLine": 87,
+        "endLine": 144
+      }
+    ],
+    "steps": [
+      {
+        "id": "m12-chat-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Keep team chat inside the Game-owned Match",
+        "explanation": [
+          "Chat needs authorization, validation and a destination. In this release the Game service owns Match team chat; a durable Chat service is deferred. Start with scope and limits before adding its socket."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Two isolated teams now work together. Add chat as a Match-owned channel, separate from the Judge and Round."
+      },
+      {
+        "id": "m12-chat-see",
+        "phase": "see",
+        "title": "A message enters one authorized team room",
+        "question": "Who chooses sender and recipient room?",
+        "explanation": [
+          "The trusted socket principal tells the server who sent the event. The Game checks Match membership and side, validates content and rate, then broadcasts to that team. History is bounded in memory for this release; it is not durable."
+        ],
+        "vocabulary": [
+          {
+            "term": "Team room",
+            "meaning": "A server-owned socket group containing only members of one Match side."
+          },
+          {
+            "term": "Bounded history",
+            "meaning": "A fixed-size recent list that drops older entries."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "The server derives sender and room before it sends an event.",
+        "visual": {
+          "kind": "trace",
+          "title": "A message enters one authorized team room",
+          "code": [
+            "Verified socket principal",
+            "Game checks Match + team",
+            "Validate message or ping",
+            "Bounded room history → teammates"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Untrusted payload",
+              "values": [
+                {
+                  "label": "sender",
+                  "value": "client claims"
+                },
+                {
+                  "label": "room",
+                  "value": "client claims"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Never use message fields to choose identity or destination."
+            },
+            {
+              "id": "frame-1",
+              "label": "Authorized",
+              "values": [
+                {
+                  "label": "sender",
+                  "value": "principal"
+                },
+                {
+                  "label": "room",
+                  "value": "derived from team"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Game checks membership and derives the team room."
+            },
+            {
+              "id": "frame-2",
+              "label": "Delivered",
+              "values": [
+                {
+                  "label": "history",
+                  "value": "last N in memory"
+                },
+                {
+                  "label": "peers",
+                  "value": "same team"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Messages and pings are bounded and process-local."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A player sends to another team or the Game process restarts",
+              "expected": "The other team gets nothing; current in-memory history is lost at restart",
+              "reason": "Authorize before broadcast and describe storage as it exists."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m12-chat-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "What is lost when this process-local chat service restarts?",
+        "explanation": [
+          "The in-memory history Map disappears. Do not describe it as durable. If that requirement changes, persist it deliberately inside the Game data boundary rather than silently switching to the deferred Chat service."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Trace one message, then trace a process restart."
+      },
+      {
+        "id": "m12-chat-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "A message includes senderId for another player. Which identity should the saved message use?",
+        "explanation": [
+          "Trace the trusted socket principal through membership to the server-created message."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Create validation first, then bind the gateway to the trusted team room."
+      },
+      {
+        "id": "m12-chat-chat-contract",
+        "phase": "build",
+        "title": "Validate a team message and quick ping",
+        "question": "Which fields may the client choose?",
+        "explanation": [
+          "In src/chat.ts, define text and quick-ping variants, enforce length and allowed ping values, and keep sender id, Match id and side out of caller-controlled fields."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use a type field for the variants.",
+          "Put limits near the contract.",
+          "Keep user and room identity out of the input.",
+          "Test invalid text length and unknown ping values."
+        ],
+        "files": [
+          {
+            "role": "domain.chat",
+            "workspace": "active",
+            "path": "src/chat.ts",
+            "action": "create",
+            "owner": "src/chat.ts owns validated message and quick-ping shapes.",
+            "change": "Define a bounded message/ping contract without client-controlled sender or room fields.",
+            "pattern": "Use distinct variants so text and ping entries have the fields each requires."
+          }
+        ],
+        "checkIds": ["m12-chat-unit"],
+        "prerequisiteCheckIds": ["m11-four-clients-browser"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m12-chat-chat-gateway",
+        "phase": "build",
+        "title": "Derive the team room from membership",
+        "question": "What must happen before broadcast?",
+        "explanation": [
+          "In src/server/chat.gateway.ts, require the attached socket principal, ask Game for the player’s Match side, join only that team room, and send bounded history. Reject strangers before returning history or publishing an entry."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the principal attached during handshake.",
+          "Resolve membership from Game state.",
+          "Choose a room from trusted Match and side.",
+          "Only then read history or emit the validated message."
+        ],
+        "files": [
+          {
+            "role": "server.chat-gateway",
+            "workspace": "active",
+            "path": "src/server/chat.gateway.ts",
+            "action": "create",
+            "owner": "src/server/chat.gateway.ts owns chat authorization and team-room delivery.",
+            "change": "Authorize membership, derive sender/room on the server and cap recent history.",
+            "pattern": "Do not accept a team room, sender id or Match id from an untrusted payload."
+          }
+        ],
+        "checkIds": ["m12-chat-unit"],
+        "prerequisiteCheckIds": ["m12-chat-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m12-chat-client",
+        "phase": "build",
+        "title": "Merge live messages with reconnect history",
+        "question": "How do you avoid showing a message twice after reconnect?",
+        "explanation": [
+          "In src/client/chat-client.ts, keep one seen-id Set for both live events and reconnect history. Add each incoming entry only once, notify the view, and remove socket listeners when the client disconnects."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start one client per team as a negative control.",
+          "Try a forged sender and invalid ping.",
+          "Send more entries than the cap and inspect history.",
+          "Create a fresh gateway and prove old memory is gone."
+        ],
+        "files": [
+          {
+            "role": "client.chat",
+            "workspace": "active",
+            "path": "src/client/chat-client.ts",
+            "action": "create",
+            "owner": "The chat client owns its connection state and message list, not authorization or team selection.",
+            "change": "Connect to the Game chat namespace, merge history and live entries by message id, and expose a small subscribe/read API.",
+            "pattern": "Deduplicate at the client by server message id; do not treat the client's list as durable history."
+          }
+        ],
+        "checkIds": ["m12-chat-client-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Run the client-state test before connecting the sidecar lifecycle."
+      },
+      {
+        "id": "m12-chat-chat-tests",
+        "phase": "build",
+        "title": "Test membership, limits and restart truth",
+        "question": "Can the other team see text or quick pings?",
+        "explanation": [
+          "In test/chat.test.ts, use four socket clients and assert only the sender’s team gets each event. Check forged sender data, max text length, bounded history and loss after a fresh gateway starts."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start one client per team as a negative control.",
+          "Try a forged sender and invalid ping.",
+          "Send more entries than the cap and inspect history.",
+          "Create a fresh gateway and prove old memory is gone."
+        ],
+        "files": [
+          {
+            "role": "server.chat-test",
+            "workspace": "active",
+            "path": "test/chat.test.ts",
+            "action": "create",
+            "owner": "test/chat.test.ts protects authorization, validation and the actual storage boundary.",
+            "change": "Add tests for team isolation, invalid payloads, history limit and process-local restart behavior.",
+            "pattern": "Assert received entries and history after restart; do not infer delivery from emit alone."
+          }
+        ],
+        "checkIds": ["m12-chat-unit"],
+        "prerequisiteCheckIds": ["m12-chat-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m12-chat-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Validate messages and quick pings, derive sender and room from the trusted principal, cap per-team history, and state that history is process-local.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Validate messages and quick pings, derive sender and room from the trusted principal, cap per-team history, and state that history is process-local.",
+        "transfer": "Changed case: send one more message than the per-team history limit, then restart the process. Expected result: only the newest bounded history remains before restart; process-local history is empty after restart.",
+        "next": "Continue to Sidecars."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m12-chat-unit",
+        "kind": "unit",
+        "command": "npm test -- test/chat.test.ts",
+        "cwd": ".",
+        "expected": "Only the authenticated team receives text and pings; invalid payloads are rejected; recent history is bounded and resets with the process.",
+        "failure": [
+          {
+            "symptom": "The client chooses sender identity",
+            "diagnostic": "Build sender from the socket principal.",
+            "meaning": "The source of identity is untrusted."
+          },
+          {
+            "symptom": "History grows without a limit",
+            "diagnostic": "Keep only the configured number of recent room entries.",
+            "meaning": "Memory use can grow with every message."
+          }
+        ]
+      },
+      {
+        "id": "m12-chat-client-unit",
+        "kind": "unit",
+        "command": "npm test -- test/chat-client.test.ts",
+        "cwd": ".",
+        "expected": "History and live events with the same message id appear once; disconnect removes listeners; reconnect history does not duplicate entries.",
+        "failure": [
+          {
+            "symptom": "One entry appears twice after reconnect",
+            "diagnostic": "Pass live and history entries through the same seen-id Set.",
+            "meaning": "Reconnect history and live delivery are being merged differently."
+          },
+          {
+            "symptom": "Messages keep arriving after disconnect",
+            "diagnostic": "Remove socket event listeners before disconnecting the client.",
+            "meaning": "The old client still owns active callbacks."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m12-sidecars",
+    "milestoneId": "M12",
+    "title": "Let collaboration end per Round and chat end per Match",
+    "why": "The screen owns connections but should not own their security or lifetime rules. Keep code collaboration and team chat as separate clients with the right owner keys.",
+    "outcome": "Replace Round-scoped collaboration, preserve Match-scoped chat, disconnect both at Match end, and dispose canceled late factories.",
+    "prerequisites": ["m12-chat"],
+    "references": [
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.ts",
+        "startLine": 78,
+        "endLine": 130
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.ts",
+        "startLine": 178,
+        "endLine": 232
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.test.ts",
+        "startLine": 43,
+        "endLine": 67
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.test.ts",
+        "startLine": 69,
+        "endLine": 91
+      }
+    ],
+    "steps": [
+      {
+        "id": "m12-sidecars-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Let collaboration end per Round and chat end per Match",
+        "explanation": [
+          "The screen owns connections but should not own their security or lifetime rules. Keep code collaboration and team chat as separate clients with the right owner keys."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Chat works. Now attach its lifetime to Match while collaboration remains attached to one Round."
+      },
+      {
+        "id": "m12-sidecars-see",
+        "phase": "see",
+        "title": "One screen contains two different lifetimes",
+        "question": "Which connection should remain after a new Round?",
+        "explanation": [
+          "Use owner keys rather than one screen-changed flag. Collaboration follows Match, Round and side. Chat follows Match and player. A canceled Promise cannot cancel its network work, so disconnect the late result explicitly."
+        ],
+        "vocabulary": [
+          {
+            "term": "Factory",
+            "meaning": "A function that creates a client, often asynchronously."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Compare the identity keys. A Round change and Match change need different cleanup.",
+        "visual": {
+          "kind": "trace",
+          "title": "One screen contains two different lifetimes",
+          "code": [
+            "Scope = Match M / Round 1",
+            "Round 2 arrives",
+            "Replace collaboration R1 → R2",
+            "Keep chat M"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Round 1",
+              "values": [
+                {
+                  "label": "collaboration",
+                  "value": "M + R1"
+                },
+                {
+                  "label": "chat",
+                  "value": "M"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The owners differ even while both clients are live."
+            },
+            {
+              "id": "frame-1",
+              "label": "Round 2",
+              "values": [
+                {
+                  "label": "collaboration",
+                  "value": "new M + R2"
+                },
+                {
+                  "label": "chat",
+                  "value": "same M"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Only the Round-specific code client changes."
+            },
+            {
+              "id": "frame-2",
+              "label": "Match complete",
+              "values": [
+                {
+                  "label": "collaboration",
+                  "value": "dispose"
+                },
+                {
+                  "label": "chat",
+                  "value": "dispose"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Both sidecars close when their Match owner ends."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A canceled factory resolves after Match complete",
+              "expected": "Disconnect the late client and do not publish it as active state",
+              "reason": "An async resource still must be disposed after its consumer disappears."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m12-sidecars-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "What should change when a Round ends but its Match continues?",
+        "explanation": [
+          "Dispose the old collaboration provider and create a fresh Round document. Keep Match chat and its listener. At Match end, dispose both. If an async factory resolves after cancellation, disconnect its result."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Test the late factory result next."
+      },
+      {
+        "id": "m12-sidecars-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "The collaboration Promise resolves late for Round 1 after Round 2 is active. Can you store it?",
+        "explanation": [
+          "Name the condition that shows it is stale and the cleanup that must run."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Test the lifetime transitions and late Promise path."
+      },
+      {
+        "id": "m12-sidecars-sidecar-keys",
+        "phase": "build",
+        "title": "Give each sidecar its real owner key",
+        "question": "Which identity change replaces each client?",
+        "explanation": [
+          "In src/client/sidecars.ts, include Round in the collaboration key but not the chat key. On Round change, dispose prior collaboration and leave same-Match chat connected. On Match change, disconnect both."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the owner key for each sidecar.",
+          "Add Round only to collaboration.",
+          "Keep chat instance when Match id stays the same.",
+          "Disconnect both only when Match or transport changes."
+        ],
+        "files": [
+          {
+            "role": "client.sidecars",
+            "workspace": "active",
+            "path": "src/client/sidecars.ts",
+            "action": "create",
+            "owner": "src/client/sidecars.ts owns cancellation and connection cleanup.",
+            "change": "Keep distinct keys for Round collaboration and Match chat.",
+            "pattern": "Treat transport, Match, Round and player ids as explicit resource identity."
+          }
+        ],
+        "checkIds": ["m12-sidecars-canceled-factory"],
+        "prerequisiteCheckIds": ["m11-round-lifetime-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m12-sidecars-sidecar-test",
+        "phase": "build",
+        "title": "Prove a late result is disposed",
+        "question": "Can a canceled factory leave a socket behind?",
+        "explanation": [
+          "In test/sidecars.test.ts, hold a client factory Promise open, change its Round or Match, then resolve it. Assert the stale client disconnects and never replaces the active one. Count listeners after reconnect to catch duplicate handlers."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Keep the factory unresolved during the scope change.",
+          "Resolve it after cancellation.",
+          "Assert disconnect ran on the late result.",
+          "Reconnect and assert exactly one listener handles the next event."
+        ],
+        "files": [
+          {
+            "role": "client.sidecars-test",
+            "workspace": "active",
+            "path": "test/sidecars.test.ts",
+            "action": "edit",
+            "owner": "test/sidecars.test.ts proves no stale client or duplicate listener survives.",
+            "change": "Add delayed-factory disposal and one-listener-after-reconnect cases.",
+            "pattern": "Use a deferred Promise and spy on disconnect; assert active client identity after each transition."
+          }
+        ],
+        "checkIds": ["m12-sidecars-canceled-factory"],
+        "prerequisiteCheckIds": ["m12-sidecars-canceled-factory"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m12-sidecars-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Replace Round-scoped collaboration, preserve Match-scoped chat, disconnect both at Match end, and dispose canceled late factories.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Replace Round-scoped collaboration, preserve Match-scoped chat, disconnect both at Match end, and dispose canceled late factories.",
+        "transfer": "Changed case: Match stays the same but Round changes. Expected result: collaboration reconnects for the new Round while chat keeps its existing connection.",
+        "next": "Continue to Live chat."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m12-sidecars-canceled-factory",
+        "kind": "unit",
+        "command": "npm test -- test/sidecars.test.ts",
+        "cwd": ".",
+        "expected": "Round changes replace collaboration only; Match change disposes both; late factories disconnect; reconnect does not duplicate listeners.",
+        "failure": [
+          {
+            "symptom": "Late factory is still active",
+            "diagnostic": "Compare its captured key with the current key after await.",
+            "meaning": "The resource no longer belongs to this screen."
+          },
+          {
+            "symptom": "One chat event appears twice",
+            "diagnostic": "Dispose old listeners before attaching replacements.",
+            "meaning": "Reconnect leaked a duplicate handler."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m12-live-chat",
+    "milestoneId": "M12",
+    "title": "Check chat with the real four-player journey",
+    "why": "Unit tests prove individual rules. This browser journey checks chat, pings, reconnect and the editor together across two teams.",
+    "outcome": "Verify each message and ping reaches teammates only, chat history returns after reconnect, and Round collaboration remains independent.",
+    "prerequisites": ["m12-sidecars"],
+    "references": [
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/e2e/live-team-chat.spec.ts",
+        "startLine": 68,
+        "endLine": 185
+      }
+    ],
+    "steps": [
+      {
+        "id": "m12-live-chat-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Check chat with the real four-player journey",
+        "explanation": [
+          "Unit tests prove individual rules. This browser journey checks chat, pings, reconnect and the editor together across two teams."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "The sidecars have tested cleanup. One live journey now checks delivery through four clients."
+      },
+      {
+        "id": "m12-live-chat-see",
+        "phase": "see",
+        "title": "A team message reaches only its teammates",
+        "question": "What does each of four players receive?",
+        "explanation": [
+          "Use four independent clients in one 2v2 Match. Send text and a quick ping from Alpha, inspect Beta for no event, then reconnect Alpha and verify one copy of each recent entry. Chat history is process memory, not durable storage."
+        ],
+        "vocabulary": [
+          {
+            "term": "Deduplicate",
+            "meaning": "Keep one entry when the same message id arrives more than once."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Trace sender, trusted room and recipients through each frame.",
+        "visual": {
+          "kind": "trace",
+          "title": "A team message reaches only its teammates",
+          "code": [
+            "A1 sends message + ping",
+            "Game derives Alpha room",
+            "A2 receives history/update",
+            "B1 and B2 receive nothing"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Send",
+              "values": [
+                {
+                  "label": "A1",
+                  "value": "authenticated"
+                },
+                {
+                  "label": "room",
+                  "value": "not supplied by client"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Sender identity is derived from the verified principal."
+            },
+            {
+              "id": "frame-1",
+              "label": "Route",
+              "values": [
+                {
+                  "label": "Game",
+                  "value": "Alpha membership"
+                },
+                {
+                  "label": "payload",
+                  "value": "validated"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The Game selects the team-only room."
+            },
+            {
+              "id": "frame-2",
+              "label": "Receive",
+              "values": [
+                {
+                  "label": "A2",
+                  "value": "message + ping"
+                },
+                {
+                  "label": "B1/B2",
+                  "value": "no event"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Cross-team clients do not receive Alpha entries."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A teammate reconnects and receives history plus a live broadcast for one message id",
+              "expected": "The chat client deduplicates that id and shows one entry",
+              "reason": "Reconnect history can overlap with a live event."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m12-live-chat-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why should a team ping use chat instead of the Ready command?",
+        "explanation": [
+          "A quick ping is a short communication cue. It must not change Player status, team readiness or Match state. The gateway delivers it only to the sender’s team."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Next, inspect the real team repository in M13."
+      },
+      {
+        "id": "m12-live-chat-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "The same history item is replayed after reconnect. What should the UI render?",
+        "explanation": [
+          "Use the stable message id to decide whether the received item is new."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Drive the live test and keep no-event assertions for the other team."
+      },
+      {
+        "id": "m12-live-chat-live-chat-spec",
+        "phase": "build",
+        "title": "Exercise team chat during a live Match",
+        "question": "How will the browser test prove private delivery?",
+        "explanation": [
+          "In test/browser/live-chat.spec.ts, create a real 2v2 Match and four clients, send text and a contextual ping, assert only teammates receive them, then reconnect and check one copy in bounded history."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Create two independent identities for each side.",
+          "Send text and a ping from one socket.",
+          "Wait for its teammate; assert opponents remain empty.",
+          "Reconnect and compare message ids for duplicates."
+        ],
+        "files": [
+          {
+            "role": "test.browser.live-chat",
+            "workspace": "active",
+            "path": "test/browser/live-chat.spec.ts",
+            "action": "create",
+            "owner": "test/browser/live-chat.spec.ts owns the live multi-client chat journey.",
+            "change": "Add a named scenario for private delivery, reconnect history, deduplication and editor coexistence.",
+            "pattern": "Use real sockets against one practice server and close every page/socket in finally."
+          }
+        ],
+        "checkIds": ["m12-live-chat-browser"],
+        "prerequisiteCheckIds": [
+          "m12-chat-unit",
+          "m12-sidecars-canceled-factory"
+        ],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m12-live-chat-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Verify each message and ping reaches teammates only, chat history returns after reconnect, and Round collaboration remains independent.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Verify each message and ping reaches teammates only, chat history returns after reconnect, and Round collaboration remains independent.",
+        "transfer": "Changed case: a right-side player sends a ping during reconnect. Expected result: both right teammates see it once, left players see nothing, and Round collaboration remains separate.",
+        "next": "Continue to Inspect team."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m12-live-chat-browser",
+        "kind": "browser",
+        "command": "npm run test:browser -- test/browser/live-chat.spec.ts",
+        "cwd": ".",
+        "expected": "Four clients share one Match; messages and pings reach teammates only; recent history is restored once after reconnect while the editor remains usable.",
+        "failure": [
+          {
+            "symptom": "The browser cannot reach the practice service",
+            "diagnostic": "Check the server-ready message and BASE_URL passed by the runner.",
+            "meaning": "All clients must share the same real practice server."
+          },
+          {
+            "symptom": "A failed test leaves a process running",
+            "diagnostic": "Put child-process and browser cleanup in finally.",
+            "meaning": "A failed journey must not leave services running."
+          }
+        ]
+      }
+    ]
+  }
+]

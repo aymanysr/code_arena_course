@@ -1,0 +1,1595 @@
+[
+  {
+    "id": "m11-document",
+    "milestoneId": "M11",
+    "title": "Give each team one shared code document",
+    "why": "In 2v2 teammates work on one solution while the other side works privately. The shared document belongs to a team and a Round, not to the whole Match.",
+    "outcome": "Create one shared document per team and Round, send updates through an authenticated server room, connect the editor to that document, and prove opponents cannot see it.",
+    "prerequisites": ["m10-two-clients"],
+    "references": [
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "packages/arena-game/src/team-collaboration.ts",
+        "startLine": 151,
+        "endLine": 177
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "services/game/src/game/collab.gateway.ts",
+        "startLine": 14,
+        "endLine": 54
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "services/game/src/game/collab.gateway.ts",
+        "startLine": 67,
+        "endLine": 93
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "frontend/src/arena/collab.ts",
+        "startLine": 89,
+        "endLine": 125
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "frontend/src/components/CodeWorkspace.tsx",
+        "startLine": 35,
+        "endLine": 55
+      }
+    ],
+    "steps": [
+      {
+        "id": "m11-document-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Give each team one shared code document",
+        "explanation": [
+          "In 2v2 teammates work on one solution while the other side works privately. The shared document belongs to a team and a Round, not to the whole Match."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "The two-client Match works. Now add shared teammate work while keeping opponent code private."
+      },
+      {
+        "id": "m11-document-see",
+        "phase": "see",
+        "title": "Two team documents stay separate",
+        "question": "Where should a teammate edit appear?",
+        "explanation": [
+          "Yjs encodes edits so concurrent changes can merge. First prove the local documents have the right Match, Round, and side keys. Then connect them: the server checks membership and chooses the room; the browser sends and receives document updates. A merge format never grants access by itself."
+        ],
+        "vocabulary": [
+          {
+            "term": "Shared document",
+            "meaning": "One team-owned source document observed by its authorized members."
+          },
+          {
+            "term": "Yjs update",
+            "meaning": "A compact change that can merge with another compatible document state."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "A side has its own document; do not create one global source string.",
+        "visual": {
+          "kind": "trace",
+          "title": "Two team documents stay separate",
+          "code": [
+            "Left team → document L / Round 1",
+            "Right team → document R / Round 1",
+            "New Round → fresh documents"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Left edit",
+              "values": [
+                {
+                  "label": "doc L",
+                  "value": "source + revision 2"
+                },
+                {
+                  "label": "doc R",
+                  "value": "unchanged"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Only members of the left side receive its update."
+            },
+            {
+              "id": "frame-1",
+              "label": "Round ends",
+              "values": [
+                {
+                  "label": "Round 1 docs",
+                  "value": "dispose"
+                },
+                {
+                  "label": "Match chat",
+                  "value": "keep"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Collaboration data is scoped to this Round."
+            },
+            {
+              "id": "frame-2",
+              "label": "Round 2",
+              "values": [
+                {
+                  "label": "doc L",
+                  "value": "fresh starter"
+                },
+                {
+                  "label": "doc R",
+                  "value": "fresh starter"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The next Round does not inherit old source or readiness."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A player from the other side subscribes to the left team room",
+              "expected": "Membership rejects the subscription before any baseline or update is sent",
+              "reason": "A merge format does not replace server authorization."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m11-document-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Does Yjs decide who may read the document?",
+        "explanation": [
+          "No. Yjs helps merge changes, but the Game checks membership and chooses the team room. The document key includes Match, Round and side. A stranger must never receive its updates."
+        ],
+        "vocabulary": [
+          {
+            "term": "CRDT",
+            "meaning": "A data structure designed so concurrent updates can merge without choosing one writer."
+          }
+        ],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep membership checks outside the Yjs document."
+      },
+      {
+        "id": "m11-document-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "Left and right teammates type different code at once. Which updates may merge?",
+        "explanation": [
+          "State the authorized peers and document key before predicting the merged text."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Add the exact dependency as a separate step, then define the document owner."
+      },
+      {
+        "id": "m11-document-yjs-package",
+        "phase": "build",
+        "title": "Add the reviewed Yjs package",
+        "question": "Which dependency provides shared document updates?",
+        "explanation": [
+          "At the practice root, add exact reference version Yjs 13.6.33. This step installs the shared-document type; the next steps connect it to the already-authenticated socket path."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Check the reference lockfile version.",
+          "Use --save-exact so package.json keeps one version.",
+          "Inspect both manifest and lockfile.",
+          "Run the dependency check before importing Y.Doc."
+        ],
+        "files": [
+          {
+            "role": "config.shared-document",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json records the exact Yjs dependency for the practice project.",
+            "change": "Add Yjs 13.6.33 and update the lockfile.",
+            "pattern": "Pin the version; keep document modeling separate from network transport."
+          }
+        ],
+        "checkIds": [
+          "m11-document-deps",
+          "m11-document-types",
+          "m11-document-unit"
+        ],
+        "prerequisiteCheckIds": [],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-document-document-port",
+        "phase": "build",
+        "title": "Name the Round and side document",
+        "question": "Which values identify one private shared document?",
+        "explanation": [
+          "In src/collaboration.ts, create a factory keyed by matchId, roundId and side. Use Y.Doc with one named source text. Keep membership checks at the server boundary, not inside the CRDT."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Make the key include all three scopes.",
+          "Create one Y.Doc for that key.",
+          "Use one named Y.Text for source.",
+          "Test left/right separation before adding sockets."
+        ],
+        "files": [
+          {
+            "role": "domain.collaboration",
+            "workspace": "active",
+            "path": "src/collaboration.ts",
+            "action": "create",
+            "owner": "src/collaboration.ts owns the shared-document shape and key.",
+            "change": "Define one document factory per Match, Round and side with one named source text.",
+            "pattern": "Keep transport and membership checks outside the document factory."
+          }
+        ],
+        "checkIds": [
+          "m11-document-deps",
+          "m11-document-types",
+          "m11-document-unit"
+        ],
+        "prerequisiteCheckIds": ["m11-document-deps"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-document-document-test",
+        "phase": "build",
+        "title": "Prove team updates stay isolated",
+        "question": "Can a left-side update alter the right document?",
+        "explanation": [
+          "In test/collaboration.test.ts, create two team documents for one Match and Round. Apply a left update and assert only the left source changes. Check that a new Round starts with a new document."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use the same Match and Round for both sides.",
+          "Apply a real Yjs update to only one document.",
+          "Read both source values after applying it.",
+          "Create Round 2 and assert its source is fresh."
+        ],
+        "files": [
+          {
+            "role": "domain.collaboration-test",
+            "workspace": "active",
+            "path": "test/collaboration.test.ts",
+            "action": "create",
+            "owner": "test/collaboration.test.ts proves document scope.",
+            "change": "Test side isolation and a fresh document for a new Round.",
+            "pattern": "Use separate document instances so accidental sharing is visible."
+          }
+        ],
+        "checkIds": [
+          "m11-document-deps",
+          "m11-document-types",
+          "m11-document-unit"
+        ],
+        "prerequisiteCheckIds": ["m11-document-types"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-document-gateway-test",
+        "phase": "build",
+        "title": "Write the room-access test first",
+        "question": "What must be true before a socket receives the team baseline?",
+        "explanation": [
+          "Create test/collaboration-transport.test.ts before the gateway. Arrange a member, a nonmember, and one 2v2 Match. Expect the member to receive the baseline for the side chosen by Game, and the nonmember to disconnect before any document bytes arrive. Run this test now and read the intended failure; the gateway implementation comes next."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use M10’s authenticated member fixture; do not place userId or side in the update body.",
+          "Start two sockets with different membership in the same Match.",
+          "Expected order: member gets Game-derived sync; stranger disconnects with no sync event.",
+          "Run only the named test with -t \"membership and initial sync\"; it should fail before the gateway exists."
+        ],
+        "files": [
+          {
+            "role": "test.collaboration-gateway",
+            "workspace": "active",
+            "path": "test/collaboration-transport.test.ts",
+            "action": "create",
+            "owner": "This integration test proves access is checked before a document baseline is sent.",
+            "change": "Test a member’s initial same-side sync and a nonmember rejection before gateway code is added.",
+            "pattern": "Assert that no sync bytes arrive after membership fails."
+          }
+        ],
+        "checkIds": ["m11-document-gateway"],
+        "prerequisiteCheckIds": ["m10-socket-auth-unit", "m11-document-unit"],
+        "next": "The test should fail because no collaboration gateway exists yet. Now make the server pass it."
+      },
+      {
+        "id": "m11-document-auth-room",
+        "phase": "build",
+        "title": "Authorize before joining the team room",
+        "question": "Who chooses the Match, Round, and side room?",
+        "explanation": [
+          "Create src/server/collab.gateway.ts as a separate namespace on the M10 authenticated socket setup. Read the trusted principal and Match from the connection, then ask the Game for the caller’s sync baseline. Game checks membership and derives the caller’s side and Round. Only then join the returned room and send sync. Never accept a room, side, or user id from the message body."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "M10 already creates the trusted socket principal; reuse that seam instead of parsing a new user id.",
+          "Let Game return the room id after it checks Match membership and 2v2 mode.",
+          "Order: authenticate → ask Game for sync → join the returned room → emit the baseline.",
+          "Test that a stranger is disconnected before receiving any sync bytes."
+        ],
+        "files": [
+          {
+            "role": "server.collaboration-gateway",
+            "workspace": "active",
+            "path": "src/server/collab.gateway.ts",
+            "action": "create",
+            "owner": "The collaboration gateway owns socket connection, validation, and same-side room delivery.",
+            "change": "Authorize the connection with M10 identity, request the Game-derived baseline, and join only its returned room.",
+            "pattern": "The server chooses room identity after membership succeeds; a client never names its own side."
+          }
+        ],
+        "checkIds": ["m11-document-types", "m11-document-gateway"],
+        "prerequisiteCheckIds": ["m10-socket-auth-unit", "m11-document-unit"],
+        "next": "A safe room can send frames; next route each changed Yjs update through Game before broadcasting it."
+      },
+      {
+        "id": "m11-document-update-channel",
+        "phase": "build",
+        "title": "Apply then relay an update",
+        "question": "When may another teammate receive a Yjs frame?",
+        "explanation": [
+          "Validate the update size and Round id, then call the Game method that verifies membership, current Round, and coding phase. The reference caps updateB64 at 262,144 characters and roundId at 128. Relay the frame only after Game accepts it, and only to the server-owned room. If the Round changed, move the socket and send a fresh baseline before more edits."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Treat the body as untrusted: it may contain only the Round id and encoded update, not identity or room.",
+          "Set a small byte limit before the Game call so a huge frame cannot fill memory.",
+          "Walkthrough: validate → Game.applyCollabUpdate(principal, matchId, frame) → relay accepted update to client.data.room.",
+          "Test an old Round id and a nonmember; neither may change or broadcast the document."
+        ],
+        "files": [
+          {
+            "role": "server.collaboration-update",
+            "workspace": "active",
+            "path": "src/server/collab.gateway.ts",
+            "action": "edit",
+            "owner": "The update handler owns input bounds and accepted-frame delivery.",
+            "change": "Send frames through Game authority before broadcasting to other sockets in the current team room.",
+            "pattern": "Validate first, await the revision-owning Game call, then emit only to the trusted room."
+          },
+          {
+            "role": "test.collaboration-update",
+            "workspace": "active",
+            "path": "test/collaboration-transport.test.ts",
+            "action": "edit",
+            "owner": "The transport test also proves accepted frames reach teammates only.",
+            "change": "Add same-side delivery, opposite-side isolation, and stale-Round rejection after the gateway joins members safely.",
+            "pattern": "Use two clients per side and assert the opposite room receives no document event."
+          }
+        ],
+        "checkIds": ["m11-document-types", "m11-document-channel"],
+        "prerequisiteCheckIds": ["m11-document-gateway"],
+        "next": "The server now owns authorization and delivery; connect a browser Y.Doc to this event path."
+      },
+      {
+        "id": "m11-document-provider-test",
+        "phase": "build",
+        "title": "Write the client-sync test first",
+        "question": "How can a browser prove it will not echo a teammate’s edit?",
+        "explanation": [
+          "Create test/collaboration-provider.test.ts before the provider. Use a local socket fake and two Y.Doc instances. Assert that a local Yjs update is sent, the server baseline is applied before connected state, and applying a remote frame does not send it back. Then add provider code to make the test pass."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use real Yjs updates between the test documents; do not compare hand-written base64 strings.",
+          "Record the order of baseline, connected state, local update, and remote update.",
+          "Guard applyUpdate with a flag and clear it in finally so remote frames do not echo.",
+          "Run this unit test first; keep server membership in the separate gateway integration test."
+        ],
+        "files": [
+          {
+            "role": "test.collaboration-provider",
+            "workspace": "active",
+            "path": "test/collaboration-provider.test.ts",
+            "action": "create",
+            "owner": "The provider test owns local/remote update and reconnect behavior for the browser client.",
+            "change": "Test baseline application, one local frame, no remote echo, and re-baseline after reconnect.",
+            "pattern": "Use a socket fake for event order, but keep at least one real Yjs update."
+          }
+        ],
+        "checkIds": ["m11-document-provider"],
+        "prerequisiteCheckIds": ["m11-document-channel"],
+        "next": "Run the test and read the missing-provider failure before creating the provider."
+      },
+      {
+        "id": "m11-document-client-provider",
+        "phase": "build",
+        "title": "Connect the browser document to the socket",
+        "question": "How does a teammate’s edit reach the same Y.Doc?",
+        "explanation": [
+          "Create src/client/collab-provider.ts around one Y.Doc and one Socket.IO client. Apply the initial server baseline before showing the editor as connected. Send local document updates while connected. When a remote frame arrives, apply it with Y.applyUpdate while a guard suppresses sending that frame back. Reconnect by requesting the authoritative baseline again."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use Socket.IO client already introduced in M10 and Y.Doc installed earlier in this lesson.",
+          "Listen for sync before enabling edits; the baseline carries state, Round id, revision, and language.",
+          "Local flow: doc update → encode bytes → emit update. Remote flow: set guard → apply Yjs frame → clear guard in finally.",
+          "Test both directions: the second document changes, but applying its frame does not send an echo."
+        ],
+        "files": [
+          {
+            "role": "client.collaboration-provider",
+            "workspace": "active",
+            "path": "src/client/collab-provider.ts",
+            "action": "create",
+            "owner": "The provider owns one browser Y.Doc and its socket lifecycle.",
+            "change": "Apply the baseline, send local Yjs updates, apply remote updates without echo, and resync after reconnect.",
+            "pattern": "Keep Game state on the game socket; this provider carries document frames only."
+          }
+        ],
+        "checkIds": [
+          "m11-document-types",
+          "m11-document-provider",
+          "m11-document-channel"
+        ],
+        "prerequisiteCheckIds": ["m11-document-channel"],
+        "next": "The provider owns the shared Y.Text; now connect the editor to that text instead of a private string."
+      },
+      {
+        "id": "m11-document-editor-package",
+        "phase": "build",
+        "title": "Add the reviewed editor binding",
+        "question": "Which editor extension binds a CodeMirror view to Y.Text?",
+        "explanation": [
+          "Add exact reference version y-codemirror.next 0.3.6. The editor integration uses its Yjs extension to bind CodeMirror to the provider’s named source text. Do not add cursor-awareness packages until shared text sync works."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "The shared text is already named source; the editor extension must use that same Y.Text.",
+          "Read the reference package lock and pin y-codemirror.next 0.3.6 exactly.",
+          "Keep the dependency step separate so an import error is not confused with a socket error.",
+          "Run npm ls y-codemirror.next --depth=0 before importing its editor extension."
+        ],
+        "files": [
+          {
+            "role": "config.collaboration-editor",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json records the exact CodeMirror/Yjs binding dependency.",
+            "change": "Add y-codemirror.next 0.3.6 and update the lockfile.",
+            "pattern": "Pin the editor binding separately from the transport provider."
+          }
+        ],
+        "checkIds": ["m11-document-editor-deps", "m11-document-types"],
+        "prerequisiteCheckIds": ["m11-document-provider"],
+        "next": "With the binding installed, connect the editor view and keep Run/Submit reading the shared source."
+      },
+      {
+        "id": "m11-document-editor-test",
+        "phase": "build",
+        "title": "Write the editor-binding test first",
+        "question": "Does team typing change the shared Y.Text?",
+        "explanation": [
+          "Create test/collaboration-editor.test.ts after y-codemirror.next is installed but before the editor adapter. Test the team editor extension against the provider’s named Y.Text, and check that solo mode still uses the local source path. The test makes the source choice visible before the adapter is added."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use the same \"source\" text name as the provider and Yjs factory.",
+          "Keep a solo editor case so team support does not replace the existing 1v1 path.",
+          "Expected: team input changes provider text; a separate client applying its update sees the same text.",
+          "Run this test now to see the missing adapter, then add the CodeMirror binding."
+        ],
+        "files": [
+          {
+            "role": "test.collaboration-editor",
+            "workspace": "active",
+            "path": "test/collaboration-editor.test.ts",
+            "action": "create",
+            "owner": "This test proves team editor input is attached to shared text and solo editing remains local.",
+            "change": "Add focused cases for the team Y.Text extension and the existing solo editor path.",
+            "pattern": "Assert observable source values rather than implementation-private flags."
+          }
+        ],
+        "checkIds": ["m11-document-editor"],
+        "prerequisiteCheckIds": [
+          "m11-document-editor-deps",
+          "m11-document-provider"
+        ],
+        "next": "The test should fail until the team editor returns the shared-text extension."
+      },
+      {
+        "id": "m11-document-editor-binding",
+        "phase": "build",
+        "title": "Bind the editor to shared source",
+        "question": "Which source should Run and Submit read in team mode?",
+        "explanation": [
+          "Create src/client/collaboration-editor.ts to add the Yjs editor extension to the existing CodeMirror setup. Use the provider’s Y.Text named source. In 2v2, Run and Submit read that shared text; in 1v1, keep the existing local editor string. If collaboration is disconnected, keep shared editing paused until the baseline is restored."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Do not create a second editor buffer for 2v2; the Y.Text is the shared source of truth.",
+          "Add the collaboration extension only when the provider exists; keep the normal 1v1 editor path.",
+          "Small decision: team mode → provider.getText(\"source\"); solo mode → existing local state.",
+          "Run typecheck and the provider test, then confirm the live 2v2 browser check uses the same editor text."
+        ],
+        "files": [
+          {
+            "role": "client.collaboration-editor",
+            "workspace": "active",
+            "path": "src/client/collaboration-editor.ts",
+            "action": "create",
+            "owner": "The editor adapter owns CodeMirror’s Y.Text binding and selects shared or local source.",
+            "change": "Bind the provider source in team mode and keep the existing local editor for 1v1.",
+            "pattern": "The editor displays shared text; the Game server remains the owner of Ready and Submit rules."
+          }
+        ],
+        "checkIds": [
+          "m11-document-editor-deps",
+          "m11-document-provider",
+          "m11-document-editor",
+          "m11-document-types"
+        ],
+        "prerequisiteCheckIds": [
+          "m11-document-editor-deps",
+          "m11-document-provider"
+        ],
+        "next": "Run the complete transport check before adding revision-bound Ready."
+      },
+      {
+        "id": "m11-document-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named checks from the practice root. Compare their result with this lesson’s outcome: Create one shared document per team and Round, send updates through an authenticated server room, connect the editor to that document, and prove opponents cannot see it.",
+          "The local test proves document merge in one process. The gateway test proves access before sync, the transport test proves same-side delivery and opponent isolation, and the editor test proves typing changes the shared text. Mark a live service check blocked if it is unavailable."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [
+          "m11-document-deps",
+          "m11-document-types",
+          "m11-document-unit",
+          "m11-document-gateway",
+          "m11-document-channel",
+          "m11-document-provider",
+          "m11-document-editor-deps",
+          "m11-document-editor"
+        ],
+        "prerequisiteCheckIds": [
+          "m11-document-channel",
+          "m11-document-provider",
+          "m11-document-editor-deps",
+          "m11-document-editor"
+        ],
+        "question": "Create one per-side, per-Round shared document, introduce Yjs as the merge format, and prove updates stay inside the right team.",
+        "transfer": "Changed case: send a valid left-side Yjs update while a right-side teammate listens. Expected result: the left teammate sees it, the right side does not, and a new Round starts empty.",
+        "next": "Continue to Ready."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m11-document-deps",
+        "kind": "integration",
+        "command": "npm ls yjs --depth=0",
+        "cwd": ".",
+        "expected": "Yjs 13.6.33 is pinned at the practice root.",
+        "failure": [
+          {
+            "symptom": "Yjs is missing or at another version",
+            "diagnostic": "Check package.json and package-lock.json against the reference lockfile.",
+            "meaning": "The document API may not match the examples."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The Y.Doc factory typechecks with an explicit Match/Round/side key.",
+        "failure": [
+          {
+            "symptom": "TypeScript cannot find Y.Doc",
+            "diagnostic": "Check that the dependency and import are present.",
+            "meaning": "The toolchain cannot type the shared document."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-unit",
+        "kind": "unit",
+        "command": "npm test -- test/collaboration.test.ts",
+        "cwd": ".",
+        "expected": "A left-side update stays out of the right-side document, and a new Round starts with a separate document.",
+        "failure": [
+          {
+            "symptom": "The right document changes after a left edit",
+            "diagnostic": "Check that the test uses separate document instances and side keys.",
+            "meaning": "Team documents are being shared too broadly."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-channel",
+        "kind": "integration",
+        "command": "npm test -- test/collaboration-transport.test.ts",
+        "cwd": ".",
+        "expected": "Two authorized teammates receive the same-side update; the opposite side receives no document bytes, and a nonmember cannot get the initial sync.",
+        "failure": [
+          {
+            "symptom": "An update is missing or reaches the other side",
+            "diagnostic": "Check the authenticated room returned by Game and the server-only side/round values.",
+            "meaning": "The gateway is not routing the authoritative team document safely."
+          },
+          {
+            "symptom": "A stranger receives sync bytes",
+            "diagnostic": "Require the trusted connection principal and verify Match membership before joining or sending the baseline.",
+            "meaning": "Yjs merging is not authorization."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-provider",
+        "kind": "unit",
+        "command": "npm test -- test/collaboration-provider.test.ts",
+        "cwd": ".",
+        "expected": "The client applies the server baseline, sends local Yjs updates, applies remote frames without echoing them, and reconnects from a fresh baseline.",
+        "failure": [
+          {
+            "symptom": "A remote frame is sent back as a new local edit",
+            "diagnostic": "Set a remote-apply guard while applying Y.applyUpdate and clear it in finally.",
+            "meaning": "One edit can echo forever or create duplicate traffic."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-editor-deps",
+        "kind": "integration",
+        "command": "npm ls y-codemirror.next --depth=0",
+        "cwd": ".",
+        "expected": "The exact editor binding package version 0.3.6 is installed in the practice root.",
+        "failure": [
+          {
+            "symptom": "The editor binding package is missing or has another version",
+            "diagnostic": "Pin y-codemirror.next 0.3.6 and inspect package.json plus the lockfile.",
+            "meaning": "The editor extension may not match the reference API."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-gateway",
+        "kind": "integration",
+        "command": "npm test -- test/collaboration-transport.test.ts -t \"membership and initial sync\"",
+        "cwd": ".",
+        "expected": "A member receives only the Game-derived same-side baseline; a nonmember disconnects before receiving any document bytes.",
+        "failure": [
+          {
+            "symptom": "A connection joins a client-chosen room",
+            "diagnostic": "Use the room returned by the membership-checked Game sync call.",
+            "meaning": "The client can select another team’s document."
+          },
+          {
+            "symptom": "A stranger receives a sync event",
+            "diagnostic": "Require the trusted socket principal and stop before join or baseline when membership fails.",
+            "meaning": "The initial state crossed the authorization boundary."
+          }
+        ]
+      },
+      {
+        "id": "m11-document-editor",
+        "kind": "unit",
+        "command": "npm test -- test/collaboration-editor.test.ts",
+        "cwd": ".",
+        "expected": "The team CodeMirror view writes to the provider Y.Text while solo mode keeps its existing local source.",
+        "failure": [
+          {
+            "symptom": "Team typing changes only a React string",
+            "diagnostic": "Attach the Yjs editor extension to the provider’s named source text.",
+            "meaning": "Teammates never receive those edits."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m11-ready",
+    "milestoneId": "M11",
+    "title": "Make Ready approve a specific revision",
+    "why": "A checkbox alone is too weak: code might change after the teammate clicked Ready. Bind each approval to the shared document revision so Submit evaluates the exact agreed source.",
+    "outcome": "Clear both Ready approvals after an edit, require two current approvals, and capture one immutable source snapshot for Submit.",
+    "prerequisites": ["m11-document"],
+    "references": [
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "packages/arena-game/src/team-collaboration.ts",
+        "startLine": 104,
+        "endLine": 148
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "packages/arena-game/test/team-collaboration.test.ts",
+        "startLine": 88,
+        "endLine": 118
+      }
+    ],
+    "steps": [
+      {
+        "id": "m11-ready-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Make Ready approve a specific revision",
+        "explanation": [
+          "A checkbox alone is too weak: code might change after the teammate clicked Ready. Bind each approval to the shared document revision so Submit evaluates the exact agreed source."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "The document is isolated by side and Round. Now make agreement about exact contents explicit."
+      },
+      {
+        "id": "m11-ready-see",
+        "phase": "see",
+        "title": "Ready at revision 4 is not Ready at revision 5",
+        "question": "What does an edit do to old approvals?",
+        "explanation": [
+          "Each Ready record stores a revision. An edit or language change increments the document revision and clears approvals. Submit checks both members are Ready at the current revision, then copies source and revision into one immutable input."
+        ],
+        "vocabulary": [
+          {
+            "term": "Revision",
+            "meaning": "A number that increases whenever shared source changes."
+          },
+          {
+            "term": "Snapshot",
+            "meaning": "A fixed copy of approved code and language for one evaluation."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Follow the revision number across Ready, edit and Submit.",
+        "visual": {
+          "kind": "trace",
+          "title": "Ready at revision 4 is not Ready at revision 5",
+          "code": [
+            "Both teammates approve r4",
+            "One edit creates r5",
+            "Both approvals clear",
+            "Submit freezes r5"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Agreed",
+              "values": [
+                {
+                  "label": "source",
+                  "value": "r4"
+                },
+                {
+                  "label": "Ready A/B",
+                  "value": "r4 / r4"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Both teammates approved the same source revision."
+            },
+            {
+              "id": "frame-1",
+              "label": "Edited",
+              "values": [
+                {
+                  "label": "source",
+                  "value": "r5"
+                },
+                {
+                  "label": "Ready A/B",
+                  "value": "none"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The old approvals no longer match the source."
+            },
+            {
+              "id": "frame-2",
+              "label": "Submit",
+              "values": [
+                {
+                  "label": "source",
+                  "value": "frozen r5"
+                },
+                {
+                  "label": "Judge input",
+                  "value": "same bytes"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Evaluation uses the agreed snapshot, not a later edit."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Submit arrives with documentRevision 4 while the current document is 5",
+              "expected": "Reject it as stale; do not evaluate old or new source implicitly",
+              "reason": "Browser and server must agree which exact text the team approved."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m11-ready-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "What happens if one teammate edits after both clicked Ready?",
+        "explanation": [
+          "The edit moves revision 4 to 5. Both saved approvals still say 4, so neither counts. The server checks the revision again at Submit; a disabled button is only a helpful hint."
+        ],
+        "vocabulary": [
+          {
+            "term": "Stale approval",
+            "meaning": "A Ready record for a document revision that is no longer current."
+          }
+        ],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict which revision changes after an edit."
+      },
+      {
+        "id": "m11-ready-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "A and B approve revision 8. A changes one character. Can either approval still unlock Submit?",
+        "explanation": [
+          "Predict the new revision and count of current approvals before the team re-approves."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Test invalidation and the exact source captured for evaluation."
+      },
+      {
+        "id": "m11-ready-readiness-port",
+        "phase": "build",
+        "title": "Store Ready with its document revision",
+        "question": "Which revision does this player approve?",
+        "explanation": [
+          "In src/readiness.ts, require the request revision to match the current team document. Store approval per member and clear both approvals after a source or language change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Include current document revision in the Ready request.",
+          "Reject a request for an old revision.",
+          "On edit or language change, clear both Ready values.",
+          "Return current revision in the authoritative snapshot."
+        ],
+        "files": [
+          {
+            "role": "domain.readiness",
+            "workspace": "active",
+            "path": "src/readiness.ts",
+            "action": "create",
+            "owner": "src/readiness.ts owns revision-bound team approval.",
+            "change": "Store each member’s Ready revision and invalidate approvals when the document advances.",
+            "pattern": "The server enforces this rule; a disabled Submit button is only a user-interface hint."
+          }
+        ],
+        "checkIds": ["m11-ready-revision"],
+        "prerequisiteCheckIds": ["m11-document-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-ready-submit-snapshot",
+        "phase": "build",
+        "title": "Freeze the agreed source for Submit",
+        "question": "What exact text should the Judge receive?",
+        "explanation": [
+          "In src/readiness.ts, require both teammates to approve the current revision. Copy source and language once and pass that fixed snapshot to evaluation; reject old revisions without replay."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Require both members to be Ready.",
+          "Compare both Ready revisions with the current one.",
+          "Copy source before asynchronous evaluation.",
+          "Assert the Judge receives the captured revision exactly once."
+        ],
+        "files": [
+          {
+            "role": "domain.readiness",
+            "workspace": "active",
+            "path": "src/readiness.ts",
+            "action": "edit",
+            "owner": "src/readiness.ts owns the revision check and agreed-source handoff.",
+            "change": "Require both current approvals and return one immutable source/language/revision snapshot.",
+            "pattern": "Check the revision again on the server at Submit; client state can be stale."
+          }
+        ],
+        "checkIds": ["m11-ready-revision"],
+        "prerequisiteCheckIds": ["m11-ready-revision"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-ready-readiness-test",
+        "phase": "build",
+        "title": "Test edit, re-Ready and stale Submit",
+        "question": "Can an old approval pass after an edit?",
+        "explanation": [
+          "In test/readiness.test.ts, have both users Ready at r4, edit to r5 and prove both approvals clear. Reject Submit at r4, then re-Ready at r5 and assert evaluation receives that exact source."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Record both approvals at one revision.",
+          "Change source and assert revision increments.",
+          "Try old revision and expect stale error.",
+          "Re-Ready both teammates and compare frozen source."
+        ],
+        "files": [
+          {
+            "role": "domain.readiness-test",
+            "workspace": "active",
+            "path": "test/readiness.test.ts",
+            "action": "create",
+            "owner": "test/readiness.test.ts protects revision-bound agreement.",
+            "change": "Add edit-invalidates-Ready and agreed-snapshot Submit cases.",
+            "pattern": "Check state before and after the edit, then inspect captured evaluator input."
+          }
+        ],
+        "checkIds": ["m11-ready-revision"],
+        "prerequisiteCheckIds": ["m11-ready-revision"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-ready-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Clear both Ready approvals after an edit, require two current approvals, and capture one immutable source snapshot for Submit.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Clear both Ready approvals after an edit, require two current approvals, and capture one immutable source snapshot for Submit.",
+        "transfer": "Changed case: both teammates approve revision 7, then one edit creates revision 8. Expected result: both approvals clear and Submit at revision 7 is rejected.",
+        "next": "Continue to Round lifetime."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m11-ready-revision",
+        "kind": "unit",
+        "command": "npm test -- test/readiness.test.ts",
+        "cwd": ".",
+        "expected": "An edit clears both approvals, stale Ready/Submit is rejected, and evaluation receives the exact approved source revision.",
+        "failure": [
+          {
+            "symptom": "Submit passes with one Ready member",
+            "diagnostic": "Check both team members and their saved revisions.",
+            "meaning": "Team agreement is incomplete."
+          },
+          {
+            "symptom": "Evaluator receives different source",
+            "diagnostic": "Copy source at the authorized revision before awaiting Judge work.",
+            "meaning": "Evaluation does not match agreed code."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m11-round-lifetime",
+    "milestoneId": "M11",
+    "title": "Close old collaboration when a Round ends",
+    "why": "A new Round gets a new Problem and document. If the previous socket, callback or awareness state survives, old edits can appear in new work. Chat belongs to the Match and can continue.",
+    "outcome": "Replace Round-scoped collaboration, keep Match-scoped chat, and dispose an async client that finishes after its request was cancelled.",
+    "prerequisites": ["m11-ready"],
+    "references": [
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.ts",
+        "startLine": 78,
+        "endLine": 130
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.ts",
+        "startLine": 178,
+        "endLine": 232
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.test.ts",
+        "startLine": 43,
+        "endLine": 67
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "frontend/src/arena/sidecars.test.ts",
+        "startLine": 69,
+        "endLine": 91
+      }
+    ],
+    "steps": [
+      {
+        "id": "m11-round-lifetime-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Close old collaboration when a Round ends",
+        "explanation": [
+          "A new Round gets a new Problem and document. If the previous socket, callback or awareness state survives, old edits can appear in new work. Chat belongs to the Match and can continue."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Ready is safe for this document. Next, prevent its client resources from leaking into later Rounds."
+      },
+      {
+        "id": "m11-round-lifetime-see",
+        "phase": "see",
+        "title": "New Round replaces collaboration but keeps chat",
+        "question": "Which resources survive the Round change?",
+        "explanation": [
+          "A sidecar is a client resource such as a collaboration socket or chat socket. Match identity scopes chat; Match plus Round scopes collaboration. When a factory resolves late, check its request token and disconnect the result."
+        ],
+        "vocabulary": [
+          {
+            "term": "Sidecar",
+            "meaning": "A live client resource attached to a screen but owned outside its main data model."
+          },
+          {
+            "term": "Dispose",
+            "meaning": "Close listeners and network connections when their owner ends."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Trace Round and Match ids separately through the resource keys.",
+        "visual": {
+          "kind": "trace",
+          "title": "New Round replaces collaboration but keeps chat",
+          "code": [
+            "Match M / Round 1",
+            "Dispose collab R1",
+            "Keep chat M",
+            "Create collab R2"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Before",
+              "values": [
+                {
+                  "label": "collab",
+                  "value": "Round 1"
+                },
+                {
+                  "label": "chat",
+                  "value": "Match M"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The two sidecars have different lifetimes."
+            },
+            {
+              "id": "frame-1",
+              "label": "Round changes",
+              "values": [
+                {
+                  "label": "collab R1",
+                  "value": "disconnect"
+                },
+                {
+                  "label": "chat M",
+                  "value": "still open"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Only Round-scoped collaboration is replaced."
+            },
+            {
+              "id": "frame-2",
+              "label": "After",
+              "values": [
+                {
+                  "label": "collab",
+                  "value": "Round 2"
+                },
+                {
+                  "label": "chat",
+                  "value": "Match M"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "New code cannot receive late Round 1 updates."
+            }
+          ],
+          "cases": [
+            {
+              "input": "The async collaboration factory resolves after the Round changed",
+              "expected": "Dispose the late client rather than attaching it to the new Round",
+              "reason": "Cancellation prevents stale state and leaked network clients."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m11-round-lifetime-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why should chat stay connected when collaboration changes?",
+        "explanation": [
+          "Collaboration represents code for one Round, so replace it. Chat belongs to the Match, so keep it. At Match end, dispose both. A factory result that arrives after cancellation must be disconnected."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Name what survives the Round transition."
+      },
+      {
+        "id": "m11-round-lifetime-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "A factory resolves late for Round 1 after Round 2 is active. What happens next?",
+        "explanation": [
+          "Predict whether the late client can be saved or needs cleanup."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Model the scopes, then write the cancellation test."
+      },
+      {
+        "id": "m11-round-lifetime-scope-lifecycle",
+        "phase": "build",
+        "title": "Give collaboration and chat separate keys",
+        "question": "Which id change should replace each client?",
+        "explanation": [
+          "In src/client/sidecars.ts, key collaboration by transport, Match, Round and side; key chat by transport, Match and player. On Round change, replace collaboration but preserve same-Match chat. On Match change, dispose both."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "List which ids change at a Round boundary.",
+          "Include Round in the collaboration key.",
+          "Leave Round out of the chat key.",
+          "Dispose both only when Match or transport changes."
+        ],
+        "files": [
+          {
+            "role": "client.sidecars",
+            "workspace": "active",
+            "path": "src/client/sidecars.ts",
+            "action": "create",
+            "owner": "src/client/sidecars.ts owns the live collaboration and chat lifetimes.",
+            "change": "Use distinct keys for Round collaboration and Match chat; dispose the resource whose owner changed.",
+            "pattern": "Use one explicit owner key per resource; do not rebuild chat for a new Round."
+          }
+        ],
+        "checkIds": ["m11-round-lifetime-unit"],
+        "prerequisiteCheckIds": ["m11-ready-revision"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-round-lifetime-late-factory",
+        "phase": "build",
+        "title": "Dispose a client that arrives too late",
+        "question": "Can a canceled factory leak a socket?",
+        "explanation": [
+          "In test/sidecars.test.ts, delay createCollab(), change the Round and cancel the request, then resolve the factory. Assert the client disconnects and never becomes active. Check that the existing chat client stays connected."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Hold the factory Promise unresolved.",
+          "Change scope before resolving it.",
+          "Resolve it and assert disconnect was called.",
+          "Check that the Match chat client is unchanged."
+        ],
+        "files": [
+          {
+            "role": "client.sidecars-test",
+            "workspace": "active",
+            "path": "test/sidecars.test.ts",
+            "action": "edit",
+            "owner": "test/sidecars.test.ts proves cancellation and cleanup.",
+            "change": "Add a delayed-factory test for late-result disposal and preserved Match chat.",
+            "pattern": "Use a deferred Promise to control when the factory completes."
+          }
+        ],
+        "checkIds": ["m11-round-lifetime-unit"],
+        "prerequisiteCheckIds": ["m11-round-lifetime-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-round-lifetime-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Replace Round-scoped collaboration, keep Match-scoped chat, and dispose an async client that finishes after its request was cancelled.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Replace Round-scoped collaboration, keep Match-scoped chat, and dispose an async client that finishes after its request was cancelled.",
+        "transfer": "Changed case: Round 2 starts while the Round 1 client factory is still pending. Expected result: the late Round 1 client is disconnected; Match chat stays open.",
+        "next": "Continue to Four clients."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m11-round-lifetime-unit",
+        "kind": "unit",
+        "command": "npm test -- test/sidecars.test.ts",
+        "cwd": ".",
+        "expected": "Round changes replace collaboration and cancel late factories; Match chat stays connected until the Match changes.",
+        "failure": [
+          {
+            "symptom": "Late client becomes active",
+            "diagnostic": "Check request identity after await and dispose stale results.",
+            "meaning": "A canceled client leaks into the new scope."
+          },
+          {
+            "symptom": "Chat reconnects every Round",
+            "diagnostic": "Remove Round id from the chat key.",
+            "meaning": "Chat has the wrong owner lifetime."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m11-four-clients",
+    "milestoneId": "M11",
+    "title": "Prove two teams stay isolated in four browsers",
+    "why": "A two-player page cannot reveal cross-team leaks. Use four independent browser contexts, two per side, against one Match to test membership, team work, Ready and Reveal.",
+    "outcome": "Verify teammate updates, side isolation, edit-invalidates-Ready, agreed Submit, reconnect and Reveal across four clients.",
+    "prerequisites": ["m11-round-lifetime"],
+    "references": [
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "frontend/e2e/live-2v2.spec.ts",
+        "startLine": 70,
+        "endLine": 154
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "services/game/src/game/team-2v2.test.ts",
+        "startLine": 135,
+        "endLine": 233
+      }
+    ],
+    "steps": [
+      {
+        "id": "m11-four-clients-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Prove two teams stay isolated in four browsers",
+        "explanation": [
+          "A two-player page cannot reveal cross-team leaks. Use four independent browser contexts, two per side, against one Match to test membership, team work, Ready and Reveal."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "The resource cleanup has its own unit test. Now verify team isolation with real clients and a server."
+      },
+      {
+        "id": "m11-four-clients-see",
+        "phase": "see",
+        "title": "Four players, two private team channels",
+        "question": "Who should see a left-side edit?",
+        "explanation": [
+          "Run one real Match with four pages. Observe an edit only on matching teammates, confirm approvals name the current revision, then submit and compare Reveal. The current reference has a separate shared-text journey; do not call a simpler four-player test proof of Yjs convergence."
+        ],
+        "vocabulary": [
+          {
+            "term": "Isolation",
+            "meaning": "One team cannot read or change the other team’s private document."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Follow one update through four views and two document revisions.",
+        "visual": {
+          "kind": "trace",
+          "title": "Four players, two private team channels",
+          "code": [
+            "A1 + A2 → left document",
+            "B1 + B2 → right document",
+            "Left submits approved r5",
+            "All four receive the right Reveal"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Before edit",
+              "values": [
+                {
+                  "label": "left",
+                  "value": "A1 + A2"
+                },
+                {
+                  "label": "right",
+                  "value": "B1 + B2"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Two membership groups share no document."
+            },
+            {
+              "id": "frame-1",
+              "label": "Left edit",
+              "values": [
+                {
+                  "label": "left revision",
+                  "value": "r5"
+                },
+                {
+                  "label": "right revision",
+                  "value": "r3"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Only A1 and A2 observe the left update."
+            },
+            {
+              "id": "frame-2",
+              "label": "After Submit",
+              "values": [
+                {
+                  "label": "left Ready",
+                  "value": "r5 / r5"
+                },
+                {
+                  "label": "Judge input",
+                  "value": "left r5"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The server checks approvals and evaluates the same source."
+            }
+          ],
+          "cases": [
+            {
+              "input": "B1 tries to join the left document room",
+              "expected": "The server rejects B1 before sending a baseline or edits",
+              "reason": "Four clients make team boundaries visible instead of implied."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m11-four-clients-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why is a unit test not enough for four-client isolation?",
+        "explanation": [
+          "A unit can show that a handler rejects a user id, but a live journey also checks socket rooms, snapshots, browser state and reconnect. Run the named test against one service."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict which client must not receive the edit."
+      },
+      {
+        "id": "m11-four-clients-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "A1 edits left revision 4 while B1 watches the right side. Which pages should change?",
+        "explanation": [
+          "Name the authorized peer and the cross-team client that must remain unchanged."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Drive four contexts and check both positive and negative visibility."
+      },
+      {
+        "id": "m11-four-clients-four-client-spec",
+        "phase": "build",
+        "title": "Add the four-client team journey",
+        "question": "How will the test see a cross-team leak?",
+        "explanation": [
+          "In test/browser/live-2v2.spec.ts, create four browser contexts for one 2v2 Match. Let one teammate edit, assert its partner sees it, assert both right-side clients do not, then test Ready, Submit, Reveal and reconnect."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Create two identities per side.",
+          "Use four independent browser contexts.",
+          "Assert teammate update and opponent non-update.",
+          "Finish with revision-bound Ready, Submit and Reveal."
+        ],
+        "files": [
+          {
+            "role": "test.live-2v2",
+            "workspace": "active",
+            "path": "test/browser/live-2v2.spec.ts",
+            "action": "create",
+            "owner": "test/browser/live-2v2.spec.ts owns the real 2v2 journey.",
+            "change": "Add four separate clients, team-only state assertions and a complete Ready-to-Reveal sequence.",
+            "pattern": "Use the server snapshot as assertion source; do not give each browser a separate fake Match."
+          }
+        ],
+        "checkIds": ["m11-four-clients-browser"],
+        "prerequisiteCheckIds": [
+          "m10-two-clients-browser",
+          "m11-ready-revision"
+        ],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m11-four-clients-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Verify teammate updates, side isolation, edit-invalidates-Ready, agreed Submit, reconnect and Reveal across four clients.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Verify teammate updates, side isolation, edit-invalidates-Ready, agreed Submit, reconnect and Reveal across four clients.",
+        "transfer": "Changed case: one client reconnects after Round changes. Expected result: it gets only its side’s new document, both current teammates can Ready, and no old-round text returns.",
+        "next": "Continue to Chat."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m11-four-clients-browser",
+        "kind": "browser",
+        "command": "npm run test:browser -- test/browser/live-2v2.spec.ts",
+        "cwd": ".",
+        "expected": "Four real clients share one 2v2 Match; teammates see their team document, opponents do not, current-revision Ready gates Submit, and clients receive the right Reveal.",
+        "failure": [
+          {
+            "symptom": "The browser cannot reach the practice service",
+            "diagnostic": "Check the server-ready message and BASE_URL passed by the runner.",
+            "meaning": "All clients must share the same real practice server."
+          },
+          {
+            "symptom": "A failed test leaves a process running",
+            "diagnostic": "Put child-process and browser cleanup in finally.",
+            "meaning": "A failed journey must not leave services running."
+          }
+        ]
+      }
+    ]
+  }
+]

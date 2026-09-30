@@ -1,0 +1,1008 @@
+[
+  {
+    "id": "m03-records",
+    "milestoneId": "M03",
+    "title": "Describe one Match with records",
+    "why": "A Match needs clear records before it can change state. You define who plays and which Round is current.",
+    "outcome": "Build 1v1 Match and Round records with explicit IDs and reject bad membership.",
+    "prerequisites": ["m02-transfer"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-game/src/records.ts",
+        "startLine": 70,
+        "endLine": 79
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "packages/arena-model/src/model.ts",
+        "startLine": 24,
+        "endLine": 30
+      }
+    ],
+    "steps": [
+      {
+        "id": "m03-records-orient",
+        "phase": "orient",
+        "title": "Name the parts of a Match",
+        "question": "What does a Match record own?",
+        "explanation": [
+          "A Match is one timed competition between two sides. In 1v1 each side is one player. In 2v2 each side is a team of two players.",
+          "A Round is one Problem inside the Match. The reference Match has three Rounds. Each Round has its own code and visible tests. Only the Match score carries over.",
+          "You will make small practice records first. They mirror the reference records in packages/arena-model/src/model.ts and packages/arena-game/src/records.ts, but they use your own local names. The team destination will map these ideas later."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match",
+            "meaning": "One timed competition between two sides."
+          },
+          {
+            "term": "Round",
+            "meaning": "One Problem inside a Match."
+          },
+          {
+            "term": "side",
+            "meaning": "One player in 1v1, or one two-player team in 2v2."
+          }
+        ],
+        "hints": [
+          "Name the Match, the Round, and the two sides.",
+          "Find the IDs in the example.",
+          "Compare with a C struct that holds related values.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the record shape."
+      },
+      {
+        "id": "m03-records-see",
+        "phase": "see",
+        "title": "See Match, Round, sides, players",
+        "question": "Which field holds the current Round?",
+        "explanation": [
+          "The Match holds an array of Rounds plus currentRound. Each Round holds a problemVersionId, per-side activities (Player status), and per-side counted scores. Sides are strings like left and right. Players belong to sides."
+        ],
+        "vocabulary": [
+          {
+            "term": "Player status",
+            "meaning": "Gameplay state of one side: coding, running, submitted, evaluating, locked in. Presence (online/offline) never replaces it."
+          }
+        ],
+        "hints": [
+          "Point at currentRound in the visual.",
+          "Point at the sides array.",
+          "Compare with an array index in C, starting at 0 or 1 by contract.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn why IDs must be explicit.",
+        "visual": {
+          "kind": "trace",
+          "title": "Match holds Rounds and sides",
+          "code": [
+            "match = { id: m1, currentRound: 1",
+            "  rounds: [ { roundId: r1, problem: p1 } ]",
+            "  sides: [left, right], players: 2 }"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Match",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Match id m1"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The Match id names the whole competition."
+            },
+            {
+              "id": "frame-1",
+              "label": "Round",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Round r1 with Problem p1"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The current Round points at one Problem. Later Rounds use new Problems."
+            },
+            {
+              "id": "frame-2",
+              "label": "Sides",
+              "values": [
+                {
+                  "label": "Focus",
+                  "value": "Two sides, two players"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Sides never change mid-Match. Players belong to exactly one side."
+            }
+          ],
+          "cases": [
+            {
+              "input": "currentRound=1, two sides",
+              "expected": "Round r1 is active",
+              "reason": "The index selects which Round record is current."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m03-records-understand",
+        "phase": "understand",
+        "title": "Explicit IDs prevent confusion",
+        "question": "Why reject a duplicate player?",
+        "explanation": [
+          "In C you might use an array index and trust the caller. Here each player has a string userId and each side has a sideId. The Match authority later uses these IDs to decide membership.",
+          "Reference preview: packages/arena-game/src/records.ts defines Participant { userId, sideId } and MatchRecord with participants. Reference preview: packages/arena-game/src/match-authority.ts defines requireMember and sideOf, which throw NotMemberError for outsiders. You only read these files now. You build the small practice version next.",
+          "Like strcmp in C, identity checks compare exact strings. A wrong ID is a membership problem, not a type problem."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match authority",
+            "meaning": "The module that checks membership, orders Match commands, and stamps revisions. It does not run Judge work or network code."
+          }
+        ],
+        "hints": [
+          "State the input IDs and the expected side.",
+          "Find requireMember in the reference preview.",
+          "Compare string IDs with C strings: exact match matters.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try a membership lookup by hand."
+      },
+      {
+        "id": "m03-records-try",
+        "phase": "try",
+        "title": "Trace a lookup",
+        "question": "What happens for an unknown userId?",
+        "explanation": [
+          "Given participants [{ userId: ana, sideId: left }, { userId: ben, sideId: right }], sideOf(ana) is left. sideOf(unknown) throws. You will encode this as an exception or an undefined return, then handle it before you read properties."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the input userId and the expected side.",
+          "Find the participants array.",
+          "Compare with a failed lookup that returns NULL in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the records and the lookup."
+      },
+      {
+        "id": "m03-records-build",
+        "phase": "build",
+        "title": "Create Match records and membership check",
+        "question": "Can your code build a 1v1 Match and reject an outsider?",
+        "explanation": [
+          "In your practice workspace, create src/match.ts and test/match.test.ts. Practice path: src/match.ts. Reference path (read only): packages/arena-game/src/records.ts. Future team path: mapped later, not now."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: makeMatch builds two sides; sideOf returns the side or throws for an outsider.",
+          "Relevant value: use participants [{ userId: ana, sideId: left }, { userId: ben, sideId: right }] in your test.",
+          "Analogous example: the m02 ready-flag test calls a function and expects one value; here call sideOf twice, once per member.",
+          "Walkthrough: export interface Participant, export function makeMatch, export function sideOf; test constructs the Match, expects left and right, then expects a throw for zoe."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/match.ts",
+            "action": "create",
+            "owner": "src/ owns pure Match records and the side lookup.",
+            "change": "Define Participant, Match, Round types plus makeMatch and sideOf with duplicate and missing checks.",
+            "pattern": "Functions take plain records and return a value or throw; no network or Judge calls."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/match.test.ts",
+            "action": "create",
+            "owner": "test/ owns the repeatable check.",
+            "change": "Test two members resolve and duplicates/outsiders fail; inspect the input object on failure.",
+            "pattern": "Import from ../src/match.js; one test per case; expect(...).toBe and expect(...).toThrow."
+          }
+        ],
+        "checkIds": ["m03-records-unit"],
+        "prerequisiteCheckIds": ["m02-transfer-unit"],
+        "next": "Check membership and connect to transitions."
+      },
+      {
+        "id": "m03-records-check",
+        "phase": "check",
+        "title": "Report the membership result",
+        "question": "What did duplicate and outsider cases prove?",
+        "explanation": [
+          "Run the check at the practice root. Record what you observed. A missing team repo does not block this practice lesson."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and the observed pass count.",
+          "Find the failing line if any test is red.",
+          "Compare with the m02 boundary failure you explained.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m03-records-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to allowed phase transitions.",
+        "transfer": "Without looking at your solution, describe in words when sideOf must throw. Then predict what a 2v2 roster with four userIds needs beyond this 1v1 version."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m03-records-unit",
+        "command": "npm test -- test/match.test.ts",
+        "cwd": ".",
+        "expected": "All cases pass: two members resolve, duplicate userId throws, outsider throws.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Outsider test does not throw",
+            "diagnostic": "Check sideOf compares userId strings exactly and throws for unknown IDs; check the test imports ../src/match.js.",
+            "meaning": "Membership must fail closed. A silent undefined lets later code read a missing side."
+          },
+          {
+            "symptom": "Cannot find module ../src/match.js",
+            "diagnostic": "Check the file is src/match.ts and the import ends with .js per NodeNext rules; run npm run typecheck for the exact line.",
+            "meaning": "TypeScript files compile to .js paths at runtime."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m03-transitions",
+    "milestoneId": "M03",
+    "title": "Allow only legal phase changes",
+    "why": "Match phase decides what players may do. An illegal change must keep old state and explain itself.",
+    "outcome": "Implement round and side transitions with useful errors.",
+    "prerequisites": ["m03-records"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-model/src/transitions.ts",
+        "startLine": 35,
+        "endLine": 37
+      },
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-model/src/transitions.ts",
+        "startLine": 48,
+        "endLine": 51
+      }
+    ],
+    "steps": [
+      {
+        "id": "m03-transitions-orient",
+        "phase": "orient",
+        "title": "Why phases gate actions",
+        "question": "Which phase allows Run and Submit?",
+        "explanation": [
+          "Match phase is the authoritative Match state. Only CODING permits Run and Submit. The server also rejects both at the exact Match deadline.",
+          "Reference Match phase order: ROUND_INTRO, CODING, then SUBMITTED, EVALUATING, SCORE_REVEAL, then next Round or Match end. Your practice model uses the reference phase names from packages/arena-model/src/model.ts: MATCH_FOUND, ROUND_INTRO, CODING, SCORE_REVEAL, ROUND_COMPLETE, MATCH_COMPLETE.",
+          "You need this now because later lessons gate Run, Submit, and Reveal on the phase."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match phase",
+            "meaning": "The authoritative Match state. Only CODING permits Run and Submit."
+          }
+        ],
+        "hints": [
+          "Answer: CODING.",
+          "Find the phase list.",
+          "Compare with a C enum that names states.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the allowed arrows."
+      },
+      {
+        "id": "m03-transitions-see",
+        "phase": "see",
+        "title": "See legal and illegal arrows",
+        "question": "What happens on an illegal arrow?",
+        "explanation": [
+          "ROUND_INTRO can go to CODING. CODING has no generic exit in the reference table; only a special reveal helper leaves it. SCORE_REVEAL can go to ROUND_INTRO, ROUND_COMPLETE, or MATCH_COMPLETE. An illegal request keeps the old phase and returns an error."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at ROUND_INTRO to CODING.",
+          "Point at the empty CODING exits.",
+          "Compare with a switch statement that rejects default.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the two state machines.",
+        "visual": {
+          "kind": "trace",
+          "title": "Phase arrows with one illegal request",
+          "code": [
+            "phase = ROUND_INTRO",
+            "request CODING -> accept",
+            "request SCORE_REVEAL -> reject"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Start",
+              "values": [
+                {
+                  "label": "Phase",
+                  "value": "ROUND_INTRO"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The Round waits in intro. Run stays disabled."
+            },
+            {
+              "id": "frame-1",
+              "label": "Legal",
+              "values": [
+                {
+                  "label": "Result",
+                  "value": "CODING"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The allowed arrow changes the phase."
+            },
+            {
+              "id": "frame-2",
+              "label": "Illegal",
+              "values": [
+                {
+                  "label": "Result",
+                  "value": "stay CODING + error"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The illegal arrow keeps state and explains the rejection."
+            }
+          ],
+          "cases": [
+            {
+              "input": "CODING requests SCORE_REVEAL directly",
+              "expected": "rejected, stays CODING",
+              "reason": "Only the reveal helper may disclose hidden results."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m03-transitions-understand",
+        "phase": "understand",
+        "title": "Round phase versus side activity",
+        "question": "Why do sides move independently?",
+        "explanation": [
+          "The Round phase is global. Player status is per side: coding, running, submitted, evaluating, locked in. One side evaluating never freezes the other side.",
+          "Reference preview: packages/arena-model/src/transitions.ts defines canTransition, canRun, canSubmit, canSideTransition, canSideRun, canSideSubmit, and publishRoundReveal. CODING to SCORE_REVEAL is absent from the generic table on purpose. You read it now and build a small practice copy next.",
+          "In C terms, think of one global enum plus one enum per side. Presence (online/offline) is separate and never an activity change."
+        ],
+        "vocabulary": [
+          {
+            "term": "Reveal",
+            "meaning": "Per-round score disclosure after evaluation. Hidden details appear only here."
+          }
+        ],
+        "hints": [
+          "Name one global phase and one side status.",
+          "Find canTransition and canSideTransition in the preview.",
+          "Compare with two independent variables, not one shared flag.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try two transitions by hand."
+      },
+      {
+        "id": "m03-transitions-try",
+        "phase": "try",
+        "title": "Predict accept or reject",
+        "question": "Does ROUND_INTRO to CODING pass? Does CODING to SCORE_REVEAL pass?",
+        "explanation": [
+          "First passes. Second fails through the generic table; it needs the reveal helper with cause REVEAL_CONDITION_MET. Side coding to submitted passes; submitted to coding passes only as recovery path."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the from, to, and expected verdict.",
+          "Find ROUND_LEGAL in the preview.",
+          "Compare with a function that returns true or false.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the transition helpers."
+      },
+      {
+        "id": "m03-transitions-build",
+        "phase": "build",
+        "title": "Implement transition guards",
+        "question": "Do legal moves change state and illegal moves preserve it?",
+        "explanation": [
+          "Practice path: src/transitions.ts. Reference path (read only): packages/arena-model/src/transitions.ts. Future team path: mapped later."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: canTransition and transitionOrThrow for rounds; canSideTransition for sides.",
+          "Relevant value: test ROUND_INTRO->CODING true, CODING->SCORE_REVEAL false, coding->submitted true.",
+          "Analogous example: like isBeforeDeadline, return boolean for can*, then throw with a clear message for the orThrow wrapper.",
+          "Walkthrough: store allowed arrows in a record; transitionOrThrow returns the new phase or throws IllegalState; test asserts state unchanged after a rejected call."
+        ],
+        "files": [
+          {
+            "role": "domain.rules",
+            "workspace": "active",
+            "path": "src/transitions.ts",
+            "action": "create",
+            "owner": "src/ owns pure phase decisions.",
+            "change": "Define RoundPhase, canTransition, transitionOrThrow, PlayerStatus, canSideTransition.",
+            "pattern": "Pure functions only; errors carry the from and to names."
+          },
+          {
+            "role": "test.rules",
+            "workspace": "active",
+            "path": "test/transitions.test.ts",
+            "action": "create",
+            "owner": "test/ proves accept and preserve-on-reject.",
+            "change": "Test legal change, illegal preservation, and side independence.",
+            "pattern": "Import from ../src/transitions.js; assert state value after each call."
+          }
+        ],
+        "checkIds": ["m03-transitions-unit"],
+        "prerequisiteCheckIds": ["m03-records-unit"],
+        "next": "Check transitions and connect to membership."
+      },
+      {
+        "id": "m03-transitions-check",
+        "phase": "check",
+        "title": "Report transition results",
+        "question": "Which illegal move did you preserve?",
+        "explanation": [
+          "Run the check at the practice root. Note the preserved state in your report."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Show the preserved phase value.",
+          "Compare with the records failure you explained.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m03-transitions-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to membership gating.",
+        "transfer": "Without your file open, explain why CODING has no generic exit. Predict what must happen before SCORE_REVEAL may appear."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m03-transitions-unit",
+        "command": "npm test -- test/transitions.test.ts",
+        "cwd": ".",
+        "expected": "Legal moves change phase; illegal moves keep old phase and throw with from/to names.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Illegal move changes the phase",
+            "diagnostic": "Check that the throw path returns before assignment; assert the variable still holds the old value.",
+            "meaning": "Preservation proves the guard works; a changed value means the check ran too late."
+          },
+          {
+            "symptom": "Error message names nothing",
+            "diagnostic": "Include from and to in the thrown Error text.",
+            "meaning": "A useful error names the rejected arrow."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m03-membership",
+    "milestoneId": "M03",
+    "title": "Let only members act",
+    "why": "The Match authority is the final check for game commands. Outsiders must fail before state changes.",
+    "outcome": "Resolve a trusted actor to a side and reject outsiders.",
+    "prerequisites": ["m03-transitions"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "packages/arena-game/src/match-authority.ts",
+        "startLine": 135,
+        "endLine": 141
+      }
+    ],
+    "steps": [
+      {
+        "id": "m03-membership-orient",
+        "phase": "orient",
+        "title": "Membership comes before action",
+        "question": "What runs before any Match command?",
+        "explanation": [
+          "Membership resolution. The caller proves who they are. The Match authority finds their side. Only then does the command run.",
+          "This matters now because Run and Submit later need the same gate. A wrong ID is a membership issue, not a missing type assertion."
+        ],
+        "vocabulary": [
+          {
+            "term": "Submission",
+            "meaning": "An explicit solution sent for hidden evaluation. Allowed only during CODING."
+          }
+        ],
+        "hints": [
+          "Answer: find the member first.",
+          "Find the participants list.",
+          "Compare with checking a password before opening a file.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the gate diagram."
+      },
+      {
+        "id": "m03-membership-see",
+        "phase": "see",
+        "title": "See actor, side lookup, command",
+        "question": "Where does an outsider stop?",
+        "explanation": [
+          "Trusted actor ana maps to left, so the command continues. Unknown zoe throws NotMemberError style failure, so no state changes."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the actor.",
+          "Point at the throw.",
+          "Compare with an early return in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the reference shape.",
+        "visual": {
+          "kind": "trace",
+          "title": "Membership gate",
+          "code": [
+            "actor = ana -> side left -> allow",
+            "actor = zoe -> throw -> deny"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Member",
+              "values": [
+                {
+                  "label": "Actor",
+                  "value": "ana maps to left"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "A known userId resolves to exactly one side."
+            },
+            {
+              "id": "frame-1",
+              "label": "Outsider",
+              "values": [
+                {
+                  "label": "Actor",
+                  "value": "zoe is unknown"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "An unknown userId throws before any mutation."
+            }
+          ],
+          "cases": [
+            {
+              "input": "actor zoe on match m1",
+              "expected": "throw, no state change",
+              "reason": "The gate runs before the command body."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m03-membership-understand",
+        "phase": "understand",
+        "title": "Reference gate without copying it",
+        "question": "What does requireMember guarantee?",
+        "explanation": [
+          "Reference preview: packages/arena-game/src/match-authority.ts exports requireMember, sideOf, loadOrThrow, NotMemberError (code 403), and IllegalStateError (code 409). Reference test preview: packages/arena-game/test/cross-isolation.test.ts expects outsiders to throw NotMemberError for snapshot, run, submit, and chat paths.",
+          "Your practice version keeps the same behavior with local names. It does not import the reference game. The team mapping happens in M13."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the error for outsiders.",
+          "Find NotMemberError in the preview.",
+          "Compare 403 (not a member) with 409 (wrong state).",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try member and outsider by hand."
+      },
+      {
+        "id": "m03-membership-try",
+        "phase": "try",
+        "title": "Decide allow or deny",
+        "question": "Does ben on the same Match pass? Does ana on another Match pass?",
+        "explanation": [
+          "Ben passes on this Match. Ana fails on another Match she never joined. Membership is per Match, not global."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write actor, match, expected verdict.",
+          "Find the participants of each Match.",
+          "Compare with file permissions per directory.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the gate."
+      },
+      {
+        "id": "m03-membership-build",
+        "phase": "build",
+        "title": "Implement member resolution",
+        "question": "Does your gate stop outsiders first?",
+        "explanation": [
+          "Practice path: src/membership.ts. Reference path (read only): packages/arena-game/src/match-authority.ts. Future team path: mapped later."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: requireMember returns the Match; sideOf returns the side; both throw for outsiders.",
+          "Relevant value: reuse the ana/ben/zoe Match from m03-records.",
+          "Analogous example: like sideOf, search participants by userId and throw when absent.",
+          "Walkthrough: define NotMemberError with code 403; requireMember loads the Match record you pass in, then checks; test covers member, outsider, and per-Match isolation."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/membership.ts",
+            "action": "create",
+            "owner": "src/ owns the membership decision.",
+            "change": "Add NotMemberError, requireMember, and sideOf on your local Match record.",
+            "pattern": "Throw before mutation; errors name the match id."
+          },
+          {
+            "role": "test.match",
+            "workspace": "active",
+            "path": "test/membership.test.ts",
+            "action": "create",
+            "owner": "test/ proves allow and deny.",
+            "change": "Test member resolves, outsider throws, and cross-match access throws.",
+            "pattern": "Import from ../src/membership.js; use expect().toThrow for denies."
+          }
+        ],
+        "checkIds": ["m03-membership-unit"],
+        "prerequisiteCheckIds": ["m03-transitions-unit"],
+        "next": "Check membership and connect to time."
+      },
+      {
+        "id": "m03-membership-check",
+        "phase": "check",
+        "title": "Report allow and deny",
+        "question": "Which outsider case did you block?",
+        "explanation": [
+          "Run the check at the practice root. Keep this evidence separate from reference test runs."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and pass count.",
+          "Name the denied actor.",
+          "Compare with the transition preservation.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m03-membership-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to injected time.",
+        "transfer": "In words, explain why membership runs before phase checks. Predict what error code an outsider gets versus a member in the wrong phase."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m03-membership-unit",
+        "command": "npm test -- test/membership.test.ts",
+        "cwd": ".",
+        "expected": "Member resolves to a side; outsider and cross-match actors throw with the match id.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Outsider does not throw",
+            "diagnostic": "Check the find predicate uses userId exactly; check the test passes an unknown id.",
+            "meaning": "Fail-closed membership protects every later command."
+          },
+          {
+            "symptom": "Wrong error for wrong phase",
+            "diagnostic": "Keep membership (403-style) separate from state (409-style) errors.",
+            "meaning": "The diagnosis differs: who versus when."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m03-clock",
+    "milestoneId": "M03",
+    "title": "Decide by injected time",
+    "why": "The Match has one server clock. Tests must supply time instead of sleeping.",
+    "outcome": "Accept before the deadline, reject at equality, and replace the old countdown.",
+    "prerequisites": ["m03-membership"],
+    "references": [
+      {
+        "lessonId": "0002-reveal-cutoff",
+        "path": "packages/arena-game/test/deadline-closure.test.ts",
+        "startLine": 11,
+        "endLine": 20
+      }
+    ],
+    "steps": [
+      {
+        "id": "m03-clock-orient",
+        "phase": "orient",
+        "title": "One Match deadline",
+        "question": "When does the Match stop accepting actions?",
+        "explanation": [
+          "At the Match deadline. The Match deadline is the end of the one Match-wide server clock. A Submission accepted before the deadline may still count if judging finishes inside a short grace period.",
+          "You need this now because Run and Submit both check now against deadline. Equality is already closed."
+        ],
+        "vocabulary": [
+          {
+            "term": "Match deadline",
+            "meaning": "The end of the one Match-wide server clock. New Run and Submit stop exactly there."
+          }
+        ],
+        "hints": [
+          "Answer: exactly at the deadline.",
+          "Find now and deadline.",
+          "Compare with an expiry check in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See injected time."
+      },
+      {
+        "id": "m03-clock-see",
+        "phase": "see",
+        "title": "See Clock as a boundary",
+        "question": "Why pass now as a parameter?",
+        "explanation": [
+          "A Clock boundary is an object with now(). Tests supply a fixed now, so they run fast and stay exact. Production supplies real time later. This is dependency injection: pass the dependency into the function instead of reading global time inside it."
+        ],
+        "vocabulary": [
+          {
+            "term": "Clock",
+            "meaning": "Practice boundary { now(): number }. Tests inject fixed time."
+          }
+        ],
+        "hints": [
+          "Point at the injected now.",
+          "Point at the deadline.",
+          "Compare with passing a FILE pointer instead of using a global.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the exact signature.",
+        "visual": {
+          "kind": "boundary",
+          "title": "now against deadline",
+          "code": [
+            "isBeforeDeadline(99, 100) -> true",
+            "isBeforeDeadline(100, 100) -> false"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Before",
+              "values": [
+                {
+                  "label": "now",
+                  "value": "99"
+                },
+                {
+                  "label": "deadline",
+                  "value": "100"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Before the deadline accepts."
+            },
+            {
+              "id": "frame-1",
+              "label": "Equal",
+              "values": [
+                {
+                  "label": "now",
+                  "value": "100"
+                },
+                {
+                  "label": "deadline",
+                  "value": "100"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Equality rejects. This differs from the old seconds-left rule."
+            }
+          ],
+          "cases": [
+            {
+              "input": "now=99, deadline=100",
+              "expected": "true",
+              "reason": "Still inside the Match."
+            },
+            {
+              "input": "now=100, deadline=100",
+              "expected": "false",
+              "reason": "Exactly at the end is closed."
+            },
+            {
+              "input": "now=101, deadline=100",
+              "expected": "false",
+              "reason": "After the end stays closed."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m03-clock-understand",
+        "phase": "understand",
+        "title": "Strict less-than, not inclusive",
+        "question": "Why is equality closed here but open in the old rule?",
+        "explanation": [
+          "The old teaching rule isSubmitWindowOpen used secondsLeft > 0, where 0 was false. The Match rule isBeforeDeadline(now, deadline) uses now < deadline, where equality is false. Same shape, new context: server time versus one deadline.",
+          "In C, 99 < 100 is true and 100 < 100 is false. TypeScript behaves the same for numbers. The limit of the C comparison: TypeScript number is not a C int, but the ordering logic matches.",
+          "You will explicitly replace the simplified seconds-left model in src/rules.ts. Keep membership and phase checks separate."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the operator: <.",
+          "Find isBeforeDeadline in the next file.",
+          "Compare > versus >= lessons from M02.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try three times by hand."
+      },
+      {
+        "id": "m03-clock-try",
+        "phase": "try",
+        "title": "Decide three times",
+        "question": "What do 99, 100, and 101 give against 100?",
+        "explanation": [
+          "True, false, false. No sleeping, no real waiting. The test supplies each now directly."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write each input and expected output.",
+          "Find the deadline value.",
+          "Compare with boundary tests from M02.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the Clock and the rule."
+      },
+      {
+        "id": "m03-clock-build",
+        "phase": "build",
+        "title": "Add Clock and deadline rule",
+        "question": "Does equality reject without sleeping?",
+        "explanation": [
+          "Practice paths: src/clock.ts, src/rules.ts, test/rules.test.ts. Reference idea: Match deadline in CONTEXT.md. Future team path: server time wiring in M06/M08, mapped later."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: Clock { now(): number }; isBeforeDeadline(now, deadline) returns now < deadline.",
+          "Relevant value: test 99/100/101 against 100 with injected numbers.",
+          "Analogous example: like the M02 boundary test, call the pure function and expect true/false/false.",
+          "Walkthrough: create src/clock.ts, edit src/rules.ts to export isBeforeDeadline and remove the old seconds-left export, write test/rules.test.ts with three cases, run typecheck plus the test."
+        ],
+        "files": [
+          {
+            "role": "port.clock",
+            "workspace": "active",
+            "path": "src/clock.ts",
+            "action": "create",
+            "owner": "src/ owns the time boundary.",
+            "change": "Define Clock with now() and a fixedClock helper for tests.",
+            "pattern": "Small interface plus one test helper; no Date.now inside the rule."
+          },
+          {
+            "role": "domain.rules",
+            "workspace": "active",
+            "path": "src/rules.ts",
+            "action": "edit",
+            "owner": "src/rules.ts owns the deadline decision.",
+            "change": "Replace the seconds-left helper with isBeforeDeadline(now, deadline).",
+            "pattern": "Export function isBeforeDeadline(now: number, deadline: number): boolean."
+          },
+          {
+            "role": "test.rules",
+            "workspace": "active",
+            "path": "test/rules.test.ts",
+            "action": "create",
+            "owner": "test/ proves the boundary without waiting.",
+            "change": "Test below, equal, above; document that equal counts as closed.",
+            "pattern": "Import from ../src/rules.js; no setTimeout or sleeps."
+          }
+        ],
+        "checkIds": ["m03-clock-unit"],
+        "prerequisiteCheckIds": ["m03-membership-unit"],
+        "next": "Check time and connect to Problems."
+      },
+      {
+        "id": "m03-clock-check",
+        "phase": "check",
+        "title": "Report the time boundary",
+        "question": "Why must tests avoid sleep?",
+        "explanation": [
+          "Run typecheck and the test at the practice root. Sleeping makes tests slow and flaky. Injected time stays exact."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State both commands and their outputs.",
+          "Show the equal case.",
+          "Compare with the M02 zero case.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m03-clock-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to Problem data.",
+        "transfer": "In words, explain when you would inject time versus read real time. Predict what a grace-period check needs beyond this strict less-than."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m03-clock-unit",
+        "command": "npm test -- test/rules.test.ts",
+        "cwd": ".",
+        "expected": "Three cases pass: 99 true, 100 false, 101 false; no timers used. npm run typecheck also passes.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "Equal case returns true",
+            "diagnostic": "Check the operator is < not <=; check the test calls isBeforeDeadline(100, 100) and expects false.",
+            "meaning": "The Match closes exactly at the deadline."
+          },
+          {
+            "symptom": "Typecheck names the old helper",
+            "diagnostic": "Remove the seconds-left export from src/rules.ts and update imports to isBeforeDeadline.",
+            "meaning": "The old model is replaced, not kept beside the new one."
+          }
+        ]
+      }
+    ]
+  }
+]

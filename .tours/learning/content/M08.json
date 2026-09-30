@@ -1,0 +1,1927 @@
+[
+  {
+    "id": "m08-store-port",
+    "milestoneId": "M08",
+    "title": "Put a small door around saved Match data",
+    "why": "A store is a door between game rules and saved data. Start with the door, so the same rule can use memory in a quick test and a database later.",
+    "outcome": "Define a small store interface, write a memory adapter, and test a rule through that interface.",
+    "prerequisites": [
+      "m05-complete-match",
+      "m06-identity",
+      "m07-local-journey"
+    ],
+    "references": [
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/store.ts",
+        "startLine": 10,
+        "endLine": 29
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/store.ts",
+        "startLine": 62,
+        "endLine": 105
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/persistence.ts",
+        "startLine": 22,
+        "endLine": 46
+      }
+    ],
+    "steps": [
+      {
+        "id": "m08-store-port-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Put a small door around saved Match data",
+        "explanation": [
+          "A store is a door between game rules and saved data. Start with the door, so the same rule can use memory in a quick test and a database later. Define a small store interface, write a memory adapter, and test a rule through that interface."
+        ],
+        "vocabulary": [
+          {
+            "term": "Adapter",
+            "meaning": "A small piece that connects one interface to a specific storage system."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Same rule, two storage choices"
+      },
+      {
+        "id": "m08-store-port-see",
+        "phase": "see",
+        "title": "Same rule, two storage choices",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Same rule, two storage choices",
+          "code": [
+            "Game rule → Store port",
+            "Store port → Memory map",
+            "Store port → Postgres row"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Caller",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "asks for a Match"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "asks for a Match."
+            },
+            {
+              "id": "frame-1",
+              "label": "Port",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "names load and save"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "names load and save."
+            },
+            {
+              "id": "frame-2",
+              "label": "Adapter",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "chooses where bytes live"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "chooses where bytes live."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Choose MemoryStore in a unit test",
+              "expected": "The rule still calls store.load()",
+              "reason": "The caller depends on the port, not Postgres."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m08-store-port-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "A store is a door between game rules and saved data. Start with the door, so the same rule can use memory in a quick test and a database later. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Adapter",
+            "meaning": "A small piece that connects one interface to a specific storage system."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m08-store-port-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "If tomorrow’s storage changes, which file should the Game rule need to know about?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Name the storage promises"
+      },
+      {
+        "id": "m08-store-port-port",
+        "phase": "build",
+        "title": "Name the storage promises",
+        "question": "Which operations does the caller need?",
+        "explanation": [
+          "Create only the methods the next rule uses: load one Match and save a Match with an optional expected revision. Keep the interface about Match data, not SQL."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start from the calls the Game must make: load one Match and save its next revision.",
+          "Put those promise signatures in MatchStore; keep SQL and Map details out of this file.",
+          "Small shape: load(id) returns a record or nothing; save(record, expectedRevision) reports a conflict.",
+          "Run typecheck. If an adapter fails to compile, compare its method names and return types with the port."
+        ],
+        "files": [
+          {
+            "role": "store.port",
+            "workspace": "active",
+            "path": "src/store/store.ts",
+            "action": "create",
+            "owner": "src/store/store.ts owns the storage promises.",
+            "change": "Define the MatchStore interface with load(id) and save(match, expectedRevision?).",
+            "pattern": "Use a domain-shaped interface so the caller does not import a database client."
+          }
+        ],
+        "checkIds": ["m08-store-port-types"],
+        "prerequisiteCheckIds": ["m07-local-journey-browser"],
+        "next": "Keep a fast in-memory adapter"
+      },
+      {
+        "id": "m08-store-port-memory",
+        "phase": "build",
+        "title": "Keep a fast in-memory adapter",
+        "question": "What makes a test store different from the durable store?",
+        "explanation": [
+          "Use a Map inside MemoryStore and clone values at the boundary. Add the expected-revision check so stale writes fail instead of silently replacing newer state."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "This adapter owns only a Map. Use the Match id as the key.",
+          "Copy a record when it enters and leaves the Map so a caller cannot mutate stored state by accident.",
+          "Walkthrough: save revision 2, change the caller copy, then load again; the saved copy should still say revision 2.",
+          "Run the store unit test before connecting PostgreSQL."
+        ],
+        "files": [
+          {
+            "role": "store.memory",
+            "workspace": "active",
+            "path": "src/store/memory-store.ts",
+            "action": "create",
+            "owner": "MemoryStore owns test-only rows.",
+            "change": "Implement the same MatchStore methods with a Map and a revision conflict error.",
+            "pattern": "The Map disappears when the process ends; this adapter proves behavior, not durability."
+          }
+        ],
+        "checkIds": ["m08-store-port-types"],
+        "prerequisiteCheckIds": ["m08-store-port-types"],
+        "next": "Call the rule through the port"
+      },
+      {
+        "id": "m08-store-port-test",
+        "phase": "build",
+        "title": "Call the rule through the port",
+        "question": "Can one action run with the memory adapter?",
+        "explanation": [
+          "Create a focused test that passes a MemoryStore into the small rule, saves one Match, reloads it, and checks stale revision rejection. Reset the Map for each test."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Pass the fake store into the Game through the same constructor used by the real adapter.",
+          "Keep the test about the contract: a saved Match can be loaded again through the port.",
+          "Example order: arrange store and Game → call one rule → ask the store for the saved record.",
+          "Run this test alone; if it passes only with MemoryStore, PostgreSQL still needs its own check."
+        ],
+        "files": [
+          {
+            "role": "store.test",
+            "workspace": "active",
+            "path": "test/store.test.ts",
+            "action": "create",
+            "owner": "The test owns its input rows and cleanup.",
+            "change": "Test save/load and a stale expected revision through the MatchStore interface.",
+            "pattern": "Inject MemoryStore. Do not create Postgres tables in a unit test."
+          }
+        ],
+        "checkIds": ["m08-store-port-unit"],
+        "prerequisiteCheckIds": ["m08-store-port-types"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m08-store-port-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "In the team repo, locate the Match state owner first. Write down its current store seam before mapping this practice port.",
+        "transfer": "In the team repo, locate the Match state owner first. Write down its current store seam before mapping this practice port."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m08-store-port-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The interface and memory adapter typecheck without importing Postgres.",
+        "failure": [
+          {
+            "symptom": "TypeScript cannot find a store method.",
+            "diagnostic": "Check that both files use the same MatchStore name and method types.",
+            "meaning": "The port and adapter disagree."
+          }
+        ]
+      },
+      {
+        "id": "m08-store-port-unit",
+        "kind": "unit",
+        "command": "npm test -- test/store.test.ts",
+        "cwd": ".",
+        "expected": "The same action saves and reloads through MatchStore; a stale revision is rejected.",
+        "failure": [
+          {
+            "symptom": "The old value replaces the new value or the test leaks state.",
+            "diagnostic": "Reset the test Map and compare expectedRevision before save.",
+            "meaning": "MemoryStore does not yet match the durable-store contract."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m08-postgres",
+    "milestoneId": "M08",
+    "title": "Save a Match in PostgreSQL",
+    "why": "Memory is useful for a fast test, but it vanishes when a process stops. PostgreSQL keeps the Match after restart and gives several users one shared record.",
+    "outcome": "Add a local-only database setting, define the Match row, and test a save after reconnecting.",
+    "prerequisites": ["m08-store-port"],
+    "references": [
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/postgres-store.ts",
+        "startLine": 12,
+        "endLine": 63
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/postgres-store.ts",
+        "startLine": 124,
+        "endLine": 131
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/test/postgres.test.ts",
+        "startLine": 384,
+        "endLine": 434
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".env.example",
+        "startLine": 1,
+        "endLine": 29
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".gitignore",
+        "startLine": 8,
+        "endLine": 11
+      }
+    ],
+    "steps": [
+      {
+        "id": "m08-postgres-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Save a Match in PostgreSQL",
+        "explanation": [
+          "Memory is useful for a fast test, but it vanishes when a process stops. PostgreSQL keeps the Match after restart and gives several users one shared record. Add a local-only database setting, define the Match row, and test a save after reconnecting."
+        ],
+        "vocabulary": [
+          {
+            "term": "JSONB",
+            "meaning": "A PostgreSQL column that stores JSON data and can still be queried."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "One Match row and its related rows"
+      },
+      {
+        "id": "m08-postgres-see",
+        "phase": "see",
+        "title": "One Match row and its related rows",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "One Match row and its related rows",
+          "code": [
+            "matches: id + data JSONB",
+            "rounds: match_id + round",
+            "TEST_PG_URL → isolated test DB"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Match",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "one authoritative JSON record"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "one authoritative JSON record."
+            },
+            {
+              "id": "frame-1",
+              "label": "Round",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "relational rows point back to Match"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "relational rows point back to Match."
+            },
+            {
+              "id": "frame-2",
+              "label": "Test DB",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "separate name, safe to clear"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "separate name, safe to clear."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Stop and restart the practice server",
+              "expected": "The saved Match still loads",
+              "reason": "A durable row survives a process restart."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m08-postgres-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "Memory is useful for a fast test, but it vanishes when a process stops. PostgreSQL keeps the Match after restart and gives several users one shared record. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "JSONB",
+            "meaning": "A PostgreSQL column that stores JSON data and can still be queried."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m08-postgres-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "Why must the test database have its own name, separate from the project database?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Add the PostgreSQL client and safe test command"
+      },
+      {
+        "id": "m08-postgres-package",
+        "phase": "build",
+        "title": "Add the PostgreSQL client and safe test command",
+        "question": "Where should the dependency and database test script live?",
+        "explanation": [
+          "Add the locked PostgreSQL client and its TypeScript types. Set test:db to run Vitest with Node's local .env file. The file holds a dedicated test URL, never a shared project URL."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the reference lockfile and copy its exact pg and test-client versions.",
+          "Add the Postgres package to dependencies and the database runner to scripts; do not edit the lockfile by hand.",
+          "The command should load TEST_PG_URL for tests while the normal app keeps its own DATABASE_URL.",
+          "Run npm ls pg --depth=0 and the package check before writing a query."
+        ],
+        "files": [
+          {
+            "role": "database.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns runtime packages and scripts.",
+            "change": "Add pg@8.23.0, @types/pg@8.23.1, and a test:db script that loads .env before Vitest.",
+            "pattern": "Pin exact versions. Pass a test file after -- to run one database check."
+          }
+        ],
+        "checkIds": ["m08-postgres-packages"],
+        "prerequisiteCheckIds": ["m08-store-port-unit"],
+        "next": "Keep local settings out of Git"
+      },
+      {
+        "id": "m08-postgres-env",
+        "phase": "build",
+        "title": "Keep local settings out of Git",
+        "question": "Which file may contain a real local setting?",
+        "explanation": [
+          "Create a sample with variable names and safe local defaults. TEST_PG_URL points only to arena_practice_test. Ignore .env, but keep .env.example visible. Never paste a real password into the sample or course evidence."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "List DATABASE_URL and TEST_PG_URL as empty examples; put no working password in this file.",
+          "Add .env to .gitignore, then keep .env.example allowed through the ignore rule.",
+          "Example: git check-ignore -q .env should pass; the same command for .env.example should fail.",
+          "Run the named ignore check from the practice root and inspect both files."
+        ],
+        "files": [
+          {
+            "role": "database.env-example",
+            "workspace": "active",
+            "path": ".env.example",
+            "action": "create",
+            "owner": ".env.example shows the setting names and harmless local defaults.",
+            "change": "List DATABASE_URL and TEST_PG_URL only; the Judge settings arrive in M09.",
+            "pattern": "Use a separate database name for TEST_PG_URL. Do not add usernames or passwords to the sample."
+          },
+          {
+            "role": "database.gitignore",
+            "workspace": "active",
+            "path": ".gitignore",
+            "action": "edit",
+            "owner": ".gitignore keeps personal settings private.",
+            "change": "Ignore .env and keep .env.example trackable.",
+            "pattern": "Confirm .env is ignored and .env.example is trackable with the named check."
+          }
+        ],
+        "checkIds": ["m08-postgres-env"],
+        "prerequisiteCheckIds": ["m08-postgres-packages"],
+        "next": "Describe the durable rows"
+      },
+      {
+        "id": "m08-postgres-schema",
+        "phase": "build",
+        "title": "Describe the durable rows",
+        "question": "How can a Round point back to its Match?",
+        "explanation": [
+          "Create the matches, rounds, and round_sides tables from the local domain you are teaching. Use a primary key for Match, a foreign key for each Round, and JSONB only for the aggregate Match record."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Give Match one primary key; make each Round point back to its Match.",
+          "Store one side snapshot per Round and side. Add an index for the lookup the recovery step needs.",
+          "Keep JSONB on the aggregate Match row only; put Round ownership in a foreign key, not a copied id string.",
+          "Run the schema against a disposable test database and confirm a Round without a Match is rejected."
+        ],
+        "files": [
+          {
+            "role": "database.schema",
+            "workspace": "active",
+            "path": "infra/schema.sql",
+            "action": "create",
+            "owner": "The SQL file owns the practice schema.",
+            "change": "Define a Match row and related Round and side rows with keys and useful indexes.",
+            "pattern": "Keep relational ownership explicit. Do not put a second copy of every field in JSONB."
+          }
+        ],
+        "checkIds": ["m08-postgres-types"],
+        "prerequisiteCheckIds": ["m08-postgres-env"],
+        "next": "Connect the port to PostgreSQL"
+      },
+      {
+        "id": "m08-postgres-adapter",
+        "phase": "build",
+        "title": "Connect the port to PostgreSQL",
+        "question": "Where should SQL stop and the game rule begin?",
+        "explanation": [
+          "Implement the MatchStore adapter with a Pool. Keep queries inside this file and return domain data through the interface. Use a transaction for writes that update more than one table."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Implement the existing MatchStore method names here; this file is the only layer that knows SQL.",
+          "Use Pool query placeholders such as $1 for every value; never build SQL by joining input text.",
+          "For a multi-row save, begin → write Match and child rows → commit; roll back if any write fails.",
+          "Run typecheck first, then the database round-trip. A mock cannot prove a real commit."
+        ],
+        "files": [
+          {
+            "role": "database.adapter",
+            "workspace": "active",
+            "path": "src/store/postgres-store.ts",
+            "action": "create",
+            "owner": "PostgresMatchStore owns SQL and connection handling.",
+            "change": "Implement MatchStore with a PostgreSQL Pool and explicit load/save transactions.",
+            "pattern": "The rule imports MatchStore; it does not import Pool or build SQL."
+          }
+        ],
+        "checkIds": ["m08-postgres-types"],
+        "prerequisiteCheckIds": ["m08-postgres-types"],
+        "next": "Prove the record survives a connection restart"
+      },
+      {
+        "id": "m08-postgres-roundtrip",
+        "phase": "build",
+        "title": "Prove the record survives a connection restart",
+        "question": "What would prove this is durable rather than a Map?",
+        "explanation": [
+          "Create a database integration test that writes a Match, closes the store, opens a new store, and reads it back. Use TEST_PG_URL only and a disposable arena_practice_test database."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point TEST_PG_URL at the disposable arena_practice_test database, never the team database.",
+          "Create the schema, save one Match, close the first pool, and construct a new store.",
+          "Analogy: a fresh process has no Map. The second store must still load the saved revision from Postgres.",
+          "Run the database test and make sure its cleanup closes both pools."
+        ],
+        "files": [
+          {
+            "role": "database.test",
+            "workspace": "active",
+            "path": "test/postgres.test.ts",
+            "action": "create",
+            "owner": "The integration test owns its disposable test database.",
+            "change": "Test schema setup, Match round-trip, store close, and reload through a new connection pool.",
+            "pattern": "Never run this test against DATABASE_URL or a teammate's database; its fixtures clear test rows."
+          }
+        ],
+        "checkIds": ["m08-postgres-roundtrip"],
+        "prerequisiteCheckIds": ["m08-postgres-types"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m08-postgres-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "In a team repo, inspect its database and test setup before choosing a practice mapping. Never point a truncating test at a teammate's database.",
+        "transfer": "In a team repo, inspect its database and test setup before choosing a practice mapping. Never point a truncating test at a teammate's database."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m08-postgres-packages",
+        "kind": "integration",
+        "command": "npm ls --depth=0 pg @types/pg",
+        "cwd": ".",
+        "expected": "The exact pg@8.23.0 and @types/pg@8.23.1 versions appear.",
+        "failure": [
+          {
+            "symptom": "npm reports a missing package.",
+            "diagnostic": "Run the exact install step from the practice root and inspect package.json.",
+            "meaning": "The Postgres adapter cannot load the declared client."
+          }
+        ]
+      },
+      {
+        "id": "m08-postgres-env",
+        "kind": "unit",
+        "command": "git check-ignore -q .env && ! git check-ignore -q .env.example",
+        "cwd": ".",
+        "expected": ".env is ignored; .env.example is not ignored.",
+        "failure": [
+          {
+            "symptom": "Both names are ignored or neither is ignored.",
+            "diagnostic": "Check rule order and the exception for .env.example.",
+            "meaning": "A personal setting could be committed or the sample could be hidden."
+          }
+        ]
+      },
+      {
+        "id": "m08-postgres-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The schema adapter compiles and imports the shared store port.",
+        "failure": [
+          {
+            "symptom": "Pool types or store methods do not match.",
+            "diagnostic": "Compare the adapter methods with src/store/store.ts.",
+            "meaning": "The SQL adapter does not satisfy the boundary."
+          }
+        ]
+      },
+      {
+        "id": "m08-postgres-roundtrip",
+        "kind": "database",
+        "command": "npm run test:db -- test/postgres.test.ts",
+        "cwd": ".",
+        "expected": "With TEST_PG_URL pointing only to arena_practice_test, the saved Match loads after the original store closes.",
+        "failure": [
+          {
+            "symptom": "Connection refused or database missing.",
+            "diagnostic": "Check that the dedicated local Postgres service is ready and TEST_PG_URL names the test database; do not weaken the round-trip assertion.",
+            "meaning": "The database environment is not ready, so durability is still unproved."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m08-transactions",
+    "milestoneId": "M08",
+    "title": "Reject an old save",
+    "why": "Two requests can read the same Match. A revision check lets the first writer save and makes the second refresh instead of erasing that update.",
+    "outcome": "Use a database transaction and expected revision so a stale writer cannot overwrite a newer Match.",
+    "prerequisites": ["m08-postgres"],
+    "references": [
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/postgres-store.ts",
+        "startLine": 278,
+        "endLine": 347
+      },
+      {
+        "lessonId": "0006-evaluation-retries",
+        "path": "packages/arena-game/test/match-revision.test.ts",
+        "startLine": 57,
+        "endLine": 73
+      }
+    ],
+    "steps": [
+      {
+        "id": "m08-transactions-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Reject an old save",
+        "explanation": [
+          "Two requests can read the same Match. A revision check lets the first writer save and makes the second refresh instead of erasing that update. Use a database transaction and expected revision so a stale writer cannot overwrite a newer Match."
+        ],
+        "vocabulary": [
+          {
+            "term": "Revision",
+            "meaning": "A number that changes when the saved Match changes."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Two writers, one current revision"
+      },
+      {
+        "id": "m08-transactions-see",
+        "phase": "see",
+        "title": "Two writers, one current revision",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Two writers, one current revision",
+          "code": [
+            "A reads revision 4",
+            "B saves revision 5",
+            "A expects 4 → conflict → refresh"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Read",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "both writers see 4"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "both writers see 4."
+            },
+            {
+              "id": "frame-1",
+              "label": "Commit B",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "database now stores 5"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "database now stores 5."
+            },
+            {
+              "id": "frame-2",
+              "label": "Save A",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "expected 4 fails; no overwrite"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "expected 4 fails; no overwrite."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Writer A submits a save after B commits",
+              "expected": "A gets a conflict and loads the current Match",
+              "reason": "The server does not blindly replay a stale mutation."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m08-transactions-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "Two requests can read the same Match. A revision check lets the first writer save and makes the second refresh instead of erasing that update. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Revision",
+            "meaning": "A number that changes when the saved Match changes."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m08-transactions-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "After a revision conflict, which Match should the screen display: A's old copy or a fresh server copy?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make revision comparison part of the write"
+      },
+      {
+        "id": "m08-transactions-transaction",
+        "phase": "build",
+        "title": "Make revision comparison part of the write",
+        "question": "When should the new row become visible?",
+        "explanation": [
+          "Begin a transaction, update only when the stored revision matches expectedRevision, then commit. On zero updated rows, load the actual revision, roll back, and return a conflict."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "The revision check and write must be one database operation, not a read followed by an unconditional save.",
+          "Use UPDATE ... WHERE id = $1 AND revision = $2; zero changed rows means someone won first.",
+          "On zero rows, read the current revision, roll back, and return a conflict; do not overwrite it.",
+          "Run the race test with two connections. One save should win and the other should see the winner’s revision."
+        ],
+        "files": [
+          {
+            "role": "database.revision",
+            "workspace": "active",
+            "path": "src/store/postgres-store.ts",
+            "action": "edit",
+            "owner": "The store owns the compare-and-save transaction.",
+            "change": "Use one conditional UPDATE and report the current revision when the expected value is stale.",
+            "pattern": "Do not retry the old Match automatically; the caller must refresh."
+          }
+        ],
+        "checkIds": ["m08-transactions-types"],
+        "prerequisiteCheckIds": ["m08-postgres-roundtrip"],
+        "next": "Test two real database connections"
+      },
+      {
+        "id": "m08-transactions-race-test",
+        "phase": "build",
+        "title": "Test two real database connections",
+        "question": "Does the stale writer leave the newer value untouched?",
+        "explanation": [
+          "Create a test with two store clients. Both read revision 4; one saves revision 5; the other save with expected 4 must conflict; reload and compare the unchanged authoritative row."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Open two independent store clients and have both read revision 4 before either writes.",
+          "Let client A save revision 5, then ask client B to save using expected revision 4.",
+          "Expected walkthrough: A succeeds; B gets a conflict; a fresh load still contains A’s value.",
+          "Run against PostgreSQL. Two calls through one in-memory adapter do not prove the database lock."
+        ],
+        "files": [
+          {
+            "role": "database.revision-test",
+            "workspace": "active",
+            "path": "test/revision.test.ts",
+            "action": "create",
+            "owner": "The race test owns two independent database clients.",
+            "change": "Verify the stale save conflicts and the persisted row still contains the winning update.",
+            "pattern": "Also force a transaction error and verify rollback preserves the earlier row."
+          }
+        ],
+        "checkIds": ["m08-transactions-race"],
+        "prerequisiteCheckIds": ["m08-transactions-types"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m08-transactions-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Map the reference's revision number to the team's existing version field. Do not rename or replace a team-owned version without checking its callers.",
+        "transfer": "Map the reference's revision number to the team's existing version field. Do not rename or replace a team-owned version without checking its callers."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m08-transactions-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The store returns a typed revision conflict without changing its MatchStore callers.",
+        "failure": [
+          {
+            "symptom": "The conflict type is missing or callers still assume every save succeeds.",
+            "diagnostic": "Check the shared store contract and update only the adapter surface.",
+            "meaning": "The version boundary is not connected."
+          }
+        ]
+      },
+      {
+        "id": "m08-transactions-race",
+        "kind": "database",
+        "command": "npm run test:db -- test/revision.test.ts",
+        "cwd": ".",
+        "expected": "Two Postgres clients produce one winner; stale save conflicts; reload shows the winner; rollback keeps the prior row.",
+        "failure": [
+          {
+            "symptom": "Both writes appear to succeed or the new row is lost.",
+            "diagnostic": "Use two independent clients and inspect the row after the failed transaction.",
+            "meaning": "The compare-and-save boundary is not safe under simultaneous requests."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m08-claims",
+    "milestoneId": "M08",
+    "title": "Let one worker own a pending evaluation",
+    "why": "A pending submission may be retried after a slow Judge or a restart. A database-session claim gives one live worker ownership until it commits or loses its connection.",
+    "outcome": "Claim a pending evaluation, run the Judge outside the short Match lock, and allow a stale owner to be rejected.",
+    "prerequisites": ["m08-transactions"],
+    "references": [
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/persistence.ts",
+        "startLine": 22,
+        "endLine": 46
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/postgres-store.ts",
+        "startLine": 170,
+        "endLine": 230
+      },
+      {
+        "lessonId": "0006-evaluation-retries",
+        "path": "packages/arena-game/src/evaluation-orchestration.ts",
+        "startLine": 191,
+        "endLine": 216
+      },
+      {
+        "lessonId": "0006-evaluation-retries",
+        "path": "packages/arena-game/test/submit-path.test.ts",
+        "startLine": 181,
+        "endLine": 190
+      }
+    ],
+    "steps": [
+      {
+        "id": "m08-claims-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Let one worker own a pending evaluation",
+        "explanation": [
+          "A pending submission may be retried after a slow Judge or a restart. A database-session claim gives one live worker ownership until it commits or loses its connection. Claim a pending evaluation, run the Judge outside the short Match lock, and allow a stale owner to be rejected."
+        ],
+        "vocabulary": [
+          {
+            "term": "Claim",
+            "meaning": "A short-lived ownership promise held while one worker finishes one job."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Claim, evaluate, then commit"
+      },
+      {
+        "id": "m08-claims-see",
+        "phase": "see",
+        "title": "Claim, evaluate, then commit",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Claim, evaluate, then commit",
+          "code": [
+            "pending row → claim session",
+            "Judge runs outside Match lock",
+            "active owner → commit"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Claim",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "database session owns one evaluation"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "database session owns one evaluation."
+            },
+            {
+              "id": "frame-1",
+              "label": "Judge",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "slow work does not hold Match lock"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "slow work does not hold Match lock."
+            },
+            {
+              "id": "frame-2",
+              "label": "Commit",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "active claim writes the terminal result"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "active claim writes the terminal result."
+            }
+          ],
+          "cases": [
+            {
+              "input": "The claim session drops before commit",
+              "expected": "Old owner cannot commit; pending work can be claimed again",
+              "reason": "A lost database session is not a successful result."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m08-claims-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "A pending submission may be retried after a slow Judge or a restart. A database-session claim gives one live worker ownership until it commits or loses its connection. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Claim",
+            "meaning": "A short-lived ownership promise held while one worker finishes one job."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m08-claims-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "Which part may run slowly without holding the Match's short mutation lock?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Name claim ownership and loss"
+      },
+      {
+        "id": "m08-claims-contract",
+        "phase": "build",
+        "title": "Name claim ownership and loss",
+        "question": "What does the owner need to prove before saving?",
+        "explanation": [
+          "Create an EvaluationClaim contract with evaluationId, assertActive(), and release(). Keep this about one pending Evaluation, not a general lock manager."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "A claim belongs to one pending evaluation and records who currently owns the work.",
+          "Keep the contract small: assertActive() checks ownership; release() ends this owner’s claim.",
+          "Example: after acquire, assertActive passes; after the database session closes, it throws ClaimLostError.",
+          "Test the lost-owner case before wiring the claim into the judging path."
+        ],
+        "files": [
+          {
+            "role": "evaluation.claim",
+            "workspace": "active",
+            "path": "src/evaluation-claims.ts",
+            "action": "create",
+            "owner": "The claim contract names durable ownership.",
+            "change": "Define the active-owner check, explicit release, and a clear claim-lost error.",
+            "pattern": "A claim is not the same as an in-memory promise map."
+          }
+        ],
+        "checkIds": ["m08-claims-types"],
+        "prerequisiteCheckIds": ["m08-transactions-race"],
+        "next": "Hold a separate Postgres session for the claim"
+      },
+      {
+        "id": "m08-claims-pool",
+        "phase": "build",
+        "title": "Hold a separate Postgres session for the claim",
+        "question": "Why not use the short write pool for a long Judge job?",
+        "explanation": [
+          "Edit PostgresStores to reserve a separate claim pool. Acquire a session-level advisory claim before judging, check that session before committing, and release it when done."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Reserve one dedicated Postgres connection for the claim; do not borrow a different pooled connection for unlock.",
+          "A session advisory lock belongs to the connection that acquired it, so keep that client until judging ends.",
+          "Flow: acquire → assert same session is alive → Judge → verify active → commit → unlock in finally.",
+          "Run the two-worker test. If the connection drops, the next worker may reclaim and the old owner must not commit."
+        ],
+        "files": [
+          {
+            "role": "evaluation.pool",
+            "workspace": "active",
+            "path": "src/store/postgres-store.ts",
+            "action": "edit",
+            "owner": "PostgresStores owns the separate claim pool.",
+            "change": "Use a dedicated database session for claims and reject commits when that session is no longer active.",
+            "pattern": "Do not hold the Match mutation lock while external code runs."
+          }
+        ],
+        "checkIds": ["m08-claims-types"],
+        "prerequisiteCheckIds": ["m08-claims-types"],
+        "next": "Make two workers compete"
+      },
+      {
+        "id": "m08-claims-claim-test",
+        "phase": "build",
+        "title": "Make two workers compete",
+        "question": "Can two database sessions both count one result?",
+        "explanation": [
+          "Create a real Postgres test with two independent claim pools. Only one should claim. Drop the owner connection, let another worker reclaim, and prove the stale owner cannot commit."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use two independent claim pools and the same evaluation id; start both workers at the same time.",
+          "Assert only one acquire succeeds. Then end that owner connection and let the other worker reclaim.",
+          "Walkthrough: old owner returns late → assertActive fails → saved verdict remains the new owner’s result.",
+          "Run against the real disposable database; mocks cannot prove a session lock is released on disconnect."
+        ],
+        "files": [
+          {
+            "role": "evaluation.claim-test",
+            "workspace": "active",
+            "path": "test/claims.test.ts",
+            "action": "create",
+            "owner": "The claim test owns its two sessions and one test evaluation.",
+            "change": "Test single ownership, claim loss and reclaim, and stale-owner commit rejection.",
+            "pattern": "Use only the isolated test database and clean the exact test evaluation afterward."
+          }
+        ],
+        "checkIds": ["m08-claims-database"],
+        "prerequisiteCheckIds": ["m08-claims-types"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m08-claims-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep request identity retry and revision conflict separate: one checks repeated submissions; the other checks stale Match state.",
+        "transfer": "Keep request identity retry and revision conflict separate: one checks repeated submissions; the other checks stale Match state."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m08-claims-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The claim interface and its separate-session owner typecheck.",
+        "failure": [
+          {
+            "symptom": "A caller can commit after the claim is lost.",
+            "diagnostic": "Make commit require a live claim and test its active-session guard.",
+            "meaning": "The ownership proof is optional or stale."
+          }
+        ]
+      },
+      {
+        "id": "m08-claims-database",
+        "kind": "database",
+        "command": "npm run test:db -- test/claims.test.ts",
+        "cwd": ".",
+        "expected": "Two independent Postgres sessions cannot both own one evaluation; lost ownership can be reclaimed; the old owner cannot commit.",
+        "failure": [
+          {
+            "symptom": "A second worker receives the same live claim or the old owner commits.",
+            "diagnostic": "Check session-level locking and the claim owner assertion.",
+            "meaning": "Cross-process evaluation ownership is not proven."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m08-events",
+    "milestoneId": "M08",
+    "title": "Announce only saved changes",
+    "why": "A live event must describe data that really committed. If a database write fails, clients must not receive a success event for state that does not exist.",
+    "outcome": "Publish after a successful commit, stamp events with the saved revision, and handle listener errors without promising a durable event queue.",
+    "prerequisites": ["m08-claims"],
+    "references": [
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/engine.ts",
+        "startLine": 164,
+        "endLine": 168
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/engine.ts",
+        "startLine": 251,
+        "endLine": 277
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/test/post-commit-events.test.ts",
+        "startLine": 21,
+        "endLine": 32
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/test/post-commit-events.test.ts",
+        "startLine": 34,
+        "endLine": 54
+      }
+    ],
+    "steps": [
+      {
+        "id": "m08-events-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Announce only saved changes",
+        "explanation": [
+          "A live event must describe data that really committed. If a database write fails, clients must not receive a success event for state that does not exist. Publish after a successful commit, stamp events with the saved revision, and handle listener errors without promising a durable event queue."
+        ],
+        "vocabulary": [
+          {
+            "term": "Commit",
+            "meaning": "The database confirms that a change is saved."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Write first, publish second"
+      },
+      {
+        "id": "m08-events-see",
+        "phase": "see",
+        "title": "Write first, publish second",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Write first, publish second",
+          "code": [
+            "BEGIN → save Match",
+            "COMMIT succeeds",
+            "publish(event, savedRevision)"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Before commit",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "event is still private"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "event is still private."
+            },
+            {
+              "id": "frame-1",
+              "label": "Commit succeeds",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "saved data is authoritative"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "saved data is authoritative."
+            },
+            {
+              "id": "frame-2",
+              "label": "Publish",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "clients can now refresh"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "clients can now refresh."
+            }
+          ],
+          "cases": [
+            {
+              "input": "The write throws before COMMIT",
+              "expected": "No success event is published",
+              "reason": "An event must not get ahead of durable state."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m08-events-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "A live event must describe data that really committed. If a database write fails, clients must not receive a success event for state that does not exist. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Commit",
+            "meaning": "The database confirms that a change is saved."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m08-events-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "If one listener crashes after a save, should the database write be undone?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make saving happen before publishing"
+      },
+      {
+        "id": "m08-events-order",
+        "phase": "build",
+        "title": "Make saving happen before publishing",
+        "question": "Which failure should suppress the event?",
+        "explanation": [
+          "Create saveThenPublish(save, publish). Await save first; call publish only after save resolves. Isolate listener errors after commit so one screen cannot undo durable state."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "The event payload needs the revision that the database actually committed.",
+          "Await save first. Call publish only after save resolves; a rejected save must send no event.",
+          "Small sequence: save(record) → receive committed revision → publish({revision}).",
+          "Keep listener errors outside the saved transaction, then run the order test."
+        ],
+        "files": [
+          {
+            "role": "game.events",
+            "workspace": "active",
+            "path": "src/events.ts",
+            "action": "create",
+            "owner": "The event helper owns ordering around persistence.",
+            "change": "Implement the save-first ordering and committed revision in the event payload.",
+            "pattern": "Do not claim a durable outbox; a missed event is repaired by fetching a fresh snapshot."
+          }
+        ],
+        "checkIds": ["m08-events-unit"],
+        "prerequisiteCheckIds": ["m08-claims-database"],
+        "next": "Prove a failed save stays silent"
+      },
+      {
+        "id": "m08-events-order-test",
+        "phase": "build",
+        "title": "Prove a failed save stays silent",
+        "question": "What should the listener observe when save rejects?",
+        "explanation": [
+          "Test the helper with a rejected save and a publish spy. Assert that the original error is visible and publish has zero calls. Add a database test for a committed revision."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Record call order in the success case: save must appear before publish.",
+          "Make save reject in a second case and assert publish has zero calls.",
+          "Example assertion: expect(publish).not.toHaveBeenCalled() after the rejected save.",
+          "Run the real database case too; compare the event revision with the committed row."
+        ],
+        "files": [
+          {
+            "role": "game.events-test",
+            "workspace": "active",
+            "path": "test/events.test.ts",
+            "action": "create",
+            "owner": "The test checks failure ordering and committed revision delivery.",
+            "change": "Assert failed writes publish nothing; real database run checks that emitted revision matches the committed row.",
+            "pattern": "The in-memory ordering test and Postgres transaction test are different checks."
+          }
+        ],
+        "checkIds": ["m08-events-unit", "m08-events-database"],
+        "prerequisiteCheckIds": ["m08-events-unit"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m08-events-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Look for whether the team's event layer runs before or after its save. Preserve its transport, but keep save ordering explicit.",
+        "transfer": "Look for whether the team's event layer runs before or after its save. Preserve its transport, but keep save ordering explicit."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m08-events-unit",
+        "kind": "unit",
+        "command": "npm test -- test/events.test.ts",
+        "cwd": ".",
+        "expected": "A rejected save publishes no success event; listener failure does not undo the committed state.",
+        "failure": [
+          {
+            "symptom": "Publish runs even though save failed.",
+            "diagnostic": "Await save before calling publish and keep the assertion on call count.",
+            "meaning": "The order could tell clients about missing data."
+          }
+        ]
+      },
+      {
+        "id": "m08-events-database",
+        "kind": "database",
+        "command": "npm run test:db -- test/events.test.ts",
+        "cwd": ".",
+        "expected": "The event appears only after the real transaction commits and carries the saved revision.",
+        "failure": [
+          {
+            "symptom": "The test sees an event before commit or a different revision.",
+            "diagnostic": "Read the row after commit and compare the revision placed on the event.",
+            "meaning": "The mock does not prove real transaction ordering."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m08-recovery",
+    "milestoneId": "M08",
+    "title": "Resume saved work after a restart",
+    "why": "A process can stop after accepting a submission but before a verdict is saved. Durable pending work lets a new process recover it without counting it twice.",
+    "outcome": "Reload pending work, recheck the Match deadline and claim, finish an interrupted Reveal safely, and keep the same scoring owner.",
+    "prerequisites": ["m08-events"],
+    "references": [
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/evaluation-orchestration.ts",
+        "startLine": 39,
+        "endLine": 80
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/engine.ts",
+        "startLine": 1004,
+        "endLine": 1076
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/src/postgres-store.ts",
+        "startLine": 349,
+        "endLine": 390
+      },
+      {
+        "lessonId": "0008-persistence-recovery",
+        "path": "packages/arena-game/test/postgres.test.ts",
+        "startLine": 384,
+        "endLine": 434
+      }
+    ],
+    "steps": [
+      {
+        "id": "m08-recovery-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Resume saved work after a restart",
+        "explanation": [
+          "A process can stop after accepting a submission but before a verdict is saved. Durable pending work lets a new process recover it without counting it twice. Reload pending work, recheck the Match deadline and claim, finish an interrupted Reveal safely, and keep the same scoring owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Recovery",
+            "meaning": "Use saved state to safely continue after a process stops."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Restart does not reset the Match clock"
+      },
+      {
+        "id": "m08-recovery-see",
+        "phase": "see",
+        "title": "Restart does not reset the Match clock",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Restart does not reset the Match clock",
+          "code": [
+            "pending Evaluation is saved",
+            "Game process restarts",
+            "reload → check deadline → claim → finish"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Before stop",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "durable row is pending"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "durable row is pending."
+            },
+            {
+              "id": "frame-1",
+              "label": "New process",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "reads current saved state"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "reads current saved state."
+            },
+            {
+              "id": "frame-2",
+              "label": "Recovery",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "rechecks deadline and ownership"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "rechecks deadline and ownership."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Pending work is still inside the accepted deadline and grace",
+              "expected": "New owner can finish once",
+              "reason": "Recovery reuses the saved request and claim rules."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m08-recovery-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "A process can stop after accepting a submission but before a verdict is saved. Durable pending work lets a new process recover it without counting it twice. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Recovery",
+            "meaning": "Use saved state to safely continue after a process stops."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m08-recovery-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "What must recovery check again before asking the Judge to do work?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Load pending rows without trusting memory"
+      },
+      {
+        "id": "m08-recovery-recovery",
+        "phase": "build",
+        "title": "Load pending rows without trusting memory",
+        "question": "Where does a restarted process find the unfinished request?",
+        "explanation": [
+          "Create a recovery service that reads durable pending submissions, reloads the Match, checks current round and inclusive grace, then claims before calling Judge."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read pending submissions from durable storage; the old service’s memory is gone after restart.",
+          "Reload the Match, then recheck current Round, phase, deadline/grace and claim ownership.",
+          "Only after those checks pass should recovery call Judge. If the record is already terminal, leave it alone.",
+          "Run the restart integration test; a saved pending row must settle once after a new service starts."
+        ],
+        "files": [
+          {
+            "role": "game.recovery",
+            "workspace": "active",
+            "path": "src/recovery.ts",
+            "action": "create",
+            "owner": "The recovery service owns restart-time orchestration.",
+            "change": "Read pending rows from the store and recheck Match phase, round, deadline and claim before evaluation.",
+            "pattern": "Do not use a process-local list as the recovery source."
+          }
+        ],
+        "checkIds": ["m08-recovery-types"],
+        "prerequisiteCheckIds": ["m08-events-database"],
+        "next": "Restart between acceptance and verdict"
+      },
+      {
+        "id": "m08-recovery-recovery-test",
+        "phase": "build",
+        "title": "Restart between acceptance and verdict",
+        "question": "Does a second process finish the saved request only once?",
+        "explanation": [
+          "Create a real Postgres test: save pending state, close the first service, create a new one, recover, and verify one terminal result. Also test a saved Reveal followed by a failed final Match write."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Save one accepted pending submission, close the first service, then create a fresh service over the same database.",
+          "Have the fresh service recover and assert one terminal result, not two Judge calls or a duplicate score.",
+          "Add the failure path: Reveal saved, final Match write fails, then retry repairs the same final result.",
+          "Run the test with PostgreSQL and the fake Judge. Mark it blocked if the database is unavailable."
+        ],
+        "files": [
+          {
+            "role": "game.recovery-test",
+            "workspace": "active",
+            "path": "test/recovery.test.ts",
+            "action": "create",
+            "owner": "The integration test controls the interruption boundary.",
+            "change": "Verify pending work, Reveal repair, accepted grace timing and idempotent later retry after a durable restart.",
+            "pattern": "A shared Map between two Engine objects is not evidence of a database restart."
+          }
+        ],
+        "checkIds": ["m08-recovery-database"],
+        "prerequisiteCheckIds": ["m08-recovery-types"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m08-recovery-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Test process restart as a real boundary. A second in-memory Engine sharing the same Map is not a Postgres restart.",
+        "transfer": "Test process restart as a real boundary. A second in-memory Engine sharing the same Map is not a Postgres restart."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m08-recovery-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "Recovery reads through the persistence interface and keeps scoring in the Game rule.",
+        "failure": [
+          {
+            "symptom": "Recovery uses an in-memory claim list or mutates score itself.",
+            "diagnostic": "Use the durable pending rows and existing Game evaluation boundary.",
+            "meaning": "Restarted work may be lost or counted outside the rules."
+          }
+        ]
+      },
+      {
+        "id": "m08-recovery-database",
+        "kind": "database",
+        "command": "npm run test:db -- test/recovery.test.ts",
+        "cwd": ".",
+        "expected": "A new process reloads and settles one accepted pending request; a saved Reveal can be repaired after the final write fails.",
+        "failure": [
+          {
+            "symptom": "The new process misses work or counts it twice.",
+            "diagnostic": "Use a new store connection and inspect durable Submission and Match state.",
+            "meaning": "Restart recovery is not proven."
+          }
+        ]
+      }
+    ]
+  }
+]

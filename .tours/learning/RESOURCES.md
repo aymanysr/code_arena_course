@@ -1,44 +1,33 @@
-# Code Arena Learning Resources
+# Code Arena learning resources
 
-## Primary evidence: this exact project
+## Start with this course
 
-- [Course Home](index.html)
-  Start Lesson 1, continue the last lesson on this browser, or browse the 14-lesson path.
-- [Explore code](source-map.html)
-  Generated inventory of scoped game, test, configuration, and runtime files. Use it to find what is not taught yet or changed since a lesson snapshot.
-- [Course guide](README.md)
-  Route descriptions and links for learners and maintainers.
-- [Maintain the course](MAINTAINING.md)
-  Source-impact review, tests, generated pages, and the explicit reviewed-snapshot workflow.
-- [Lesson 1: follow one Submit](lessons/0001-follow-one-submit.html)
-  A short, interactive trace through the real Submit path. Use it to learn the difference between delivery, game authority, and code execution.
-- [CodeTour 1: big picture](../1-code-arena-big-picture.tour) and [CodeTour 2: submission journey](../2-submission-journey.tour)
-  Editor navigation stops that open actual source locations; they do not by themselves track full codebase coverage.
-- [42 project requirements](../../ft_transcendence.pdf)
-  Authoritative requirements for the team project. Read alongside the [compliance matrix](../../prototype/game-ui/42-subject-compliance.md); this learning workspace does not change module claims or sign-off.
-- [Frozen CodeTour reference snapshot](../reference-baseline.md)
-  Records the direct CodeTour file hashes and verification evidence captured for the existing course. It does not freeze every repository file.
-- [Code Arena behavior spec](../../.scratch/code-arena/spec.md)
-  Intended behavior and acceptance criteria. Compare it with the implementation and tests; it is not proof that a feature is currently implemented.
+- [Course Home](index.html) — the M00–M13 guided route.
+- [Mission](MISSION.md) — the rebuild goal and evidence limits.
+- [Explore code](source-map.html) — the complete declared reference inventory.
+- [Maintain the course](MAINTAINING.md) — how to change content and verify it.
+- [Reference lessons](reference.html) — source-following lessons for extra context.
 
-## Knowledge
+## Primary evidence: this project
 
-- [TypeScript Handbook: Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html)
-  Official explanation of object types and interface/type contracts; use when a lesson relies on a TypeScript contract such as `ArenaTransport`.
-- [TypeScript Handbook: Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html)
-  Official guide to class members and implementations; use when following concrete classes such as `ArenaEngine` or `ContainerJudge`.
+- [Code Arena source and tests](../../) — the current implementation, not the course's practice model.
+- [Code Arena behavior specification](../../.scratch/code-arena/spec.md) — intended behavior to compare with the code; it is not proof of implementation.
+- [42 project requirements](../../ft_transcendence.pdf) — authoritative evaluation requirements. Read the applicable pages with the [compliance matrix](../../prototype/game-ui/42-subject-compliance.md).
+- [Frozen source reference](../reference-baseline.md) — snapshot and direct CodeTour evidence. It does not prove a learner build.
+- [CodeTours](../1-code-arena-big-picture.tour) — editor navigation to real source locations.
 
-## Wisdom (people)
+## Knowledge: official references
 
-- Your teammates and the ft_transcendence peer-evaluation setting are the real-world check: practice explaining each slice and ask a teammate to challenge where authority lives.
+- [TypeScript Handbook: Object Types](https://www.typescriptlang.org/docs/handbook/2/objects.html) — contracts for records and interfaces.
+- [TypeScript Handbook: Classes](https://www.typescriptlang.org/docs/handbook/2/classes.html) — concrete implementations of contracts.
+- [TypeScript Handbook: Modules](https://www.typescriptlang.org/docs/handbook/2/modules.html) — imports and exports.
+- [Node.js module resolution](https://nodejs.org/api/packages.html#modules-packages) — package and module boundaries.
+- [Vitest security advisory](https://github.com/advisories/GHSA-82fw-gwwq-j7x9) — why the practice workspace pins a patched version; it does not change the reference game's dependency choice.
 
-## Gaps
+## Wisdom: people
 
-- The complete course now has 14 linked lessons. The source map tracks every in-scope file as lesson-taught or support-only; rerun its check after the reference game changes and review any affected lesson, test, or CodeTour before freezing a newer snapshot.
+Ask teammates to challenge where identity, Match rules, storage, and execution are owned. Confirm real paths and commands together before mapping them into the Team workspace.
 
-## Guided foundations — primary tool references
+## Current gaps
 
-- [Install Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm/) — official macOS/Windows installer and LTS guidance.
-- [TypeScript modules](https://www.typescriptlang.org/docs/handbook/2/modules.html) — import/export boundaries.
-- [NodeNext module resolution](https://www.typescriptlang.org/docs/handbook/modules/theory.html) — why emitted JavaScript filenames matter.
-- [Vitest advisory and patched versions](https://github.com/advisories/GHSA-82fw-gwwq-j7x9) — practice pins patched 4.1.11; reference dependency versions are a separate project decision.
+As of 2026-09-29, all 68 lessons are authored, 201 in-scope files and 21 explicit exclusions have reviewed dispositions, and all 18 required behavior rows link to checks. The author-rehearsal gate remains open because 15 required checks have a latest blocked result. No target-repository results exist. The foundation learner walkthrough remains pending. These are separate from 42-subject module sign-off.

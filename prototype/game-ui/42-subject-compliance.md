@@ -1,6 +1,6 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-30 (pre-Lesson 1 orientation and teammate-repository build path reviewed against PDF requirements; prior Match deadline, Lobby, event-convergence, and source-linked course reviews retained; module rows intentionally unchanged — team sign-off required)
+Last reviewed: 2026-09-30 (complete guided course, M13 transition, Task 14 coverage audit, pre-Lesson 1 orientation, and teammate-repository build path reviewed against PDF requirements; prior Match deadline, Lobby, event-convergence, and source-linked course reviews retained; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
 Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus the pre-Lesson 1 orientation, teammate-repository build map, contextual file/pattern/test guidance, and source-linked Lessons 1–14. Lesson 11's current chat sources were reviewed and required no refresh. Course content and focused tests do not change a subject-module claim.
@@ -57,12 +57,14 @@ existing reviewed-evidence refresh procedure remains required during execution.
 
 The isolated guided-build-course checkout now implements the validated 68-lesson
 route, a static dusk/light lesson layout, workspace profile validation, and
-workspace-separated progress data. Eleven authored M00–M02 lessons now cover orientation, real practice setup, and the C-to-TypeScript bridge;
+workspace-separated progress data. Thirty-seven authored M00–M07 lessons now cover orientation, real practice setup, the C-to-TypeScript bridge, Match records, phase transitions, membership, injected Clock deadline, Problem validation with hidden-suite sealing, a fake Judge port with compile/runtime/infrastructure error separation, neutral visible Run, Submit acceptance, pending evaluation with same-identity retry, integer scoring with one rounding point, sealed Reveal, Round reset, final-result tie-breaks, deadline closure with an inclusive grace cutoff, a full local Match, HTTP serving with validation and development-only identity, and browser screens with transport, panels, and Submit/Reveal flow; the final local 1v1 composition remains a documented but unverified course step;
 later lessons remain explicitly planned. Fresh-directory install, typecheck,
 build, and demo were rehearsed on Node 26.10.0, including a reproduced and
 repaired missing-export error. Practice uses patched Vitest 4.1.11 after a
-concrete dependency audit; this does not change the reference game tooling. All 18 author-rehearsal exercise tests pass, including repaired boundary mistakes. The real learner walkthrough remains pending before later lesson authoring. These are learning-platform
+concrete dependency audit; this does not change the reference game tooling. All 18 author-rehearsal exercise tests pass for M00–M02, plus 18 new author-rehearsal checks for ticket 08 (M03–M04: records, transitions, membership, deadline equality, hidden-seal scan, fake resolve/reject with compile_error and runtime_error verdicts, neutral Run with Judge-call spies) and 15 checks for ticket 09 (M05: acceptance freeze, pending/error endings, single-run retry join, exact 43 scoring, sealed Reveal, Round reset, tie-break matrices, inclusive grace cutoff, three-Round journey), plus 24 historical checks for ticket 10. A fresh Nest/Vite setup rehearsal then passed 3 service tests, 9 UI tests, and a real Chrome proxy smoke (verified identity, 400 diagnostic, Enter, 1280px and 390px widths); it exposed and fixed Vitest root, Nest injection, POST status, and missing proxy-path guidance. The complete final Arena 1v1 composition was not rerun and remains open; prior CORS/setContent evidence is historical. Every M03–M07 lesson cites validated reference spans, and the M05 deadline timeline frames plus the M07 journey are covered by browser tests with zero console errors. The real learner walkthrough remains pending while authoring continues per learner instruction. These are learning-platform
 capabilities, not completed game modules or target-repository checks.
+
+Task 10 setup reconciliation (2026-09-28): M06 now teaches explicit Nest injection, HTTP 200, and controller-owned validation/identity; M07 separates the Vitest project root from Vite’s client root and proxies both practice and game routes. Fresh service/UI/browser smoke passed as described above. The full Arena 1v1 composition and fresh offline install remain unverified; no production or target-repository evidence is inferred.
 
 Reviewed the mandatory accessibility, validation, identity, and game requirements
 against the PDF. The course executes no player programs and adds no production
@@ -550,3 +552,23 @@ The local HTML files do not demonstrate a backend, database, authentication, aut
 Before submission, the root `README.md` must follow printed pp.27-29 (PDF pp.28-30): italicized curriculum attribution with actual logins, English description and instructions, prerequisites, resources and precise AI-use disclosure, team roles, project management, stack justification, database schema, features and owners, module calculation/justification/implementation/owners, and honest individual contributions and challenges.
 
 During evaluation, demonstrate each claimed module end-to-end. The subject explicitly assigns zero points to incomplete or non-functional modules.
+
+## Guided-course Task 11 review (2026-09-29)
+
+Reviewed the authoritative PDF requirements for simultaneous-user safety and race prevention (printed p.8), the required database schema and .env.example (p.9), security boundaries (p.16), and live multiplayer synchronization (pp.16–17). M08/M09 teach durable revisions/claims, private Judge execution, and secret-file handling. The course content is not evidence that a target implementation meets those requirements.
+
+The disposable author rehearsal passed 17 unit/config/type checks. The five Postgres checks remain blocked because the dedicated local port returned no response; the real Judge, private worker and Game-to-Judge checks remain blocked because Docker socket access was denied. No untrusted player source was run. The exact tool versions were resolved in a disposable exercise; a fresh offline install remains unverified. The Task10 full 1v1 journey remains open, the learner walkthrough is pending, and no teammate repository is available. No 42 subject module row or claim changes from this course work.
+
+## Guided-course Task 12 review (2026-09-29)
+
+Reviewed the authoritative PDF's mandatory simultaneous-user, race-prevention, validation, secure-connection, and accessibility requirements (printed pp.8–9; PDF pp.9–10), plus live-match, reconnection, and multiplayer synchronization requirements (printed pp.16–17; PDF pp.17–18). M10–M12 teach invitation admission, socket identity and Match membership, multi-socket Presence, reconnect snapshots, team-scoped documents/readiness, and Game-owned process-local chat. These lesson checks are course rehearsal only; they do not prove the target implementation or the live journey.
+
+The disposable practice rehearsal passed 14 checks (including exact package resolution, typecheck, fake-socket gateway ordering, Presence, collaboration, readiness, chat, and sidecar lifecycle) across 10 Vitest files / 16 tests. Real Postgres start concurrency and live reconnect, 1v1, 2v2, and chat browser checks remain blocked because the Game/database stack is unavailable. The teammate repository and learner walkthrough are still pending. No 42 module row or point claim changed; no advanced-chat module is claimed.
+
+## Guided-course Tasks 13–14 review (2026-09-29)
+
+Reviewed the authoritative PDF's simultaneous-user, concurrency, validation, secure-connection, and accessibility requirements (printed pp.8–9; PDF pp.9–10), live multiplayer and synchronization requirements (printed pp.16–17; PDF pp.17–18), and root README obligations (printed pp.27–29; PDF pp.28–30). M13 teaches inspection-first team mapping, actual-owner reuse/extension, Compose, private Judge deployment, HTTPS/WSS, behavior parity, and the English handover README structure. The teammate repository is not available, so these remain instructions; no actual target integration or README review is claimed.
+
+Task 14 now records dispositions for all 201 scoped reference files (74 direct build mappings and 127 explained support files) plus all 21 explicit scope exclusions. All 18 required behavior rows link to course checks; the support-only row remains separate. The read-only audit currently reports 79 of 94 required checks passing in author rehearsal, with 15 latest blocked results and no required check missing an author run. Zero checks have results from the teammate repository. `courseReady` and `targetComplete` therefore remain false; the learner walkthrough is also still pending as a separate human gate. The M13 practice rule check passed in the disposable course rehearsal, and its result is recorded only as author-rehearsal evidence.
+
+This work changes the learning platform and its course records only. It does not change game source, prove the mandatory requirements against a new implementation, or demonstrate any claimed module. No subject module row, point claim, or team sign-off changes.

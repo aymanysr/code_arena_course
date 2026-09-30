@@ -18,6 +18,7 @@ import {
   parseChecksumList,
   parseReferenceSnapshot,
 } from "./reference-audit.mjs";
+import { auditBuildCoverage } from "./build-coverage.mjs";
 
 const require = createRequire(import.meta.url);
 const ts = require("typescript");
@@ -1033,6 +1034,7 @@ export async function buildCatalogData({
     ".tours",
     ".agents",
     ".claude",
+    ".husky",
     ".trigger-tree",
     ".superpowers",
     ".vscode",
@@ -2316,8 +2318,76 @@ export async function renderCatalogOutputs(
   return { data, files };
 }
 
+function formatBuildCoverageReport(course, data, report) {
+  const dispositions = course.path.dispositions;
+  const requiredBehaviors = course.path.behaviors.filter(
+    (behavior) => behavior.scope === "required"
+  );
+  const requiredCheckIds = new Set();
+  const checksByLesson = new Map(
+    course.lessons.map((lesson) => [lesson.id, lesson.checks])
+  );
+  for (const behavior of requiredBehaviors) {
+    for (const lessonId of behavior.lessonIds) {
+      for (const check of checksByLesson.get(lessonId) ?? []) {
+        if (check.kind !== "explain") requiredCheckIds.add(check.id);
+      }
+    }
+  }
+  const authorOpen = new Set(
+    report.issues
+      .filter((issue) => issue.id.startsWith("author-check:"))
+      .map((issue) => issue.id.slice("author-check:".length))
+  );
+  const teamOpen = new Set(
+    report.issues
+      .filter((issue) => issue.id.startsWith("team-check:"))
+      .map((issue) => issue.id.slice("team-check:".length))
+  );
+  const count = (kind) =>
+    dispositions.filter((item) => item.kind === kind).length;
+  const dispositionByPath = new Map(
+    dispositions.map((item) => [item.path, item])
+  );
+  const sourceDisposed = data.files.filter((file) =>
+    dispositionByPath.has(file.path)
+  ).length;
+  const exclusionsDisposed = data.exclusions.filter((item) => {
+    const disposition = dispositionByPath.get(item.path);
+    return (
+      disposition?.kind === "exclude" && disposition.reason === item.reason
+    );
+  }).length;
+  const readyLessons = course.path.lessons.filter(
+    (lesson) => lesson.status === "ready"
+  ).length;
+  const linkedBehaviors = requiredBehaviors.filter(
+    (behavior) => behavior.checkIds.length > 0
+  ).length;
+  return `Build coverage: ${readyLessons}/${course.path.lessons.length} lessons authored; ${sourceDisposed}/${data.files.length} scoped files and ${exclusionsDisposed}/${data.exclusions.length} explicit exclusions disposed (${count("build")} build, ${count("support")} support, ${count("exclude")} excluded); ${linkedBehaviors}/${requiredBehaviors.length} required behaviors linked; ${requiredCheckIds.size - authorOpen.size}/${requiredCheckIds.size} required author checks pass; ${requiredCheckIds.size - teamOpen.size}/${requiredCheckIds.size} current team checks pass; courseReady=${report.courseReady}; targetComplete=${report.targetComplete}.`;
+}
+
+function printBuildCoverageBlockers(report) {
+  if (!report.issues.length) return;
+  const courseIssues = report.issues.filter(
+    (issue) => issue.scope === "course"
+  );
+  const targetIssues = report.issues.filter(
+    (issue) => issue.scope === "target"
+  );
+  for (const issue of courseIssues)
+    console.error(`Course gate · ${issue.id}: ${issue.reason}`);
+  for (const issue of targetIssues.slice(0, 8))
+    console.error(`Team target · ${issue.id}: ${issue.reason}`);
+  if (targetIssues.length > 8)
+    console.error(
+      `Team target · ${targetIssues.length - 8} more open item(s).`
+    );
+}
+
 async function main() {
-  const checkOnly = process.argv.includes("--check");
+  const strictBuildComplete = process.argv.includes("--check-build-complete");
+  const checkOnly = process.argv.includes("--check") || strictBuildComplete;
   const acceptSnapshot = process.argv.includes("--accept-reviewed-snapshot");
   const reviewedArg = process.argv.find((arg) =>
     arg.startsWith("--reviewed-lessons=")
@@ -2362,6 +2432,13 @@ async function main() {
     options
   );
   const { summary } = data;
+  const course = await loadBuildCourse(learningDir, data);
+  const courseEvidence = JSON.parse(
+    await readFile(path.join(learningDir, "course-evidence.json"), "utf8")
+  );
+  const buildCoverage = auditBuildCoverage(course, data, courseEvidence);
+  if (!acceptSnapshot)
+    console.log(formatBuildCoverageReport(course, data, buildCoverage));
 
   if (acceptSnapshot) {
     console.log(formatAuditReport(data));
@@ -2452,6 +2529,10 @@ async function main() {
       summary.courseOrderIssues
     )
       process.exitCode = 1;
+    if (strictBuildComplete && !buildCoverage.courseReady) {
+      printBuildCoverageBlockers(buildCoverage);
+      process.exitCode = 1;
+    }
     return;
   }
 

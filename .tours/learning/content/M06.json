@@ -1,0 +1,1170 @@
+[
+  {
+    "id": "m06-http",
+    "milestoneId": "M06",
+    "title": "Serve one request from your own process",
+    "why": "The browser is another process. The game server owns authoritative state and answers over HTTP.",
+    "outcome": "Start a practice server, send one request, and diagnose a refused connection.",
+    "prerequisites": ["m05-complete-match"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/game/src/main.ts",
+        "startLine": 1,
+        "endLine": 13
+      }
+    ],
+    "steps": [
+      {
+        "id": "m06-http-orient",
+        "phase": "orient",
+        "title": "Two processes, one contract",
+        "question": "Why does the game need a server process?",
+        "explanation": [
+          "Browsers cannot be trusted with scores, hidden tests, or time. The server holds the Match record, checks membership and deadlines, and answers requests with JSON.",
+          "You need this now because every later screen calls this server. Reference preview: services/game/src/main.ts boots the Nest application and listens on a port. Your practice server starts smaller with plain HTTP and grows toward the same shape."
+        ],
+        "vocabulary": [
+          {
+            "term": "Server",
+            "meaning": "A separate process that owns Match state and answers HTTP requests."
+          },
+          {
+            "term": "Port",
+            "meaning": "A number naming one listening service on a machine."
+          }
+        ],
+        "hints": [
+          "Answer: authority lives off-device.",
+          "Find the listen call.",
+          "Compare with a referee off the field.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See request to response."
+      },
+      {
+        "id": "m06-http-see",
+        "phase": "see",
+        "title": "See client, port, JSON",
+        "question": "What travels each way?",
+        "explanation": [
+          "Out: method, path, headers, body. Back: status code plus JSON. A refused connection means no process listens at that port."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the request.",
+          "Point at the status.",
+          "Compare with sending a letter and getting a reply.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the server shape.",
+        "visual": {
+          "kind": "trace",
+          "title": "One request round trip",
+          "code": [
+            "POST /practice-decision {secondsLeft: 12}",
+            "server checks -> 200 {open: true}",
+            "no listener -> connection refused"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Request",
+              "values": [
+                {
+                  "label": "Sent",
+                  "value": "method, path, JSON body"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The client names an action and supplies data."
+            },
+            {
+              "id": "frame-1",
+              "label": "Response",
+              "values": [
+                {
+                  "label": "Back",
+                  "value": "status plus JSON"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The server answers with a status and a small JSON object."
+            },
+            {
+              "id": "frame-2",
+              "label": "Refused",
+              "values": [
+                {
+                  "label": "Cause",
+                  "value": "no listening process"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Refusal names a process or port problem, never a game-rule problem."
+            }
+          ],
+          "cases": [
+            {
+              "input": "server stopped, send request",
+              "expected": "connection refused",
+              "reason": "Nothing listens on that port."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m06-http-understand",
+        "phase": "understand",
+        "title": "Listen, parse, answer",
+        "question": "What are the server's three jobs?",
+        "explanation": [
+          "Listen on a port, read one request body as JSON, and answer with a status plus JSON. Frameworks automate this later; your first server does it by hand so each part stays visible.",
+          "Reference preview: services/game/src/main.ts creates the Nest application and listens (lines 1-13). Practice path: src/server/main.ts. Future team path: the real service module, mapped in M13."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name listen, parse, answer.",
+          "Find app.listen in the preview.",
+          "Compare with a shop counter.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try start and stop by hand."
+      },
+      {
+        "id": "m06-http-try",
+        "phase": "try",
+        "title": "Decide process or rule problem",
+        "question": "Request refused: which file do you open first?",
+        "explanation": [
+          "Neither game file. Check the server process and port first: is it running, and is the URL port the one it printed when it started? Only then read domain code."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write symptom and first check.",
+          "Find the printed port.",
+          "Compare with checking power before the bulb.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the server."
+      },
+      {
+        "id": "m06-http-setup-scripts",
+        "phase": "build",
+        "title": "Name the server scripts",
+        "question": "Which commands start and check the server?",
+        "explanation": [
+          "Two names: dev:server compiles and starts the API process; test:service runs the HTTP tests. Scripts live in package.json so every learner uses the same command.",
+          "Add dev:server as npm run build && node dist/src/server/main.js. Add test:service as vitest run test/http.test.ts. Vite is added in M07, so the server command works before the browser toolchain exists."
+        ],
+        "vocabulary": [
+          {
+            "term": "npm script",
+            "meaning": "A named command in package.json. npm run <name> executes it."
+          }
+        ],
+        "hints": [
+          "Goal: package.json gains dev:server and test:service with the exact commands above.",
+          "Relevant value: npm pkg get scripts prints both names.",
+          "Analogous example: like the M01 scripts, each name is a short label for a command.",
+          "Walkthrough: edit only the scripts object, save package.json, then run npm pkg get scripts."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns tool and script names.",
+            "change": "Add dev:server and test:service with the commands shown; do not add browser tools yet.",
+            "pattern": "Valid JSON; scripts map names to shell commands."
+          }
+        ],
+        "checkIds": ["m06-scripts-setup"],
+        "prerequisiteCheckIds": ["m05-complete-match-unit"],
+        "next": "Create the server files."
+      },
+      {
+        "id": "m06-http-build",
+        "phase": "build",
+        "title": "Start a practice server",
+        "question": "Does one request get one JSON answer?",
+        "explanation": [
+          "Practice paths: src/server/main.ts, test/server.ts, test/http.test.ts. First make a small Node HTTP server so the request, port, and response are visible. It serves only the teaching API; the browser gets its own Vite process in M07."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: listen on port 3002, answer POST /practice-decision with JSON, and print the actual listening address.",
+          "Relevant value: send {secondsLeft: 12}; expect 200 and {open: true}.",
+          "Analogous example: like the fake Judge, start with one controllable process and one clear result.",
+          "Walkthrough: create main.ts with node:http; create a helper that starts on port 0 for tests; fetch once, then close the server in teardown."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/main.ts",
+            "action": "create",
+            "owner": "src/server/ owns the listening process.",
+            "change": "Listen for the teaching API request, return JSON, and print the bound address. Do not serve browser files here.",
+            "pattern": "One JSON route; support PORT=0 for tests; close cleanly."
+          },
+          {
+            "role": "test.http",
+            "workspace": "active",
+            "path": "test/server.ts",
+            "action": "create",
+            "owner": "test/ owns the server lifecycle helper.",
+            "change": "Add start/close helpers with an ephemeral port for tests.",
+            "pattern": "No fixed test ports; teardown always closes."
+          },
+          {
+            "role": "test.http",
+            "workspace": "active",
+            "path": "test/http.test.ts",
+            "action": "create",
+            "owner": "test/ proves the round trip.",
+            "change": "Test start, one request, and refused-connection diagnosis.",
+            "pattern": "Start in setup with an ephemeral port; close in teardown."
+          }
+        ],
+        "checkIds": ["m06-http-service"],
+        "prerequisiteCheckIds": [
+          "m05-complete-match-unit",
+          "m06-scripts-setup"
+        ],
+        "next": "Check the server and connect to routes."
+      },
+      {
+        "id": "m06-http-check",
+        "phase": "check",
+        "title": "Report the round trip",
+        "question": "What proved the process boundary?",
+        "explanation": [
+          "Run the check at the practice root. Record the ready line and the refused case separately."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and outputs.",
+          "Show the ready port.",
+          "Compare with in-process calls.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m06-http-service"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to routes and services.",
+        "transfer": "In words, explain why the browser cannot own the score. Predict what a second process enables that a function call cannot."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m06-http-service",
+        "command": "npm run test:service",
+        "cwd": ".",
+        "expected": "Server starts and answers one JSON route; stopped server yields connection refused with a process/port diagnosis.",
+        "kind": "service",
+        "failure": [
+          {
+            "symptom": "Connection refused on a running server",
+            "diagnostic": "Compare the fetch URL port with the printed ready line; check the server started before the fetch.",
+            "meaning": "Ports must match; the client must wait for listen."
+          },
+          {
+            "symptom": "Port already in use",
+            "diagnostic": "Use an ephemeral port per test run and always close the server in teardown.",
+            "meaning": "Tests must not fight over fixed ports."
+          }
+        ]
+      },
+      {
+        "id": "m06-scripts-setup",
+        "command": "npm pkg get scripts",
+        "cwd": ".",
+        "expected": "Printed JSON includes dev:server and test:service with the exact taught commands.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "Script name missing from output",
+            "diagnostic": "Check the scripts object in package.json for a typo; JSON must stay valid.",
+            "meaning": "Later steps run these names."
+          },
+          {
+            "symptom": "npm pkg errors",
+            "diagnostic": "Run npm run typecheck first to confirm the toolchain works in this folder.",
+            "meaning": "The manifest edit must not break the project."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m06-controller",
+    "milestoneId": "M06",
+    "title": "Route to the rules you already tested",
+    "why": "Routes translate HTTP into calls to pure game behavior. The rules stay framework-free.",
+    "outcome": "Wire a route to an existing pure rule with constructor injection.",
+    "prerequisites": ["m06-http"],
+    "references": [
+      {
+        "lessonId": "0001-submit-journey",
+        "path": "services/game/src/game/game.controller.ts",
+        "startLine": 83,
+        "endLine": 97
+      },
+      {
+        "lessonId": "0001-submit-journey",
+        "path": "services/game/src/game/game.service.ts",
+        "startLine": 117,
+        "endLine": 124
+      }
+    ],
+    "steps": [
+      {
+        "id": "m06-controller-orient",
+        "phase": "orient",
+        "title": "Thin routes, fat rules",
+        "question": "What may a route contain?",
+        "explanation": [
+          "Parsing and delegation only. The route reads the path and body, then calls an already-tested rule or service. New logic in a route is a smell.",
+          "Dependency injection first means passing the service object into the route holder. Nest decorators automate the wiring later; the idea stays the same."
+        ],
+        "vocabulary": [
+          {
+            "term": "Controller",
+            "meaning": "HTTP layer that parses requests and calls game behavior. Holds no game rules."
+          }
+        ],
+        "hints": [
+          "Answer: parse and delegate.",
+          "Find the service call.",
+          "Compare with a receptionist.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the delegation."
+      },
+      {
+        "id": "m06-controller-see",
+        "phase": "see",
+        "title": "See route to service to rule",
+        "question": "Which layer owns the decision?",
+        "explanation": [
+          "The rule. The route passes secondsLeft through; the service calls isBeforeDeadline; the answer returns as JSON."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the route.",
+          "Point at the rule call.",
+          "Compare with main calling a helper.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn injection.",
+        "visual": {
+          "kind": "trace",
+          "title": "Delegation chain",
+          "code": [
+            "route receives {secondsLeft: 12}",
+            "service calls isBeforeDeadline(12, 100)",
+            "route answers {open: true}"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Route",
+              "values": [
+                {
+                  "label": "Does",
+                  "value": "parse only"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The route extracts the input value."
+            },
+            {
+              "id": "frame-1",
+              "label": "Service",
+              "values": [
+                {
+                  "label": "Does",
+                  "value": "call tested rule"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The service reuses the M03 deadline rule unchanged."
+            },
+            {
+              "id": "frame-2",
+              "label": "Answer",
+              "values": [
+                {
+                  "label": "Sends",
+                  "value": "JSON result"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The route serializes the rule's answer."
+            }
+          ],
+          "cases": [
+            {
+              "input": "route with new scoring logic",
+              "expected": "rejected in review",
+              "reason": "Rules live in src/, not in routes."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m06-controller-understand",
+        "phase": "understand",
+        "title": "Pass the service in",
+        "question": "What does constructor injection replace?",
+        "explanation": [
+          "The first server made HTTP visible. Now replace its hand-written route with Nest, the framework used by the reference game service. A controller receives the request; a service calls the rule; a module registers both.",
+          "A decorator is a label beginning with @ that tells Nest what a class or method does. Constructor injection means Nest passes the registered service into the controller."
+        ],
+        "vocabulary": [
+          {
+            "term": "Decorator",
+            "meaning": "An @ label that tells Nest how to connect a class or method."
+          },
+          {
+            "term": "Module",
+            "meaning": "A Nest registration file that lists controllers and providers."
+          }
+        ],
+        "hints": [
+          "Name the three files: module, controller, service.",
+          "Find @Post on the request method.",
+          "Compare the module with a C program wiring function pointers before calling them.",
+          "Read the expected result before changing files."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try wiring by hand."
+      },
+      {
+        "id": "m06-controller-try",
+        "phase": "try",
+        "title": "Trace one call",
+        "question": "Where does {secondsLeft: 0} become false?",
+        "explanation": [
+          "In the rule, not the route. The route passes 0 through; isBeforeDeadline(0, 100) is true — wait, check the deadline you configured. Trace the value at each layer."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the value at each layer.",
+          "Find the rule call.",
+          "Compare with argument passing in C.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build the route."
+      },
+      {
+        "id": "m06-controller-setup-nest",
+        "phase": "build",
+        "title": "Install Nest and enable its decorators",
+        "question": "Which settings let TypeScript understand Nest classes?",
+        "explanation": [
+          "At the practice root, install the reference-locked server packages: npm install --save-exact @nestjs/common@11.2.6 @nestjs/core@11.2.6 @nestjs/platform-express@11.2.6 reflect-metadata@0.2.2 rxjs@7.8.2. Then add the reference-locked type package with npm install --save-dev --save-exact @types/express@4.17.25.",
+          "Edit tsconfig.json to add experimentalDecorators: true and emitDecoratorMetadata: true. These settings let TypeScript keep the class information Nest uses for injection. Keep the other M01 settings unchanged."
+        ],
+        "vocabulary": [
+          {
+            "term": "Metadata",
+            "meaning": "Extra information kept with a class so Nest can connect its dependencies."
+          }
+        ],
+        "hints": [
+          "Goal: package.json lists five runtime packages and @types/express; tsconfig enables both decorator settings.",
+          "Relevant value: npm ls --depth=0 lists the installed versions; npm run typecheck still passes.",
+          "Analogous example: like adding a header before compiling C, the setting enables syntax the compiler otherwise rejects.",
+          "Walkthrough: install the runtime group, install the type package, edit only the two compiler options, then inspect the package list."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "The practice root owns its installed server tools.",
+            "change": "Add the five exact runtime versions and the exact @types/express development version shown.",
+            "pattern": "Use --save-exact so package.json records fixed versions."
+          },
+          {
+            "role": "config.typescript",
+            "workspace": "active",
+            "path": "tsconfig.json",
+            "action": "edit",
+            "owner": "tsconfig.json controls TypeScript compiler options.",
+            "change": "Enable experimentalDecorators and emitDecoratorMetadata.",
+            "pattern": "Keep target, module, moduleResolution, strict, rootDir, outDir, and skipLibCheck unchanged."
+          }
+        ],
+        "checkIds": ["m06-nest-setup"],
+        "prerequisiteCheckIds": ["m06-http-service"],
+        "next": "Create the module, controller, and service."
+      },
+      {
+        "id": "m06-controller-build",
+        "phase": "build",
+        "title": "Move the request into Nest",
+        "question": "Does the route call your tested rule?",
+        "explanation": [
+          "Practice paths: create src/server/game.module.ts, game.controller.ts, and game.service.ts; edit main.ts and test/server.ts. The module registers the controller and service. The controller receives GameService and delegates to the M03 deadline rule. Use @Inject(GameService) on the constructor parameter: Vitest transforms source TypeScript without emitDecoratorMetadata, and the explicit token works in both tests and the built server. Add @HttpCode(200) to keep the same status as the plain HTTP route introduced one lesson earlier; Nest otherwise defaults POST to 201.",
+          "The service takes a small rule object in its constructor. The Nest module supplies the existing M03 rule with a provider factory; no deadline formula is copied into the controller."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: POST /practice-decision follows controller → injected service → existing deadline rule.",
+          "Relevant value: secondsLeft 12 and 0 return the existing rule answers.",
+          "Analogous example: like passing Judge into run(), pass the rule into the service once.",
+          "Walkthrough: register the provider factory in GameModule, mark the controller constructor parameter @Inject(GameService), bootstrap GameModule in main.ts, and start it through test/server.ts. Keep POST at 200 with @HttpCode(200)."
+        ],
+        "files": [
+          {
+            "role": "config.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns the exact commands learners can run.",
+            "change": "Extend test:service to include test/service.test.ts.",
+            "pattern": "Keep the existing test/http.test.ts entry."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/game.service.ts",
+            "action": "create",
+            "owner": "src/server/ owns request-scoped behavior.",
+            "change": "Add a service that receives and calls the M03 deadline rule.",
+            "pattern": "Constructor takes the rule dependency; method stays thin."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/game.controller.ts",
+            "action": "create",
+            "owner": "The controller owns HTTP route mapping.",
+            "change": "Map POST /practice-decision and delegate to GameService.",
+            "pattern": "Parse/request plumbing only; inject with @Inject(GameService), keep @HttpCode(200), and do not copy a rule formula."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/game.module.ts",
+            "action": "create",
+            "owner": "The module owns Nest registration.",
+            "change": "Register GameController and provide GameService with the existing rule.",
+            "pattern": "One provider factory; no hidden global service."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/main.ts",
+            "action": "edit",
+            "owner": "main.ts owns process startup.",
+            "change": "Bootstrap GameModule with NestFactory and print its ready address.",
+            "pattern": "Import reflect-metadata before decorated classes load."
+          },
+          {
+            "role": "test.http",
+            "workspace": "active",
+            "path": "test/server.ts",
+            "action": "edit",
+            "owner": "test/ owns the HTTP test lifecycle helper.",
+            "change": "Start and close the Nest application on an ephemeral port.",
+            "pattern": "Close in teardown even when an assertion fails."
+          },
+          {
+            "role": "test.http",
+            "workspace": "active",
+            "path": "test/service.test.ts",
+            "action": "create",
+            "owner": "test/ proves route-to-rule delegation.",
+            "change": "Test the Nest route answers the existing rule for two inputs.",
+            "pattern": "Start in setup; fetch; close in teardown."
+          }
+        ],
+        "checkIds": ["m06-controller-service"],
+        "prerequisiteCheckIds": ["m06-http-service", "m06-nest-setup"],
+        "next": "Check delegation and connect to validation."
+      },
+      {
+        "id": "m06-controller-check",
+        "phase": "check",
+        "title": "Report delegation",
+        "question": "What proved the rule did the work?",
+        "explanation": [
+          "Run the check at the practice root. The rule file is unchanged; only wiring is new."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and outputs.",
+          "Show both inputs.",
+          "Compare with duplicating logic.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m06-controller-service"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to input validation.",
+        "transfer": "In words, explain what belongs in a route versus a service. Predict where a new game rule should live."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m06-controller-service",
+        "command": "npm run test:service",
+        "cwd": ".",
+        "expected": "Nest starts the teaching route; POST delegates through GameController and injected GameService to the unchanged M03 rule.",
+        "kind": "service",
+        "failure": [
+          {
+            "symptom": "Route recomputes instead of calling",
+            "diagnostic": "Import the rule from src/rules.js into the service; delete duplicated logic.",
+            "meaning": "One implementation, one tested place."
+          },
+          {
+            "symptom": "Service constructs its own globals",
+            "diagnostic": "Pass dependencies through the constructor so tests can substitute.",
+            "meaning": "Injection keeps tests fast and isolated."
+          }
+        ]
+      },
+      {
+        "id": "m06-nest-setup",
+        "command": "npm ls --depth=0 @nestjs/common @nestjs/core @nestjs/platform-express reflect-metadata rxjs @types/express",
+        "cwd": ".",
+        "expected": "All six exact versions listed in the install step appear without missing-package errors.",
+        "kind": "integration",
+        "failure": [
+          {
+            "symptom": "Cannot find module @nestjs/core",
+            "diagnostic": "Rerun the runtime install command at the practice root and confirm package.json lists the exact version.",
+            "meaning": "The process cannot start before its installed libraries exist."
+          },
+          {
+            "symptom": "Decorator metadata is empty or TypeScript rejects @ labels",
+            "diagnostic": "Check both tsconfig decorator options and rebuild.",
+            "meaning": "Nest needs the compiler to keep class metadata."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m06-validation",
+    "milestoneId": "M06",
+    "title": "Reject bad JSON with 400",
+    "why": "TypeScript annotations vanish at runtime. The server must check untrusted bodies itself.",
+    "outcome": "Validate one teaching route and return clear 400 errors.",
+    "prerequisites": ["m06-controller"],
+    "references": [
+      {
+        "lessonId": "0005-problem-editor-run",
+        "path": "services/game/src/game/game.controller.ts",
+        "startLine": 55,
+        "endLine": 65
+      }
+    ],
+    "steps": [
+      {
+        "id": "m06-validation-orient",
+        "phase": "orient",
+        "title": "Annotations do not guard the network",
+        "question": "Why check a body TypeScript already types?",
+        "explanation": [
+          "Annotations disappear when compiled. Any client can send a string where a number belongs. The route must verify shapes at runtime and answer 400 for bad input.",
+          "This teaching route is POST /practice-decision with {secondsLeft: number}. It does not authorize a game Submit; the gameplay controller later consumes trusted identity and authoritative Match time."
+        ],
+        "vocabulary": [
+          {
+            "term": "Validation",
+            "meaning": "Runtime shape checking of untrusted input. Failures answer 400."
+          }
+        ],
+        "hints": [
+          "Answer: types vanish.",
+          "Find a string where a number belongs.",
+          "Compare with checking argc/argv.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See valid versus malformed."
+      },
+      {
+        "id": "m06-validation-see",
+        "phase": "see",
+        "title": "See 200 and 400 side by side",
+        "question": "Which body gets which status?",
+        "explanation": [
+          "{secondsLeft: 12} passes and answers 200. {secondsLeft: '12'} fails validation and answers 400 with a message naming the field."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at the good body.",
+          "Point at the 400.",
+          "Compare with valid versus invalid input.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the parser.",
+        "visual": {
+          "kind": "trace",
+          "title": "Validation branches",
+          "code": [
+            "{secondsLeft: 12} -> 200 {open}",
+            "{secondsLeft: '12'} -> 400 {error}",
+            "{} -> 400 {error}"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Valid",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "200 with answer"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "A number passes and delegates to the rule."
+            },
+            {
+              "id": "frame-1",
+              "label": "Wrong type",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "400 naming secondsLeft"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "A string fails before any rule runs."
+            },
+            {
+              "id": "frame-2",
+              "label": "Missing",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "400 naming secondsLeft"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "A missing field fails the same way."
+            }
+          ],
+          "cases": [
+            {
+              "input": "secondsLeft: '12'",
+              "expected": "400",
+              "reason": "Annotations cannot reject JSON."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m06-validation-understand",
+        "phase": "understand",
+        "title": "Check before delegating",
+        "question": "Where does validation sit?",
+        "explanation": [
+          "Between parsing and the service call. Invalid bodies never reach game rules.",
+          "Reference preview: services/game/src/game/game.controller.ts checks code and language types and sizes before delegating (lines 55-65). Your practice input.ts checks secondsLeft the same way."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the order: parse, validate, delegate.",
+          "Find the typeof checks in the preview.",
+          "Compare with guard clauses.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try three bodies by hand."
+      },
+      {
+        "id": "m06-validation-try",
+        "phase": "try",
+        "title": "Decide 200 or 400",
+        "question": "12? '12'? Missing?",
+        "explanation": ["200, 400, 400. Each 400 names secondsLeft."],
+        "vocabulary": [],
+        "hints": [
+          "Write body and status.",
+          "Find the field check.",
+          "Compare with the visual.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build validation."
+      },
+      {
+        "id": "m06-validation-build",
+        "phase": "build",
+        "title": "Validate the teaching route",
+        "question": "Do malformed bodies fail with 400 before rules run?",
+        "explanation": [
+          "Practice paths: create src/server/input.ts; edit src/server/game.controller.ts and test/service.test.ts. Nest maps BadRequestException to status 400."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: parseDecision validates unknown JSON to {secondsLeft: number} or throws a 400-shaped error.",
+          "Relevant value: fetch good, string, and missing bodies; assert 200/400/400.",
+          "Analogous example: like validateProblem, throw on malformed input with the field named.",
+          "Walkthrough: define parseDecision(body: unknown), throw BadRequestException with the field name, let the controller map it to 400, and assert the rule service was not called on invalid input."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/input.ts",
+            "action": "create",
+            "owner": "src/server/ owns input parsing.",
+            "change": "Add parseDecision with explicit number check for secondsLeft.",
+            "pattern": "Throw a named error; the route maps it to 400."
+          },
+          {
+            "role": "test.http",
+            "workspace": "active",
+            "path": "test/service.test.ts",
+            "action": "edit",
+            "owner": "test/ proves 400s.",
+            "change": "Add malformed-body cases asserting status and field-naming error.",
+            "pattern": "Fetch with JSON bodies; assert status before content."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/game.controller.ts",
+            "action": "edit",
+            "owner": "The controller owns request-to-input wiring.",
+            "change": "Call parseDecision before the rule service and allow BadRequestException to become HTTP 400.",
+            "pattern": "Keep the successful route at HTTP 200; do not put parsing in main.ts."
+          }
+        ],
+        "checkIds": ["m06-validation-service"],
+        "prerequisiteCheckIds": ["m06-controller-service"],
+        "next": "Check validation and connect to identity."
+      },
+      {
+        "id": "m06-validation-check",
+        "phase": "check",
+        "title": "Report 400s",
+        "question": "What proved rules never ran on bad input?",
+        "explanation": ["Run the check at the practice root."],
+        "vocabulary": [],
+        "hints": [
+          "State the command and statuses.",
+          "Show the field name.",
+          "Compare with silent acceptance.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m06-validation-service"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to identity.",
+        "transfer": "In words, explain why validation precedes the service call. Predict what a gameplay route validates beyond types."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m06-validation-service",
+        "command": "npm run test:service",
+        "cwd": ".",
+        "expected": "Good body answers 200; string and missing bodies answer 400 naming secondsLeft; rules never run on 400.",
+        "kind": "service",
+        "failure": [
+          {
+            "symptom": "String body reaches the rule",
+            "diagnostic": "Call parseDecision before the service; check typeof secondsLeft === 'number'.",
+            "meaning": "Validation gates delegation."
+          },
+          {
+            "symptom": "400 without a field name",
+            "diagnostic": "Include 'secondsLeft' in the error message.",
+            "meaning": "Errors must guide the sender."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m06-identity",
+    "milestoneId": "M06",
+    "title": "Attach a verified identity, not a body field",
+    "why": "Membership needs a server-verified actor. Client-supplied player IDs are untrusted.",
+    "outcome": "Reject missing, untrusted, and outsider actors before membership.",
+    "prerequisites": ["m06-validation"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/principal.ts",
+        "startLine": 1,
+        "endLine": 36
+      }
+    ],
+    "steps": [
+      {
+        "id": "m06-identity-orient",
+        "phase": "orient",
+        "title": "Who says who you are?",
+        "question": "Why is a body playerId untrusted?",
+        "explanation": [
+          "Anyone can type any name into a request body. The server attaches identity from a verified seam — here a development-only header adapter, later real authentication.",
+          "The practice adapter is conspicuously development-only: it reads x-dev-user-id only when explicitly enabled, and production replaces it without changing game logic."
+        ],
+        "vocabulary": [
+          {
+            "term": "Identity",
+            "meaning": "Server-verified actor attached before membership. Never a body field."
+          }
+        ],
+        "hints": [
+          "Answer: bodies lie.",
+          "Find the header.",
+          "Compare with a stamped badge versus a handwritten note.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "See the three denials."
+      },
+      {
+        "id": "m06-identity-see",
+        "phase": "see",
+        "title": "See missing, untrusted, outsider",
+        "question": "Which denial is membership versus authentication?",
+        "explanation": [
+          "Missing header and disabled adapter deny with 401 before membership. A verified outsider reaches membership and fails there."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Point at each 401.",
+          "Point at the outsider.",
+          "Compare with locked door versus wrong guest list.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Learn the adapter.",
+        "visual": {
+          "kind": "trace",
+          "title": "Identity before membership",
+          "code": [
+            "no header -> 401",
+            "header zoe, not a member -> membership deny",
+            "header ana, member -> allow"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Missing",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "401 no actor"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Without an actor, nothing else is checked."
+            },
+            {
+              "id": "frame-1",
+              "label": "Outsider",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "membership deny"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "A verified non-member fails at the M03 gate."
+            },
+            {
+              "id": "frame-2",
+              "label": "Member",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "allowed onward"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "A verified member proceeds to phase and deadline gates."
+            }
+          ],
+          "cases": [
+            {
+              "input": "body playerId ana, no header",
+              "expected": "401",
+              "reason": "Bodies never identify."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m06-identity-understand",
+        "phase": "understand",
+        "title": "Development-only, on purpose",
+        "question": "What makes the adapter safe to learn with?",
+        "explanation": [
+          "It is explicit and ugly: a header read that only works when enabled, named DEV, and documented as replaced in production. Game logic below it never changes.",
+          "Reference preview: services/game/src/game/principal.ts defines the DEV-ONLY seam, 401s for missing identity, and requirePrincipal (lines 1-36). Your practice identity.ts mirrors it with local names."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the header.",
+          "Find DEV_PRINCIPAL in the preview.",
+          "Compare with training wheels.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try three actors by hand."
+      },
+      {
+        "id": "m06-identity-try",
+        "phase": "try",
+        "title": "Decide allow or deny",
+        "question": "No header? Header zoe? Header ana?",
+        "explanation": ["401, membership deny, allow onward."],
+        "vocabulary": [],
+        "hints": [
+          "Write actor and verdict.",
+          "Find each branch.",
+          "Compare with the membership lesson.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Build identity."
+      },
+      {
+        "id": "m06-identity-build",
+        "phase": "build",
+        "title": "Attach verified identity",
+        "question": "Does a body playerId alone get in?",
+        "explanation": [
+          "Practice paths: create src/server/identity.ts; edit src/server/game.controller.ts and test/service.test.ts. The /game-decision controller route reads the development-only identity header before it calls membership or reads body playerId."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Goal: identityFromHeader attaches {userId} or 401s; game route ignores body playerId.",
+          "Relevant value: missing header gives 401; zoe gets 403 from membership; ana reaches the rule and gets 200.",
+          "Analogous example: like requireMember, resolve the actor before anything else.",
+          "Walkthrough: define identityFromHeader; add /game-decision to game.controller.ts; call the adapter, then requireMember, then parse the body; test a lying body playerId without a header and expect 401."
+        ],
+        "files": [
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/identity.ts",
+            "action": "create",
+            "owner": "src/server/ owns actor attachment.",
+            "change": "Add an explicit development-only header adapter with 401s.",
+            "pattern": "Name DEV in code and comments; never trust body fields."
+          },
+          {
+            "role": "test.http",
+            "workspace": "active",
+            "path": "test/service.test.ts",
+            "action": "edit",
+            "owner": "test/ proves 401s.",
+            "change": "Add missing-header, outsider, and lying-body cases.",
+            "pattern": "Set headers per fetch; assert 401 before membership."
+          },
+          {
+            "role": "domain.match",
+            "workspace": "active",
+            "path": "src/server/game.controller.ts",
+            "action": "edit",
+            "owner": "The controller owns HTTP identity and membership order.",
+            "change": "Add POST /game-decision; attach identity from the explicit development header before membership and rule calls.",
+            "pattern": "Use @Inject(GameService); never read playerId from JSON; return 401 before membership and 403 for a non-member."
+          }
+        ],
+        "checkIds": ["m06-identity-service"],
+        "prerequisiteCheckIds": ["m06-validation-service"],
+        "next": "Check identity and connect to the browser."
+      },
+      {
+        "id": "m06-identity-check",
+        "phase": "check",
+        "title": "Report identity denials",
+        "question": "What proved bodies never identify?",
+        "explanation": [
+          "Run the check at the practice root. No production-auth claim comes from these credentials."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "State the command and statuses.",
+          "Show the lying body 401.",
+          "Compare with trusted headers.",
+          "Read the expected result before you change code."
+        ],
+        "files": [],
+        "checkIds": ["m06-identity-service"],
+        "prerequisiteCheckIds": [],
+        "next": "Move to the browser.",
+        "transfer": "In words, explain why identity precedes membership. Predict what production replaces in this adapter."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m06-identity-service",
+        "command": "npm run test:service",
+        "cwd": ".",
+        "expected": "Missing header answers 401; outsider fails membership; lying body without header answers 401; member passes to gates.",
+        "kind": "service",
+        "failure": [
+          {
+            "symptom": "Body playerId accepted",
+            "diagnostic": "Read the actor only from the verified header adapter; ignore body identity fields.",
+            "meaning": "Bodies are untrusted input."
+          },
+          {
+            "symptom": "Outsider gets 401 instead of membership error",
+            "diagnostic": "Attach identity first (401 only when absent), then run the M03 membership gate.",
+            "meaning": "Authentication and membership are separate denials."
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,1651 @@
+[
+  {
+    "id": "m09-isolation",
+    "milestoneId": "M09",
+    "title": "Keep player code on the other side of a boundary",
+    "why": "Player code is untrusted input. It must run in a limited execution environment, away from Game memory, service credentials, the browser, and the database.",
+    "outcome": "Define a verdict-only Judge contract and show which trusted data may cross into one execution case.",
+    "prerequisites": ["m08-recovery"],
+    "references": [
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/judge.ts",
+        "startLine": 107,
+        "endLine": 139
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/container-judge.ts",
+        "startLine": 257,
+        "endLine": 301
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "spikes/judge-isolation/DECISION.md",
+        "startLine": 1,
+        "endLine": 25
+      }
+    ],
+    "steps": [
+      {
+        "id": "m09-isolation-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Keep player code on the other side of a boundary",
+        "explanation": [
+          "Player code is untrusted input. It must run in a limited execution environment, away from Game memory, service credentials, the browser, and the database. Define a verdict-only Judge contract and show which trusted data may cross into one execution case."
+        ],
+        "vocabulary": [
+          {
+            "term": "Sandbox",
+            "meaning": "A restricted place to run code with limits on time, memory, files and network."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Trusted Game and limited execution box"
+      },
+      {
+        "id": "m09-isolation-see",
+        "phase": "see",
+        "title": "Trusted Game and limited execution box",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Trusted Game and limited execution box",
+          "code": [
+            "Game → Judge request",
+            "Worker → fresh case container",
+            "verdict → Game-owned scoring"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Game",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "owns rules and score"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "owns rules and score."
+            },
+            {
+              "id": "frame-1",
+              "label": "Container",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "runs one untrusted case"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "runs one untrusted case."
+            },
+            {
+              "id": "frame-2",
+              "label": "Worker",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "compares output; returns result"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "compares output; returns result."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Submitted code tries to reach a database",
+              "expected": "No database credential, host mount or network is present in the execution box",
+              "reason": "Isolation is enforced by the container boundary, not by a code comment."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m09-isolation-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "Player code is untrusted input. It must run in a limited execution environment, away from Game memory, service credentials, the browser, and the database. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Sandbox",
+            "meaning": "A restricted place to run code with limits on time, memory, files and network."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m09-isolation-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "Should the browser receive the expected output of a hidden case?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Define a verdict without moving score ownership"
+      },
+      {
+        "id": "m09-isolation-contract",
+        "phase": "build",
+        "title": "Define a verdict without moving score ownership",
+        "question": "What data does the Game need back from the Judge?",
+        "explanation": [
+          "Create a small Judge contract with request identity, language and source, bounded cases, resource limits, and per-case status/output. Return verdict details only; Game still owns points and Reveal."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Judge receives source and bounded cases; it returns per-case status and safe output.",
+          "Keep Match totals and hidden expected values outside both request and public result.",
+          "Example result: {caseId, status, actualOutput}; Game uses status to award points and make Reveal.",
+          "Run typecheck and the contract test before adding a container or worker."
+        ],
+        "files": [
+          {
+            "role": "judge.contract",
+            "workspace": "active",
+            "path": "src/judge/contract.ts",
+            "action": "create",
+            "owner": "The contract owns the boundary data shape.",
+            "change": "Define JudgeRequest and JudgeResult without including Match totals or hidden expected output in a public response.",
+            "pattern": "Only trusted Game/worker code sees expected values; never send the hidden suite to the browser."
+          }
+        ],
+        "checkIds": ["m09-isolation-unit"],
+        "prerequisiteCheckIds": ["m08-recovery-database"],
+        "next": "Check what can cross the boundary"
+      },
+      {
+        "id": "m09-isolation-contract-test",
+        "phase": "build",
+        "title": "Check what can cross the boundary",
+        "question": "Can a client-facing object include hidden markers?",
+        "explanation": [
+          "Add a focused contract test that checks returned visible results contain only the requested visible cases and that the Judge result does not own scores."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Build one visible case and one hidden case, then inspect exactly what crosses each boundary.",
+          "Assert the Judge result has case status but no Match score or hidden expected value.",
+          "Walkthrough: a passing verdict returns to Game; only Game changes score and builds Reveal.",
+          "Run the contract test and keep secret fixture assertions on the trusted side."
+        ],
+        "files": [
+          {
+            "role": "judge.contract-test",
+            "workspace": "active",
+            "path": "test/judge-contract.test.ts",
+            "action": "create",
+            "owner": "The unit test owns public-versus-trusted shape checks.",
+            "change": "Verify case identity and status are returned without hidden expected values or Match score fields.",
+            "pattern": "A string scan helps, but it is not proof against every confidentiality leak."
+          }
+        ],
+        "checkIds": ["m09-isolation-unit"],
+        "prerequisiteCheckIds": ["m09-isolation-unit"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m09-isolation-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Read the actual team execution path and threat boundary. Do not copy a Docker setting until you know which process owns the socket.",
+        "transfer": "Read the actual team execution path and threat boundary. Do not copy a Docker setting until you know which process owns the socket."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m09-isolation-unit",
+        "kind": "unit",
+        "command": "npm test -- test/judge-contract.test.ts",
+        "cwd": ".",
+        "expected": "Contract tests keep Match scoring in Game and keep hidden expected values out of public results.",
+        "failure": [
+          {
+            "symptom": "A public type contains a hidden case value or score field.",
+            "diagnostic": "Separate the trusted judge request from the public response.",
+            "meaning": "The boundary leaks data or moves rule ownership."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m09-provider",
+    "milestoneId": "M09",
+    "title": "Choose one Judge provider on purpose",
+    "why": "Different environments may use a local container or a private worker. A missing provider must fail clearly; silently switching can change the security boundary.",
+    "outcome": "Read provider choice from configuration, validate the selected adapter, and keep local settings out of Git.",
+    "prerequisites": ["m09-isolation"],
+    "references": [
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "services/game/src/game/judge-factory.ts",
+        "startLine": 19,
+        "endLine": 40
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "services/game/src/game/judge-factory.test.ts",
+        "startLine": 12,
+        "endLine": 36
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/worker-judge.ts",
+        "startLine": 68,
+        "endLine": 159
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".env.example",
+        "startLine": 1,
+        "endLine": 29
+      }
+    ],
+    "steps": [
+      {
+        "id": "m09-provider-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Choose one Judge provider on purpose",
+        "explanation": [
+          "Different environments may use a local container or a private worker. A missing provider must fail clearly; silently switching can change the security boundary. Read provider choice from configuration, validate the selected adapter, and keep local settings out of Git."
+        ],
+        "vocabulary": [
+          {
+            "term": "Provider",
+            "meaning": "The selected service that performs the Judge work."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "One explicit route, no fallback arrow"
+      },
+      {
+        "id": "m09-provider-see",
+        "phase": "see",
+        "title": "One explicit route, no fallback arrow",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "One explicit route, no fallback arrow",
+          "code": [
+            "JUDGE_BACKEND=container",
+            "or JUDGE_BACKEND=worker",
+            "unknown/unavailable → clear error"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Read setting",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "once at startup"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "once at startup."
+            },
+            {
+              "id": "frame-1",
+              "label": "Choose adapter",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "only the named provider"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "only the named provider."
+            },
+            {
+              "id": "frame-2",
+              "label": "Failure",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "report unavailable; do not switch"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "report unavailable; do not switch."
+            }
+          ],
+          "cases": [
+            {
+              "input": "JUDGE_BACKEND=worker but token is missing",
+              "expected": "Startup fails with a setting diagnostic",
+              "reason": "It must not fall back to the direct container adapter."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m09-provider-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "Different environments may use a local container or a private worker. A missing provider must fail clearly; silently switching can change the security boundary. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Provider",
+            "meaning": "The selected service that performs the Judge work."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m09-provider-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "Why can silent fallback hide a missing security control?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make provider choice explicit"
+      },
+      {
+        "id": "m09-provider-provider",
+        "phase": "build",
+        "title": "Make provider choice explicit",
+        "question": "What should happen when the chosen provider is unavailable?",
+        "explanation": [
+          "Create one provider factory. Accept only the named backend, validate that provider's required settings, and throw a clear error if it is missing. Do not put a fallback branch after the error."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Select one backend from JUDGE_BACKEND when the app starts.",
+          "Validate only the settings required by that selected backend; an unknown value is an error.",
+          "Small shape: container → ContainerJudge; worker → WorkerJudge; missing config → throw, with no fallback arrow.",
+          "Run provider tests for both valid choices, an unknown choice, and missing selected settings."
+        ],
+        "files": [
+          {
+            "role": "judge.provider",
+            "workspace": "active",
+            "path": "src/judge/provider.ts",
+            "action": "create",
+            "owner": "The factory owns provider selection.",
+            "change": "Select the configured container or worker adapter once and reject unknown or incomplete settings.",
+            "pattern": "No automatic fallback: a broken private worker must not become a less restricted provider."
+          }
+        ],
+        "checkIds": ["m09-provider-unit"],
+        "prerequisiteCheckIds": ["m09-isolation-unit"],
+        "next": "Add Judge variable names without a secret"
+      },
+      {
+        "id": "m09-provider-env",
+        "phase": "build",
+        "title": "Add Judge variable names without a secret",
+        "question": "Where should the private worker token live?",
+        "explanation": [
+          "Add JUDGE_BACKEND, JUDGE_WORKER_URL and an empty JUDGE_WORKER_TOKEN line to .env.example. The real token belongs in the ignored local .env file; do not record it in commands, screenshots or evidence."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Add the three variable names to .env.example, with an empty token value.",
+          "Put real settings only in ignored .env. Do not paste the token into a command or screenshot.",
+          "Example: JUDGE_BACKEND=worker and JUDGE_WORKER_URL=http://127.0.0.1:PORT; leave JUDGE_WORKER_TOKEN blank.",
+          "Run the ignore check and inspect the example file for secrets."
+        ],
+        "files": [
+          {
+            "role": "judge.env-example",
+            "workspace": "active",
+            "path": ".env.example",
+            "action": "edit",
+            "owner": ".env.example lists setting names only.",
+            "change": "Add the selected backend, local worker URL, and a blank token setting.",
+            "pattern": "Never fill a real token into the sample or commit .env."
+          }
+        ],
+        "checkIds": ["m09-provider-env"],
+        "prerequisiteCheckIds": ["m09-provider-unit"],
+        "next": "Prove invalid choices fail closed"
+      },
+      {
+        "id": "m09-provider-provider-tests",
+        "phase": "build",
+        "title": "Prove invalid choices fail closed",
+        "question": "What should the test see for an unknown provider?",
+        "explanation": [
+          "Test each supported provider, an unknown name, and a missing selected-provider setting. Assert that the factory reports its own error rather than returning another adapter."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Test one successful instance for each backend the course supports.",
+          "Then test an unknown backend and a missing URL/token for the selected backend.",
+          "Expected: each bad selection throws a clear provider error; it never returns the other provider.",
+          "Run the test without Docker first; this test checks configuration, not execution."
+        ],
+        "files": [
+          {
+            "role": "judge.provider-test",
+            "workspace": "active",
+            "path": "test/provider.test.ts",
+            "action": "create",
+            "owner": "The provider test owns configuration cases.",
+            "change": "Test explicit selection and the no-fallback rule for unknown or unavailable providers.",
+            "pattern": "This is a configuration unit test, not evidence that a real Judge ran code."
+          }
+        ],
+        "checkIds": ["m09-provider-unit"],
+        "prerequisiteCheckIds": ["m09-provider-env"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m09-provider-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "In the team repository, inspect how it gets identity and provider settings. Practice environment names are not production authentication.",
+        "transfer": "In the team repository, inspect how it gets identity and provider settings. Practice environment names are not production authentication."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m09-provider-unit",
+        "kind": "unit",
+        "command": "npm test -- test/provider.test.ts",
+        "cwd": ".",
+        "expected": "Supported configuration selects its named adapter; unknown or incomplete configuration throws without switching.",
+        "failure": [
+          {
+            "symptom": "The factory returns a default adapter for an unsupported name.",
+            "diagnostic": "Remove fallback behavior and report the selected provider's missing setting.",
+            "meaning": "The runtime security boundary may differ from configuration."
+          }
+        ]
+      },
+      {
+        "id": "m09-provider-env",
+        "kind": "unit",
+        "command": "git check-ignore -q .env && ! git check-ignore -q .env.example",
+        "cwd": ".",
+        "expected": ".env is ignored, .env.example remains trackable, and the sample token value is blank.",
+        "failure": [
+          {
+            "symptom": "The local token is visible in the sample or the sample is ignored.",
+            "diagnostic": "Keep only variable names in the sample and add the explicit ignore exception.",
+            "meaning": "A secret could enter source control."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m09-case-runner",
+    "milestoneId": "M09",
+    "title": "Run each case with limits",
+    "why": "One player program can loop forever, fill memory, print endlessly, create processes, or try to use the network. Each case needs its own disposable container and finite limits.",
+    "outcome": "Build a case runner that sends only needed input, captures bounded output, and lets trusted code compare expected results.",
+    "prerequisites": ["m09-provider"],
+    "references": [
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/container-judge.ts",
+        "startLine": 184,
+        "endLine": 245
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/container-judge.ts",
+        "startLine": 257,
+        "endLine": 301
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/container-judge.ts",
+        "startLine": 346,
+        "endLine": 399
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/test/container-judge.test.ts",
+        "startLine": 16,
+        "endLine": 69
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "spikes/judge-isolation/DECISION.md",
+        "startLine": 27,
+        "endLine": 40
+      }
+    ],
+    "steps": [
+      {
+        "id": "m09-case-runner-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Run each case with limits",
+        "explanation": [
+          "One player program can loop forever, fill memory, print endlessly, create processes, or try to use the network. Each case needs its own disposable container and finite limits. Build a case runner that sends only needed input, captures bounded output, and lets trusted code compare expected results."
+        ],
+        "vocabulary": [
+          {
+            "term": "Resource limit",
+            "meaning": "A maximum amount of time, memory, output, or processes."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "One fresh box for one case"
+      },
+      {
+        "id": "m09-case-runner-see",
+        "phase": "see",
+        "title": "One fresh box for one case",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "One fresh box for one case",
+          "code": [
+            "source + current input",
+            "fresh container: no network, bounded time/memory",
+            "captured output ↔ trusted expected value"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Input",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "current case only"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "current case only."
+            },
+            {
+              "id": "frame-1",
+              "label": "Execution",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "fresh restricted container"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "fresh restricted container."
+            },
+            {
+              "id": "frame-2",
+              "label": "Compare",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "trusted worker checks output"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "trusted worker checks output."
+            }
+          ],
+          "cases": [
+            {
+              "input": "One case prints too many bytes",
+              "expected": "Return output_limit_exceeded with capped text",
+              "reason": "An over-limit verdict is different from an infrastructure failure."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m09-case-runner-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "One player program can loop forever, fill memory, print endlessly, create processes, or try to use the network. Each case needs its own disposable container and finite limits. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Resource limit",
+            "meaning": "A maximum amount of time, memory, output, or processes."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m09-case-runner-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "Why should the current container not receive the expected output?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Name the real Judge check"
+      },
+      {
+        "id": "m09-case-runner-test-script",
+        "phase": "build",
+        "title": "Name the real Judge check",
+        "question": "How does the command get the local settings without printing them?",
+        "explanation": [
+          "Add test:judge as a Node command that loads the ignored .env file before starting Vitest. Keep the setting values out of the command itself."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Add test:judge to package.json before the first test asks learners to use it.",
+          "Use Node’s --env-file=.env option to load local settings; the script contains no token value.",
+          "Example shape: node --env-file=.env ./node_modules/vitest/vitest.mjs run test/judge.test.ts.",
+          "Run npm run test:judge with a harmless configuration and confirm the script reaches the named test."
+        ],
+        "files": [
+          {
+            "role": "judge.script",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns the Judge command.",
+            "change": "Add test:judge using Node --env-file=.env to start the local Vitest runner.",
+            "pattern": "The script loads local settings but the script text contains no token value."
+          }
+        ],
+        "checkIds": ["m09-case-runner-script"],
+        "prerequisiteCheckIds": ["m09-provider-unit"],
+        "next": "Run one bounded case"
+      },
+      {
+        "id": "m09-case-runner-runner",
+        "phase": "build",
+        "title": "Run one bounded case",
+        "question": "Which parts of a hidden test stay outside player code?",
+        "explanation": [
+          "Create a runner that starts a fresh container for each case. Pass only source and that case's input. Keep expected output in the trusted worker and compare only after the container exits. Map compile_error, runtime_error, time_limit_exceeded, memory_limit_exceeded, output_limit_exceeded and process_limit_exceeded without turning infrastructure failure into a player verdict."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Run each test case in a fresh container and send only source plus that case’s input.",
+          "Keep expected output in trusted code. Capture stdout with a byte cap and stop the container at its time limit.",
+          "Walk one result: compiler exit → compile_error; runtime exit → runtime_error; timeout → time_limit_exceeded.",
+          "Run one harmless known-answer case before resource-failure cases; infrastructure errors must not become player verdicts."
+        ],
+        "files": [
+          {
+            "role": "judge.case-runner",
+            "workspace": "active",
+            "path": "src/judge/case-runner.ts",
+            "action": "create",
+            "owner": "The case runner owns process launch and result mapping.",
+            "change": "Map compile, run and resource failures into the known verdict statuses; cap captured output.",
+            "pattern": "Apply CPU, wall time, memory, output and process bounds; disable network and persistent mounts."
+          }
+        ],
+        "checkIds": ["m09-case-runner-types"],
+        "prerequisiteCheckIds": ["m09-case-runner-script"],
+        "next": "Declare the small language runtime"
+      },
+      {
+        "id": "m09-case-runner-image",
+        "phase": "build",
+        "title": "Declare the small language runtime",
+        "question": "Which code runs in the trusted image and which runs in the disposable container?",
+        "explanation": [
+          "Create the judge image with the supported C, C++ and Python toolchains and a trusted wrapper. Never put database credentials or a Docker socket in the player container."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Install only the supported language toolchains and the trusted launcher in the image.",
+          "The player container must not receive the database URL, worker token, host filesystem, or Docker socket.",
+          "Example boundary: copy source into a fresh work directory, run one compiler, then execute with finite limits.",
+          "Build the image and inspect its user, mounts, network and limits before running fixtures."
+        ],
+        "files": [
+          {
+            "role": "judge.image",
+            "workspace": "active",
+            "path": "infra/judge.Dockerfile",
+            "action": "create",
+            "owner": "The Dockerfile owns trusted compiler and wrapper dependencies.",
+            "change": "Build the bounded execution image for the named starter languages.",
+            "pattern": "Pin the base image and keep secrets and service mounts out of the image."
+          }
+        ],
+        "checkIds": ["m09-case-runner-types"],
+        "prerequisiteCheckIds": ["m09-case-runner-types"],
+        "next": "Test safe examples and bounded output"
+      },
+      {
+        "id": "m09-case-runner-runner-test",
+        "phase": "build",
+        "title": "Test safe examples and bounded output",
+        "question": "Can normal and wrong answers return without exposing hidden data?",
+        "explanation": [
+          "Create benign known-answer tests for C, C++ and Python, plus a small output-cap case. Do not run fork bombs or memory attacks as a first rehearsal; Docker's enforcement and cleanup must be checked first."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start with one tiny C, C++ and Python program that returns a known answer.",
+          "Add a small output-cap case; assert the captured result stops at the configured byte limit.",
+          "Example: expected output remains in the test process; the container receives source and stdin only.",
+          "Run bounded benign fixtures first. Do not try hostile resource attacks before Docker cleanup is verified."
+        ],
+        "files": [
+          {
+            "role": "judge.runner-test",
+            "workspace": "active",
+            "path": "test/judge.test.ts",
+            "action": "create",
+            "owner": "The runner test owns small known fixtures.",
+            "change": "Check accepted, compile_error, runtime_error, time_limit_exceeded, memory_limit_exceeded and output_limit_exceeded with small fixtures inside a reviewed, limited container.",
+            "pattern": "Never assert a contestant-supplied pass flag; compare captured output in trusted code."
+          }
+        ],
+        "checkIds": ["m09-case-runner-docker"],
+        "prerequisiteCheckIds": ["m09-case-runner-types"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m09-case-runner-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Before running any hostile test, read the runner source and resource flags. Start with known good and small wrong-answer programs.",
+        "transfer": "Before running any hostile test, read the runner source and resource flags. Start with known good and small wrong-answer programs."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m09-case-runner-script",
+        "kind": "integration",
+        "command": "npm pkg get scripts.test:judge",
+        "cwd": ".",
+        "expected": "The package script loads .env locally and invokes Vitest without printing any setting value.",
+        "failure": [
+          {
+            "symptom": "The script name is missing or contains a token value.",
+            "diagnostic": "Read only the script definition and keep actual settings in ignored .env.",
+            "meaning": "The real Judge command is not safely configured."
+          }
+        ]
+      },
+      {
+        "id": "m09-case-runner-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "The runner request/result types preserve the verdict taxonomy and omit score ownership.",
+        "failure": [
+          {
+            "symptom": "Infrastructure failure is reported as a counted wrong answer.",
+            "diagnostic": "Keep JudgeInfraError separate from a contestant execution verdict.",
+            "meaning": "A temporary service outage could count against a player."
+          }
+        ]
+      },
+      {
+        "id": "m09-case-runner-docker",
+        "kind": "judge",
+        "command": "npm run test:judge -- test/judge.test.ts",
+        "cwd": ".",
+        "expected": "With Docker and the configured image ready, bounded C, C++ and Python examples return accepted, compile_error, runtime_error, time_limit_exceeded, memory_limit_exceeded or output_limit_exceeded as expected; hidden expected values stay in trusted code.",
+        "failure": [
+          {
+            "symptom": "Docker is unavailable or a required image is missing.",
+            "diagnostic": "Check readiness and image names. Do not weaken limits or mark this Judge check passed because a unit mock passed.",
+            "meaning": "Real code execution and resource bounds remain unproved."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m09-worker",
+    "milestoneId": "M09",
+    "title": "Put the Judge behind a private worker",
+    "why": "The worker owns Docker access and a bounded queue. Game sends a job over a private authenticated route; the worker has no Game database credentials and no public port.",
+    "outcome": "Add authentication, a finite queue, readiness checks, and safe shutdown to the worker boundary.",
+    "prerequisites": ["m09-case-runner"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/judge-worker/src/http-server.ts",
+        "startLine": 183,
+        "endLine": 252
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/judge-worker/src/job-queue.ts",
+        "startLine": 22,
+        "endLine": 134
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/judge-worker/src/readiness.ts",
+        "startLine": 31,
+        "endLine": 74
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "docker-compose.yml",
+        "startLine": 57,
+        "endLine": 115
+      }
+    ],
+    "steps": [
+      {
+        "id": "m09-worker-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Put the Judge behind a private worker",
+        "explanation": [
+          "The worker owns Docker access and a bounded queue. Game sends a job over a private authenticated route; the worker has no Game database credentials and no public port. Add authentication, a finite queue, readiness checks, and safe shutdown to the worker boundary."
+        ],
+        "vocabulary": [
+          {
+            "term": "Readiness",
+            "meaning": "A check that says whether a service can accept real work now."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Private Game-to-worker route"
+      },
+      {
+        "id": "m09-worker-see",
+        "phase": "see",
+        "title": "Private Game-to-worker route",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Private Game-to-worker route",
+          "code": [
+            "Game → private HTTP + bearer token",
+            "bounded queue → container worker",
+            "no public port · no DB credentials"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Private route",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "authenticated inside Compose"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "authenticated inside Compose."
+            },
+            {
+              "id": "frame-1",
+              "label": "Queue",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "finite active and waiting jobs"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "finite active and waiting jobs."
+            },
+            {
+              "id": "frame-2",
+              "label": "Readiness",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "Docker and images must be ready"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Docker and images must be ready."
+            }
+          ],
+          "cases": [
+            {
+              "input": "The queue is full",
+              "expected": "Worker returns a clear busy result and starts no extra container",
+              "reason": "A finite queue protects memory and host capacity."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m09-worker-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "The worker owns Docker access and a bounded queue. Game sends a job over a private authenticated route; the worker has no Game database credentials and no public port. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Readiness",
+            "meaning": "A check that says whether a service can accept real work now."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m09-worker-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "Which service should receive the Docker socket mount?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Name the private worker check"
+      },
+      {
+        "id": "m09-worker-test-script",
+        "phase": "build",
+        "title": "Name the private worker check",
+        "question": "Which local settings does this command read?",
+        "explanation": [
+          "Add test:worker as a Node command that loads the ignored .env file before Vitest. Do not place the bearer token in the package script."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Add test:worker in the same package script style as test:judge.",
+          "Load ignored .env at process start; keep the bearer token out of the command text.",
+          "The script should target test/worker.test.ts so the check is easy to find and repeat.",
+          "Run npm run test:worker and confirm missing worker settings fail with a clear setup message."
+        ],
+        "files": [
+          {
+            "role": "worker.script",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "package.json owns the worker command.",
+            "change": "Add test:worker using Node --env-file=.env to start the worker integration runner.",
+            "pattern": "Keep the token value only in the ignored local .env file."
+          }
+        ],
+        "checkIds": ["m09-worker-scripts"],
+        "prerequisiteCheckIds": ["m09-case-runner-docker"],
+        "next": "Set a finite amount of waiting work"
+      },
+      {
+        "id": "m09-worker-queue",
+        "phase": "build",
+        "title": "Set a finite amount of waiting work",
+        "question": "What should happen after the waiting queue is full?",
+        "explanation": [
+          "Create a queue with a small active limit, a maximum waiting count, a wait timeout and an execution timeout. Keep a timed-out caller from freeing a slot while its job still runs."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose a maximum number of active jobs and a separate maximum waiting count.",
+          "When waiting is full, reject new work; give queued work a wait timeout and running work its own execution timeout.",
+          "Important: caller timeout does not mean the container stopped. Keep the slot until the job actually ends or is terminated.",
+          "Test full queue, wait timeout, execution timeout, and slot release after cleanup."
+        ],
+        "files": [
+          {
+            "role": "worker.queue",
+            "workspace": "active",
+            "path": "src/worker/queue.ts",
+            "action": "create",
+            "owner": "The queue owns capacity and timeout decisions.",
+            "change": "Bound active jobs, waiting jobs, queue wait time and execution time.",
+            "pattern": "Reject excess work clearly; do not keep an unbounded list of source code."
+          }
+        ],
+        "checkIds": ["m09-worker-types"],
+        "prerequisiteCheckIds": ["m09-worker-scripts"],
+        "next": "Protect the internal job endpoint"
+      },
+      {
+        "id": "m09-worker-http",
+        "phase": "build",
+        "title": "Protect the internal job endpoint",
+        "question": "How does Game prove that this request came from its service?",
+        "explanation": [
+          "Create the private worker endpoint. Require the configured bearer token, cap request size, validate the job shape, and return only safe verdict details. Do not publish the port through public ingress."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Reject a request before queueing it unless its bearer token matches the private setting.",
+          "Cap body bytes before parsing; validate source, language, case input and resource limits.",
+          "Return safe verdict fields only. Bind the port to the private network, not public ingress.",
+          "Test wrong token, oversized body, malformed job and normal result; no player failure for worker outage."
+        ],
+        "files": [
+          {
+            "role": "worker.http",
+            "workspace": "active",
+            "path": "src/worker/main.ts",
+            "action": "create",
+            "owner": "The worker entry owns its private HTTP boundary.",
+            "change": "Validate bearer auth, request bounds, result shape and safe error mapping.",
+            "pattern": "Keep the worker off public routes; player containers never receive this token."
+          }
+        ],
+        "checkIds": ["m09-worker-types"],
+        "prerequisiteCheckIds": ["m09-worker-types"],
+        "next": "Refuse work until Docker is ready"
+      },
+      {
+        "id": "m09-worker-readiness",
+        "phase": "build",
+        "title": "Refuse work until Docker is ready",
+        "question": "What must be healthy before the worker accepts a job?",
+        "explanation": [
+          "Create a readiness probe for the Docker daemon and the configured judge images. On shutdown, stop accepting new jobs and wait for or terminate bounded work without leaving containers behind."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Readiness needs both a reachable Docker daemon and every required judge image.",
+          "Return not-ready when either check fails; do not accept work while startup is incomplete.",
+          "On shutdown, stop new jobs, wait only for the configured bound, then terminate and remove remaining containers.",
+          "Test missing image, Docker down, shutdown during a job and a clean ready state."
+        ],
+        "files": [
+          {
+            "role": "worker.readiness",
+            "workspace": "active",
+            "path": "src/worker/readiness.ts",
+            "action": "create",
+            "owner": "Readiness owns service dependencies.",
+            "change": "Check the daemon and required images; report not-ready without claiming player failure.",
+            "pattern": "Only the trusted worker controls the Docker socket and cleanup."
+          }
+        ],
+        "checkIds": ["m09-worker-ready"],
+        "prerequisiteCheckIds": ["m09-worker-types"],
+        "next": "Exercise auth, queue and readiness"
+      },
+      {
+        "id": "m09-worker-worker-test",
+        "phase": "build",
+        "title": "Exercise auth, queue and readiness",
+        "question": "Can an unauthenticated or excess request reach execution?",
+        "explanation": [
+          "Create unit tests for rejected tokens, malformed data, full queue and not-ready status. Add a live-worker check that confirms the private route and cleanup when Docker is available."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Keep unit cases for wrong token, malformed body, full queue and not-ready status.",
+          "For the live case, send one harmless job through the private endpoint and assert container cleanup.",
+          "Expected: an infrastructure error is visible to the service and does not count as a player verdict.",
+          "Run unit tests without Docker; mark the live check blocked when Docker is unavailable."
+        ],
+        "files": [
+          {
+            "role": "worker.test",
+            "workspace": "active",
+            "path": "test/worker.test.ts",
+            "action": "create",
+            "owner": "The worker test owns queue and HTTP boundary cases.",
+            "change": "Test authorization, bounded queue, readiness, timeout and shutdown cleanup.",
+            "pattern": "Mocks can check mapping; the worker check must use the private service and real configured image."
+          }
+        ],
+        "checkIds": ["m09-worker-live"],
+        "prerequisiteCheckIds": ["m09-worker-ready"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m09-worker-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "A development bearer token does not replace the team's user login, HTTPS, or production secret management.",
+        "transfer": "A development bearer token does not replace the team's user login, HTTPS, or production secret management."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m09-worker-scripts",
+        "kind": "integration",
+        "command": "npm pkg get scripts.test:worker",
+        "cwd": ".",
+        "expected": "The package script loads .env locally and starts Vitest without embedding a worker token.",
+        "failure": [
+          {
+            "symptom": "The script is missing or contains a token value.",
+            "diagnostic": "Inspect only the script definition; leave the real token in ignored .env.",
+            "meaning": "The worker test cannot safely receive local configuration."
+          }
+        ]
+      },
+      {
+        "id": "m09-worker-types",
+        "kind": "unit",
+        "command": "npm run typecheck",
+        "cwd": ".",
+        "expected": "Worker request handling checks auth and bounds before queueing a job.",
+        "failure": [
+          {
+            "symptom": "Unauthenticated input reaches the queue.",
+            "diagnostic": "Validate bearer identity and input size before calling queue.run.",
+            "meaning": "The internal execution service can be abused."
+          }
+        ]
+      },
+      {
+        "id": "m09-worker-ready",
+        "kind": "unit",
+        "command": "npm test -- test/worker.test.ts",
+        "cwd": ".",
+        "expected": "Unit tests reject bad auth, malformed jobs, queue overflow and not-ready state; cleanup path is covered.",
+        "failure": [
+          {
+            "symptom": "A queue or health test hangs or accepts invalid input.",
+            "diagnostic": "Check finite queue behavior and await cleanup in finally.",
+            "meaning": "The service may hang or accept unsafe work."
+          }
+        ]
+      },
+      {
+        "id": "m09-worker-live",
+        "kind": "worker",
+        "command": "npm run test:worker -- test/worker.test.ts",
+        "cwd": ".",
+        "expected": "With the private worker and configured image running, authenticated work returns a bounded verdict; bad auth and readiness fail closed; shutdown leaves no job behind.",
+        "failure": [
+          {
+            "symptom": "No private worker responds or readiness says Docker/images are missing.",
+            "diagnostic": "Check worker URL, its private token source, daemon and image readiness. Do not print token values.",
+            "meaning": "Worker isolation and real queue behavior are unproved."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m09-replace-fake",
+    "milestoneId": "M09",
+    "title": "Connect the real Judge without moving the rules",
+    "why": "The fake makes rule tests fast, but it does not run submitted code. A real provider should replace the fake behind the same Game-facing contract.",
+    "outcome": "Use the configured Judge for one bounded real evaluation while keeping score, retry, deadline and Reveal inside Game.",
+    "prerequisites": ["m09-worker"],
+    "references": [
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "services/game/src/game/game.service.ts",
+        "startLine": 145,
+        "endLine": 164
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "services/game/src/game/judge-factory.ts",
+        "startLine": 19,
+        "endLine": 40
+      },
+      {
+        "lessonId": "0014-rewrite-with-tests",
+        "path": "packages/arena-harness/src/fake-judge.ts",
+        "startLine": 1,
+        "endLine": 55
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/src/judge.ts",
+        "startLine": 107,
+        "endLine": 139
+      }
+    ],
+    "steps": [
+      {
+        "id": "m09-replace-fake-orient",
+        "phase": "orient",
+        "title": "Why this boundary comes now",
+        "question": "Connect the real Judge without moving the rules",
+        "explanation": [
+          "The fake makes rule tests fast, but it does not run submitted code. A real provider should replace the fake behind the same Game-facing contract. Use the configured Judge for one bounded real evaluation while keeping score, retry, deadline and Reveal inside Game."
+        ],
+        "vocabulary": [
+          {
+            "term": "Verdict",
+            "meaning": "The Judge's result for running a case; Game decides how it affects score."
+          }
+        ],
+        "hints": [
+          "Say the goal in one sentence.",
+          "Point to the owner of the data.",
+          "Compare it with one earlier boundary.",
+          "Keep the next code change small."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Swap the adapter, keep Match ownership"
+      },
+      {
+        "id": "m09-replace-fake-see",
+        "phase": "see",
+        "title": "Swap the adapter, keep Match ownership",
+        "question": "What moves from one box to the next?",
+        "explanation": [
+          "Follow each frame from left to right. The arrows show ownership and the stop points show where the next test should look."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the caller.",
+          "Follow one arrow.",
+          "Name which side owns the value.",
+          "Use the case to predict the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Keep the responsibility clear",
+        "visual": {
+          "kind": "trace",
+          "title": "Swap the adapter, keep Match ownership",
+          "code": [
+            "FakeJudge → test rules quickly",
+            "Configured GameJudge → real provider",
+            "verdict → Game scoring and Reveal"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Same interface",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "caller does not know the adapter"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "caller does not know the adapter."
+            },
+            {
+              "id": "frame-1",
+              "label": "Real provider",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "runs bounded isolated source"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "runs bounded isolated source."
+            },
+            {
+              "id": "frame-2",
+              "label": "Game",
+              "values": [
+                {
+                  "label": "State",
+                  "value": "owns score, phase and Reveal"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "owns score, phase and Reveal."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A valid submitted program completes through the selected backend",
+              "expected": "A real verdict reaches the existing Game scoring path",
+              "reason": "The Judge reports execution; Game applies its rule."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m09-replace-fake-understand",
+        "phase": "understand",
+        "title": "Keep the responsibility clear",
+        "question": "What should this part not take over?",
+        "explanation": [
+          "The fake makes rule tests fast, but it does not run submitted code. A real provider should replace the fake behind the same Game-facing contract. The goal is to add only the boundary needed by this step; later lessons add the next owner."
+        ],
+        "vocabulary": [
+          {
+            "term": "Verdict",
+            "meaning": "The Judge's result for running a case; Game decides how it affects score."
+          }
+        ],
+        "hints": [
+          "Name the part that owns the rule.",
+          "Name the part that owns the resource.",
+          "Use the first vocabulary word.",
+          "Do not add a second owner."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Predict before you build"
+      },
+      {
+        "id": "m09-replace-fake-try",
+        "phase": "try",
+        "title": "Predict before you build",
+        "question": "If the worker returns a passing case, which component decides the points?",
+        "explanation": [
+          "Pause before typing. Say what should happen, then compare your prediction with the check after the change."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Describe the normal case.",
+          "Describe one failure.",
+          "Say which file should explain it.",
+          "Keep the rule and the adapter separate."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use the selected provider through GameJudge"
+      },
+      {
+        "id": "m09-replace-fake-wiring",
+        "phase": "build",
+        "title": "Use the selected provider through GameJudge",
+        "question": "Which code should change when the provider changes?",
+        "explanation": [
+          "Edit the Game service wiring so it builds exactly one configured GameJudge. Keep the fake for unit tests and pass the real adapter only to the integration scenario."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Keep Game’s Judge interface unchanged; select the configured provider once during service startup.",
+          "Inject that adapter into GameService. Keep the fake wired into fast unit tests.",
+          "Flow: config → one provider factory → GameJudge; unknown or missing config stops startup.",
+          "Run typecheck and provider tests before the real submission integration case."
+        ],
+        "files": [
+          {
+            "role": "judge.game-wiring",
+            "workspace": "active",
+            "path": "src/server/game.service.ts",
+            "action": "edit",
+            "owner": "Game service wiring owns provider injection.",
+            "change": "Resolve one configured GameJudge at startup and inject it into the existing Game rule.",
+            "pattern": "Do not move score calculation into the worker or browser."
+          }
+        ],
+        "checkIds": ["m09-real-evaluation"],
+        "prerequisiteCheckIds": ["m09-worker-live"],
+        "next": "Run one harmless real submission"
+      },
+      {
+        "id": "m09-replace-fake-real-test",
+        "phase": "build",
+        "title": "Run one harmless real submission",
+        "question": "What is the smallest end-to-end proof of the real adapter?",
+        "explanation": [
+          "Create one bounded C or Python example with a known answer, then follow it through Game submit, worker, result, score and Reveal. Keep the test data harmless and ensure the real runner applies its resource limits."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use one harmless source program and one known input/output pair.",
+          "Submit through the Game path, then observe the worker verdict, Game score and Reveal.",
+          "Assert the same submitted source reached the selected real provider; score remains owned by Game.",
+          "Run with bounded Docker settings and inspect cleanup. If the provider is absent, mark this check blocked."
+        ],
+        "files": [
+          {
+            "role": "judge.real-test",
+            "workspace": "active",
+            "path": "test/real-evaluation.test.ts",
+            "action": "create",
+            "owner": "The integration test owns one known harmless submission.",
+            "change": "Assert a real selected provider runs the program and Game applies its existing score and Reveal rule.",
+            "pattern": "Do not treat a mock verdict as a real Judge pass; keep its evidence kind judge."
+          }
+        ],
+        "checkIds": ["m09-real-evaluation"],
+        "prerequisiteCheckIds": ["m09-real-evaluation"],
+        "next": "Check and connect to the next lesson."
+      },
+      {
+        "id": "m09-replace-fake-check",
+        "phase": "check",
+        "title": "Check, explain, and connect",
+        "question": "Can you explain what changed and what comes next?",
+        "explanation": [
+          "Run each named check from the practice root and read its expected outcome. If the required service is unavailable, record it as blocked and leave the gate open."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what the check proved.",
+          "Say what it did not prove.",
+          "Map one owner in the team repo before copying this pattern."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Do not replace the team's authentication, score rule, or Match owner while swapping one Judge adapter.",
+        "transfer": "Do not replace the team's authentication, score rule, or Match owner while swapping one Judge adapter."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m09-real-evaluation",
+        "kind": "judge",
+        "command": "npm run test:judge -- test/real-evaluation.test.ts",
+        "cwd": ".",
+        "expected": "A benign program runs through the configured provider; Game persists the result, applies score and exposes Reveal at the normal phase boundary.",
+        "failure": [
+          {
+            "symptom": "Provider or worker is unavailable, or the Match settles through a fake.",
+            "diagnostic": "Check JUDGE_BACKEND and worker readiness; assert the integration test uses the real configured provider.",
+            "meaning": "The complete Game-to-real-Judge boundary is not proven."
+          }
+        ]
+      }
+    ]
+  }
+]

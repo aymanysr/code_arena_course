@@ -2793,6 +2793,8 @@ test("renders the test-evidence capstone and disposes every remaining source pat
       readme.includes("Before Lesson 1")
   );
   assert.ok(readme.includes("[Teammate repo map](reference.html#build-path)"));
+  assert.match(readme, /68 authored lessons/);
+  assert.match(readme, /^- \[Build route\]/m);
   assert.doesNotMatch(readme, /lessons\/\d{4}-[^)]+\.html/);
 });
 

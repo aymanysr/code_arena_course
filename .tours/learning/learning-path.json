@@ -9,10 +9,7 @@
       "why": "**See the destination.** Play/watch one reference journey; identify Match, Round, Problem, Run, Submit, Reveal; locate browser, server, storage, and Judge on a simple map. Distinguish reference from practice and team workspaces.",
       "enables": "Know what the game does before creating files.",
       "prerequisites": [],
-      "lessonIds": [
-        "m00-destination",
-        "m00-workspaces"
-      ],
+      "lessonIds": ["m00-destination", "m00-workspaces"],
       "content": "content/M00.json"
     },
     {
@@ -20,15 +17,8 @@
       "title": "Set up a practice workspace",
       "why": "**Set up a practice workspace.** Explain root/current directory, editor, terminal, Git status, Node, package manager, package manifest, dependency install, TypeScript tools, and the first run command. Verify versions and each command before proceeding.",
       "enables": "Run one function in your own practice folder.",
-      "prerequisites": [
-        "M00"
-      ],
-      "lessonIds": [
-        "m01-tools",
-        "m01-folder",
-        "m01-package",
-        "m01-first-run"
-      ],
+      "prerequisites": ["M00"],
+      "lessonIds": ["m01-tools", "m01-folder", "m01-package", "m01-first-run"],
       "content": "content/M01.json"
     },
     {
@@ -36,9 +26,7 @@
       "title": "Move from C to TypeScript and tests",
       "why": "**Move from C to TypeScript and tests.** Functions/parameters/returns; annotations and type erasure; `number` versus C integer types; booleans/strings; objects and arrays; unions, missing values, imports/exports, and basic errors as needed. Explain a test as a function call plus an expected result.",
       "enables": "Test a boundary and explain a changed case.",
-      "prerequisites": [
-        "M01"
-      ],
+      "prerequisites": ["M01"],
       "lessonIds": [
         "m02-boundary",
         "m02-types-runtime",
@@ -53,9 +41,7 @@
       "title": "Represent the game and change its state",
       "why": "**Represent the game and change its state.** Player/side IDs, Match/Round records, allowed phase transitions, membership, injected time, and the difference between a pure decision and a state change. Introduce interfaces as contracts when the first substitute is needed.",
       "enables": "Represent a Match and reject an invalid action.",
-      "prerequisites": [
-        "M02"
-      ],
+      "prerequisites": ["M02"],
       "lessonIds": [
         "m03-records",
         "m03-transitions",
@@ -69,14 +55,8 @@
       "title": "Give players a Problem and a visible Run",
       "why": "**Give players a Problem and a visible Run.** Problem data and validation; statement/starter languages; separate visible and hidden data; a fake Judge; a Run request and result. Introduce promises/`async`/`await` and error paths around this concrete dependency.",
       "enables": "Run public examples without changing the score.",
-      "prerequisites": [
-        "M03"
-      ],
-      "lessonIds": [
-        "m04-problem",
-        "m04-judge-port",
-        "m04-run"
-      ],
+      "prerequisites": ["M03"],
+      "lessonIds": ["m04-problem", "m04-judge-port", "m04-run"],
       "content": "content/M04.json"
     },
     {
@@ -84,9 +64,7 @@
       "title": "Submit, evaluate, score, and reveal",
       "why": "**Submit, evaluate, score, and reveal.** Acceptance and pending receipt; request identity and duplicate protection; fake-Judge success/failure; counted scores; normal Reveal; Round resets; summed Match scores and tie-breaks; Match deadline and bounded reveal grace. Teach these as separate slices.",
       "enables": "Finish a local Match with tested scoring and deadlines.",
-      "prerequisites": [
-        "M04"
-      ],
+      "prerequisites": ["M04"],
       "lessonIds": [
         "m05-accept",
         "m05-pending",
@@ -105,9 +83,7 @@
       "title": "Expose a small server API",
       "why": "**Expose a small server API.** Process/port; HTTP request/response; JSON; route/controller/service; runtime input validation; trusted identity seam; status/error responses. Explain the reference framework's modules and dependency injection only as the small route needs them.",
       "enables": "Call your rules through a small server API.",
-      "prerequisites": [
-        "M05"
-      ],
+      "prerequisites": ["M05"],
       "lessonIds": [
         "m06-http",
         "m06-controller",
@@ -121,9 +97,7 @@
       "title": "Build the screen around working behavior",
       "why": "**Build the screen around working behavior.** HTML/CSS and browser events; then TypeScript components, props/state, rendering, effects/cleanup, forms, editor integration, and requests. Begin with one input/button/result; expand to Problem/editor/Run/Submit/Reveal/final result. Introduce a transport interface when separating the screen from the connection.",
       "enables": "Use one browser to play through your local game.",
-      "prerequisites": [
-        "M06"
-      ],
+      "prerequisites": ["M06"],
       "lessonIds": [
         "m07-browser-basics",
         "m07-react-state",
@@ -139,11 +113,7 @@
       "title": "Save and recover the game",
       "why": "**Save and recover the game.** Memory store versus database; schema/relations and JSONB where used; persistence interface and Postgres adapter; transactions/revisions; durable evaluation ownership; work outside short locks; restart and failed-write recovery; publish events only after commit.",
       "enables": "Recover saved state and reject stale writes.",
-      "prerequisites": [
-        "M05",
-        "M06",
-        "M07"
-      ],
+      "prerequisites": ["M05", "M06", "M07"],
       "lessonIds": [
         "m08-store-port",
         "m08-postgres",
@@ -159,9 +129,7 @@
       "title": "Run code through the real Judge boundary",
       "why": "**Run code through the real Judge boundary.** First explain why player programs need isolation. Connect explicit provider selection, worker API, per-case containers, languages, limits, sealed data, queue/readiness, and infrastructure failures. Compare real results with the fake-Judge contract.",
       "enables": "Run player programs through an isolated Judge.",
-      "prerequisites": [
-        "M08"
-      ],
+      "prerequisites": ["M08"],
       "lessonIds": [
         "m09-isolation",
         "m09-provider",
@@ -176,11 +144,7 @@
       "title": "Create a private Lobby and connect two players",
       "why": "**Create a private Lobby and connect two players.** Invite code, side assignment, Ready and host Start; durable Match creation; HTTP versus socket events; trusted socket identity; membership, revisions, first/last-socket presence, stale replies, disconnect/reconnect, and authoritative refresh.",
       "enables": "Invite a second player and recover after reconnect.",
-      "prerequisites": [
-        "M07",
-        "M08",
-        "M09"
-      ],
+      "prerequisites": ["M07", "M08", "M09"],
       "lessonIds": [
         "m10-invite",
         "m10-start",
@@ -195,10 +159,8 @@
       "id": "M11",
       "title": "Make 2v2 safe and understandable",
       "why": "**Make 2v2 safe and understandable.** Team membership; shared document and revisions; collaboration protocol; round-scoped clients; both-player readiness; readiness invalidation after edits; submission of the agreed document snapshot.",
-      "enables": "Keep two teams\u2019 code and readiness separate.",
-      "prerequisites": [
-        "M10"
-      ],
+      "enables": "Keep two teams’ code and readiness separate.",
+      "prerequisites": ["M10"],
       "lessonIds": [
         "m11-document",
         "m11-ready",
@@ -212,14 +174,8 @@
       "title": "Add Game-owned team chat and client cleanup",
       "why": "**Add Game-owned team chat and client cleanup.** Match scope versus Round scope; chat membership and team isolation; messages/pings; history limits and errors; preservation/disposal of chat and collaboration clients.",
       "enables": "Chat with teammates and clean up old clients.",
-      "prerequisites": [
-        "M11"
-      ],
-      "lessonIds": [
-        "m12-chat",
-        "m12-sidecars",
-        "m12-live-chat"
-      ],
+      "prerequisites": ["M11"],
+      "lessonIds": ["m12-chat", "m12-sidecars", "m12-live-chat"],
       "content": "content/M12.json"
     },
     {
@@ -227,9 +183,7 @@
       "title": "Integrate, operate, and prove the complete game",
       "why": "**Integrate, operate, and prove the complete game.** Team-repo mapping; real identity/navigation/configuration contracts; Docker/Compose, environment examples, private worker, Nginx/TLS, service readiness, real multiplayer browser journeys, error recovery, README/contributions, and behavior-by-behavior comparison with the reference.",
       "enables": "Check your implementation inside the team app.",
-      "prerequisites": [
-        "M12"
-      ],
+      "prerequisites": ["M12"],
       "lessonIds": [
         "m13-inspect-team",
         "m13-map-rule",
@@ -256,9 +210,7 @@
       "milestoneId": "M00",
       "title": "Know which folder is yours",
       "status": "ready",
-      "prerequisites": [
-        "m00-destination"
-      ],
+      "prerequisites": ["m00-destination"],
       "output": "build/m00-workspaces.html"
     },
     {
@@ -266,9 +218,7 @@
       "milestoneId": "M01",
       "title": "Meet the tools before using them",
       "status": "ready",
-      "prerequisites": [
-        "m00-workspaces"
-      ],
+      "prerequisites": ["m00-workspaces"],
       "output": "build/m01-tools.html"
     },
     {
@@ -276,9 +226,7 @@
       "milestoneId": "M01",
       "title": "Create a clear practice folder",
       "status": "ready",
-      "prerequisites": [
-        "m01-tools"
-      ],
+      "prerequisites": ["m01-tools"],
       "output": "build/m01-folder.html"
     },
     {
@@ -286,9 +234,7 @@
       "milestoneId": "M01",
       "title": "Give your project its tools",
       "status": "ready",
-      "prerequisites": [
-        "m01-folder"
-      ],
+      "prerequisites": ["m01-folder"],
       "output": "build/m01-package.html"
     },
     {
@@ -296,9 +242,7 @@
       "milestoneId": "M01",
       "title": "Write a function and run it",
       "status": "ready",
-      "prerequisites": [
-        "m01-package"
-      ],
+      "prerequisites": ["m01-package"],
       "output": "build/m01-first-run.html"
     },
     {
@@ -306,9 +250,7 @@
       "milestoneId": "M02",
       "title": "Turn a boundary into a test",
       "status": "ready",
-      "prerequisites": [
-        "m01-first-run"
-      ],
+      "prerequisites": ["m01-first-run"],
       "output": "build/m02-boundary.html"
     },
     {
@@ -316,9 +258,7 @@
       "milestoneId": "M02",
       "title": "Separate types from running code",
       "status": "ready",
-      "prerequisites": [
-        "m02-boundary"
-      ],
+      "prerequisites": ["m02-boundary"],
       "output": "build/m02-types-runtime.html"
     },
     {
@@ -326,9 +266,7 @@
       "milestoneId": "M02",
       "title": "Represent players and missing results",
       "status": "ready",
-      "prerequisites": [
-        "m02-types-runtime"
-      ],
+      "prerequisites": ["m02-types-runtime"],
       "output": "build/m02-records.html"
     },
     {
@@ -336,9 +274,7 @@
       "milestoneId": "M02",
       "title": "Move a rule without changing it",
       "status": "ready",
-      "prerequisites": [
-        "m02-records"
-      ],
+      "prerequisites": ["m02-records"],
       "output": "build/m02-modules.html"
     },
     {
@@ -346,276 +282,222 @@
       "milestoneId": "M02",
       "title": "Write a changed rule on your own",
       "status": "ready",
-      "prerequisites": [
-        "m02-modules"
-      ],
+      "prerequisites": ["m02-modules"],
       "output": "build/m02-transfer.html"
     },
     {
       "id": "m03-records",
       "milestoneId": "M03",
       "title": "Records",
-      "status": "planned",
-      "prerequisites": [
-        "m02-transfer"
-      ],
+      "status": "ready",
+      "prerequisites": ["m02-transfer"],
       "output": "build/m03-records.html"
     },
     {
       "id": "m03-transitions",
       "milestoneId": "M03",
       "title": "Transitions",
-      "status": "planned",
-      "prerequisites": [
-        "m03-records"
-      ],
+      "status": "ready",
+      "prerequisites": ["m03-records"],
       "output": "build/m03-transitions.html"
     },
     {
       "id": "m03-membership",
       "milestoneId": "M03",
       "title": "Membership",
-      "status": "planned",
-      "prerequisites": [
-        "m03-transitions"
-      ],
+      "status": "ready",
+      "prerequisites": ["m03-transitions"],
       "output": "build/m03-membership.html"
     },
     {
       "id": "m03-clock",
       "milestoneId": "M03",
       "title": "Clock",
-      "status": "planned",
-      "prerequisites": [
-        "m03-membership"
-      ],
+      "status": "ready",
+      "prerequisites": ["m03-membership"],
       "output": "build/m03-clock.html"
     },
     {
       "id": "m04-problem",
       "milestoneId": "M04",
       "title": "Problem",
-      "status": "planned",
-      "prerequisites": [
-        "m03-clock"
-      ],
+      "status": "ready",
+      "prerequisites": ["m03-clock"],
       "output": "build/m04-problem.html"
     },
     {
       "id": "m04-judge-port",
       "milestoneId": "M04",
       "title": "Judge port",
-      "status": "planned",
-      "prerequisites": [
-        "m04-problem"
-      ],
+      "status": "ready",
+      "prerequisites": ["m04-problem"],
       "output": "build/m04-judge-port.html"
     },
     {
       "id": "m04-run",
       "milestoneId": "M04",
       "title": "Run",
-      "status": "planned",
-      "prerequisites": [
-        "m04-judge-port"
-      ],
+      "status": "ready",
+      "prerequisites": ["m04-judge-port"],
       "output": "build/m04-run.html"
     },
     {
       "id": "m05-accept",
       "milestoneId": "M05",
       "title": "Accept",
-      "status": "planned",
-      "prerequisites": [
-        "m04-run"
-      ],
+      "status": "ready",
+      "prerequisites": ["m04-run"],
       "output": "build/m05-accept.html"
     },
     {
       "id": "m05-pending",
       "milestoneId": "M05",
       "title": "Pending",
-      "status": "planned",
-      "prerequisites": [
-        "m05-accept"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-accept"],
       "output": "build/m05-pending.html"
     },
     {
       "id": "m05-retry",
       "milestoneId": "M05",
       "title": "Retry",
-      "status": "planned",
-      "prerequisites": [
-        "m05-pending"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-pending"],
       "output": "build/m05-retry.html"
     },
     {
       "id": "m05-score",
       "milestoneId": "M05",
       "title": "Score",
-      "status": "planned",
-      "prerequisites": [
-        "m05-retry"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-retry"],
       "output": "build/m05-score.html"
     },
     {
       "id": "m05-reveal",
       "milestoneId": "M05",
       "title": "Reveal",
-      "status": "planned",
-      "prerequisites": [
-        "m05-score"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-score"],
       "output": "build/m05-reveal.html"
     },
     {
       "id": "m05-round-reset",
       "milestoneId": "M05",
       "title": "Round reset",
-      "status": "planned",
-      "prerequisites": [
-        "m05-reveal"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-reveal"],
       "output": "build/m05-round-reset.html"
     },
     {
       "id": "m05-final-result",
       "milestoneId": "M05",
       "title": "Final result",
-      "status": "planned",
-      "prerequisites": [
-        "m05-round-reset"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-round-reset"],
       "output": "build/m05-final-result.html"
     },
     {
       "id": "m05-deadline",
       "milestoneId": "M05",
       "title": "Deadline",
-      "status": "planned",
-      "prerequisites": [
-        "m05-final-result"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-final-result"],
       "output": "build/m05-deadline.html"
     },
     {
       "id": "m05-complete-match",
       "milestoneId": "M05",
       "title": "Complete match",
-      "status": "planned",
-      "prerequisites": [
-        "m05-deadline"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-deadline"],
       "output": "build/m05-complete-match.html"
     },
     {
       "id": "m06-http",
       "milestoneId": "M06",
       "title": "Http",
-      "status": "planned",
-      "prerequisites": [
-        "m05-complete-match"
-      ],
+      "status": "ready",
+      "prerequisites": ["m05-complete-match"],
       "output": "build/m06-http.html"
     },
     {
       "id": "m06-controller",
       "milestoneId": "M06",
       "title": "Controller",
-      "status": "planned",
-      "prerequisites": [
-        "m06-http"
-      ],
+      "status": "ready",
+      "prerequisites": ["m06-http"],
       "output": "build/m06-controller.html"
     },
     {
       "id": "m06-validation",
       "milestoneId": "M06",
       "title": "Validation",
-      "status": "planned",
-      "prerequisites": [
-        "m06-controller"
-      ],
+      "status": "ready",
+      "prerequisites": ["m06-controller"],
       "output": "build/m06-validation.html"
     },
     {
       "id": "m06-identity",
       "milestoneId": "M06",
       "title": "Identity",
-      "status": "planned",
-      "prerequisites": [
-        "m06-validation"
-      ],
+      "status": "ready",
+      "prerequisites": ["m06-validation"],
       "output": "build/m06-identity.html"
     },
     {
       "id": "m07-browser-basics",
       "milestoneId": "M07",
       "title": "Browser basics",
-      "status": "planned",
-      "prerequisites": [
-        "m06-identity"
-      ],
+      "status": "ready",
+      "prerequisites": ["m06-identity"],
       "output": "build/m07-browser-basics.html"
     },
     {
       "id": "m07-react-state",
       "milestoneId": "M07",
       "title": "React state",
-      "status": "planned",
-      "prerequisites": [
-        "m07-browser-basics"
-      ],
+      "status": "ready",
+      "prerequisites": ["m07-browser-basics"],
       "output": "build/m07-react-state.html"
     },
     {
       "id": "m07-transport",
       "milestoneId": "M07",
       "title": "Transport",
-      "status": "planned",
-      "prerequisites": [
-        "m07-react-state"
-      ],
+      "status": "ready",
+      "prerequisites": ["m07-react-state"],
       "output": "build/m07-transport.html"
     },
     {
       "id": "m07-editor-run",
       "milestoneId": "M07",
       "title": "Editor run",
-      "status": "planned",
-      "prerequisites": [
-        "m07-transport"
-      ],
+      "status": "ready",
+      "prerequisites": ["m07-transport"],
       "output": "build/m07-editor-run.html"
     },
     {
       "id": "m07-submit-reveal",
       "milestoneId": "M07",
       "title": "Submit reveal",
-      "status": "planned",
-      "prerequisites": [
-        "m07-editor-run"
-      ],
+      "status": "ready",
+      "prerequisites": ["m07-editor-run"],
       "output": "build/m07-submit-reveal.html"
     },
     {
       "id": "m07-local-journey",
       "milestoneId": "M07",
       "title": "Local journey",
-      "status": "planned",
-      "prerequisites": [
-        "m07-submit-reveal"
-      ],
+      "status": "ready",
+      "prerequisites": ["m07-submit-reveal"],
       "output": "build/m07-local-journey.html"
     },
     {
       "id": "m08-store-port",
       "milestoneId": "M08",
       "title": "Store port",
-      "status": "planned",
+      "status": "ready",
       "prerequisites": [
         "m05-complete-match",
         "m06-identity",
@@ -627,107 +509,87 @@
       "id": "m08-postgres",
       "milestoneId": "M08",
       "title": "Postgres",
-      "status": "planned",
-      "prerequisites": [
-        "m08-store-port"
-      ],
+      "status": "ready",
+      "prerequisites": ["m08-store-port"],
       "output": "build/m08-postgres.html"
     },
     {
       "id": "m08-transactions",
       "milestoneId": "M08",
       "title": "Transactions",
-      "status": "planned",
-      "prerequisites": [
-        "m08-postgres"
-      ],
+      "status": "ready",
+      "prerequisites": ["m08-postgres"],
       "output": "build/m08-transactions.html"
     },
     {
       "id": "m08-claims",
       "milestoneId": "M08",
       "title": "Claims",
-      "status": "planned",
-      "prerequisites": [
-        "m08-transactions"
-      ],
+      "status": "ready",
+      "prerequisites": ["m08-transactions"],
       "output": "build/m08-claims.html"
     },
     {
       "id": "m08-events",
       "milestoneId": "M08",
       "title": "Events",
-      "status": "planned",
-      "prerequisites": [
-        "m08-claims"
-      ],
+      "status": "ready",
+      "prerequisites": ["m08-claims"],
       "output": "build/m08-events.html"
     },
     {
       "id": "m08-recovery",
       "milestoneId": "M08",
       "title": "Recovery",
-      "status": "planned",
-      "prerequisites": [
-        "m08-events"
-      ],
+      "status": "ready",
+      "prerequisites": ["m08-events"],
       "output": "build/m08-recovery.html"
     },
     {
       "id": "m09-isolation",
       "milestoneId": "M09",
       "title": "Isolation",
-      "status": "planned",
-      "prerequisites": [
-        "m08-recovery"
-      ],
+      "status": "ready",
+      "prerequisites": ["m08-recovery"],
       "output": "build/m09-isolation.html"
     },
     {
       "id": "m09-provider",
       "milestoneId": "M09",
       "title": "Provider",
-      "status": "planned",
-      "prerequisites": [
-        "m09-isolation"
-      ],
+      "status": "ready",
+      "prerequisites": ["m09-isolation"],
       "output": "build/m09-provider.html"
     },
     {
       "id": "m09-case-runner",
       "milestoneId": "M09",
       "title": "Case runner",
-      "status": "planned",
-      "prerequisites": [
-        "m09-provider"
-      ],
+      "status": "ready",
+      "prerequisites": ["m09-provider"],
       "output": "build/m09-case-runner.html"
     },
     {
       "id": "m09-worker",
       "milestoneId": "M09",
       "title": "Worker",
-      "status": "planned",
-      "prerequisites": [
-        "m09-case-runner"
-      ],
+      "status": "ready",
+      "prerequisites": ["m09-case-runner"],
       "output": "build/m09-worker.html"
     },
     {
       "id": "m09-replace-fake",
       "milestoneId": "M09",
       "title": "Replace fake",
-      "status": "planned",
-      "prerequisites": [
-        "m09-worker"
-      ],
+      "status": "ready",
+      "prerequisites": ["m09-worker"],
       "output": "build/m09-replace-fake.html"
     },
     {
       "id": "m10-invite",
       "milestoneId": "M10",
       "title": "Invite",
-      "status": "planned",
+      "status": "ready",
       "prerequisites": [
         "m07-local-journey",
         "m08-recovery",
@@ -739,190 +601,152 @@
       "id": "m10-start",
       "milestoneId": "M10",
       "title": "Start",
-      "status": "planned",
-      "prerequisites": [
-        "m10-invite"
-      ],
+      "status": "ready",
+      "prerequisites": ["m10-invite"],
       "output": "build/m10-start.html"
     },
     {
       "id": "m10-socket-auth",
       "milestoneId": "M10",
       "title": "Socket auth",
-      "status": "planned",
-      "prerequisites": [
-        "m10-start"
-      ],
+      "status": "ready",
+      "prerequisites": ["m10-start"],
       "output": "build/m10-socket-auth.html"
     },
     {
       "id": "m10-presence",
       "milestoneId": "M10",
       "title": "Presence",
-      "status": "planned",
-      "prerequisites": [
-        "m10-socket-auth"
-      ],
+      "status": "ready",
+      "prerequisites": ["m10-socket-auth"],
       "output": "build/m10-presence.html"
     },
     {
       "id": "m10-reconnect",
       "milestoneId": "M10",
       "title": "Reconnect",
-      "status": "planned",
-      "prerequisites": [
-        "m10-presence"
-      ],
+      "status": "ready",
+      "prerequisites": ["m10-presence"],
       "output": "build/m10-reconnect.html"
     },
     {
       "id": "m10-two-clients",
       "milestoneId": "M10",
       "title": "Two clients",
-      "status": "planned",
-      "prerequisites": [
-        "m10-reconnect"
-      ],
+      "status": "ready",
+      "prerequisites": ["m10-reconnect"],
       "output": "build/m10-two-clients.html"
     },
     {
       "id": "m11-document",
       "milestoneId": "M11",
       "title": "Document",
-      "status": "planned",
-      "prerequisites": [
-        "m10-two-clients"
-      ],
+      "status": "ready",
+      "prerequisites": ["m10-two-clients"],
       "output": "build/m11-document.html"
     },
     {
       "id": "m11-ready",
       "milestoneId": "M11",
       "title": "Ready",
-      "status": "planned",
-      "prerequisites": [
-        "m11-document"
-      ],
+      "status": "ready",
+      "prerequisites": ["m11-document"],
       "output": "build/m11-ready.html"
     },
     {
       "id": "m11-round-lifetime",
       "milestoneId": "M11",
       "title": "Round lifetime",
-      "status": "planned",
-      "prerequisites": [
-        "m11-ready"
-      ],
+      "status": "ready",
+      "prerequisites": ["m11-ready"],
       "output": "build/m11-round-lifetime.html"
     },
     {
       "id": "m11-four-clients",
       "milestoneId": "M11",
       "title": "Four clients",
-      "status": "planned",
-      "prerequisites": [
-        "m11-round-lifetime"
-      ],
+      "status": "ready",
+      "prerequisites": ["m11-round-lifetime"],
       "output": "build/m11-four-clients.html"
     },
     {
       "id": "m12-chat",
       "milestoneId": "M12",
       "title": "Chat",
-      "status": "planned",
-      "prerequisites": [
-        "m11-four-clients"
-      ],
+      "status": "ready",
+      "prerequisites": ["m11-four-clients"],
       "output": "build/m12-chat.html"
     },
     {
       "id": "m12-sidecars",
       "milestoneId": "M12",
       "title": "Sidecars",
-      "status": "planned",
-      "prerequisites": [
-        "m12-chat"
-      ],
+      "status": "ready",
+      "prerequisites": ["m12-chat"],
       "output": "build/m12-sidecars.html"
     },
     {
       "id": "m12-live-chat",
       "milestoneId": "M12",
       "title": "Live chat",
-      "status": "planned",
-      "prerequisites": [
-        "m12-sidecars"
-      ],
+      "status": "ready",
+      "prerequisites": ["m12-sidecars"],
       "output": "build/m12-live-chat.html"
     },
     {
       "id": "m13-inspect-team",
       "milestoneId": "M13",
-      "title": "Inspect team",
-      "status": "planned",
-      "prerequisites": [
-        "m12-live-chat"
-      ],
+      "title": "Inspect the team project",
+      "status": "ready",
+      "prerequisites": ["m12-live-chat"],
       "output": "build/m13-inspect-team.html"
     },
     {
       "id": "m13-map-rule",
       "milestoneId": "M13",
-      "title": "Map rule",
-      "status": "planned",
-      "prerequisites": [
-        "m13-inspect-team"
-      ],
+      "title": "Map one rule and its test",
+      "status": "ready",
+      "prerequisites": ["m13-inspect-team"],
       "output": "build/m13-map-rule.html"
     },
     {
       "id": "m13-integrate",
       "milestoneId": "M13",
-      "title": "Integrate",
-      "status": "planned",
-      "prerequisites": [
-        "m13-map-rule"
-      ],
+      "title": "Connect the team features",
+      "status": "ready",
+      "prerequisites": ["m13-map-rule"],
       "output": "build/m13-integrate.html"
     },
     {
       "id": "m13-compose",
       "milestoneId": "M13",
-      "title": "Compose",
-      "status": "planned",
-      "prerequisites": [
-        "m13-integrate"
-      ],
+      "title": "Run the services together",
+      "status": "ready",
+      "prerequisites": ["m13-integrate"],
       "output": "build/m13-compose.html"
     },
     {
       "id": "m13-tls",
       "milestoneId": "M13",
-      "title": "Tls",
-      "status": "planned",
-      "prerequisites": [
-        "m13-compose"
-      ],
+      "title": "Secure the browser connection",
+      "status": "ready",
+      "prerequisites": ["m13-compose"],
       "output": "build/m13-tls.html"
     },
     {
       "id": "m13-parity",
       "milestoneId": "M13",
-      "title": "Parity",
-      "status": "planned",
-      "prerequisites": [
-        "m13-tls"
-      ],
+      "title": "Compare the game behavior",
+      "status": "ready",
+      "prerequisites": ["m13-tls"],
       "output": "build/m13-parity.html"
     },
     {
       "id": "m13-handover",
       "milestoneId": "M13",
-      "title": "Handover",
-      "status": "planned",
-      "prerequisites": [
-        "m13-parity"
-      ],
+      "title": "Hand over the project clearly",
+      "status": "ready",
+      "prerequisites": ["m13-parity"],
       "output": "build/m13-handover.html"
     }
   ],
@@ -941,26 +765,22 @@
         "m03-membership",
         "m03-clock"
       ],
-      "referenceLessonIds": [
-        "0003-rounds-and-final-score"
+      "referenceLessonIds": ["0003-rounds-and-final-score"],
+      "checkIds": [
+        "m03-records-unit",
+        "m03-transitions-unit",
+        "m03-membership-unit",
+        "m03-clock-unit"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Explain state and reject an action for the correct reason with an injected clock."
     },
     {
       "id": "behavior-02",
       "title": "Problems, starter code, visible/hidden separation",
-      "lessonIds": [
-        "m04-problem",
-        "m04-judge-port",
-        "m04-run"
-      ],
-      "referenceLessonIds": [
-        "0005-problem-editor-run",
-        "0007-judge-boundary"
-      ],
-      "checkIds": [],
+      "lessonIds": ["m04-problem", "m04-judge-port", "m04-run"],
+      "referenceLessonIds": ["0005-problem-editor-run", "0007-judge-boundary"],
+      "checkIds": ["m04-problem-unit", "m04-judge-port-unit", "m04-run-unit"],
       "scope": "required",
       "reason": "Render public Problem data and show that hidden inputs remain private."
     },
@@ -983,10 +803,14 @@
         "m09-worker",
         "m09-replace-fake"
       ],
-      "referenceLessonIds": [
-        "0005-problem-editor-run"
+      "referenceLessonIds": ["0005-problem-editor-run"],
+      "checkIds": [
+        "m04-run-unit",
+        "m07-editor-run-unit",
+        "m09-case-runner-types",
+        "m09-real-evaluation",
+        "m09-worker-live"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Run visible cases without changing score; explain compilation/runtime/infrastructure outcomes."
     },
@@ -1008,10 +832,12 @@
         "m06-validation",
         "m06-identity"
       ],
-      "referenceLessonIds": [
-        "0001-submit-journey"
+      "referenceLessonIds": ["0001-submit-journey"],
+      "checkIds": [
+        "m05-accept-unit",
+        "m05-retry-unit",
+        "m06-validation-service"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "An authorized valid action reaches evaluation; rejected actions do not."
     },
@@ -1035,10 +861,12 @@
         "m08-events",
         "m08-recovery"
       ],
-      "referenceLessonIds": [
-        "0006-evaluation-retries"
+      "referenceLessonIds": ["0006-evaluation-retries"],
+      "checkIds": [
+        "m05-retry-unit",
+        "m08-transactions-race",
+        "m08-claims-database"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Replay a same-identity request safely; reject conflicting reuse and avoid duplicate committed outcomes."
     },
@@ -1066,7 +894,13 @@
         "0002-reveal-cutoff",
         "0003-rounds-and-final-score"
       ],
-      "checkIds": [],
+      "checkIds": [
+        "m05-score-unit",
+        "m05-reveal-unit",
+        "m05-round-reset-unit",
+        "m05-final-result-unit",
+        "m07-local-journey-browser"
+      ],
       "scope": "required",
       "reason": "Explain summed scores and tie-breaks; reveal only at the permitted time; reset the appropriate state."
     },
@@ -1094,7 +928,11 @@
         "0002-reveal-cutoff",
         "0003-rounds-and-final-score"
       ],
-      "checkIds": [],
+      "checkIds": [
+        "m05-deadline-unit",
+        "m08-recovery-database",
+        "m08-postgres-roundtrip"
+      ],
       "scope": "required",
       "reason": "Reject at the exact Match deadline, handle accepted work within grace, and finish durably with unplayed Rounds contributing zero."
     },
@@ -1109,10 +947,12 @@
         "m08-events",
         "m08-recovery"
       ],
-      "referenceLessonIds": [
-        "0008-persistence-recovery"
+      "referenceLessonIds": ["0008-persistence-recovery"],
+      "checkIds": [
+        "m08-postgres-roundtrip",
+        "m08-transactions-race",
+        "m08-recovery-database"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Recover durable state and pending work; surface stale writes without silently replaying unsafe commands."
     },
@@ -1137,7 +977,11 @@
         "0008-persistence-recovery",
         "0009-live-connection"
       ],
-      "checkIds": [],
+      "checkIds": [
+        "m08-events-database",
+        "m08-recovery-database",
+        "m10-reconnect-browser"
+      ],
       "scope": "required",
       "reason": "Failed writes do not publish success; reconnect can recover missed events from authoritative state."
     },
@@ -1151,11 +995,12 @@
         "m09-worker",
         "m09-replace-fake"
       ],
-      "referenceLessonIds": [
-        "0007-judge-boundary",
-        "0013-running-the-project"
+      "referenceLessonIds": ["0007-judge-boundary", "0013-running-the-project"],
+      "checkIds": [
+        "m09-case-runner-docker",
+        "m09-provider-unit",
+        "m09-real-evaluation"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Distinguish fake-Judge logic checks from real execution checks; validate limits and sealing without silently falling back between providers."
     },
@@ -1180,7 +1025,11 @@
         "0013-running-the-project",
         "0014-rewrite-with-tests"
       ],
-      "checkIds": [],
+      "checkIds": [
+        "m09-worker-types",
+        "m09-worker-live",
+        "m13-compose-map-check"
+      ],
       "scope": "required",
       "reason": "Explain and check bounded queue, timeout, readiness, and private deployment behavior."
     },
@@ -1195,10 +1044,12 @@
         "m10-reconnect",
         "m10-two-clients"
       ],
-      "referenceLessonIds": [
-        "0004-lobby-to-match"
+      "referenceLessonIds": ["0004-lobby-to-match"],
+      "checkIds": [
+        "m10-invite-unit",
+        "m10-start-database",
+        "m10-two-clients-browser"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Verify host/full-side/Ready rules, concurrent joins/start, stale replies, and one Match handoff."
     },
@@ -1213,10 +1064,13 @@
         "m10-reconnect",
         "m10-two-clients"
       ],
-      "referenceLessonIds": [
-        "0009-live-connection"
+      "referenceLessonIds": ["0009-live-connection"],
+      "checkIds": [
+        "m10-socket-auth-unit",
+        "m10-presence-multi-socket",
+        "m10-reconnect-browser",
+        "m10-two-clients-browser"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Reject nonmembers, count multiple sockets correctly, and reconnect without stale-state corruption."
     },
@@ -1229,25 +1083,26 @@
         "m11-round-lifetime",
         "m11-four-clients"
       ],
-      "referenceLessonIds": [
-        "0010-team-collaboration"
+      "referenceLessonIds": ["0010-team-collaboration"],
+      "checkIds": [
+        "m11-document-unit",
+        "m11-ready-revision",
+        "m11-round-lifetime-unit",
+        "m11-four-clients-browser"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Keep teams isolated, invalidate Ready after edits, and judge the agreed revision."
     },
     {
       "id": "behavior-15",
       "title": "Team chat and pings",
-      "lessonIds": [
-        "m12-chat",
-        "m12-sidecars",
-        "m12-live-chat"
+      "lessonIds": ["m12-chat", "m12-sidecars", "m12-live-chat"],
+      "referenceLessonIds": ["0011-team-chat"],
+      "checkIds": [
+        "m12-chat-unit",
+        "m12-chat-client-unit",
+        "m12-live-chat-browser"
       ],
-      "referenceLessonIds": [
-        "0011-team-chat"
-      ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Enforce team membership and explain history limits without claiming durable chat."
     },
@@ -1275,11 +1130,14 @@
         "m12-sidecars",
         "m12-live-chat"
       ],
-      "referenceLessonIds": [
-        "0012-arena-screen",
-        "0011-team-chat"
+      "referenceLessonIds": ["0012-arena-screen", "0011-team-chat"],
+      "checkIds": [
+        "m07-local-journey-browser",
+        "m10-reconnect-browser",
+        "m11-four-clients-browser",
+        "m12-live-chat-browser",
+        "m12-sidecars-canceled-factory"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Complete the player journey; show correct deadline-Reveal order; clean up Round-scoped collaboration while preserving Match-scoped chat."
     },
@@ -1308,10 +1166,14 @@
         "m13-parity",
         "m13-handover"
       ],
-      "referenceLessonIds": [
-        "0013-running-the-project"
+      "referenceLessonIds": ["0013-running-the-project"],
+      "checkIds": [
+        "m01-package-install",
+        "m06-controller-service",
+        "m09-worker-live",
+        "m13-tls-path-check",
+        "m13-team-rule-check"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Run the actual target setup with documented prerequisites, ignored secrets, correct identity contracts, and HTTPS/WSS checks."
     },
@@ -1325,12 +1187,25 @@
         "m13-compose",
         "m13-tls",
         "m13-parity",
-        "m13-handover"
+        "m13-handover",
+        "m07-local-journey",
+        "m08-recovery",
+        "m09-replace-fake",
+        "m10-reconnect",
+        "m10-two-clients",
+        "m11-four-clients",
+        "m12-live-chat"
       ],
-      "referenceLessonIds": [
-        "0014-rewrite-with-tests"
+      "referenceLessonIds": ["0014-rewrite-with-tests"],
+      "checkIds": [
+        "m07-local-journey-browser",
+        "m08-recovery-database",
+        "m09-real-evaluation",
+        "m10-two-clients-browser",
+        "m11-four-clients-browser",
+        "m12-live-chat-browser",
+        "m13-parity-matrix-check"
       ],
-      "checkIds": [],
       "scope": "required",
       "reason": "Record target outcomes for complete 1v1/2v2, disconnect/reconnect, failures, and cross-team isolation. Explain meaningful differences."
     },
@@ -1352,10 +1227,1383 @@
         "0013-running-the-project",
         "0014-rewrite-with-tests"
       ],
-      "checkIds": [],
+      "checkIds": ["m13-team-inspection"],
       "scope": "support",
       "reason": "Every item has a reasoned disposition. Optional experiments and service skeletons cannot be presented as production features or silently required builds."
     }
   ],
-  "dispositions": []
+  "dispositions": [
+    {
+      "path": ".env.example",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-postgres, m09-provider, m13-compose, m13-handover, m13-inspect-team, m13-tls; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": [
+        "m08-postgres",
+        "m09-provider",
+        "m13-compose",
+        "m13-handover",
+        "m13-inspect-team",
+        "m13-tls"
+      ]
+    },
+    {
+      "path": ".gitignore",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-postgres, m13-tls; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-postgres", "m13-tls"]
+    },
+    {
+      "path": "AGENTS.md",
+      "kind": "support",
+      "reason": "Repository-agent workflow and safety instructions govern contributors; they are not executable Code Arena behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": "CONTEXT.md",
+      "kind": "support",
+      "reason": "Canonical glossary and project framing support consistent reading across lessons but do not implement game behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": "docker-compose.yml",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-worker, m13-compose, m13-handover, m13-inspect-team; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": [
+        "m09-worker",
+        "m13-compose",
+        "m13-handover",
+        "m13-inspect-team"
+      ]
+    },
+    {
+      "path": "frontend/.oxlintrc.json",
+      "kind": "support",
+      "reason": "Records frontend lint policy; the course explains what the lint command does without teaching individual style-rule configuration as game behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/e2e/collab-reconnect.spec.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-14, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/e2e/live-1v1.spec.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-local-journey, m10-two-clients; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-local-journey", "m10-two-clients"]
+    },
+    {
+      "path": "frontend/e2e/live-2v2.spec.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m11-four-clients; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m11-four-clients"]
+    },
+    {
+      "path": "frontend/e2e/live-collab.spec.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-14, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/e2e/live-lobby.spec.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-12, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/e2e/live-team-chat.spec.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m12-live-chat; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m12-live-chat"]
+    },
+    {
+      "path": "frontend/e2e/reconnect.spec.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Reconnecting gives you a fresh snapshot—not a frozen game; A green test is evidence for this repo—not proof of your rewrite; behavior-09, behavior-11, behavior-13 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/index.html",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-browser-basics; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-browser-basics"]
+    },
+    {
+      "path": "frontend/package.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/playwright.config.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/App.tsx",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-react-state; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-react-state"]
+    },
+    {
+      "path": "frontend/src/arena/chat.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Team chat is a side channel—not editor state or Match state; behavior-15, behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/chat.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m12-chat; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m12-chat"]
+    },
+    {
+      "path": "frontend/src/arena/collab.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; behavior-14 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/collab.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; behavior-14 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/fixture.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/lobby-session.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; behavior-12 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/lobby-session.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-reconnect; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-reconnect"]
+    },
+    {
+      "path": "frontend/src/arena/lobby.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; behavior-12 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/mock-authority.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/mock.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/sidecars.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m11-round-lifetime, m12-sidecars; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m11-round-lifetime", "m12-sidecars"]
+    },
+    {
+      "path": "frontend/src/arena/sidecars.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m11-round-lifetime, m12-sidecars; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m11-round-lifetime", "m12-sidecars"]
+    },
+    {
+      "path": "frontend/src/arena/socket.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Reconnecting gives you a fresh snapshot—not a frozen game; behavior-09, behavior-13 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/socket.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-reconnect; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-reconnect"]
+    },
+    {
+      "path": "frontend/src/arena/transport.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-transport; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-transport"]
+    },
+    {
+      "path": "frontend/src/arena/types.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; Reconnecting gives you a fresh snapshot—not a frozen game; behavior-02, behavior-03, behavior-09 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/arena/useArena.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Reconnecting gives you a fresh snapshot—not a frozen game; behavior-09, behavior-13 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/ArenaHeader.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/ArenaPage.test.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for What resets each Round—and what decides the Match?; The Arena screen is a view of Match state—not another game engine; behavior-01, behavior-06, behavior-07 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/ArenaPage.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for What resets each Round—and what decides the Match?; The problem file becomes an editor prompt—but Run is not Submit; behavior-01, behavior-02, behavior-03 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/ArenaWorkspace.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; The Arena screen is a view of Match state—not another game engine; behavior-02, behavior-03, behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/CodeWorkspace.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for A click is a request. The Match engine decides what it means.; The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03, behavior-04 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/DuelPanel.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/EditorAdapter.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/EditorAdapter.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/EditorToolbar.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for A click is a request. The Match engine decides what it means.; The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03, behavior-04 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/LobbyPage.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; behavior-12 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/MatchPanel.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/MatchResult.tsx",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-submit-reveal; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-submit-reveal"]
+    },
+    {
+      "path": "frontend/src/components/PhaseBanner.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/ProblemPanel.tsx",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-editor-run; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-editor-run"]
+    },
+    {
+      "path": "frontend/src/components/ReadyState.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; behavior-14 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/RoundScoreReveal.tsx",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-submit-reveal; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-submit-reveal"]
+    },
+    {
+      "path": "frontend/src/components/status.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/TeamChat.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for Team chat is a side channel—not editor state or Match state; behavior-15, behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/TeamPanel.tsx",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/components/TestPanel.tsx",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-editor-run, m07-react-state; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-editor-run", "m07-react-state"]
+    },
+    {
+      "path": "frontend/src/index.css",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Arena screen is a view of Match state—not another game engine; behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m07-browser-basics; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m07-browser-basics"]
+    },
+    {
+      "path": "frontend/test/live-config.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/test/mock-transport.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/test/transport-session.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "infra/nginx/nginx.conf",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-inspect-team, m13-tls; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-inspect-team", "m13-tls"]
+    },
+    {
+      "path": "infra/postgres/init-db.sh",
+      "kind": "support",
+      "reason": "Read-only reference detail for What survives when the Game service restarts?; The local play script and Compose stack are not the same thing; behavior-08, behavior-09, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "package-lock.json",
+      "kind": "support",
+      "reason": "Pins the workspace dependency graph for reproducible installs; it supports setup but does not teach game behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": "package.json",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-handover, m13-inspect-team; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-handover", "m13-inspect-team"]
+    },
+    {
+      "path": "packages/arena-game/package.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/src/collab.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; behavior-14 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/src/container-judge.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-case-runner, m09-isolation; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-case-runner", "m09-isolation"]
+    },
+    {
+      "path": "packages/arena-game/src/engine.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-events, m08-recovery; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-events", "m08-recovery"]
+    },
+    {
+      "path": "packages/arena-game/src/evaluation-orchestration.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m05-pending, m08-claims, m08-recovery; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m05-pending", "m08-claims", "m08-recovery"]
+    },
+    {
+      "path": "packages/arena-game/src/evaluation-telemetry.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/src/file-bank.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m04-problem; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m04-problem"]
+    },
+    {
+      "path": "packages/arena-game/src/index.ts",
+      "kind": "support",
+      "reason": "Package export barrel re-exports engine modules; behavior is taught at the defining modules and tests.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/src/judge.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m04-judge-port, m09-isolation, m09-replace-fake; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m04-judge-port", "m09-isolation", "m09-replace-fake"]
+    },
+    {
+      "path": "packages/arena-game/src/judge0.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Game owns the rules; the Judge runs code—but is it really sealed?; behavior-02, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/src/lobby.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-invite, m10-start; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-invite", "m10-start"]
+    },
+    {
+      "path": "packages/arena-game/src/match-authority.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m03-membership; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m03-membership"]
+    },
+    {
+      "path": "packages/arena-game/src/persistence.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-claims, m08-store-port; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-claims", "m08-store-port"]
+    },
+    {
+      "path": "packages/arena-game/src/postgres-store.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-claims, m08-postgres, m08-recovery, m08-transactions; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": [
+        "m08-claims",
+        "m08-postgres",
+        "m08-recovery",
+        "m08-transactions"
+      ]
+    },
+    {
+      "path": "packages/arena-game/src/principal.ts",
+      "kind": "support",
+      "reason": "The test-principal factory supplies test identities; production identity and development middleware are traced at their owning boundaries.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/src/records.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m03-records; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m03-records"]
+    },
+    {
+      "path": "packages/arena-game/src/round-lifecycle.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m05-reveal, m05-round-reset; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m05-reveal", "m05-round-reset"]
+    },
+    {
+      "path": "packages/arena-game/src/store.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-store-port; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-store-port"]
+    },
+    {
+      "path": "packages/arena-game/src/team-collaboration.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m11-document, m11-ready, m13-handover; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m11-document", "m11-ready", "m13-handover"]
+    },
+    {
+      "path": "packages/arena-game/src/worker-judge.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-provider; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-provider"]
+    },
+    {
+      "path": "packages/arena-game/test/collab.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-14, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/compiled-bank.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/concurrency.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A retry is the same Evaluation only when its identity matches; behavior-05 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/container-judge-trust.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Game owns the rules; the Judge runs code—but is it really sealed?; behavior-02, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/container-judge.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-case-runner; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-case-runner"]
+    },
+    {
+      "path": "packages/arena-game/test/cross-isolation.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/deadline-closure.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m03-clock, m05-deadline; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m03-clock", "m05-deadline"]
+    },
+    {
+      "path": "packages/arena-game/test/evaluation-orchestration.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A retry is the same Evaluation only when its identity matches; behavior-05 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/evaluation-telemetry.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/judge-security.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-parity; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-parity"]
+    },
+    {
+      "path": "packages/arena-game/test/judge0.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Game owns the rules; the Judge runs code—but is it really sealed?; behavior-02, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/lifecycle-1v1.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-parity; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-parity"]
+    },
+    {
+      "path": "packages/arena-game/test/lobby-atomic.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/lobby.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-invite, m10-start; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-invite", "m10-start"]
+    },
+    {
+      "path": "packages/arena-game/test/match-revision.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-transactions; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-transactions"]
+    },
+    {
+      "path": "packages/arena-game/test/persistence.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for What survives when the Game service restarts?; behavior-08, behavior-09 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/post-commit-events.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-events; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-events"]
+    },
+    {
+      "path": "packages/arena-game/test/postgres.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m08-postgres, m08-recovery; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m08-postgres", "m08-recovery"]
+    },
+    {
+      "path": "packages/arena-game/test/reconnect.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-parity; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-parity"]
+    },
+    {
+      "path": "packages/arena-game/test/round-lifecycle.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-map-rule; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-map-rule"]
+    },
+    {
+      "path": "packages/arena-game/test/run-path.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m04-run; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m04-run"]
+    },
+    {
+      "path": "packages/arena-game/test/scoring-reveal.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Closing, cutoff, Reveal: when an in-flight result counts; What resets each Round—and what decides the Match?; behavior-01, behavior-06, behavior-07 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/scripted-judge.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/sealing.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; The Game owns the rules; the Judge runs code—but is it really sealed?; behavior-02, behavior-03, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/setup.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/test/submit-path.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m05-accept, m05-complete-match, m05-retry, m08-claims; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": [
+        "m05-accept",
+        "m05-complete-match",
+        "m05-retry",
+        "m08-claims"
+      ]
+    },
+    {
+      "path": "packages/arena-game/test/team-2v2.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-parity; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-parity"]
+    },
+    {
+      "path": "packages/arena-game/test/team-collaboration.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m11-ready; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m11-ready"]
+    },
+    {
+      "path": "packages/arena-game/test/worker-judge.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Game owns the rules; the Judge runs code—but is it really sealed?; behavior-02, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/tsconfig.build.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-game/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/package.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/src/fake-judge.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-replace-fake; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-replace-fake"]
+    },
+    {
+      "path": "packages/arena-harness/src/fixtures.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/src/judge-port.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/src/mock-game.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/test/bank.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/test/lifecycle.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-harness/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/package.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/src/chat.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Team chat is a side channel—not editor state or Match state; behavior-15, behavior-16 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/src/events.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/src/index.ts",
+      "kind": "support",
+      "reason": "Package export barrel re-exports model modules; the event, scoring, and transition behavior is linked at its definitions.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/src/model.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m03-records; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m03-records"]
+    },
+    {
+      "path": "packages/arena-model/src/scoring.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m05-final-result, m05-score; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m05-final-result", "m05-score"]
+    },
+    {
+      "path": "packages/arena-model/src/transitions.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m03-transitions, m13-map-rule; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m03-transitions", "m13-map-rule"]
+    },
+    {
+      "path": "packages/arena-model/test/events.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/test/scoring.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/test/transitions.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/tsconfig.build.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/arena-model/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/problem-bank/problems/double-it.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/problem-bank/problems/even-ledger.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "packages/problem-bank/schema.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The problem file becomes an editor prompt—but Run is not Submit; behavior-02, behavior-03 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "scripts/check-run-opencode-plan-launcher.sh",
+      "kind": "support",
+      "reason": "Local agent-runner verification script; it does not build, test, or run the game.",
+      "lessonIds": []
+    },
+    {
+      "path": "scripts/finalize-opencode-run.sh",
+      "kind": "support",
+      "reason": "Local agent-runner handoff/finalization script; it is workspace tooling, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": "scripts/gen-dev-certs.sh",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-tls; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-tls"]
+    },
+    {
+      "path": "scripts/play.sh",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/chat/Dockerfile",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/chat/package.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/chat/src/app.module.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/chat/src/health.controller.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/chat/src/main.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/chat/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/core/Dockerfile",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/core/package.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/core/src/app.module.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/core/src/health.controller.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/core/src/main.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/core/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/Dockerfile",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/package.json",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-socket-auth; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-socket-auth"]
+    },
+    {
+      "path": "services/game/src/app.module.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/collab-ws.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for An edit changes the revision—and resets both Ready approvals; behavior-14 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/collab.gateway.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-integrate; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-integrate"]
+    },
+    {
+      "path": "services/game/src/game/dev-fixture-gate.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/errors.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/game.controller.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m06-controller, m06-validation; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m06-controller", "m06-validation"]
+    },
+    {
+      "path": "services/game/src/game/game.gateway.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-presence, m10-reconnect, m10-socket-auth; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-presence", "m10-reconnect", "m10-socket-auth"]
+    },
+    {
+      "path": "services/game/src/game/game.module.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m13-integrate; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m13-integrate"]
+    },
+    {
+      "path": "services/game/src/game/game.service.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m06-controller, m09-replace-fake; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m06-controller", "m09-replace-fake"]
+    },
+    {
+      "path": "services/game/src/game/judge-factory.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-provider; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-provider"]
+    },
+    {
+      "path": "services/game/src/game/judge-factory.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-provider, m09-replace-fake; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-provider", "m09-replace-fake"]
+    },
+    {
+      "path": "services/game/src/game/lobby.controller.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; behavior-12 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/lobby.gateway.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; behavior-12 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/lobby.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Lobby gathers players; Game creates the Match; behavior-12 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/match-socket-presence.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-presence; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-presence"]
+    },
+    {
+      "path": "services/game/src/game/match-socket-presence.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-presence; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-presence"]
+    },
+    {
+      "path": "services/game/src/game/principal.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m06-identity, m13-integrate; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m06-identity", "m13-integrate"]
+    },
+    {
+      "path": "services/game/src/game/reconnect.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Reconnecting gives you a fresh snapshot—not a frozen game; behavior-09, behavior-13 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/service.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/socket-auth.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for Reconnecting gives you a fresh snapshot—not a frozen game; behavior-09, behavior-13 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/game/socket-auth.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m10-socket-auth; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m10-socket-auth"]
+    },
+    {
+      "path": "services/game/src/game/team-2v2.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m11-four-clients; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m11-four-clients"]
+    },
+    {
+      "path": "services/game/src/game/team-chat.gateway.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m12-chat; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m12-chat"]
+    },
+    {
+      "path": "services/game/src/game/team-chat.test.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m12-chat, m13-parity; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m12-chat", "m13-parity"]
+    },
+    {
+      "path": "services/game/src/health.controller.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/game/src/main.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m06-http; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m06-http"]
+    },
+    {
+      "path": "services/game/tsconfig.json",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/docker-entrypoint.sh",
+      "kind": "support",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/Dockerfile",
+      "kind": "support",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/package.json",
+      "kind": "support",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/src/http-server.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-worker; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-worker"]
+    },
+    {
+      "path": "services/judge-worker/src/job-queue.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-worker; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-worker"]
+    },
+    {
+      "path": "services/judge-worker/src/main.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for The local play script and Compose stack are not the same thing; behavior-10, behavior-11, behavior-17 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/src/readiness.ts",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-worker, m13-compose; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-worker", "m13-compose"]
+    },
+    {
+      "path": "services/judge-worker/test/compose-topology.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/test/http-server.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/test/job-queue.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/test/readiness.test.ts",
+      "kind": "support",
+      "reason": "Read-only reference detail for A green test is evidence for this repo—not proof of your rewrite; behavior-11, behavior-18 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/tsconfig.build.json",
+      "kind": "support",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson.",
+      "lessonIds": []
+    },
+    {
+      "path": "services/judge-worker/tsconfig.json",
+      "kind": "support",
+      "reason": "Lesson 13 teaches this worker topology through Compose/runtime anchors; this is supporting build configuration, not a separate runtime behavior lesson.",
+      "lessonIds": []
+    },
+    {
+      "path": "spikes/judge-isolation/bench-compile-model.sh",
+      "kind": "support",
+      "reason": "Benchmark helper for the separately labeled Judge isolation experiment; not part of the runtime or compliance evidence.",
+      "lessonIds": []
+    },
+    {
+      "path": "spikes/judge-isolation/DECISION.md",
+      "kind": "build",
+      "reason": "The guided course cites this exact source in m09-case-runner, m09-isolation; adapt the responsibility after inspecting the team repository.",
+      "lessonIds": ["m09-case-runner", "m09-isolation"]
+    },
+    {
+      "path": "spikes/judge-isolation/results.md",
+      "kind": "support",
+      "reason": "Read-only reference detail for The Game owns the rules; the Judge runs code—but is it really sealed?; behavior-02, behavior-10 teach its broader behavior through the mapped course files. Compare this source; do not copy it as a required learner file.",
+      "lessonIds": []
+    },
+    {
+      "path": "spikes/judge-isolation/spike.sh",
+      "kind": "support",
+      "reason": "Runs the isolated Judge experiment only; it is not production execution behavior or a parity gate.",
+      "lessonIds": []
+    },
+    {
+      "path": ".husky/pre-commit",
+      "kind": "support",
+      "reason": "Runs contributor formatting, type, and test checks before a commit; it supports repository maintenance rather than game behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": "node_modules",
+      "kind": "exclude",
+      "reason": "Third-party dependencies; inspect package manifests when needed.",
+      "lessonIds": []
+    },
+    {
+      "path": "dist",
+      "kind": "exclude",
+      "reason": "Generated build output; the authored source lives in workspace roots.",
+      "lessonIds": []
+    },
+    {
+      "path": "test-results",
+      "kind": "exclude",
+      "reason": "Generated browser-test output, not executable product source.",
+      "lessonIds": []
+    },
+    {
+      "path": ".playwright-cli",
+      "kind": "exclude",
+      "reason": "Generated browser inspection snapshots, not authored game source.",
+      "lessonIds": []
+    },
+    {
+      "path": ".playwright-mcp",
+      "kind": "exclude",
+      "reason": "Generated browser inspection captures, not authored game source.",
+      "lessonIds": []
+    },
+    {
+      "path": ".husky/_",
+      "kind": "exclude",
+      "reason": "Generated Husky hook runtime files, not authored project source.",
+      "lessonIds": []
+    },
+    {
+      "path": "frontend/test-results",
+      "kind": "exclude",
+      "reason": "Generated Playwright output, not authored application code.",
+      "lessonIds": []
+    },
+    {
+      "path": "docs",
+      "kind": "exclude",
+      "reason": "Reference documents are linked from the learning notes; they are not runtime source.",
+      "lessonIds": []
+    },
+    {
+      "path": "prototype",
+      "kind": "exclude",
+      "reason": "Design and behavior prototypes are not the current production game implementation.",
+      "lessonIds": []
+    },
+    {
+      "path": "graphify-out",
+      "kind": "exclude",
+      "reason": "Generated graph data and visualizations; not authoritative implementation.",
+      "lessonIds": []
+    },
+    {
+      "path": ".scratch",
+      "kind": "exclude",
+      "reason": "Planning and issue notes can describe intended work, not proof of current behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": ".tours",
+      "kind": "exclude",
+      "reason": "Learning artifacts and editor navigation, separate from game implementation coverage.",
+      "lessonIds": []
+    },
+    {
+      "path": ".agents",
+      "kind": "exclude",
+      "reason": "Agent tools and local instructions, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": ".claude",
+      "kind": "exclude",
+      "reason": "Agent tools and local instructions, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": ".github",
+      "kind": "exclude",
+      "reason": "Repository automation; outside the first game-learning pass.",
+      "lessonIds": []
+    },
+    {
+      "path": ".trigger-tree",
+      "kind": "exclude",
+      "reason": "Documentation-discovery telemetry, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": ".superpowers",
+      "kind": "exclude",
+      "reason": "Agent workflow state, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": ".vscode",
+      "kind": "exclude",
+      "reason": "Editor setup, not game behavior.",
+      "lessonIds": []
+    },
+    {
+      "path": "skills-lock.json",
+      "kind": "exclude",
+      "reason": "Agent skill version bookkeeping, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": ".codex",
+      "kind": "exclude",
+      "reason": "Agent planning state; it is neither game runtime nor learner course content.",
+      "lessonIds": []
+    },
+    {
+      "path": "Run plan in OpenCode.command",
+      "kind": "exclude",
+      "reason": "Local agent-tool launcher, not game runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": "team-vote-board.html",
+      "kind": "exclude",
+      "reason": "Temporary team decision page, not the game application.",
+      "lessonIds": []
+    },
+    {
+      "path": "to-questionnaire-team-decisions.md",
+      "kind": "exclude",
+      "reason": "Team planning note, not game implementation.",
+      "lessonIds": []
+    }
+  ]
 }

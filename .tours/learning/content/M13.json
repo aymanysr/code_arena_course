@@ -1,0 +1,1840 @@
+[
+  {
+    "id": "m13-inspect-team",
+    "milestoneId": "M13",
+    "title": "Inspect the team project",
+    "why": "Before moving code, learn what the team already has. A README, package scripts, identity flow, service owners, database setup, and deployment route can change where a file belongs. If the friend’s repository is not available, record what is missing and keep building in practice.",
+    "outcome": "Write a fact-based inventory of the team project and its unknowns.",
+    "prerequisites": ["m12-live-chat"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "package.json",
+        "startLine": 1,
+        "endLine": 27
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".env.example",
+        "startLine": 1,
+        "endLine": 29
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "docker-compose.yml",
+        "startLine": 1,
+        "endLine": 111
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "infra/nginx/nginx.conf",
+        "startLine": 1,
+        "endLine": 50
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-inspect-team-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "Before moving code, learn what the team already has. A README, package scripts, identity flow, service owners, database setup, and deployment route can change where a file belongs. If the friend’s repository is not available, record what is missing and keep building in practice."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m12-chat-client-unit"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-inspect-team-see",
+        "phase": "see",
+        "title": "Three places, three kinds of evidence",
+        "question": "Which project gives you a fact, and which one needs your inspection?",
+        "explanation": [
+          "The reference game shows one implementation. Your practice folder contains your own learning work. The team repository is a separate project whose paths, scripts, owners, and identity rules must be read before you map anything.",
+          "In the reference, Compose, environment examples, and Nginx show how processes connect. Your teammate may use a different framework or deployment layout."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "reference.compose",
+            "workspace": "reference",
+            "path": "docker-compose.yml",
+            "action": "read",
+            "owner": "Reference Compose lists the example services and dependencies.",
+            "change": "Read the service graph and health checks.",
+            "pattern": "Notice which ports are private."
+          },
+          {
+            "role": "reference.edge",
+            "workspace": "reference",
+            "path": "infra/nginx/nginx.conf",
+            "action": "read",
+            "owner": "Reference Nginx owns the example HTTPS and WSS entry.",
+            "change": "Read the public paths and upstream names.",
+            "pattern": "Do not assume the team uses Nginx."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "Keep the three project roots separate",
+          "code": [
+            "Reference source → learn a pattern",
+            "Practice root → change your own files",
+            "Team root → inspect before mapping"
+          ],
+          "frames": [
+            {
+              "id": "facts",
+              "label": "Facts",
+              "codeLines": [1, 2],
+              "explanation": "Reference paths explain the example. Team paths must come from your teammate’s real checkout.",
+              "values": [
+                {
+                  "label": "Reference",
+                  "value": "known example"
+                },
+                {
+                  "label": "Practice",
+                  "value": "learner-owned"
+                },
+                {
+                  "label": "Team",
+                  "value": "inspect first"
+                }
+              ]
+            },
+            {
+              "id": "unknown",
+              "label": "Unknowns",
+              "codeLines": [2, 3],
+              "explanation": "If the team repository is missing, keep team instructions blocked and return to practice.",
+              "values": [
+                {
+                  "label": "Missing repo",
+                  "value": "no target check"
+                },
+                {
+                  "label": "Next action",
+                  "value": "continue practice"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-inspect-team-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "Why can the same responsibility live in a different folder?",
+        "explanation": [
+          "A TypeScript import is like a C header or linker boundary in one small way: another file must know how to find an exported value. The team may split packages differently, use a different server, or delegate sign-in to a gateway. Record what exists before choosing “reuse,” “create,” or “extend.”",
+          "Inspect in this order: README and contribution rules; root and workspace package scripts; folders and owners; identity and route setup; database and environment names; Compose, health checks, and HTTPS/WSS ingress. Never copy secret values into notes."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-inspect-team-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "A friend shares only the README today. What do you record?",
+        "explanation": [
+          "Write the README facts you can point to. Mark scripts, identity owner, database, service boundaries, and deployment as “not checked” until their files or owner confirms them. Ask for the missing checkout and package scripts before mapping game code."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-inspect-team-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Create `docs/team-inspection.md` in the practice project. Record each fact, where you confirmed it, its owner, and any question.",
+        "explanation": [
+          "Create `docs/team-inspection.md` in the practice project. Record each fact, where you confirmed it, its owner, and any question.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Create the file under the practice root.",
+          "Use a two-column table: fact and where you confirmed it.",
+          "Add a separate “unknown / ask teammate” section.",
+          "If the repository is not supplied, record that exact blocker and stop the team check."
+        ],
+        "files": [
+          {
+            "role": "docs.team-inventory",
+            "workspace": "active",
+            "path": "docs/team-inspection.md",
+            "action": "create",
+            "owner": "docs/ records observations so later mappings have a source.",
+            "change": "Record the repository path, source file or answer, owner, and unresolved question.",
+            "pattern": "Use “unknown” when a teammate has not confirmed a fact."
+          }
+        ],
+        "checkIds": ["m13-team-inspection"],
+        "prerequisiteCheckIds": ["m12-chat-client-unit"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-inspect-team-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "Your inventory separates observed facts from unknowns for repository path, package scripts, identity owner, persistence, service boundaries, and deployment.",
+        "explanation": [
+          "Your inventory separates observed facts from unknowns for repository path, package scripts, identity owner, persistence, service boundaries, and deployment.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-team-inspection"],
+        "prerequisiteCheckIds": [],
+        "next": "Only after this inventory can one small rule be placed safely.",
+        "transfer": "If the teammate later says the API is owned by a gateway package, update the owner entry before mapping the HTTP controller."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-team-inspection",
+        "command": "Explain aloud",
+        "cwd": ".",
+        "expected": "Your inventory separates observed facts from unknowns for repository path, package scripts, identity owner, persistence, service boundaries, and deployment.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "The repository or owner is not available",
+            "diagnostic": "Ask for the actual checkout path and the person responsible for the service. Keep the team check blocked.",
+            "meaning": "The course cannot inspect a path or infer an owner."
+          },
+          {
+            "symptom": "A secret appears in the notes",
+            "diagnostic": "Remove the value and record only the variable name and who supplies it.",
+            "meaning": "Environment examples may name settings; secret values stay outside notes and Git."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m13-map-rule",
+    "milestoneId": "M13",
+    "title": "Map one rule and its test",
+    "why": "Start with one pure rule because it has no database, socket, or browser dependency. You already met the submit-window rule and its boundary test in M02. Compare those exact practice files with the team’s existing rule and test, then choose reuse, create, or extend.",
+    "outcome": "Map one learner-authored rule and its test to confirmed team paths and a confirmed team check.",
+    "prerequisites": ["m13-inspect-team"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-model/src/transitions.ts",
+        "startLine": 23,
+        "endLine": 70
+      },
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-game/test/round-lifecycle.test.ts",
+        "startLine": 44,
+        "endLine": 69
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-map-rule-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "Start with one pure rule because it has no database, socket, or browser dependency. You already met the submit-window rule and its boundary test in M02. Compare those exact practice files with the team’s existing rule and test, then choose reuse, create, or extend."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m13-team-inspection"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-map-rule-see",
+        "phase": "see",
+        "title": "A rule moves with its proof",
+        "question": "What should travel together when a pure rule moves?",
+        "explanation": [
+          "A rule file contains a decision. Its test names the input and expected result. Together, they let you explain what the rule means before it enters a larger service.",
+          "The target location may differ. Keep the rule’s behavior and test case connected even if the team uses a different package name."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "rule.reference",
+            "workspace": "reference",
+            "path": "packages/arena-model/src/transitions.ts",
+            "action": "read",
+            "owner": "The reference model holds pure phase decisions.",
+            "change": "Read allowed and rejected transitions.",
+            "pattern": "Notice how the rule stays separate from the Game service."
+          },
+          {
+            "role": "rule.test-reference",
+            "workspace": "reference",
+            "path": "packages/arena-game/test/round-lifecycle.test.ts",
+            "action": "read",
+            "owner": "The reference test checks rule outcomes.",
+            "change": "Read the passing and rejected cases.",
+            "pattern": "A test proves only the behavior it exercises."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "Keep the rule next to the test that explains it",
+          "code": [
+            "src/submit-window.ts → decision",
+            "test/submit-window.test.ts → examples",
+            "team path + team command → target result"
+          ],
+          "frames": [
+            {
+              "id": "practice",
+              "label": "Practice",
+              "codeLines": [1, 2],
+              "explanation": "The course paths identify the rule and its boundary tests.",
+              "values": [
+                {
+                  "label": "Rule",
+                  "value": "pure decision"
+                },
+                {
+                  "label": "Test",
+                  "value": "known examples"
+                }
+              ]
+            },
+            {
+              "id": "target",
+              "label": "Team",
+              "codeLines": [2, 3],
+              "explanation": "The team path and command come from the inspected repository, not from the practice package.",
+              "values": [
+                {
+                  "label": "Target",
+                  "value": "confirmed owner"
+                },
+                {
+                  "label": "Command",
+                  "value": "confirmed script"
+                },
+                {
+                  "label": "Result",
+                  "value": "unverified until run"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-map-rule-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "Why should a pure rule move before a whole service?",
+        "explanation": [
+          "A pure function is easier to compare because its result depends on its inputs rather than network or stored state. In C terms, think of a small function with explicit parameters and a return value. In TypeScript, its exported name and type also form the import contract.",
+          "Inspect `src/submit-window.ts` and `test/submit-window.test.ts` in practice. In the team repo, look for the existing owner and its tests. If the rule already exists, choose reuse or extend after reading it; do not overwrite a teammate’s code."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-map-rule-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "The team already has a differently named deadline helper. What do you check?",
+        "explanation": [
+          "Read its callers, input types, boundary tests, and package exports. If its behavior already matches, map to it as “reuse.” If it is close but missing a case, choose “extend” and add the case. Create a new file only when no current owner fits."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-map-rule-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Map `src/submit-window.ts` and `test/submit-window.test.ts` as separate files. Enter the team paths and test command only after confirming them in the team project.",
+        "explanation": [
+          "Map `src/submit-window.ts` and `test/submit-window.test.ts` as separate files. Enter the team paths and test command only after confirming them in the team project.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Open the practice rule and its test first.",
+          "Find the team package that owns this behavior.",
+          "Choose reuse, create, or extend based on the files you saw.",
+          "Only map a team command after reading its script and cwd."
+        ],
+        "files": [
+          {
+            "role": "rule.submit-window",
+            "workspace": "active",
+            "path": "src/submit-window.ts",
+            "action": "read",
+            "owner": "The learner-authored pure rule decides whether a submission is inside the time window.",
+            "change": "Read the rule and compare its condition with the team owner.",
+            "pattern": "Keep equality and just-after-deadline cases visible."
+          },
+          {
+            "role": "test.submit-window",
+            "workspace": "active",
+            "path": "test/submit-window.test.ts",
+            "action": "read",
+            "owner": "The test file explains the rule with concrete boundaries.",
+            "change": "Read its tests and use them to review the team version.",
+            "pattern": "Do not move the rule without its boundary examples."
+          }
+        ],
+        "checkIds": ["m13-team-rule-check"],
+        "prerequisiteCheckIds": ["m13-team-inspection"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-map-rule-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "The practice suite checks the exact boundary examples. A team check is valid only after you map this ID to the team script and working folder you confirmed.",
+        "explanation": [
+          "The practice suite checks the exact boundary examples. A team check is valid only after you map this ID to the team script and working folder you confirmed.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-team-rule-check"],
+        "prerequisiteCheckIds": [],
+        "next": "One mapped rule shows the method; now identify all feature owners.",
+        "transfer": "If the team rule uses milliseconds and your practice rule uses seconds, write down the conversion at the boundary and add a changed-case test before reusing it."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-team-rule-check",
+        "command": "npm test -- test/submit-window.test.ts",
+        "cwd": ".",
+        "expected": "The practice suite checks the exact boundary examples. A team check is valid only after you map this ID to the team script and working folder you confirmed.",
+        "kind": "unit",
+        "failure": [
+          {
+            "symptom": "The test path is not found",
+            "diagnostic": "Check that the practice root is selected and that the M02 test was created there.",
+            "meaning": "The course does not create the learner’s game files."
+          },
+          {
+            "symptom": "The team test command is not known",
+            "diagnostic": "Read the actual package scripts and ask which workspace owns the check.",
+            "meaning": "A practice command is not a team command."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m13-integrate",
+    "milestoneId": "M13",
+    "title": "Connect the team features",
+    "why": "The game crosses several owners. Match rules belong in the Game domain; browser state belongs in the client; trusted identity comes from the team’s real authentication boundary; database and Judge work have separate owners. Map each feature to an existing implementation before deciding what to create.",
+    "outcome": "Create a feature-to-owner map for identity, routes, persistence, Judge, browser, collaboration, and chat.",
+    "prerequisites": ["m13-map-rule"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/principal.ts",
+        "startLine": 1,
+        "endLine": 36
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/game/src/game/game.module.ts",
+        "startLine": 11,
+        "endLine": 26
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "services/game/src/game/collab.gateway.ts",
+        "startLine": 14,
+        "endLine": 54
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-integrate-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "The game crosses several owners. Match rules belong in the Game domain; browser state belongs in the client; trusted identity comes from the team’s real authentication boundary; database and Judge work have separate owners. Map each feature to an existing implementation before deciding what to create."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m13-team-rule-check"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-integrate-see",
+        "phase": "see",
+        "title": "One player action crosses several owners",
+        "question": "Where does identity become trusted, and who owns the Match rule?",
+        "explanation": [
+          "The browser asks for an action. The team’s authentication layer proves who the caller is. The Game checks Match membership and owns the rule. The store commits durable state. The browser receives an authoritative result.",
+          "A different repository may combine or split these boxes. Keep the responsibility map; change file paths only after reading that repository."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "identity.reference",
+            "workspace": "reference",
+            "path": "services/game/src/game/principal.ts",
+            "action": "read",
+            "owner": "The reference identity seam is development-only.",
+            "change": "Read the principal contract and its warning.",
+            "pattern": "A development identity header is not production authentication."
+          },
+          {
+            "role": "game-module.reference",
+            "workspace": "reference",
+            "path": "services/game/src/game/game.module.ts",
+            "action": "read",
+            "owner": "The reference module composes the Game adapters.",
+            "change": "Read which gateway and service are registered.",
+            "pattern": "Module wiring does not make all features one owner."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "Follow one Submit through its owners",
+          "code": [
+            "Browser → verified identity",
+            "Game → authorize and apply rule",
+            "Store/Judge → separate work",
+            "Browser ← safe result"
+          ],
+          "frames": [
+            {
+              "id": "request",
+              "label": "Request",
+              "codeLines": [1, 2],
+              "explanation": "Identity is supplied by the actual team auth boundary; Game checks the member before acting.",
+              "values": [
+                {
+                  "label": "Caller",
+                  "value": "authenticated"
+                },
+                {
+                  "label": "Rule owner",
+                  "value": "Game"
+                }
+              ]
+            },
+            {
+              "id": "result",
+              "label": "Result",
+              "codeLines": [2, 3, 4],
+              "explanation": "Persistence and Judge are separate dependencies. Only the Game decides what result becomes Match state.",
+              "values": [
+                {
+                  "label": "Store",
+                  "value": "durable record"
+                },
+                {
+                  "label": "Judge",
+                  "value": "execution result"
+                },
+                {
+                  "label": "Client",
+                  "value": "authoritative view"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-integrate-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "Why do we keep identity, Game rules, and storage as separate responsibilities?",
+        "explanation": [
+          "The identity layer answers who made the request. The Game answers whether that member may change this Match. The store saves the accepted state. The Judge reports how submitted code ran. Combining these answers can accidentally trust a browser field or count an uncommitted result.",
+          "Inspect actual routes, modules, owner files, package boundaries, and tests. Check how the real user ID enters the server; never keep the course’s development identity seam as if it were the team’s production sign-in."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-integrate-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "The team has a Match service but its frontend uses a different transport. What should you map?",
+        "explanation": [
+          "Map the Match owner to the existing service first. Then map the browser transport separately, and record its request/event contract. Do not build a second Match authority because the frontend path differs. Ask the owners before changing identity or module registration."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-integrate-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Create a feature-owner table in `docs/team-feature-map.md`. For every feature, write its current file, confirmed owner, API or event boundary, check, and missing dependency.",
+        "explanation": [
+          "Create a feature-owner table in `docs/team-feature-map.md`. For every feature, write its current file, confirmed owner, API or event boundary, check, and missing dependency.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start with the team’s identity contract.",
+          "Trace one browser request into the Game service.",
+          "Add storage, Judge, and socket owners from their manifests and routes.",
+          "Mark missing owners as dependencies; do not create a parallel service by guess."
+        ],
+        "files": [
+          {
+            "role": "docs.feature-map",
+            "workspace": "active",
+            "path": "docs/team-feature-map.md",
+            "action": "create",
+            "owner": "docs/ records which existing owner is responsible for each game feature.",
+            "change": "List identity, HTTP routes, Match rules, persistence, Judge, browser state, collaboration, and chat owners.",
+            "pattern": "For every row, record the source file, confirmed owner, action, test ID, and unresolved dependency."
+          }
+        ],
+        "checkIds": ["m13-feature-map-check"],
+        "prerequisiteCheckIds": ["m13-team-rule-check"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-integrate-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "For each feature, you can name its real owner, the contract crossing into it, an existing implementation to reuse or extend, and any missing owner.",
+        "explanation": [
+          "For each feature, you can name its real owner, the contract crossing into it, an existing implementation to reuse or extend, and any missing owner.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-feature-map-check"],
+        "prerequisiteCheckIds": [],
+        "next": "Once owners are clear, understand how their processes start together.",
+        "transfer": "If the team uses a managed database instead of Compose Postgres, keep the persistence owner but replace the local startup row with the team’s documented service."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-feature-map-check",
+        "command": "Explain aloud",
+        "cwd": ".",
+        "expected": "For each feature, you can name its real owner, the contract crossing into it, an existing implementation to reuse or extend, and any missing owner.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "The repository or owner is not available",
+            "diagnostic": "Ask for the actual checkout path and the person responsible for the service. Keep the team check blocked.",
+            "meaning": "The course cannot inspect a path or infer an owner."
+          },
+          {
+            "symptom": "Two services appear to own the same Match decision",
+            "diagnostic": "Trace the request to the single authoritative mutation and ask the service owners to confirm it.",
+            "meaning": "A UI or transport may display a rule; the Game must remain authoritative."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m13-compose",
+    "milestoneId": "M13",
+    "title": "Run the services together",
+    "why": "A service can pass its unit tests and still fail when its database, Game process, browser, or private Judge worker cannot start together. Learn how the repository assembles processes before changing deployment files.",
+    "outcome": "Describe the team’s service startup order, health checks, private network, and restart procedure.",
+    "prerequisites": ["m13-integrate"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "docker-compose.yml",
+        "startLine": 1,
+        "endLine": 111
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".env.example",
+        "startLine": 1,
+        "endLine": 29
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/judge-worker/src/readiness.ts",
+        "startLine": 31,
+        "endLine": 74
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-compose-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "A service can pass its unit tests and still fail when its database, Game process, browser, or private Judge worker cannot start together. Learn how the repository assembles processes before changing deployment files."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m13-feature-map-check"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-compose-see",
+        "phase": "see",
+        "title": "A Dockerfile is a recipe; Compose connects running services",
+        "question": "What does Compose add after each service has an image?",
+        "explanation": [
+          "A Dockerfile describes how to build one image. An image is the built template. A container is one running process from that image. Compose starts related containers and connects their networks, volumes, health checks, and settings.",
+          "The reference keeps the Judge worker private and gives Postgres a named volume. Your team may run those dependencies differently; record the observed design."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "compose.reference",
+            "workspace": "reference",
+            "path": "docker-compose.yml",
+            "action": "read",
+            "owner": "Compose owns the example local service graph.",
+            "change": "Read service dependencies, readiness, ports, and volumes.",
+            "pattern": "An exposed port is a deliberate boundary."
+          },
+          {
+            "role": "env-example.reference",
+            "workspace": "reference",
+            "path": ".env.example",
+            "action": "read",
+            "owner": "The example file names settings without real credentials.",
+            "change": "Read variable names and comments only.",
+            "pattern": "Do not copy secret values into documentation."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "Compose orders processes, not source-code calls",
+          "code": [
+            "Dockerfile → image → container",
+            "Compose → network + volumes",
+            "Health check → ready or blocked"
+          ],
+          "frames": [
+            {
+              "id": "start",
+              "label": "Starting",
+              "codeLines": [1, 2],
+              "explanation": "A running container is not necessarily ready to accept requests.",
+              "values": [
+                {
+                  "label": "Process",
+                  "value": "running"
+                },
+                {
+                  "label": "Dependency",
+                  "value": "starting"
+                }
+              ]
+            },
+            {
+              "id": "ready",
+              "label": "Ready",
+              "codeLines": [2, 3],
+              "explanation": "Use the documented health check and dependency contract, not an arbitrary wait.",
+              "values": [
+                {
+                  "label": "Health",
+                  "value": "ready"
+                },
+                {
+                  "label": "Next step",
+                  "value": "start dependent service"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-compose-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "Why is “container running” different from “service ready”?",
+        "explanation": [
+          "A process can be alive while Postgres is still initializing or the private worker cannot reach its runtime. Read each health check and the service that depends on it. In a team project, one-command launch should be the command actually documented in its README or scripts.",
+          "The example repository may use Docker Compose and a local named volume. A team may use a cloud database or another orchestrator. Keep the distinction between recipe, image, running container, and service graph."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-compose-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "The Game starts before the database is ready. What evidence helps?",
+        "explanation": [
+          "Read the Compose health condition, database health check, and the Game’s readiness endpoint. Record the exact startup and recovery commands from the actual team docs. Do not “fix” this by adding a sleep with no readiness check."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-compose-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Create `docs/team-compose-map.md` with service, image owner, dependency, readiness check, data volume, network access, and restart command.",
+        "explanation": [
+          "Create `docs/team-compose-map.md` with service, image owner, dependency, readiness check, data volume, network access, and restart command.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Open the actual Compose or deployment file.",
+          "Follow one service from its image to its health check.",
+          "Mark published ports separately from private network names.",
+          "Record the exact team launch command only after finding it in the team project."
+        ],
+        "files": [
+          {
+            "role": "docs.compose-map",
+            "workspace": "active",
+            "path": "docs/team-compose-map.md",
+            "action": "create",
+            "owner": "docs/ records which processes start and which dependencies must be ready.",
+            "change": "List image owner, service name, dependency, health check, data volume, and restart command.",
+            "pattern": "Mark private worker and database network access explicitly; write “not checked” when unavailable."
+          }
+        ],
+        "checkIds": ["m13-compose-map-check"],
+        "prerequisiteCheckIds": ["m13-feature-map-check"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-compose-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "Your map distinguishes Dockerfile, image, container, and Compose; names the real database and Judge-worker dependency; and records readiness and restart checks.",
+        "explanation": [
+          "Your map distinguishes Dockerfile, image, container, and Compose; names the real database and Judge-worker dependency; and records readiness and restart checks.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-compose-map-check"],
+        "prerequisiteCheckIds": [],
+        "next": "After service boundaries are clear, follow how browser traffic reaches them safely.",
+        "transfer": "If the team runs the database outside Compose, map its readiness URL and recovery owner instead of adding a second database container."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-compose-map-check",
+        "command": "Explain aloud",
+        "cwd": ".",
+        "expected": "Your map distinguishes Dockerfile, image, container, and Compose; names the real database and Judge-worker dependency; and records readiness and restart checks.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "Docker or the service stack is unavailable",
+            "diagnostic": "Record the exact missing service and leave its launch check blocked.",
+            "meaning": "A written topology does not prove the containers start."
+          },
+          {
+            "symptom": "The team test command is not known",
+            "diagnostic": "Read the actual package scripts and ask which workspace owns the check.",
+            "meaning": "A practice command is not a team command."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m13-tls",
+    "milestoneId": "M13",
+    "title": "Secure the browser connection",
+    "why": "The browser uses HTTPS for page/API traffic and WSS for live sockets. A reverse proxy may terminate TLS before forwarding requests to private services. Certificates, proxy paths, and secrets must match the team’s actual deployment.",
+    "outcome": "Trace the HTTPS and WSS routes and document how development certificates and secret values are handled.",
+    "prerequisites": ["m13-compose"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "infra/nginx/nginx.conf",
+        "startLine": 1,
+        "endLine": 50
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "scripts/gen-dev-certs.sh",
+        "startLine": 1,
+        "endLine": 11
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".gitignore",
+        "startLine": 8,
+        "endLine": 11
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".env.example",
+        "startLine": 1,
+        "endLine": 29
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-tls-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "The browser uses HTTPS for page/API traffic and WSS for live sockets. A reverse proxy may terminate TLS before forwarding requests to private services. Certificates, proxy paths, and secrets must match the team’s actual deployment."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m13-compose-map-check"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-tls-see",
+        "phase": "see",
+        "title": "HTTPS and WSS enter through the same secure boundary",
+        "question": "Where is encryption checked, and where does the request go next?",
+        "explanation": [
+          "The browser connects to the trusted HTTPS/WSS entry. The proxy presents the certificate, then forwards a matching API or socket path to an internal service. The internal hop may use a different protocol, but the browser must not silently disable certificate checks.",
+          "Development certificates are for local use and their secret keys must stay out of Git. Production certificate ownership belongs to the team’s deployment process."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "nginx.reference",
+            "workspace": "reference",
+            "path": "infra/nginx/nginx.conf",
+            "action": "read",
+            "owner": "The reference Nginx routes HTTPS and Socket.IO to internal services.",
+            "change": "Read the API route, socket upgrade headers, and certificate paths.",
+            "pattern": "The reference Nginx does not serve the frontend files."
+          },
+          {
+            "role": "cert-script.reference",
+            "workspace": "reference",
+            "path": "scripts/gen-dev-certs.sh",
+            "action": "read",
+            "owner": "This script creates local development certificates.",
+            "change": "Read its scope and where generated files are ignored.",
+            "pattern": "A local self-signed certificate is not a production certificate."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "Browser traffic stays encrypted to the edge",
+          "code": [
+            "Browser → HTTPS or WSS",
+            "Nginx → route + certificate",
+            "Private service → API or socket"
+          ],
+          "frames": [
+            {
+              "id": "secure",
+              "label": "Secure entry",
+              "codeLines": [1, 2],
+              "explanation": "The browser verifies the certificate at the public entry point.",
+              "values": [
+                {
+                  "label": "Scheme",
+                  "value": "HTTPS / WSS"
+                },
+                {
+                  "label": "Certificate",
+                  "value": "checked"
+                }
+              ]
+            },
+            {
+              "id": "forward",
+              "label": "Internal route",
+              "codeLines": [2, 3],
+              "explanation": "The proxy forwards only the intended route to the owning service.",
+              "values": [
+                {
+                  "label": "HTTP path",
+                  "value": "API upstream"
+                },
+                {
+                  "label": "WSS path",
+                  "value": "socket upstream"
+                }
+              ]
+            },
+            {
+              "id": "unsafe",
+              "label": "Unsafe shortcut",
+              "codeLines": [1, 2],
+              "explanation": "Turning off certificate verification hides identity failures and is not a finished solution.",
+              "values": [
+                {
+                  "label": "Verification",
+                  "value": "must stay on"
+                },
+                {
+                  "label": "Secret key",
+                  "value": "must stay private"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-tls-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "Why can a browser page load while its WebSocket fails?",
+        "explanation": [
+          "The HTTPS page and WSS connection can use different proxy paths and upgrade headers. Read the socket URL, proxy route, certificate, and service port as one chain. Confirm how the team supplies certificates and secret values; never put a private key or password in source code.",
+          "The reference uses Nginx for the secure entry and a local certificate script for development. A different team might use a managed ingress, so map the same responsibilities to its actual owner."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-tls-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "The local certificate is self-signed. What is the safe development response?",
+        "explanation": [
+          "Use the documented local certificate setup and trust it only in your local development environment. Keep verification enabled. For a missing or wrong production certificate, fix the certificate or host configuration; do not bypass TLS checks."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-tls-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Create `docs/team-https-path.md` with the browser scheme, proxy route, internal service, certificate owner, local-only files, and production secret source.",
+        "explanation": [
+          "Create `docs/team-https-path.md` with the browser scheme, proxy route, internal service, certificate owner, local-only files, and production secret source.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start from the URL shown to the browser.",
+          "Follow the matching API and WebSocket proxy locations.",
+          "Find where the certificate and key are supplied.",
+          "If a secure route is unknown, record it as blocked instead of adding a bypass."
+        ],
+        "files": [
+          {
+            "role": "docs.https-path",
+            "workspace": "active",
+            "path": "docs/team-https-path.md",
+            "action": "create",
+            "owner": "docs/ records the browser-to-service security boundary.",
+            "change": "Trace HTTPS API and WSS routes, certificate ownership, local-only files, and production secret source.",
+            "pattern": "Never record secret values or recommend disabled certificate verification."
+          }
+        ],
+        "checkIds": ["m13-tls-path-check"],
+        "prerequisiteCheckIds": ["m13-compose-map-check"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-tls-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "You can trace the browser HTTPS and WSS paths through the confirmed ingress, identify who owns certificates, and show that verification stays enabled.",
+        "explanation": [
+          "You can trace the browser HTTPS and WSS paths through the confirmed ingress, identify who owns certificates, and show that verification stays enabled.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-tls-path-check"],
+        "prerequisiteCheckIds": [],
+        "next": "Now compare required game behavior with actual team evidence.",
+        "transfer": "If the team uses a managed HTTPS ingress, record its documented WSS support and owner; do not add Nginx just because the reference uses it."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-tls-path-check",
+        "command": "Explain aloud",
+        "cwd": ".",
+        "expected": "You can trace the browser HTTPS and WSS paths through the confirmed ingress, identify who owns certificates, and show that verification stays enabled.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "The socket route or certificate owner is unknown",
+            "diagnostic": "Read the real ingress config or ask its owner; mark that route blocked.",
+            "meaning": "A matching HTTPS page alone does not prove WSS works."
+          },
+          {
+            "symptom": "Someone suggests disabling certificate verification",
+            "diagnostic": "Keep verification enabled and repair the certificate or trusted host configuration.",
+            "meaning": "A bypass removes the identity check the connection needs."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m13-parity",
+    "milestoneId": "M13",
+    "title": "Compare the game behavior",
+    "why": "A matching screen does not prove the game behaves the same. Compare the reference contract with the team result feature by feature, including two-player play, 2v2 isolation, reconnect, deadlines, Judge/worker failures, persistence, HTTPS/WSS, and chat boundaries.",
+    "outcome": "Create a behavior matrix that separates expected behavior, reference evidence, team evidence, and intentional differences.",
+    "prerequisites": ["m13-tls"],
+    "references": [
+      {
+        "lessonId": "0003-rounds-and-final-score",
+        "path": "packages/arena-game/test/lifecycle-1v1.test.ts",
+        "startLine": 5,
+        "endLine": 45
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "packages/arena-game/test/team-2v2.test.ts",
+        "startLine": 289,
+        "endLine": 338
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "packages/arena-game/test/reconnect.test.ts",
+        "startLine": 14,
+        "endLine": 67
+      },
+      {
+        "lessonId": "0007-judge-boundary",
+        "path": "packages/arena-game/test/judge-security.test.ts",
+        "startLine": 18,
+        "endLine": 189
+      },
+      {
+        "lessonId": "0011-team-chat",
+        "path": "services/game/src/game/team-chat.test.ts",
+        "startLine": 259,
+        "endLine": 356
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-parity-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "A matching screen does not prove the game behaves the same. Compare the reference contract with the team result feature by feature, including two-player play, 2v2 isolation, reconnect, deadlines, Judge/worker failures, persistence, HTTPS/WSS, and chat boundaries."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m13-tls-path-check"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-parity-see",
+        "phase": "see",
+        "title": "A parity row needs two separate kinds of evidence",
+        "question": "Does the team result match the behavior, or only the picture?",
+        "explanation": [
+          "Write the expected behavior first. Link the reference check that explains it. Then record the target command, browser run, and observed result separately. If the actual team repository is missing, the target column stays blocked.",
+          "A difference may be intentional, but it needs a reason and an owner. Do not turn an author rehearsal or a screenshot into a target pass."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "parity.reference",
+            "workspace": "reference",
+            "path": "packages/arena-game/test/lifecycle-1v1.test.ts",
+            "action": "read",
+            "owner": "The reference integration test describes the full 1v1 flow.",
+            "change": "Read the observed action order and outcome.",
+            "pattern": "A reference pass is not a team pass."
+          },
+          {
+            "role": "parity-team.reference",
+            "workspace": "reference",
+            "path": "packages/arena-game/test/team-2v2.test.ts",
+            "action": "read",
+            "owner": "The reference tests include team isolation cases.",
+            "change": "Read what separate teams are allowed to see.",
+            "pattern": "Do not infer live transport from a unit fixture."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "Keep expected, reference, and team evidence separate",
+          "code": [
+            "Expected behavior → requirement",
+            "Reference check → example result",
+            "Team check → observed target result"
+          ],
+          "frames": [
+            {
+              "id": "reference",
+              "label": "Reference",
+              "codeLines": [1, 2],
+              "explanation": "Reference source explains one expected behavior and how its own check exercises it.",
+              "values": [
+                {
+                  "label": "Reference",
+                  "value": "source evidence"
+                },
+                {
+                  "label": "Team",
+                  "value": "not checked"
+                }
+              ]
+            },
+            {
+              "id": "target",
+              "label": "Team",
+              "codeLines": [1, 3],
+              "explanation": "The target result needs its own exact command or browser journey and recorded output.",
+              "values": [
+                {
+                  "label": "Target",
+                  "value": "separate run"
+                },
+                {
+                  "label": "Status",
+                  "value": "passed / failed / blocked"
+                }
+              ]
+            },
+            {
+              "id": "difference",
+              "label": "Difference",
+              "codeLines": [3],
+              "explanation": "An intentional difference needs a reason and responsible owner; it remains visible in the matrix.",
+              "values": [
+                {
+                  "label": "Difference",
+                  "value": "documented"
+                },
+                {
+                  "label": "Owner",
+                  "value": "named"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-parity-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "Why is a reference test not proof that the team game works?",
+        "explanation": [
+          "The test ran against the reference implementation. The team may use other files, libraries, or deployment rules. Record the team command and its result separately; a practice suite, author rehearsal, or mapped command does not run itself.",
+          "Include 1v1, 2v2 separation, changed-document readiness, reconnect, deadline/reveal, database restart, Judge verdict versus infrastructure failure, worker readiness, HTTPS/WSS, and chat team isolation. For each row, capture a positive and important failure case."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-parity-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "The team intentionally stores chat only in memory. What do you write?",
+        "explanation": [
+          "Record that as a difference, its owner, the product decision, and its restart behavior. Do not label it equivalent to durable chat. Ask whether the requirement expects history after restart and leave that row open until confirmed."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-parity-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Create `docs/behavior-parity.md`. Add one row for each required behavior and separate expected, reference, team command, observed result, and difference/owner columns.",
+        "explanation": [
+          "Create `docs/behavior-parity.md`. Add one row for each required behavior and separate expected, reference, team command, observed result, and difference/owner columns.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the expected behavior before searching for a check.",
+          "Use the reference test as a locator for one scenario.",
+          "Record the exact team command and observed output separately.",
+          "Keep missing database, Docker, browser, or teammate access as a named blocker."
+        ],
+        "files": [
+          {
+            "role": "docs.parity-matrix",
+            "workspace": "active",
+            "path": "docs/behavior-parity.md",
+            "action": "create",
+            "owner": "docs/ keeps behavior outcomes and evidence linked by scenario.",
+            "change": "Create rows for 1v1, 2v2 isolation, readiness, reconnect, deadline, persistence, Judge/worker failures, HTTPS/WSS, and chat.",
+            "pattern": "Columns: expected behavior, reference evidence, exact team check, observed result, difference and owner."
+          }
+        ],
+        "checkIds": ["m13-parity-matrix-check"],
+        "prerequisiteCheckIds": ["m13-tls-path-check"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-parity-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "Every required behavior row separates the expected result, reference evidence, target run, observed output, and any intentional difference.",
+        "explanation": [
+          "Every required behavior row separates the expected result, reference evidence, target run, observed output, and any intentional difference.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-parity-matrix-check"],
+        "prerequisiteCheckIds": [],
+        "next": "The final handover should show the team how to run and review the work.",
+        "transfer": "If an intentional difference changes hidden-case privacy or user authorization, ask the requirement owner to review it before marking the matrix complete."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-parity-matrix-check",
+        "command": "Explain aloud",
+        "cwd": ".",
+        "expected": "Every required behavior row separates the expected result, reference evidence, target run, observed output, and any intentional difference.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "A target result has no command or observation",
+            "diagnostic": "Leave the row blocked and record which repository, service, or browser is missing.",
+            "meaning": "A blank target cell is not a pass."
+          },
+          {
+            "symptom": "A reference or practice pass was copied into the target column",
+            "diagnostic": "Move it back to its original evidence column and run the team check separately.",
+            "meaning": "Evidence belongs to the workspace where it was observed."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m13-handover",
+    "milestoneId": "M13",
+    "title": "Hand over the project clearly",
+    "why": "A teammate should be able to find the setup steps, understand the service owners, run checks, and see what remains unfinished without guessing. The README is a map and a record of evidence, not a promise that every project requirement has passed.",
+    "outcome": "Write a concise README with setup, ownership, architecture, commands, contribution guidance, AI-use disclosure, and honest status.",
+    "prerequisites": ["m13-parity"],
+    "references": [
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "package.json",
+        "startLine": 1,
+        "endLine": 27
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": ".env.example",
+        "startLine": 1,
+        "endLine": 29
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "docker-compose.yml",
+        "startLine": 1,
+        "endLine": 111
+      },
+      {
+        "lessonId": "0010-team-collaboration",
+        "path": "packages/arena-game/src/team-collaboration.ts",
+        "startLine": 151,
+        "endLine": 177
+      }
+    ],
+    "steps": [
+      {
+        "id": "m13-handover-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "What must be known before changing the team project?",
+        "explanation": [
+          "A teammate should be able to find the setup steps, understand the service owners, run checks, and see what remains unfinished without guessing. The README is a map and a record of evidence, not a promise that every project requirement has passed."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the goal before opening files.",
+          "Find who owns the current behavior.",
+          "Separate what you observed from what you assume.",
+          "If a fact is missing, record it as unknown."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": ["m13-parity-matrix-check"],
+        "next": "Now trace the current project boundary before choosing a target path."
+      },
+      {
+        "id": "m13-handover-see",
+        "phase": "see",
+        "title": "A useful README answers the next teammate’s first questions",
+        "question": "What should a teammate know before running or changing the game?",
+        "explanation": [
+          "Show the actual install/start commands, required tools, service owners, data flow, environment variable names, check commands, and how to join the work. Name commands only after confirming them in the team project.",
+          "List incomplete behaviors and blocked environments. Include the team’s required AI-use disclosure in its own wording. Do not claim compliance or module completion from course notes."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow at a time.",
+          "Name which project owns each value.",
+          "Predict the failure before reading the next frame."
+        ],
+        "files": [
+          {
+            "role": "readme.reference",
+            "workspace": "reference",
+            "path": "package.json",
+            "action": "read",
+            "owner": "The root manifest documents the reference workspace scripts.",
+            "change": "Read its real aggregate commands.",
+            "pattern": "A different team root may expose other scripts."
+          },
+          {
+            "role": "secrets.reference",
+            "workspace": "reference",
+            "path": ".env.example",
+            "action": "read",
+            "owner": "The example file lists setting names without secret values.",
+            "change": "Use it to explain configuration names.",
+            "pattern": "Do not copy .env values into README."
+          }
+        ],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use what you observed to name the real owner before making a change.",
+        "visual": {
+          "kind": "trace",
+          "title": "The README gives a route into the project",
+          "code": [
+            "Prerequisites → setup",
+            "Architecture → owners",
+            "Checks → observed evidence",
+            "Open items → next owner"
+          ],
+          "frames": [
+            {
+              "id": "start",
+              "label": "Start",
+              "codeLines": [1, 2],
+              "explanation": "A new teammate can follow the setup steps from a clean checkout.",
+              "values": [
+                {
+                  "label": "Prerequisites",
+                  "value": "named"
+                },
+                {
+                  "label": "Commands",
+                  "value": "confirmed"
+                }
+              ]
+            },
+            {
+              "id": "work",
+              "label": "Work",
+              "codeLines": [2, 3],
+              "explanation": "Architecture and checks point to owners and real test commands.",
+              "values": [
+                {
+                  "label": "Owner",
+                  "value": "named"
+                },
+                {
+                  "label": "Evidence",
+                  "value": "linked"
+                }
+              ]
+            },
+            {
+              "id": "handover",
+              "label": "Continue",
+              "codeLines": [3, 4],
+              "explanation": "Open issues show what is incomplete and who can resolve it.",
+              "values": [
+                {
+                  "label": "Status",
+                  "value": "honest"
+                },
+                {
+                  "label": "Next owner",
+                  "value": "clear"
+                }
+              ]
+            }
+          ],
+          "cases": []
+        }
+      },
+      {
+        "id": "m13-handover-understand",
+        "phase": "understand",
+        "title": "Connect the pieces",
+        "question": "How is documentation different from test evidence?",
+        "explanation": [
+          "A README can say which command to run, but only an observed run can show whether it passed. Keep setup instructions, architecture, check results, and incomplete requirements in separate sections. Use the real team package scripts and deployment docs.",
+          "Before writing, inspect any existing README and contribution guide. Reuse their style and keep the team’s required disclosure wording. Do not replace existing sections just to match a course outline."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Compare one C idea you already know.",
+          "Find the TypeScript or web boundary.",
+          "Ask who owns this decision in the team repository.",
+          "Do not change an owner until the contract is clear."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Try the decision with a changed repository layout."
+      },
+      {
+        "id": "m13-handover-try",
+        "phase": "try",
+        "title": "Choose before you build",
+        "question": "The README already has setup steps but no AI-use disclosure. What do you do?",
+        "explanation": [
+          "Ask the team which disclosure rule applies, then add or link the confirmed wording. Keep the existing setup. If the requirement owner has not answered, mark the disclosure as an open task rather than inventing a policy."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Write the facts you have.",
+          "Mark the uncertain part.",
+          "Name a safe next inspection.",
+          "Keep the target check blocked until the unknown is resolved."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make one small, reviewable change."
+      },
+      {
+        "id": "m13-handover-build",
+        "phase": "build",
+        "title": "Make one small change",
+        "question": "Write or extend the team `README.md` after checking whether it already exists. Document confirmed setup, owners, checks, contribution steps, AI-use disclosure, and open work.",
+        "explanation": [
+          "Write or extend the team `README.md` after checking whether it already exists. Document confirmed setup, owners, checks, contribution steps, AI-use disclosure, and open work.",
+          "Use the workspace map only after the team path, owner, and command have been confirmed. This course does not open the folder or write the game for you."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the team README before editing it.",
+          "Keep existing setup and ownership facts that are still correct.",
+          "Add only commands and requirements confirmed by the team.",
+          "List pending behaviors, blockers, and owners in plain English."
+        ],
+        "files": [
+          {
+            "role": "docs.project-readme",
+            "workspace": "active",
+            "path": "README.md",
+            "action": "edit",
+            "owner": "The project README is the first handover route for a new contributor.",
+            "change": "Document confirmed prerequisites, setup, architecture/owners, scripts, checks, contribution steps, AI-use disclosure, and open work.",
+            "pattern": "Preserve existing useful sections; label every command and status with its real evidence source."
+          }
+        ],
+        "checkIds": ["m13-handover-review"],
+        "prerequisiteCheckIds": ["m13-parity-matrix-check"],
+        "next": "Check this one change before moving to the next responsibility."
+      },
+      {
+        "id": "m13-handover-check",
+        "phase": "check",
+        "title": "Check the evidence",
+        "question": "A new teammate can find confirmed setup and check commands, feature owners, contribution rules, AI-use disclosure, and visible unfinished work.",
+        "explanation": [
+          "A new teammate can find confirmed setup and check commands, feature owners, contribution rules, AI-use disclosure, and visible unfinished work.",
+          "A practice result checks only your practice project. A typed team command is unverified until you run it in the real team repository and review its output."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the exact command and working folder.",
+          "Compare the output with the expected result.",
+          "If a dependency is missing, name it.",
+          "Record passed, failed, or blocked without changing the story."
+        ],
+        "files": [],
+        "checkIds": ["m13-handover-review"],
+        "prerequisiteCheckIds": [],
+        "next": "The guided build ends with a clear route for the next contributor; the team still owns its actual verification.",
+        "transfer": "If a new contributor cannot run the documented checks from the README alone, revise the steps and ask them to retry from a clean checkout."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m13-handover-review",
+        "command": "Explain aloud",
+        "cwd": ".",
+        "expected": "A new teammate can find confirmed setup and check commands, feature owners, contribution rules, AI-use disclosure, and visible unfinished work.",
+        "kind": "explain",
+        "failure": [
+          {
+            "symptom": "A command or result cannot be verified",
+            "diagnostic": "Label it as proposed or blocked and ask its owner to confirm it.",
+            "meaning": "README text does not execute a command."
+          },
+          {
+            "symptom": "A compliance or module claim has no owner evidence",
+            "diagnostic": "Remove the claim or mark it pending team review.",
+            "meaning": "Course documentation cannot sign off a team module."
+          }
+        ]
+      }
+    ]
+  }
+]

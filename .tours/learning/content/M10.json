@@ -1,0 +1,1860 @@
+[
+  {
+    "id": "m10-invite",
+    "milestoneId": "M10",
+    "title": "Invite players into one private Lobby",
+    "why": "Start with an invitation Lobby because players need a safe place to choose sides before a Match exists. This release uses private invites; the old public queue is retained reference code, not the path to build first.",
+    "outcome": "Trace a normalized invite code to one room, identify the host and side limit, and test invalid, full and concurrent joins.",
+    "prerequisites": ["m07-local-journey", "m08-recovery", "m09-replace-fake"],
+    "references": [
+      {
+        "lessonId": "0004-lobby-to-match",
+        "path": "packages/arena-game/src/lobby.ts",
+        "startLine": 426,
+        "endLine": 475
+      },
+      {
+        "lessonId": "0004-lobby-to-match",
+        "path": "packages/arena-game/test/lobby.test.ts",
+        "startLine": 137,
+        "endLine": 212
+      }
+    ],
+    "steps": [
+      {
+        "id": "m10-invite-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Invite players into one private Lobby",
+        "explanation": [
+          "Start with an invitation Lobby because players need a safe place to choose sides before a Match exists. This release uses private invites; the old public queue is retained reference code, not the path to build first."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "M08 recovery makes Lobby state durable; M09 gives Match creation a real Judge boundary. Invitation-first keeps the next task small."
+      },
+      {
+        "id": "m10-invite-see",
+        "phase": "see",
+        "title": "An invite code points to one room",
+        "question": "What changes when the last seat is taken?",
+        "explanation": [
+          "The code locates the room. A transaction checks active Match/queue membership, locks the room, then adds a seat. Public matchmaking is a separate retained route, so it is not mixed into this first path."
+        ],
+        "vocabulary": [
+          {
+            "term": "Invitation Lobby",
+            "meaning": "A private waiting room with one host, a code, sides and Ready state."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Join is a decision with rejection cases, not a blind append.",
+        "visual": {
+          "kind": "trace",
+          "title": "An invite code points to one room",
+          "code": [
+            "Host creates open room",
+            "Invite joins a side",
+            "Full room rejects another join"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Host room",
+              "values": [
+                {
+                  "label": "status",
+                  "value": "open"
+                },
+                {
+                  "label": "seats",
+                  "value": "1 / 2"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The host is a member before sharing the code."
+            },
+            {
+              "id": "frame-1",
+              "label": "Friend joins",
+              "values": [
+                {
+                  "label": "code",
+                  "value": "normalized"
+                },
+                {
+                  "label": "seats",
+                  "value": "2 / 2"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The server locks the room row while admitting a player."
+            },
+            {
+              "id": "frame-2",
+              "label": "Another join",
+              "values": [
+                {
+                  "label": "status",
+                  "value": "open"
+                },
+                {
+                  "label": "seats",
+                  "value": "2 / 2"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "A third player gets a full-room error; no seat is overwritten."
+            }
+          ],
+          "cases": [
+            {
+              "input": "The code is misspelled or the second side is full",
+              "expected": "The request returns a clear error and leaves existing members unchanged",
+              "reason": "The code is a lookup key; room state and capacity stay server-owned."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m10-invite-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why check an existing queue or Match before adding a room member?",
+        "explanation": [
+          "One player cannot safely be admitted to two active places. The Lobby checks those memberships while holding a per-user transaction lock, then locks the room before checking capacity."
+        ],
+        "vocabulary": [
+          {
+            "term": "Capacity",
+            "meaning": "The maximum number of players or seats a room can accept."
+          }
+        ],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Now predict what the next boundary should do."
+      },
+      {
+        "id": "m10-invite-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "Two requests for the final seat arrive together. Can both succeed?",
+        "explanation": [
+          "Predict which transaction waits, which request may win the seat, and what the other request should receive."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make the join boundary and its rejection test."
+      },
+      {
+        "id": "m10-invite-join-contract",
+        "phase": "build",
+        "title": "Normalize and guard an invite join",
+        "question": "Which checks must happen before adding a member?",
+        "explanation": [
+          "In src/lobby.ts, normalize the invite code, reject missing, expired, matched or full rooms, and add the player under the room lock. Do not add the retained public-queue path."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Trim and normalize the code before lookup.",
+          "Check status and expiry before seat assignment.",
+          "Count capacity from the locked member list.",
+          "Test invalid code and the final seat."
+        ],
+        "files": [
+          {
+            "role": "lobby.room",
+            "workspace": "active",
+            "path": "src/lobby.ts",
+            "action": "create",
+            "owner": "src/lobby.ts owns invite-room membership and capacity.",
+            "change": "Implement invite join with normalized code lookup and explicit invalid/full errors.",
+            "pattern": "Read the existing member list and transaction order first; use a database lock to serialize admission."
+          }
+        ],
+        "checkIds": ["m10-invite-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-invite-join-failures",
+        "phase": "build",
+        "title": "Test invalid and full invitations",
+        "question": "Does a rejected join leave the room unchanged?",
+        "explanation": [
+          "In test/lobby.test.ts, cover an invalid code, a full side and two users racing for the last allowed seat. Assert both each response and the stored member list."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Start with one room and its current members.",
+          "Use Promise.all for the two final-seat attempts.",
+          "Assert exactly one request succeeds.",
+          "Re-read room state; do not infer it from status alone."
+        ],
+        "files": [
+          {
+            "role": "lobby.test",
+            "workspace": "active",
+            "path": "test/lobby.test.ts",
+            "action": "edit",
+            "owner": "test/lobby.test.ts owns Lobby boundary examples.",
+            "change": "Add tests for invalid invite, full capacity and concurrent admission without relying on public queue matching.",
+            "pattern": "Assert final state as well as each request result."
+          }
+        ],
+        "checkIds": ["m10-invite-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-invite-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Trace a normalized invite code to one room, identify the host and side limit, and test invalid, full and concurrent joins.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Trace a normalized invite code to one room, identify the host and side limit, and test invalid, full and concurrent joins.",
+        "transfer": "Changed case: a third player joins after the left side has reached its two-player limit. Predict before running it: the join is rejected and the room still has the same four members.",
+        "next": "Continue to Start."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m10-invite-unit",
+        "kind": "unit",
+        "command": "npm test -- test/lobby.test.ts",
+        "cwd": ".",
+        "expected": "Invite normalization rejects invalid/expired rooms, capacity is enforced, and concurrent joins never oversubscribe one side.",
+        "failure": [
+          {
+            "symptom": "Invalid code is accepted",
+            "diagnostic": "Check normalization and look up the expected room under the transaction.",
+            "meaning": "The invite boundary is not enforcing its lookup rule."
+          },
+          {
+            "symptom": "Two final-seat requests both succeed",
+            "diagnostic": "Hold the room row lock while checking capacity and adding the member.",
+            "meaning": "Admission is not serialized."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m10-start",
+    "milestoneId": "M10",
+    "title": "Start exactly one Match when the Lobby is ready",
+    "why": "A Lobby is waiting state; a Match is durable play state. Build this handoff only after invites work so each decision has a clear owner.",
+    "outcome": "Require the host, full sides and every Ready flag, then prove concurrent Start requests return one Match handoff and failed creation rolls back.",
+    "prerequisites": ["m10-invite"],
+    "references": [
+      {
+        "lessonId": "0004-lobby-to-match",
+        "path": "packages/arena-game/src/lobby.ts",
+        "startLine": 685,
+        "endLine": 748
+      },
+      {
+        "lessonId": "0004-lobby-to-match",
+        "path": "packages/arena-game/test/lobby.test.ts",
+        "startLine": 215,
+        "endLine": 253
+      },
+      {
+        "lessonId": "0004-lobby-to-match",
+        "path": "packages/arena-game/test/lobby.test.ts",
+        "startLine": 299,
+        "endLine": 348
+      }
+    ],
+    "steps": [
+      {
+        "id": "m10-start-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Start exactly one Match when the Lobby is ready",
+        "explanation": [
+          "A Lobby is waiting state; a Match is durable play state. Build this handoff only after invites work so each decision has a clear owner."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Invite joins and Ready state already exist. This lesson joins them into one durable Match."
+      },
+      {
+        "id": "m10-start-see",
+        "phase": "see",
+        "title": "Ready seats cross one durable handoff",
+        "question": "Can a repeated Start create two Matches?",
+        "explanation": [
+          "A Ready room is not yet a Match. Check host, full sides and every Ready flag while the room is locked. Write the Match before changing the room to matched, inside one transaction."
+        ],
+        "vocabulary": [
+          {
+            "term": "Handoff",
+            "meaning": "One owner finishes its work and gives the next owner a durable identifier."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Follow the transaction; one failed insert must not leave a half-started room.",
+        "visual": {
+          "kind": "trace",
+          "title": "Ready seats cross one durable handoff",
+          "code": [
+            "Host asks to start",
+            "Validate sides and Ready",
+            "Create Match inside transaction",
+            "Commit room handoff"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Not ready",
+              "values": [
+                {
+                  "label": "host",
+                  "value": "yes"
+                },
+                {
+                  "label": "sides",
+                  "value": "not full"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Start is rejected before creating a Match."
+            },
+            {
+              "id": "frame-1",
+              "label": "Ready",
+              "values": [
+                {
+                  "label": "host",
+                  "value": "yes"
+                },
+                {
+                  "label": "sides",
+                  "value": "full"
+                },
+                {
+                  "label": "ready",
+                  "value": "all"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "Only the host may start after every seat is full and Ready."
+            },
+            {
+              "id": "frame-2",
+              "label": "Committed",
+              "values": [
+                {
+                  "label": "match",
+                  "value": "one id"
+                },
+                {
+                  "label": "room",
+                  "value": "matched"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The Match save and room status change share a transaction."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Two Start requests race or Match creation throws",
+              "expected": "At most one Match is created; failure leaves no matched room or phantom membership",
+              "reason": "The room lock, Match save and room status update define one handoff."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m10-start-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why must room status and Match creation commit together?",
+        "explanation": [
+          "If the room becomes matched but Match creation fails, players see a game that does not exist. If Match creation commits but the room stays open, another Start can create a second one. One database transaction protects both sides."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Now predict what the next boundary should do."
+      },
+      {
+        "id": "m10-start-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "The host is Ready but one seat is empty. Which check fails first?",
+        "explanation": [
+          "Say whether this request should create a Match and what room status should remain."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Add one guard at a time, then test the transaction."
+      },
+      {
+        "id": "m10-start-start-gate",
+        "phase": "build",
+        "title": "Enforce host, full-side and Ready gates",
+        "question": "What must be true before Match creation begins?",
+        "explanation": [
+          "In src/lobby.ts, keep the room row locked, verify the trusted host, count each side against its mode, and require every member to be Ready before calling the Match creator."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the room row with FOR UPDATE.",
+          "Check host identity before side counts.",
+          "Compare each side to perSideCapacity, not only total count.",
+          "Keep Match save and room status inside one transaction."
+        ],
+        "files": [
+          {
+            "role": "lobby.start",
+            "workspace": "active",
+            "path": "src/lobby.ts",
+            "action": "edit",
+            "owner": "src/lobby.ts owns the Lobby-to-Match transaction.",
+            "change": "Validate host, exact per-side capacity and all Ready flags before creating the Match.",
+            "pattern": "Keep the room lock until the Match record and matched room state commit."
+          }
+        ],
+        "checkIds": ["m10-start-unit", "m10-start-database"],
+        "prerequisiteCheckIds": ["m10-invite-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-start-start-race-test",
+        "phase": "build",
+        "title": "Prove the handoff does not split",
+        "question": "What remains after Match creation fails or two Starts race?",
+        "explanation": [
+          "In test/lobby.test.ts, exercise concurrent Start calls and inject a Match-creation failure. Assert one id is returned for a successful race and the room remains open after rollback."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Make two calls against the same room.",
+          "Count calls to the Match creator.",
+          "For failure, throw before commit.",
+          "Re-read the room to prove rollback."
+        ],
+        "files": [
+          {
+            "role": "lobby.test",
+            "workspace": "active",
+            "path": "test/lobby.test.ts",
+            "action": "edit",
+            "owner": "test/lobby.test.ts proves the transaction boundary.",
+            "change": "Add failure-injection and concurrent-start assertions for the Match handoff.",
+            "pattern": "Check returned Match ids and final persisted room status."
+          }
+        ],
+        "checkIds": ["m10-start-unit", "m10-start-database"],
+        "prerequisiteCheckIds": ["m10-start-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-start-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Require the host, full sides and every Ready flag, then prove concurrent Start requests return one Match handoff and failed creation rolls back.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Require the host, full sides and every Ready flag, then prove concurrent Start requests return one Match handoff and failed creation rolls back.",
+        "transfer": "Changed case: the host starts while one seat is empty. Expected result: no Match is created, no room handoff happens, and the Lobby stays open.",
+        "next": "Continue to Socket auth."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m10-start-unit",
+        "kind": "unit",
+        "command": "npm test -- test/lobby.test.ts",
+        "cwd": ".",
+        "expected": "A non-host, incomplete side, or non-Ready member cannot start; concurrent starts converge on one Match id.",
+        "failure": [
+          {
+            "symptom": "A second Match appears",
+            "diagnostic": "Keep the room row locked through Match creation and commit.",
+            "meaning": "The handoff is not serialized."
+          }
+        ]
+      },
+      {
+        "id": "m10-start-database",
+        "kind": "database",
+        "command": "npm run test:db -- test/lobby-concurrency.test.ts",
+        "cwd": ".",
+        "expected": "A real Postgres test proves Match insert and room status commit together or roll back together.",
+        "failure": [
+          {
+            "symptom": "Postgres is unavailable",
+            "diagnostic": "Run the documented local database setup, then check TEST_PG_URL without printing its value.",
+            "meaning": "A mocked lock cannot prove concurrent database behavior."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m10-socket-auth",
+    "milestoneId": "M10",
+    "title": "Trust the socket identity, then check Match membership",
+    "why": "A socket stays connected, so every live command must use an identity the server already verified. This follows the HTTP boundary lesson but adds a handshake and a Match room.",
+    "outcome": "Reject missing or conflicting identities and non-members; never take a player id from a message body as authority.",
+    "prerequisites": ["m10-start"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/socket-auth.ts",
+        "startLine": 16,
+        "endLine": 36
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/game.gateway.ts",
+        "startLine": 42,
+        "endLine": 72
+      },
+      {
+        "lessonId": "0013-running-the-project",
+        "path": "services/game/package.json",
+        "startLine": 16,
+        "endLine": 27
+      }
+    ],
+    "steps": [
+      {
+        "id": "m10-socket-auth-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Trust the socket identity, then check Match membership",
+        "explanation": [
+          "A socket stays connected, so every live command must use an identity the server already verified. This follows the HTTP boundary lesson but adds a handshake and a Match room."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "The host now creates a Match. The next request may join only that Match room."
+      },
+      {
+        "id": "m10-socket-auth-see",
+        "phase": "see",
+        "title": "Handshake identity meets Match membership",
+        "question": "Which identity can a live command trust?",
+        "explanation": [
+          "A trusted principal answers who is connected. Match membership answers whether this player may see or change this Match. Both are required. The current local seam is development-only; it is not the team authentication system."
+        ],
+        "vocabulary": [
+          {
+            "term": "Principal",
+            "meaning": "A server-verified identity attached to a request or connection."
+          },
+          {
+            "term": "Membership",
+            "meaning": "A server-side record that says which player belongs to a Match."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Identity and authorization are two checks; a trusted name is not automatic permission.",
+        "visual": {
+          "kind": "trace",
+          "title": "Handshake identity meets Match membership",
+          "code": [
+            "Client handshake",
+            "Auth seam verifies principal",
+            "Game checks Match membership",
+            "Authorized socket joins room"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Unverified",
+              "values": [
+                {
+                  "label": "userId",
+                  "value": "client text"
+                },
+                {
+                  "label": "Match",
+                  "value": "unknown"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Handshake text alone is not proof of identity."
+            },
+            {
+              "id": "frame-1",
+              "label": "Principal",
+              "values": [
+                {
+                  "label": "userId",
+                  "value": "trusted"
+                },
+                {
+                  "label": "source",
+                  "value": "auth seam"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The auth seam attaches a verified principal to socket data."
+            },
+            {
+              "id": "frame-2",
+              "label": "Membership",
+              "values": [
+                {
+                  "label": "Match",
+                  "value": "requested"
+                },
+                {
+                  "label": "member",
+                  "value": "yes / no"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The Game checks that principal against Match membership before joining."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A client sends a different playerId in a Submit body",
+              "expected": "The handler ignores body identity and uses the attached principal",
+              "reason": "Authorization derives from verified socket state and server membership."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m10-socket-auth-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why can a signed-in player still be denied a Match socket?",
+        "explanation": [
+          "The user can be real but not belong to this Match. The Game checks membership before the socket joins its private event room or runs a command."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Now predict a forged identity before writing the test."
+      },
+      {
+        "id": "m10-socket-auth-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "A valid user changes matchId to another room. Should the socket join it?",
+        "explanation": [
+          "Trace which step checks Match membership and what should happen on failure."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Attach the trusted principal first, then test its rejection path."
+      },
+      {
+        "id": "m10-socket-auth-deps",
+        "phase": "build",
+        "title": "Install the socket packages before coding",
+        "question": "Which packages make the server and browser speak Socket.IO?",
+        "explanation": [
+          "In package.json, add the four reviewed versions shown below. Use the exact versions and let npm update package-lock.json before writing socket code."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the development-only guard before parsing fields.",
+          "Reject auth and query values when they disagree.",
+          "Attach principal to socket.data after verification.",
+          "Do not let a Run or Submit payload choose its caller."
+        ],
+        "files": [
+          {
+            "role": "practice.package",
+            "workspace": "active",
+            "path": "package.json",
+            "action": "edit",
+            "owner": "The practice root pins Socket.IO and the Nest adapter versions.",
+            "change": "Add @nestjs/websockets 11.2.6, @nestjs/platform-socket.io 11.2.6, socket.io 4.8.3 and socket.io-client 4.8.3 as exact versions.",
+            "pattern": "Read the source manifest first. Install exact versions with npm --save-exact, then keep the lockfile in sync."
+          },
+          {
+            "role": "practice.lock",
+            "workspace": "active",
+            "path": "package-lock.json",
+            "action": "edit",
+            "owner": "package-lock.json records the resolved versions for repeatable installs.",
+            "change": "Record the exact Socket.IO package versions installed from package.json.",
+            "pattern": "Do not hand-edit generated lock entries; let npm write them and inspect the diff."
+          }
+        ],
+        "checkIds": ["m10-socket-deps"],
+        "prerequisiteCheckIds": [],
+        "next": "Verify the installed package tree before importing the packages."
+      },
+      {
+        "id": "m10-socket-auth-principal",
+        "phase": "build",
+        "title": "Attach an authenticated socket principal",
+        "question": "Which values become trusted after the handshake?",
+        "explanation": [
+          "In src/server/socket-auth.ts, parse identity only through the authentication seam, reject missing or conflicting values, and attach the result to socket.data. Label the current development seam honestly; production authentication is a separate integration."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Read the development-only guard before parsing fields.",
+          "Reject auth and query values when they disagree.",
+          "Attach principal to socket.data after verification.",
+          "Do not let a Run or Submit payload choose its caller."
+        ],
+        "files": [
+          {
+            "role": "server.socket-auth",
+            "workspace": "active",
+            "path": "src/server/socket-auth.ts",
+            "action": "create",
+            "owner": "src/server/socket-auth.ts owns handshake identity parsing.",
+            "change": "Create the principal from the auth seam and fail closed for missing or conflicting identity fields.",
+            "pattern": "Socket handlers read the attached principal, never userId sent in a command body."
+          }
+        ],
+        "checkIds": ["m10-socket-auth-unit"],
+        "prerequisiteCheckIds": ["m10-start-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-socket-auth-gateway",
+        "phase": "build",
+        "title": "Authorize the Match before joining its room",
+        "question": "What must the Game prove before this socket receives a snapshot?",
+        "explanation": [
+          "In src/server/match.gateway.ts, read the verified principal, then ask Game for the current Match snapshot; that lookup proves membership. Only after it succeeds, join match:<id>. Every message handler reads the principal again; never trust a player id from the payload."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use one trusted user and another Match id.",
+          "Keep the positive member case as a control.",
+          "Assert no room join or snapshot for a stranger.",
+          "Do not label the development seam production authentication."
+        ],
+        "files": [
+          {
+            "role": "server.match-gateway",
+            "workspace": "active",
+            "path": "src/server/match.gateway.ts",
+            "action": "create",
+            "owner": "The Match gateway owns socket connection order and event-room membership.",
+            "change": "Verify Match membership before room join, attach the trusted principal, and send one authoritative baseline snapshot.",
+            "pattern": "Make the membership lookup happen before join or private output. Reuse Game rules instead of adding new rule checks in the gateway."
+          }
+        ],
+        "checkIds": ["m10-socket-auth-unit"],
+        "prerequisiteCheckIds": [],
+        "next": "Now test missing identity, non-membership and the safe order."
+      },
+      {
+        "id": "m10-socket-auth-membership",
+        "phase": "build",
+        "title": "Test the Match membership decision",
+        "question": "Can a stranger join the Match room?",
+        "explanation": [
+          "In test/socket-auth.test.ts and test/match-gateway.test.ts, cover missing and conflicting identity, a non-member, and a member who may join only after Game confirms the Match."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Use one trusted user and another Match id.",
+          "Keep the positive member case as a control.",
+          "Assert no room join or snapshot for a stranger.",
+          "Do not label the development seam production authentication."
+        ],
+        "files": [
+          {
+            "role": "server.socket-auth-test",
+            "workspace": "active",
+            "path": "test/socket-auth.test.ts",
+            "action": "create",
+            "owner": "test/socket-auth.test.ts protects the socket boundary.",
+            "change": "Test missing/conflicting principals, non-member denial, and membership-before-room join.",
+            "pattern": "Assert no private snapshot or room join occurs for a non-member."
+          }
+        ],
+        "checkIds": ["m10-socket-auth-unit"],
+        "prerequisiteCheckIds": ["m10-socket-auth-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-socket-auth-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Reject missing or conflicting identities and non-members; never take a player id from a message body as authority.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Reject missing or conflicting identities and non-members; never take a player id from a message body as authority.",
+        "transfer": "Changed case: a valid player for Match A sends Match B in the event body. Expected result: reject it; the server takes identity and Match access from the authenticated connection.",
+        "next": "Continue to Presence."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m10-socket-auth-unit",
+        "kind": "unit",
+        "command": "npm test -- test/socket-auth.test.ts test/match-gateway.test.ts",
+        "cwd": ".",
+        "expected": "Missing or conflicting identity and non-members are rejected before room join or private output; a member receives one server snapshot.",
+        "failure": [
+          {
+            "symptom": "A stranger joins the Match room",
+            "diagnostic": "Check that Game membership succeeds before client.join().",
+            "meaning": "The gateway opened a private room before authorization."
+          },
+          {
+            "symptom": "The message body can choose a player",
+            "diagnostic": "Read identity from the attached socket principal.",
+            "meaning": "The gateway is trusting caller-controlled identity."
+          }
+        ]
+      },
+      {
+        "id": "m10-socket-deps",
+        "kind": "integration",
+        "command": "npm ls @nestjs/websockets @nestjs/platform-socket.io socket.io socket.io-client --depth=0",
+        "cwd": ".",
+        "expected": "The practice root reports @nestjs/websockets@11.2.6, @nestjs/platform-socket.io@11.2.6, socket.io@4.8.3 and socket.io-client@4.8.3.",
+        "failure": [
+          {
+            "symptom": "A listed package is missing or has a different version",
+            "diagnostic": "Compare package.json with services/game/package.json and install the reviewed exact version.",
+            "meaning": "The example imports may not match the installed API."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m10-presence",
+    "milestoneId": "M10",
+    "title": "Keep Presence separate from Player status",
+    "why": "One player may open two tabs. Presence tells us whether any connection is open; Player status tells us what the game is doing. Count sockets before deciding a player is offline.",
+    "outcome": "Use a Map of players to Sets of socket ids; show online on the first socket and offline only after the last one closes.",
+    "prerequisites": ["m10-socket-auth"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/match-socket-presence.ts",
+        "startLine": 15,
+        "endLine": 62
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/match-socket-presence.test.ts",
+        "startLine": 46,
+        "endLine": 101
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/game.gateway.ts",
+        "startLine": 51,
+        "endLine": 72
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/game.gateway.ts",
+        "startLine": 75,
+        "endLine": 85
+      }
+    ],
+    "steps": [
+      {
+        "id": "m10-presence-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Keep Presence separate from Player status",
+        "explanation": [
+          "One player may open two tabs. Presence tells us whether any connection is open; Player status tells us what the game is doing. Count sockets before deciding a player is offline."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Now that each socket has a trusted player, count that player’s tabs without changing Match status."
+      },
+      {
+        "id": "m10-presence-see",
+        "phase": "see",
+        "title": "Two tabs still mean one online player",
+        "question": "What happens after only one tab closes?",
+        "explanation": [
+          "A Map looks up each player/Match pair. Its Set holds connection ids. Set size changes from zero to one on the first open and one to zero on the last close. In 2v2 the service tracks each member; in 1v1 it may aggregate a side."
+        ],
+        "vocabulary": [
+          {
+            "term": "Map",
+            "meaning": "A lookup table from a key, such as a player, to a value."
+          },
+          {
+            "term": "Set",
+            "meaning": "A collection that keeps each socket id only once."
+          },
+          {
+            "term": "Presence",
+            "meaning": "Whether a player has at least one live connection."
+          },
+          {
+            "term": "Player status",
+            "meaning": "The game state, such as coding or submitted."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Count socket ids; do not store only one online/offline flag.",
+        "visual": {
+          "kind": "trace",
+          "title": "Two tabs still mean one online player",
+          "code": [
+            "open Alice / tab A",
+            "open Alice / tab B",
+            "close tab A",
+            "close tab B"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "One socket",
+              "values": [
+                {
+                  "label": "Alice sockets",
+                  "value": "{tab A}"
+                },
+                {
+                  "label": "Presence",
+                  "value": "online"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "The first socket changes Presence to online."
+            },
+            {
+              "id": "frame-1",
+              "label": "Two sockets",
+              "values": [
+                {
+                  "label": "Alice sockets",
+                  "value": "{tab A, tab B}"
+                },
+                {
+                  "label": "Presence",
+                  "value": "online"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The second tab adds an id without changing Player status."
+            },
+            {
+              "id": "frame-2",
+              "label": "One left",
+              "values": [
+                {
+                  "label": "Alice sockets",
+                  "value": "{tab B}"
+                },
+                {
+                  "label": "Presence",
+                  "value": "online"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Closing tab A does not mark Alice offline."
+            },
+            {
+              "id": "frame-3",
+              "label": "None left",
+              "values": [
+                {
+                  "label": "Alice sockets",
+                  "value": "{}"
+                },
+                {
+                  "label": "Presence",
+                  "value": "offline"
+                }
+              ],
+              "codeLines": [4],
+              "explanation": "Only the last close changes Presence to offline."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Alice opens tab A and tab B, then closes A",
+              "expected": "Alice remains online until tab B closes",
+              "reason": "Presence counts live connections; it is not the player’s game status."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m10-presence-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why is one boolean per player not enough?",
+        "explanation": [
+          "A boolean cannot tell whether one tab closed while another remains. Map<string, Set<string>> stores each socket id once per player/Match. Only an empty Set means offline. Keep this separate from Match status, such as coding or submitted."
+        ],
+        "vocabulary": [
+          {
+            "term": "Socket id",
+            "meaning": "A unique identifier for one live browser connection."
+          }
+        ],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Use two open socket ids in the example."
+      },
+      {
+        "id": "m10-presence-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "After opening tab A and tab B, you close tab A. Should the UI show offline?",
+        "explanation": [
+          "Use the Set size in each frame. Then name which separate field tells whether Alice is coding."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Write the Map/Set rule as a tiny boundary and test it."
+      },
+      {
+        "id": "m10-presence-counter",
+        "phase": "build",
+        "title": "Track each player’s socket ids",
+        "question": "Which event changes Presence from offline to online?",
+        "explanation": [
+          "In src/presence.ts, define open(userId, socketId), close(socketId), and isOnline(userId). The tracker uses a Match-scoped Map<string, Set<string>>: add one id per open socket and stay online until the Set is empty. Keep Player status in another field."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Create or find the player’s Set on open.",
+          "Add the exact socket id, not only a count.",
+          "On close, remove only that id.",
+          "Mark offline only when the Set is empty."
+        ],
+        "files": [
+          {
+            "role": "server.presence",
+            "workspace": "active",
+            "path": "src/presence.ts",
+            "action": "create",
+            "owner": "src/presence.ts owns process-local open-socket counting.",
+            "change": "Implement Map<string, Set<string>> and its first-open/last-close edges.",
+            "pattern": "Use one tracker per Match in this practice model; the service gateway supplies the Match and user together when it opens or closes a socket."
+          }
+        ],
+        "checkIds": ["m10-presence-multi-socket"],
+        "prerequisiteCheckIds": ["m10-socket-auth-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-presence-gateway",
+        "phase": "build",
+        "title": "Connect socket events to first-open and last-close",
+        "question": "Which Game calls run on connection and disconnection?",
+        "explanation": [
+          "In src/server/match.gateway.ts, first let Game.snapshot() verify Match membership. Then record each socket open and close for that same player and Match. The Presence tracker marks online on the first open and offline only after the last socket disconnects. A dropped socket is not a deliberate leave."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Open two different ids for one player.",
+          "Close the first id and assert still online.",
+          "Close the last id and assert offline.",
+          "Close an unknown id and assert state does not change."
+        ],
+        "files": [
+          {
+            "role": "server.match-presence",
+            "workspace": "active",
+            "path": "src/server/match.gateway.ts",
+            "action": "edit",
+            "owner": "The Match gateway connects authorized socket lifecycle to the Presence tracker.",
+            "change": "After membership validation, call noteSocketOpen(userId, matchId, socket.id); call noteSocketClosed with the attached principal on disconnect.",
+            "pattern": "Presence counts sockets per Match and player. One close leaves the player online; only the last close marks them offline."
+          }
+        ],
+        "checkIds": ["m10-presence-multi-socket"],
+        "prerequisiteCheckIds": ["m10-presence-multi-socket"],
+        "next": "Run the two-tab case, then explain why status and Presence are separate."
+      },
+      {
+        "id": "m10-presence-counter-test",
+        "phase": "build",
+        "title": "Test the required two-tab example",
+        "question": "Can the first disconnect leave the player online?",
+        "explanation": [
+          "In test/presence.test.ts, create a new Presence object. Open Alice/tab A and Alice/tab B, close tab A, assert online; close tab B, assert offline. Check that closing one id twice is harmless."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Open two different ids for one player.",
+          "Close the first id and assert still online.",
+          "Close the last id and assert offline.",
+          "Close an unknown id and assert state does not change."
+        ],
+        "files": [
+          {
+            "role": "server.presence-test",
+            "workspace": "active",
+            "path": "test/presence.test.ts",
+            "action": "create",
+            "owner": "test/presence.test.ts protects the first-open and last-close transitions.",
+            "change": "Add the complete two-socket test before wiring Presence into a gateway.",
+            "pattern": "Start with one player and two distinct socket ids so each state change is visible."
+          }
+        ],
+        "checkIds": ["m10-presence-multi-socket"],
+        "prerequisiteCheckIds": ["m10-presence-multi-socket"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-presence-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Use a Map of players to Sets of socket ids; show online on the first socket and offline only after the last one closes.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Use a Map of players to Sets of socket ids; show online on the first socket and offline only after the last one closes.",
+        "transfer": "Changed case: one teammate has three tabs. Close two tabs and expect online; close the last tab and expect offline.",
+        "next": "Continue to Reconnect."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m10-presence-multi-socket",
+        "kind": "unit",
+        "command": "npm test -- test/presence.test.ts test/match-gateway.test.ts",
+        "cwd": ".",
+        "expected": "Two tabs for one player stay online until the last socket closes; the gateway records open/close for the attached member after authorization.",
+        "failure": [
+          {
+            "symptom": "Alice goes offline after the first close",
+            "diagnostic": "Check whether another socket id remains in the Set.",
+            "meaning": "Presence must follow the last connection."
+          },
+          {
+            "symptom": "Player status changes on disconnect",
+            "diagnostic": "Keep Presence separate from Match Player status.",
+            "meaning": "A connection event does not decide game activity."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m10-reconnect",
+    "milestoneId": "M10",
+    "title": "Reconnect from the latest server snapshot",
+    "why": "A socket event says that something changed; it may be missed, duplicated or arrive late. The server snapshot is the source of truth, so reconnect means resubscribe and fetch current state.",
+    "outcome": "Discard older replies, rejoin the active room, hand off to a Match once, and refresh after a 409 without replaying the unsafe command.",
+    "prerequisites": ["m10-presence"],
+    "references": [
+      {
+        "lessonId": "0009-live-connection",
+        "path": "frontend/src/arena/socket.ts",
+        "startLine": 85,
+        "endLine": 104
+      },
+      {
+        "lessonId": "0004-lobby-to-match",
+        "path": "frontend/src/arena/lobby-session.ts",
+        "startLine": 83,
+        "endLine": 122
+      },
+      {
+        "lessonId": "0009-live-connection",
+        "path": "services/game/src/game/game.gateway.ts",
+        "startLine": 42,
+        "endLine": 72
+      }
+    ],
+    "steps": [
+      {
+        "id": "m10-reconnect-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Reconnect from the latest server snapshot",
+        "explanation": [
+          "A socket event says that something changed; it may be missed, duplicated or arrive late. The server snapshot is the source of truth, so reconnect means resubscribe and fetch current state."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Presence is tracked. Next, recover from missed events without treating payloads as full state."
+      },
+      {
+        "id": "m10-reconnect-see",
+        "phase": "see",
+        "title": "An event rings the bell; a snapshot tells the truth",
+        "question": "What should the client trust after reconnect?",
+        "explanation": [
+          "Treat live events as a reason to fetch state. requestVersion lets the UI discard an older fetch after a newer one starts. The server checks membership, joins the room, then sends a full snapshot so there is no gap between subscription and baseline."
+        ],
+        "vocabulary": [
+          {
+            "term": "Authoritative snapshot",
+            "meaning": "A complete current view built by the server that owns the game state."
+          },
+          {
+            "term": "Stale reply",
+            "meaning": "A response based on an older request or revision than the client already applied."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Refreshing is safe for reading; automatically retrying a write may not be.",
+        "visual": {
+          "kind": "trace",
+          "title": "An event rings the bell; a snapshot tells the truth",
+          "code": [
+            "Socket opens",
+            "Join authorized room",
+            "Fetch full snapshot",
+            "Apply current revision only"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Event lost",
+              "values": [
+                {
+                  "label": "Client",
+                  "value": "old snapshot"
+                },
+                {
+                  "label": "Server",
+                  "value": "new state"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "An event payload cannot reconstruct every missed change."
+            },
+            {
+              "id": "frame-1",
+              "label": "Rejoin",
+              "values": [
+                {
+                  "label": "Room",
+                  "value": "authorized"
+                },
+                {
+                  "label": "Request",
+                  "value": "snapshot"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The socket joins first, then receives the authoritative baseline."
+            },
+            {
+              "id": "frame-2",
+              "label": "Late reply",
+              "values": [
+                {
+                  "label": "Reply",
+                  "value": "older revision"
+                },
+                {
+                  "label": "Client",
+                  "value": "newer already applied"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "The client drops a snapshot it can prove is stale."
+            }
+          ],
+          "cases": [
+            {
+              "input": "A command receives 409 because the Match revision changed",
+              "expected": "Refresh current state and show the conflict; do not replay the command automatically",
+              "reason": "The same command may no longer be safe after another action changed the Match."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m10-reconnect-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why is retry after 409 not always safe?",
+        "explanation": [
+          "Another player may have changed the Match while your request was in flight. A new snapshot lets the learner decide what to do. Replaying automatically could submit old code or advance a Round twice."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Make a prediction about the older delayed response."
+      },
+      {
+        "id": "m10-reconnect-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "Fetch A starts first but returns after fetch B. Which response may update the page?",
+        "explanation": [
+          "Predict how a request counter and server revision together prevent older data from replacing newer data."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Separate event notification, full fetch, stale guard and command error."
+      },
+      {
+        "id": "m10-reconnect-stale-guard",
+        "phase": "build",
+        "title": "Drop a provably older snapshot",
+        "question": "Which reply is known to be too old?",
+        "explanation": [
+          "In src/client/socket-transport.ts, compare incoming Match revision and Round with the last applied snapshot. Ignore only a reply that is provably older; let a current full snapshot repair a missed event."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Keep the last applied revision.",
+          "Reject an incoming revision only when it is lower.",
+          "At the same revision, compare Round before discarding.",
+          "Test an older event and a newer authoritative snapshot."
+        ],
+        "files": [
+          {
+            "role": "client.socket-transport",
+            "workspace": "active",
+            "path": "src/client/socket-transport.ts",
+            "action": "create",
+            "owner": "src/client/socket-transport.ts owns live transport state and revision ordering.",
+            "change": "Add a stale revision guard before applying an event-triggered snapshot.",
+            "pattern": "An event triggers refresh; the response snapshot replaces UI state only if it is not provably older."
+          }
+        ],
+        "checkIds": ["m10-reconnect-unit", "m10-reconnect-browser"],
+        "prerequisiteCheckIds": ["m10-presence-multi-socket"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-reconnect-lobby-recover",
+        "phase": "build",
+        "title": "Rejoin and hand off only once",
+        "question": "What must happen when the socket comes back?",
+        "explanation": [
+          "In src/client/lobby-session.ts, fetch the active Lobby after connect, join the current room channel, ignore requests from an older session, and deduplicate Match handoff. A 409 refreshes and surfaces the conflict; it does not replay the command."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Increment a request version when starting a fetch.",
+          "Ignore a response when its version no longer matches.",
+          "Keep one Set of handed-off Match ids.",
+          "After 409, refresh once and show the conflict instead of replaying."
+        ],
+        "files": [
+          {
+            "role": "client.lobby-session",
+            "workspace": "active",
+            "path": "src/client/lobby-session.ts",
+            "action": "create",
+            "owner": "src/client/lobby-session.ts owns Lobby recovery and the one-time Match handoff.",
+            "change": "Add request-version checks and a single handoff guard around authoritative refresh.",
+            "pattern": "Socket events and mutation replies trigger the active-state fetch; only the fetch updates room state."
+          }
+        ],
+        "checkIds": ["m10-reconnect-unit", "m10-reconnect-browser"],
+        "prerequisiteCheckIds": ["m10-reconnect-unit"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-reconnect-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Discard older replies, rejoin the active room, hand off to a Match once, and refresh after a 409 without replaying the unsafe command.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Discard older replies, rejoin the active room, hand off to a Match once, and refresh after a 409 without replaying the unsafe command.",
+        "transfer": "Changed case: revision 8 arrives after the client already applied revision 9. Expected result: ignore the old snapshot and do not replay the timed-out command.",
+        "next": "Continue to Two clients."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m10-reconnect-unit",
+        "kind": "unit",
+        "command": "npm test -- test/reconnect.test.ts",
+        "cwd": ".",
+        "expected": "Out-of-order snapshots are ignored, reconnect fetches the current room, handoff happens once, and 409 refreshes without replay.",
+        "failure": [
+          {
+            "symptom": "Old room data overwrites new state",
+            "diagnostic": "Check request version and Match revision before applying.",
+            "meaning": "The client is applying stale state."
+          },
+          {
+            "symptom": "The command is sent twice after a conflict",
+            "diagnostic": "Refresh and show 409; do not replay the mutation.",
+            "meaning": "The write may no longer be safe."
+          }
+        ]
+      },
+      {
+        "id": "m10-reconnect-browser",
+        "kind": "browser",
+        "command": "npm run test:browser -- test/browser/reconnect.spec.ts",
+        "cwd": ".",
+        "expected": "A real browser reconnects to the same authorized room and renders the current snapshot without duplicate Match handoff.",
+        "failure": [
+          {
+            "symptom": "The browser cannot reach the practice service",
+            "diagnostic": "Check the server-ready message and BASE_URL passed by the runner.",
+            "meaning": "Two clients must share the real practice server."
+          },
+          {
+            "symptom": "A failed test leaves a process running",
+            "diagnostic": "Put child-process and browser cleanup in finally.",
+            "meaning": "A failed journey must not leave services running."
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "m10-two-clients",
+    "milestoneId": "M10",
+    "title": "Let two browser clients share one real Match",
+    "why": "Earlier checks ran one function at a time. Now test the whole 1v1 journey with two independent browsers that send requests to the same practice server.",
+    "outcome": "Create one invited Match, Run and Submit from separate clients, observe Reveal on both, and reconnect one client without changing the other client’s state.",
+    "prerequisites": ["m10-reconnect"],
+    "references": [
+      {
+        "lessonId": "0012-arena-screen",
+        "path": "frontend/e2e/live-1v1.spec.ts",
+        "startLine": 61,
+        "endLine": 131
+      }
+    ],
+    "steps": [
+      {
+        "id": "m10-two-clients-orient",
+        "phase": "orient",
+        "title": "Why this comes now",
+        "question": "Let two browser clients share one real Match",
+        "explanation": [
+          "Earlier checks ran one function at a time. Now test the whole 1v1 journey with two independent browsers that send requests to the same practice server."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the current owner.",
+          "Follow one state change.",
+          "Compare it with the next layer.",
+          "Say what the check can prove."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Reconnect logic is in place. Two real clients now check the full path instead of a mock."
+      },
+      {
+        "id": "m10-two-clients-see",
+        "phase": "see",
+        "title": "Two browsers, one server-owned Match",
+        "question": "Which side owns the score both browsers see?",
+        "explanation": [
+          "A local mock can check layout but cannot prove multiplayer. This check needs two browser contexts plus the same running API and frontend. The retained sample uses a development identity seam only; target authentication must come from the team."
+        ],
+        "vocabulary": [
+          {
+            "term": "Browser context",
+            "meaning": "An isolated browser session with its own storage and cookies."
+          }
+        ],
+        "hints": [
+          "Start at the first box.",
+          "Follow one arrow to the next owner.",
+          "Use the frames to track state.",
+          "Predict the case before reading the result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Count clients and Match ids, not only page instances.",
+        "visual": {
+          "kind": "trace",
+          "title": "Two browsers, one server-owned Match",
+          "code": [
+            "Browser A → Game server",
+            "Browser B → same Match",
+            "Game → Judge result",
+            "Game snapshot → both views"
+          ],
+          "frames": [
+            {
+              "id": "frame-0",
+              "label": "Two clients",
+              "values": [
+                {
+                  "label": "A",
+                  "value": "Match M"
+                },
+                {
+                  "label": "B",
+                  "value": "Match M"
+                }
+              ],
+              "codeLines": [1],
+              "explanation": "Each browser has its own UI and socket."
+            },
+            {
+              "id": "frame-1",
+              "label": "One action",
+              "values": [
+                {
+                  "label": "request",
+                  "value": "A submits"
+                },
+                {
+                  "label": "owner",
+                  "value": "Game"
+                }
+              ],
+              "codeLines": [2],
+              "explanation": "The Game checks membership and owns the Match transition."
+            },
+            {
+              "id": "frame-2",
+              "label": "One result",
+              "values": [
+                {
+                  "label": "snapshot",
+                  "value": "same revision"
+                },
+                {
+                  "label": "views",
+                  "value": "A and B"
+                }
+              ],
+              "codeLines": [3],
+              "explanation": "Both clients render a server snapshot."
+            }
+          ],
+          "cases": [
+            {
+              "input": "Browser A disconnects during a Round",
+              "expected": "B continues; A rejoins and reads the current Match snapshot",
+              "reason": "A browser connection is not the Match itself."
+            }
+          ]
+        }
+      },
+      {
+        "id": "m10-two-clients-understand",
+        "phase": "understand",
+        "title": "Name the boundary before coding",
+        "question": "Why do both browsers need to use the same live server?",
+        "explanation": [
+          "If each browser has a separate mock Match, they can agree by accident. A shared server proves authorization, transport and snapshots converge on one Match record."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the rule owner.",
+          "Trace the value that changes.",
+          "Check who may perform the action.",
+          "Say which test catches a wrong result."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Say what evidence one shared server provides."
+      },
+      {
+        "id": "m10-two-clients-try",
+        "phase": "try",
+        "title": "Make a prediction",
+        "question": "Browser A disconnects after Browser B submits. What should Browser A see after reconnect?",
+        "explanation": [
+          "Predict whether the old page cache or the Game snapshot owns the current result."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Choose the state that should stay authoritative.",
+          "Check who is allowed to act.",
+          "Predict the failure path too.",
+          "Then compare with the named test."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "next": "Write one named browser journey using two isolated contexts."
+      },
+      {
+        "id": "m10-two-clients-two-client-spec",
+        "phase": "build",
+        "title": "Drive a real 1v1 from two browser contexts",
+        "question": "How can the test prove both pages share one Match?",
+        "explanation": [
+          "In test/browser/live-1v1.spec.ts, create one invitation Match, open separate contexts for both players, then Run, Submit, Reveal and disconnect/reconnect one client. Read the same server-owned revision from both pages."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Create one invited Match before opening the clients.",
+          "Give each context a different player identity.",
+          "Assert a server transition appears in both pages.",
+          "Disconnect one context and verify snapshot recovery."
+        ],
+        "files": [
+          {
+            "role": "test.live-1v1",
+            "workspace": "active",
+            "path": "test/browser/live-1v1.spec.ts",
+            "action": "create",
+            "owner": "test/browser/live-1v1.spec.ts owns the real two-client journey.",
+            "change": "Add one named 1v1 scenario with two browser contexts and one shared Match id.",
+            "pattern": "Use one service instance; keep each client’s context and identity separate."
+          }
+        ],
+        "checkIds": ["m10-two-clients-browser"],
+        "prerequisiteCheckIds": ["m10-reconnect-browser"],
+        "next": "Run the named check and read its first failure before continuing."
+      },
+      {
+        "id": "m10-two-clients-check",
+        "phase": "check",
+        "title": "Check, explain, and carry the pattern forward",
+        "explanation": [
+          "Run the named check from the practice root. Compare its result with this lesson's outcome: Create one invited Match, Run and Submit from separate clients, observe Reveal on both, and reconnect one client without changing the other client’s state.",
+          "If a required database or live service is unavailable, mark the check blocked. A mock or source read cannot replace it."
+        ],
+        "vocabulary": [],
+        "hints": [
+          "Name the files you changed.",
+          "Say what passed or remains blocked.",
+          "Say what the check did not prove.",
+          "Map the same responsibility in the team repository."
+        ],
+        "files": [],
+        "checkIds": [],
+        "prerequisiteCheckIds": [],
+        "question": "Create one invited Match, Run and Submit from separate clients, observe Reveal on both, and reconnect one client without changing the other client’s state.",
+        "transfer": "Changed case: client A reconnects after client B already submitted. Expected result: A receives the saved Match state once and does not create a second handoff.",
+        "next": "Continue to Document."
+      }
+    ],
+    "checks": [
+      {
+        "id": "m10-two-clients-browser",
+        "kind": "browser",
+        "command": "npm run test:browser -- test/browser/live-1v1.spec.ts",
+        "cwd": ".",
+        "expected": "Two isolated contexts join the invited Match, Run and Submit through the real service, observe one Reveal, and one reconnects from a fresh snapshot.",
+        "failure": [
+          {
+            "symptom": "The browser cannot reach the practice service",
+            "diagnostic": "Check the server-ready message and BASE_URL passed by the runner.",
+            "meaning": "Two clients must share the real practice server."
+          },
+          {
+            "symptom": "A failed test leaves a process running",
+            "diagnostic": "Put child-process and browser cleanup in finally.",
+            "meaning": "A failed journey must not leave services running."
+          }
+        ]
+      }
+    ]
+  }
+]
