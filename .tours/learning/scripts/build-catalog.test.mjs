@@ -2788,7 +2788,11 @@ test("renders the test-evidence capstone and disposes every remaining source pat
 
   const readme = await readFile(path.join(learningDir, "README.md"), "utf8");
   assert.match(readme, /\[Build route\]\(index\.html\)/);
-  assert.match(readme, /\[Reference lessons\]\(reference\.html\).*14 lessons/);
+  assert.ok(
+    readme.includes("[Reference lessons](reference.html)") &&
+      readme.includes("Before Lesson 1")
+  );
+  assert.ok(readme.includes("[Teammate repo map](reference.html#build-path)"));
   assert.doesNotMatch(readme, /lessons\/\d{4}-[^)]+\.html/);
 });
 

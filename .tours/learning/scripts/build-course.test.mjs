@@ -1,6 +1,57 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import path from 'node:path';
-import {renderCatalogOutputs} from './build-catalog.mjs';import {foundationFixture} from './fixtures/build-course.mjs';import {validateBuildPath} from './build-path.mjs';
-const repoRoot=process.cwd(),learningDir=path.join(repoRoot,'.tours/learning');
-let api={};try{api=await import('./build-course.mjs')}catch{}
-test('guided entry preserves reference pages and excludes planned lesson links',async()=>{const coverage=JSON.parse(await readFile(path.join(learningDir,'coverage-map.json'),'utf8'));const {files}=await renderCatalogOutputs(repoRoot,learningDir,coverage,{tours:[]});for(const l of coverage.lessons)assert.ok(files.has(path.join(learningDir,l.output)));const home=files.get(path.join(learningDir,'index.html'));assert.match(home,/data-build-continue/);assert.ok(files.has(path.join(learningDir,'reference.html')));assert.ok(files.has(path.join(learningDir,'build/m00-destination.html')));assert.doesNotMatch(home,/href="build\/m13-parity.html"/)});
-test('embedded lesson data cannot end its JSON script',async()=>{assert.equal(typeof api.renderBuildOutputs,'function');const f=foundationFixture();f.lessons[0].steps[0].explanation=['</script><img src=x onerror=alert(1)>'];const course=validateBuildPath(f.raw,f.lessons,f.referenceData);const files=await api.renderBuildOutputs({learningDir,referenceData:f.referenceData,course,runtimeSource:''});const page=files.get(path.join(learningDir,'build/m00-start.html'));assert.doesNotMatch(page,/<img src=x/);assert.match(page,/\\u003c\/script/);assert.match(page,/href="\.\.\/source-map.html/)});
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { renderCatalogOutputs } from "./build-catalog.mjs";
+import { foundationFixture } from "./fixtures/build-course.mjs";
+import { validateBuildPath } from "./build-path.mjs";
+const repoRoot = process.cwd(),
+  learningDir = path.join(repoRoot, ".tours/learning");
+let api = {};
+try {
+  api = await import("./build-course.mjs");
+} catch {}
+test("guided entry preserves reference pages and excludes planned lesson links", async () => {
+  const coverage = JSON.parse(
+    await readFile(path.join(learningDir, "coverage-map.json"), "utf8")
+  );
+  const { files } = await renderCatalogOutputs(
+    repoRoot,
+    learningDir,
+    coverage,
+    { tours: [] }
+  );
+  for (const l of coverage.lessons)
+    assert.ok(files.has(path.join(learningDir, l.output)));
+  const home = files.get(path.join(learningDir, "index.html"));
+  assert.match(home, /data-build-continue/);
+  assert.ok(files.has(path.join(learningDir, "reference.html")));
+  assert.ok(files.has(path.join(learningDir, "build/m00-destination.html")));
+  const reference = files.get(path.join(learningDir, "reference.html"));
+  assert.equal((reference.match(/data-build-step=/g) || []).length, 8);
+  const destination = files.get(
+    path.join(learningDir, "build/m00-destination.html")
+  );
+  assert.ok(destination.includes('href="../reference.html#build-path"'));
+  const orientation = files.get(
+    path.join(learningDir, "lessons/0000-before-lesson-one.html")
+  );
+  assert.ok(orientation.includes('href="../reference.html#build-path"'));
+  assert.doesNotMatch(home, /href="build\/m13-parity.html"/);
+});
+test("embedded lesson data cannot end its JSON script", async () => {
+  assert.equal(typeof api.renderBuildOutputs, "function");
+  const f = foundationFixture();
+  f.lessons[0].steps[0].explanation = ["</script><img src=x onerror=alert(1)>"];
+  const course = validateBuildPath(f.raw, f.lessons, f.referenceData);
+  const files = await api.renderBuildOutputs({
+    learningDir,
+    referenceData: f.referenceData,
+    course,
+    runtimeSource: "",
+  });
+  const page = files.get(path.join(learningDir, "build/m00-start.html"));
+  assert.doesNotMatch(page, /<img src=x/);
+  assert.match(page, /\\u003c\/script/);
+  assert.match(page, /href="\.\.\/source-map.html/);
+});

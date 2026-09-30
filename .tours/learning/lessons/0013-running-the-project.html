@@ -1131,6 +1131,48 @@
   }
 }
 
+@layer components {
+  .build-path-list {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 72ch;
+    padding-inline-start: 1.5rem;
+  }
+
+  .build-path-list > li {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.55rem;
+    background: var(--surface);
+  }
+
+  .build-path-list h3 {
+    margin-block-end: 0.4rem;
+  }
+
+  .build-path-list p + p {
+    margin-block-start: 0.45rem;
+  }
+
+  .build-path-list a,
+  #orientation .section a,
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding-inline: 0.65rem;
+  }
+
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+  }
+}
+
 </style>
   </head>
   <body data-lesson-id="0013-running-the-project" data-course-lesson="0013-running-the-project">
@@ -1242,16 +1284,16 @@
                 a blocked test is not a pass.
               </p>
               <div class="source-links">
-                <a href="../source-map.html?file=package.json&amp;line=7" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/package.json:7"
+                <a href="../source-map.html?file=package.json&amp;line=7" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/package.json:7"
                   >Workspace groups · package.json:7</a
                 >
-                <a href="../source-map.html?file=package.json&amp;line=12" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="12" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/package.json:12"
+                <a href="../source-map.html?file=package.json&amp;line=12" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="12" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/package.json:12"
                   >Aggregate and runtime commands · package.json:12</a
                 >
-                <a href="../source-map.html?file=.husky%2Fpre-commit&amp;line=1" data-source-id="source-d2bc4bbf14eadc29" data-source-path=".husky/pre-commit" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.husky/pre-commit:1"
+                <a href="../source-map.html?file=.husky%2Fpre-commit&amp;line=1" data-source-id="source-d2bc4bbf14eadc29" data-source-path=".husky/pre-commit" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/.husky/pre-commit:1"
                   >Checks run before each commit · pre-commit:1</a
                 >
-                <a href="../source-map.html?file=frontend%2Findex.html&amp;line=9" data-source-id="source-959f9cada636604d" data-source-path="frontend/index.html" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/index.html:9"
+                <a href="../source-map.html?file=frontend%2Findex.html&amp;line=9" data-source-id="source-959f9cada636604d" data-source-path="frontend/index.html" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/index.html:9"
                   >The browser's React mount and module entry · index.html:9</a
                 >
               </div>
@@ -1276,16 +1318,16 @@
                 and without Docker Run/Submit fail safely.
               </p>
               <div class="source-links">
-                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=2" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:2"
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=2" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/scripts/play.sh:2"
                   >Purpose and local/LAN modes · play.sh:2</a
                 >
-                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=17" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="17" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:17"
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=17" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="17" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/scripts/play.sh:17"
                   >Development database URL and Game endpoint · play.sh:17</a
                 >
-                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=23" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="23" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:23"
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=23" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="23" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/scripts/play.sh:23"
                   >Build and launch Game plus frontend preview · play.sh:23</a
                 >
-                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=30" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="30" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:30"
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=30" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="30" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/scripts/play.sh:30"
                   >Cleanup when the script exits · play.sh:30</a
                 >
               </div>
@@ -1344,59 +1386,59 @@
                 host.
               </p>
               <div class="source-links">
-                <a href="../source-map.html?file=docker-compose.yml&amp;line=1" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:1"
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=1" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:1"
                   >Local Compose startup and intentional omissions ·
                   docker-compose.yml:1</a
                 >
-                <a href="../source-map.html?file=docker-compose.yml&amp;line=57" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="57" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:57"
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=57" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="57" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:57"
                   >Judge Worker service, bounded queue, socket mount, and
                   readiness check · docker-compose.yml:57</a
                 >
-                <a href="../source-map.html?file=docker-compose.yml&amp;line=85" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="85" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:85"
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=85" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="85" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:85"
                   >Compose configures Game to use the internal worker ·
                   docker-compose.yml:85</a
                 >
-                <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.ts&amp;line=19" data-source-id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/game/judge-factory.ts:19"
+                <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.ts&amp;line=19" data-source-id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/judge-factory.ts:19"
                   >Game backend selection and no-fallback rule ·
                   judge-factory.ts:19</a
                 >
-                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fmain.ts&amp;line=21" data-source-id="source-d6e914cd95e4e14e" data-source-path="services/judge-worker/src/main.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/main.ts:21"
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fmain.ts&amp;line=21" data-source-id="source-d6e914cd95e4e14e" data-source-path="services/judge-worker/src/main.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/main.ts:21"
                   >Worker configuration, ContainerJudge, queue, and listener ·
                   main.ts:21</a
                 >
-                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fhttp-server.ts&amp;line=183" data-source-id="source-ac47c28cfc201378" data-source-path="services/judge-worker/src/http-server.ts" data-source-line="183" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/http-server.ts:183"
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fhttp-server.ts&amp;line=183" data-source-id="source-ac47c28cfc201378" data-source-path="services/judge-worker/src/http-server.ts" data-source-line="183" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/http-server.ts:183"
                   >Worker HTTP endpoints and liveness/readiness routes ·
                   http-server.ts:183</a
                 >
-                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fjob-queue.ts&amp;line=22" data-source-id="source-751066cc12adb6bb" data-source-path="services/judge-worker/src/job-queue.ts" data-source-line="22" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/job-queue.ts:22"
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fjob-queue.ts&amp;line=22" data-source-id="source-751066cc12adb6bb" data-source-path="services/judge-worker/src/job-queue.ts" data-source-line="22" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/job-queue.ts:22"
                   >Bounded active work and waiting queue settings ·
                   job-queue.ts:22</a
                 >
-                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Freadiness.ts&amp;line=31" data-source-id="source-d6972f22a23c365f" data-source-path="services/judge-worker/src/readiness.ts" data-source-line="31" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/readiness.ts:31"
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Freadiness.ts&amp;line=31" data-source-id="source-d6972f22a23c365f" data-source-path="services/judge-worker/src/readiness.ts" data-source-line="31" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/judge-worker/src/readiness.ts:31"
                   >Readiness checks Docker and every configured image ·
                   readiness.ts:31</a
                 >
-                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:19"
+                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/infra/nginx/nginx.conf:19"
                   >Public proxy routes omit the internal worker ·
                   nginx.conf:19</a
                 >
-                <a href="../source-map.html?file=docker-compose.yml&amp;line=95" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="95" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:95"
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=95" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="95" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/docker-compose.yml:95"
                   >Nginx is the only published service ·
                   docker-compose.yml:95</a
                 >
-                <a href="../source-map.html?file=scripts%2Fgen-dev-certs.sh&amp;line=2" data-source-id="source-353133ae448c8d19" data-source-path="scripts/gen-dev-certs.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/gen-dev-certs.sh:2"
+                <a href="../source-map.html?file=scripts%2Fgen-dev-certs.sh&amp;line=2" data-source-id="source-353133ae448c8d19" data-source-path="scripts/gen-dev-certs.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/scripts/gen-dev-certs.sh:2"
                   >Local-only self-signed TLS certificate generation ·
                   gen-dev-certs.sh:2</a
                 >
-                <a href="../source-map.html?file=.env.example&amp;line=1" data-source-id="source-a3046da0d15a27e8" data-source-path=".env.example" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.env.example:1"
+                <a href="../source-map.html?file=.env.example&amp;line=1" data-source-id="source-a3046da0d15a27e8" data-source-path=".env.example" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/.env.example:1"
                   >Safe placeholder settings and internal ports ·
                   .env.example:1</a
                 >
-                <a href="../source-map.html?file=.gitignore&amp;line=8" data-source-id="source-bc37d034bad56458" data-source-path=".gitignore" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.gitignore:8"
+                <a href="../source-map.html?file=.gitignore&amp;line=8" data-source-id="source-bc37d034bad56458" data-source-path=".gitignore" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/.gitignore:8"
                   >Ignore local secrets and generated certificates ·
                   .gitignore:8</a
                 >
-                <a href="../source-map.html?file=infra%2Fpostgres%2Finit-db.sh&amp;line=6" data-source-id="source-26975be9396ea409" data-source-path="infra/postgres/init-db.sh" data-source-line="6" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/postgres/init-db.sh:6"
+                <a href="../source-map.html?file=infra%2Fpostgres%2Finit-db.sh&amp;line=6" data-source-id="source-26975be9396ea409" data-source-path="infra/postgres/init-db.sh" data-source-line="6" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/infra/postgres/init-db.sh:6"
                   >Create separate database roles and databases ·
                   init-db.sh:6</a
                 >
@@ -1417,14 +1459,14 @@
                 behavior itself.
               </p>
               <div class="source-links">
-                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:19"
+                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/infra/nginx/nginx.conf:19"
                   >TLS listener and API proxy routes · nginx.conf:19</a
                 >
-                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=35" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="35" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:35"
+                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=35" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="35" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/infra/nginx/nginx.conf:35"
                   >WebSocket ingress, including Game-owned chat ·
                   nginx.conf:35</a
                 >
-                <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.module.ts&amp;line=11" data-source-id="source-d2b17d64c9888904" data-source-path="services/game/src/game/game.module.ts" data-source-line="11" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/game/game.module.ts:11"
+                <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.module.ts&amp;line=11" data-source-id="source-d2b17d64c9888904" data-source-path="services/game/src/game/game.module.ts" data-source-line="11" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/game/game.module.ts:11"
                   >Game module wiring and development-principal seam ·
                   game.module.ts:11</a
                 >
@@ -1467,33 +1509,33 @@
           </ul>
         </div>
         <div class="source-links mt-1">
-          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-fb5a0d25b73565bb" data-source-path="services/core/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/main.ts:5"
+          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-fb5a0d25b73565bb" data-source-path="services/core/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/core/src/main.ts:5"
             >Core process bootstrap · main.ts:5</a
           >
-          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-525fb8b7f396195b" data-source-path="services/core/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/app.module.ts:4"
+          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-525fb8b7f396195b" data-source-path="services/core/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/core/src/app.module.ts:4"
             >Core currently wires only HealthController · app.module.ts:4</a
           >
-          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-4067f72ffa5ac117" data-source-path="services/core/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/health.controller.ts:21"
+          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-4067f72ffa5ac117" data-source-path="services/core/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/core/src/health.controller.ts:21"
             >Core liveness and dependency-readiness routes ·
             health.controller.ts:21</a
           >
-          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-5f12cb4e32097020" data-source-path="services/game/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/main.ts:5"
+          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-5f12cb4e32097020" data-source-path="services/game/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/main.ts:5"
             >Game process bootstrap · main.ts:5</a
           >
-          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fapp.module.ts&amp;line=5" data-source-id="source-9321969d6314b463" data-source-path="services/game/src/app.module.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/app.module.ts:5"
+          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fapp.module.ts&amp;line=5" data-source-id="source-9321969d6314b463" data-source-path="services/game/src/app.module.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/app.module.ts:5"
             >Game root module · app.module.ts:5</a
           >
-          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-edbe4d34ad2907a9" data-source-path="services/game/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/health.controller.ts:21"
+          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-edbe4d34ad2907a9" data-source-path="services/game/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/src/health.controller.ts:21"
             >Game liveness and dependency-readiness routes ·
             health.controller.ts:21</a
           >
-          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-32779476fac96bc6" data-source-path="services/chat/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/main.ts:5"
+          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-32779476fac96bc6" data-source-path="services/chat/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/chat/src/main.ts:5"
             >Separate Chat process bootstrap · main.ts:5</a
           >
-          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-354e0126aa611161" data-source-path="services/chat/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/app.module.ts:4"
+          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-354e0126aa611161" data-source-path="services/chat/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/chat/src/app.module.ts:4"
             >Chat currently wires only HealthController · app.module.ts:4</a
           >
-          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-5ace2ef1e5538dd0" data-source-path="services/chat/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/health.controller.ts:21"
+          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-5ace2ef1e5538dd0" data-source-path="services/chat/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/chat/src/health.controller.ts:21"
             >Chat liveness and dependency-readiness routes ·
             health.controller.ts:21</a
           >
@@ -1520,71 +1562,71 @@
         <details class="card">
           <summary>Open the package, Docker, and tooling source index</summary>
           <div class="source-links mt-1">
-            <a href="../source-map.html?file=frontend%2Fpackage.json&amp;line=7" data-source-id="source-da6498268e99511d" data-source-path="frontend/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/package.json:7"
+            <a href="../source-map.html?file=frontend%2Fpackage.json&amp;line=7" data-source-id="source-da6498268e99511d" data-source-path="frontend/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/package.json:7"
               >Frontend scripts and dependencies · frontend/package.json:7</a
             >
-            <a href="../source-map.html?file=frontend%2Fvite.config.ts&amp;line=5" data-source-id="source-97c6e2c429ec4831" data-source-path="frontend/vite.config.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/vite.config.ts:5"
+            <a href="../source-map.html?file=frontend%2Fvite.config.ts&amp;line=5" data-source-id="source-97c6e2c429ec4831" data-source-path="frontend/vite.config.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/vite.config.ts:5"
               >Vite/React/Tailwind dev-server config · vite.config.ts:5</a
             >
-            <a href="../source-map.html?file=frontend%2Fplaywright.config.ts&amp;line=3" data-source-id="source-1ed7245e0c7c6349" data-source-path="frontend/playwright.config.ts" data-source-line="3" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/playwright.config.ts:3"
+            <a href="../source-map.html?file=frontend%2Fplaywright.config.ts&amp;line=3" data-source-id="source-1ed7245e0c7c6349" data-source-path="frontend/playwright.config.ts" data-source-line="3" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/playwright.config.ts:3"
               >Browser-test directory and base URL · playwright.config.ts:3</a
             >
-            <a href="../source-map.html?file=frontend%2Ftsconfig.json&amp;line=2" data-source-id="source-5c19f37df4b2357c" data-source-path="frontend/tsconfig.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/tsconfig.json:2"
+            <a href="../source-map.html?file=frontend%2Ftsconfig.json&amp;line=2" data-source-id="source-5c19f37df4b2357c" data-source-path="frontend/tsconfig.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/frontend/tsconfig.json:2"
               >Frontend TypeScript checking boundary · tsconfig.json:2</a
             >
-            <a href="../source-map.html?file=packages%2Farena-model%2Fpackage.json&amp;line=8" data-source-id="source-bb263404bc58baad" data-source-path="packages/arena-model/package.json" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/package.json:8"
+            <a href="../source-map.html?file=packages%2Farena-model%2Fpackage.json&amp;line=8" data-source-id="source-bb263404bc58baad" data-source-path="packages/arena-model/package.json" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-model/package.json:8"
               >Shared model workspace scripts · arena-model/package.json:8</a
             >
-            <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.json&amp;line=1" data-source-id="source-ee31895bbb66c288" data-source-path="packages/arena-model/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/tsconfig.json:1"
+            <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.json&amp;line=1" data-source-id="source-ee31895bbb66c288" data-source-path="packages/arena-model/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-model/tsconfig.json:1"
               >Model typecheck config · arena-model/tsconfig.json:1</a
             >
-            <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.build.json&amp;line=1" data-source-id="source-20b35343e9295e7b" data-source-path="packages/arena-model/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/tsconfig.build.json:1"
+            <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.build.json&amp;line=1" data-source-id="source-20b35343e9295e7b" data-source-path="packages/arena-model/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-model/tsconfig.build.json:1"
               >Model production build config ·
               arena-model/tsconfig.build.json:1</a
             >
-            <a href="../source-map.html?file=packages%2Farena-game%2Fpackage.json&amp;line=9" data-source-id="source-436dabd821f55c7a" data-source-path="packages/arena-game/package.json" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/package.json:9"
+            <a href="../source-map.html?file=packages%2Farena-game%2Fpackage.json&amp;line=9" data-source-id="source-436dabd821f55c7a" data-source-path="packages/arena-game/package.json" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/package.json:9"
               >Game engine workspace scripts · arena-game/package.json:9</a
             >
-            <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.json&amp;line=1" data-source-id="source-fa3014050d5c0356" data-source-path="packages/arena-game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/tsconfig.json:1"
+            <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.json&amp;line=1" data-source-id="source-fa3014050d5c0356" data-source-path="packages/arena-game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/tsconfig.json:1"
               >Engine typecheck config · arena-game/tsconfig.json:1</a
             >
-            <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.build.json&amp;line=1" data-source-id="source-01f5e904a4abffa3" data-source-path="packages/arena-game/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/tsconfig.build.json:1"
+            <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.build.json&amp;line=1" data-source-id="source-01f5e904a4abffa3" data-source-path="packages/arena-game/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-game/tsconfig.build.json:1"
               >Engine production build config ·
               arena-game/tsconfig.build.json:1</a
             >
-            <a href="../source-map.html?file=packages%2Farena-harness%2Fpackage.json&amp;line=7" data-source-id="source-60190eefc099b899" data-source-path="packages/arena-harness/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-harness/package.json:7"
+            <a href="../source-map.html?file=packages%2Farena-harness%2Fpackage.json&amp;line=7" data-source-id="source-60190eefc099b899" data-source-path="packages/arena-harness/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-harness/package.json:7"
               >Fake-backed harness workspace scripts ·
               arena-harness/package.json:7</a
             >
-            <a href="../source-map.html?file=packages%2Farena-harness%2Ftsconfig.json&amp;line=1" data-source-id="source-6d83685a2dd65a0f" data-source-path="packages/arena-harness/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-harness/tsconfig.json:1"
+            <a href="../source-map.html?file=packages%2Farena-harness%2Ftsconfig.json&amp;line=1" data-source-id="source-6d83685a2dd65a0f" data-source-path="packages/arena-harness/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/packages/arena-harness/tsconfig.json:1"
               >Harness typecheck config · arena-harness/tsconfig.json:1</a
             >
-            <a href="../source-map.html?file=services%2Fcore%2Fpackage.json&amp;line=2" data-source-id="source-6e38cd4fab1f84b3" data-source-path="services/core/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/package.json:2"
+            <a href="../source-map.html?file=services%2Fcore%2Fpackage.json&amp;line=2" data-source-id="source-6e38cd4fab1f84b3" data-source-path="services/core/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/core/package.json:2"
               >Core workspace identity and scripts · core/package.json:2</a
             >
-            <a href="../source-map.html?file=services%2Fcore%2Ftsconfig.json&amp;line=1" data-source-id="source-b63edc54e579d2d0" data-source-path="services/core/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/tsconfig.json:1"
+            <a href="../source-map.html?file=services%2Fcore%2Ftsconfig.json&amp;line=1" data-source-id="source-b63edc54e579d2d0" data-source-path="services/core/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/core/tsconfig.json:1"
               >Core compile target and decorators · core/tsconfig.json:1</a
             >
-            <a href="../source-map.html?file=services%2Fchat%2Fpackage.json&amp;line=2" data-source-id="source-0e6038495c53ae73" data-source-path="services/chat/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/package.json:2"
+            <a href="../source-map.html?file=services%2Fchat%2Fpackage.json&amp;line=2" data-source-id="source-0e6038495c53ae73" data-source-path="services/chat/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/chat/package.json:2"
               >Deferred Chat workspace identity and scripts ·
               chat/package.json:2</a
             >
-            <a href="../source-map.html?file=services%2Fchat%2Ftsconfig.json&amp;line=1" data-source-id="source-1d23c74cfcec565d" data-source-path="services/chat/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/tsconfig.json:1"
+            <a href="../source-map.html?file=services%2Fchat%2Ftsconfig.json&amp;line=1" data-source-id="source-1d23c74cfcec565d" data-source-path="services/chat/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/chat/tsconfig.json:1"
               >Chat compile target and decorators · chat/tsconfig.json:1</a
             >
-            <a href="../source-map.html?file=services%2Fgame%2Fpackage.json&amp;line=2" data-source-id="source-8fb1c332a4ad7e98" data-source-path="services/game/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/package.json:2"
+            <a href="../source-map.html?file=services%2Fgame%2Fpackage.json&amp;line=2" data-source-id="source-8fb1c332a4ad7e98" data-source-path="services/game/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/package.json:2"
               >Game workspace identity and scripts · game/package.json:2</a
             >
-            <a href="../source-map.html?file=services%2Fgame%2Ftsconfig.json&amp;line=1" data-source-id="source-c318ba965cf4aa71" data-source-path="services/game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/tsconfig.json:1"
+            <a href="../source-map.html?file=services%2Fgame%2Ftsconfig.json&amp;line=1" data-source-id="source-c318ba965cf4aa71" data-source-path="services/game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/tsconfig.json:1"
               >Game compile target and decorators · game/tsconfig.json:1</a
             >
-            <a href="../source-map.html?file=services%2Fcore%2FDockerfile&amp;line=1" data-source-id="source-bf797b667254a0ff" data-source-path="services/core/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/Dockerfile:1"
+            <a href="../source-map.html?file=services%2Fcore%2FDockerfile&amp;line=1" data-source-id="source-bf797b667254a0ff" data-source-path="services/core/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/core/Dockerfile:1"
               >Core image build context and stages · Core Dockerfile:1</a
             >
-            <a href="../source-map.html?file=services%2Fchat%2FDockerfile&amp;line=1" data-source-id="source-dc653dedf3dfe3e5" data-source-path="services/chat/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/Dockerfile:1"
+            <a href="../source-map.html?file=services%2Fchat%2FDockerfile&amp;line=1" data-source-id="source-dc653dedf3dfe3e5" data-source-path="services/chat/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/chat/Dockerfile:1"
               >Chat image build context and stages · Chat Dockerfile:1</a
             >
-            <a href="../source-map.html?file=services%2Fgame%2FDockerfile&amp;line=1" data-source-id="source-e1e47bf146ffa9ea" data-source-path="services/game/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/Dockerfile:1"
+            <a href="../source-map.html?file=services%2Fgame%2FDockerfile&amp;line=1" data-source-id="source-e1e47bf146ffa9ea" data-source-path="services/game/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/Documents/antigravity/fearless-meitner/services/game/Dockerfile:1"
               >Game image dependencies, problem-bank data, and stages · Game
               Dockerfile:1</a
             >
@@ -1632,7 +1674,7 @@
             judge isolation, or production deployment.
           </p>
         </article>
-        <nav class="nav-row lesson-navigation" aria-label="Lesson navigation"><a data-course-home href="../index.html">Course Home</a> · <a data-course-explore href="../source-map.html">Explore code</a> · <a data-previous-lesson href="0012-arena-screen.html">← Lesson 12: The Arena screen is a view of Match state—not another game engine</a> · <a data-next-lesson data-primary-course-nav href="0014-rewrite-with-tests.html">Next: Lesson 14, A green test is evidence for this repo—not proof of your rewrite →</a></nav>
+        <aside class="concept-note" data-build-card="find-homes"><h2>How this lesson helps your build: Find the homes</h2><p><strong>Why this comes now:</strong> First find where this repo keeps rules and tests. That way you add files beside the code that owns them.</p><p><strong>What must exist first:</strong> Find the homes in your teammate&#39;s repo</p><p><strong>Where it belongs:</strong> Use the paths that already exist in your teammate&#39;s repo. If it looks like this repo, inspect packages/, services/, and frontend/ first.</p><p><strong>Pattern:</strong> Keep each rule, route, test, and data file near its current owner.</p><p><strong>What to create:</strong> Write down the game package, test folder, frontend app, service route, storage module, and run commands.</p><p><strong>How to check it:</strong> You can name the test command and folder where a Match rule test should go.</p><p>Reference only: <a data-build-source href="../source-map.html?file=package.json">source file</a> · <a data-build-test href="../source-map.html?file=packages%2Farena-game%2Ftest%2Fround-lifecycle.test.ts">test file</a>. These links show current behavior. Run an equivalent test in your own repo before claiming parity.</p></aside><nav class="nav-row lesson-navigation" aria-label="Lesson navigation"><a data-course-home href="../index.html">Course Home</a> · <a data-course-explore href="../source-map.html">Explore code</a> · <a data-previous-lesson href="0012-arena-screen.html">← Lesson 12: The Arena screen is a view of Match state—not another game engine</a> · <a data-next-lesson data-primary-course-nav href="0014-rewrite-with-tests.html">Next: Lesson 14, A green test is evidence for this repo—not proof of your rewrite →</a></nav>
       </section>
 
       <footer class="footer-note">

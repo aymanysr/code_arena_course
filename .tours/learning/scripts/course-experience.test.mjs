@@ -19,10 +19,21 @@ let server;
 let serverBaseUrl;
 
 async function createRenderedFixture() {
-  fixtureDirectory = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-experience-"));
-  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
-  lessonOutput = coverageMap.lessons.find((lesson) => lesson.id === lessonId).output;
-  const rendered = await renderCatalogOutputs(repoRoot, learningDir, coverageMap, { tours: [], guidedCourse: false });
+  fixtureDirectory = await mkdtemp(
+    path.join(os.tmpdir(), "code-arena-course-experience-")
+  );
+  const coverageMap = JSON.parse(
+    await readFile(path.join(learningDir, "coverage-map.json"), "utf8")
+  );
+  lessonOutput = coverageMap.lessons.find(
+    (lesson) => lesson.id === lessonId
+  ).output;
+  const rendered = await renderCatalogOutputs(
+    repoRoot,
+    learningDir,
+    coverageMap,
+    { tours: [], guidedCourse: false }
+  );
   for (const [outputPath, contents] of rendered.files) {
     const relativeOutput = path.relative(learningDir, outputPath);
     const destination = path.join(fixtureDirectory, relativeOutput);
@@ -31,7 +42,9 @@ async function createRenderedFixture() {
   }
 
   server = createServer(async (request, response) => {
-    const pathname = decodeURIComponent(new URL(request.url, "http://127.0.0.1").pathname);
+    const pathname = decodeURIComponent(
+      new URL(request.url, "http://127.0.0.1").pathname
+    );
     if (pathname === "/favicon.ico") {
       response.statusCode = 204;
       response.end();
@@ -53,18 +66,22 @@ async function createRenderedFixture() {
 async function tabUntil(page, selector, maxTabs = 80) {
   const target = page.locator(selector).first();
   for (let index = 0; index < maxTabs; index += 1) {
-    if (await target.evaluate((element) => element === document.activeElement)) return true;
+    if (await target.evaluate((element) => element === document.activeElement))
+      return true;
     await page.keyboard.press("Tab");
   }
   return false;
 }
 
 async function readStartText(page) {
-  return (await page.locator("[data-course-start]").innerText()).replace(/\s+/g, " ").trim();
+  return (await page.locator("[data-course-start]").innerText())
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function route(mode, relativePath) {
-  if (mode === "file") return pathToFileURL(path.join(fixtureDirectory, relativePath)).href;
+  if (mode === "file")
+    return pathToFileURL(path.join(fixtureDirectory, relativePath)).href;
   return `${serverBaseUrl}/${relativePath}`;
 }
 
@@ -79,20 +96,29 @@ before(async () => {
 
 after(async () => {
   await browser?.close();
-  if (server?.listening) await new Promise((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
-  if (fixtureDirectory) await rm(fixtureDirectory, { recursive: true, force: true });
+  if (server?.listening)
+    await new Promise((resolve, reject) =>
+      server.close((error) => (error ? reject(error) : resolve()))
+    );
+  if (fixtureDirectory)
+    await rm(fixtureDirectory, { recursive: true, force: true });
 });
 
 test("a complete legacy reference lesson session works from a direct file and local server", async (t) => {
   for (const mode of ["file", "server"]) {
-    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const context = await browser.newContext({
+      viewport: { width: 1280, height: 900 },
+    });
     const page = await context.newPage();
     const browserErrors = [];
     t.after(() => context.close());
     page.on("console", (message) => {
-      if (message.type() === "error" || message.type() === "warning") browserErrors.push(`${message.type()}: ${message.text()}`);
+      if (message.type() === "error" || message.type() === "warning")
+        browserErrors.push(`${message.type()}: ${message.text()}`);
     });
-    page.on("pageerror", (error) => browserErrors.push(`pageerror: ${error.message}`));
+    page.on("pageerror", (error) =>
+      browserErrors.push(`pageerror: ${error.message}`)
+    );
     await page.goto(route(mode, "index.html"));
     await page.evaluate(() => {
       try {
@@ -110,87 +136,229 @@ test("a complete legacy reference lesson session works from a direct file and lo
         return false;
       }
     });
-    assert.equal(await readStartText(page), "Start Lesson 1 →");
+    assert.equal(await readStartText(page), "Start before Lesson 1 →");
     assert.equal(await page.locator("[data-lesson-link]").count(), 14);
+    assert.equal(await page.locator("[data-build-step]").count(), 8);
 
-    assert.equal(await tabUntil(page, "a[aria-current='page']"), true, `${mode}: keyboard reaches Learn`);
-    assert.equal(await tabUntil(page, "a[href='source-map.html']"), true, `${mode}: keyboard reaches Explore code`);
-    assert.equal(await tabUntil(page, "[data-course-start]"), true, `${mode}: keyboard reaches Start`);
-    for (const lessonLink of await page.locator("[data-lesson-link]").evaluateAll((links) => links.map((link) => `[data-lesson-link='${link.dataset.lessonLink}']`))) {
-      assert.equal(await tabUntil(page, lessonLink), true, `${mode}: keyboard reaches ${lessonLink}`);
+    assert.equal(
+      await tabUntil(page, "a[aria-current='page']"),
+      true,
+      `${mode}: keyboard reaches Learn`
+    );
+    assert.equal(
+      await tabUntil(page, "a[href='source-map.html']"),
+      true,
+      `${mode}: keyboard reaches Explore code`
+    );
+    assert.equal(
+      await tabUntil(page, "[data-course-start]"),
+      true,
+      `${mode}: keyboard reaches Start`
+    );
+    for (const lessonLink of await page
+      .locator("[data-lesson-link]")
+      .evaluateAll((links) =>
+        links.map((link) => `[data-lesson-link='${link.dataset.lessonLink}']`)
+      )) {
+      assert.equal(
+        await tabUntil(page, lessonLink),
+        true,
+        `${mode}: keyboard reaches ${lessonLink}`
+      );
     }
 
-    const firstLessonHref = await page.locator("[data-course-start]").getAttribute("href");
-    assert.equal(firstLessonHref, lessonOutput);
+    const firstLessonHref = await page
+      .locator("[data-course-start]")
+      .getAttribute("href");
+    assert.equal(firstLessonHref, "lessons/0000-before-lesson-one.html");
     await page.locator("[data-course-start]").click({ noWaitAfter: true });
     await page.waitForTimeout(100);
-    assert.ok(new URL(page.url()).pathname.endsWith(lessonOutput), `${mode}: Start navigates to its href ${firstLessonHref}`);
-    assert.equal(await page.locator("#trace").isVisible(), true, "the full trace is visible before any prediction answer");
-    assert.equal(await page.locator("#recall").isVisible(), true, "the retrieval prompt is visible before any prediction answer");
+    assert.ok(
+      new URL(page.url()).pathname.endsWith(
+        "lessons/0000-before-lesson-one.html"
+      ),
+      "Start opens the orientation page"
+    );
+    assert.equal(
+      await page.locator("#orientation h1").innerText(),
+      "Find your starting point"
+    );
+    assert.match(
+      await page.locator("#orientation").innerText(),
+      /Where it belongs:/
+    );
+    assert.match(
+      await page.locator("#orientation").innerText(),
+      /How to check it:/
+    );
+    await page
+      .getByText("Explore the Submit trace")
+      .click({ noWaitAfter: true });
+    await page.waitForTimeout(100);
+    assert.ok(
+      new URL(page.url()).pathname.endsWith(lessonOutput),
+      "orientation links to Lesson 1"
+    );
+    assert.equal(
+      await page.locator("#trace").isVisible(),
+      true,
+      "the full trace is visible before any prediction answer"
+    );
+    assert.equal(
+      await page.locator("#recall").isVisible(),
+      true,
+      "the retrieval prompt is visible before any prediction answer"
+    );
     if (canPersist) {
       await page.waitForFunction((key) => {
         const record = JSON.parse(localStorage.getItem(key) ?? "null");
-        return record?.lastLessonId === "0001-submit-journey" && record.lessons?.["0001-submit-journey"] === "started";
+        return (
+          record?.lastLessonId === "0001-submit-journey" &&
+          record.lessons?.["0001-submit-journey"] === "started"
+        );
       }, COURSE_ACTIVITY_KEY);
     } else {
-      assert.equal(await page.locator("[data-course-storage-unavailable]").isVisible(), true);
+      assert.equal(
+        await page.locator("[data-course-storage-unavailable]").isVisible(),
+        true
+      );
     }
 
     await page.locator("#quiz-authority [data-answer='toolbar']").click();
-    assert.match(await page.locator("#authority-feedback").innerText(), /Not quite/);
-    assert.equal(await page.locator("#trace").isVisible(), true, "a wrong guess does not hide the trace");
+    assert.match(
+      await page.locator("#authority-feedback").innerText(),
+      /Not quite/
+    );
+    assert.equal(
+      await page.locator("#trace").isVisible(),
+      true,
+      "a wrong guess does not hide the trace"
+    );
     await page.locator("#quiz-authority [data-answer='engine']").click();
-    assert.match(await page.locator("#authority-feedback").innerText(), /Exactly/);
-    assert.equal(await page.locator("#trace").isVisible(), true, "a correct guess leaves the trace available");
+    assert.match(
+      await page.locator("#authority-feedback").innerText(),
+      /Exactly/
+    );
+    assert.equal(
+      await page.locator("#trace").isVisible(),
+      true,
+      "a correct guess leaves the trace available"
+    );
     await page.locator("#quiz-phase [data-answer='route']").click();
     assert.match(await page.locator("#phase-feedback").innerText(), /Look for/);
     await page.locator("#quiz-phase [data-answer='engine']").click();
     assert.match(await page.locator("#phase-feedback").innerText(), /Right/);
 
-    assert.match(await page.locator("[data-course-self-check-note]").innerText(), /This records activity on this browser\. It is not proof of mastery or rewrite parity\./);
+    assert.match(
+      await page.locator("[data-course-self-check-note]").innerText(),
+      /This records activity on this browser\. It is not proof of mastery or rewrite parity\./
+    );
     await page.locator("[data-course-self-check]").click();
-    assert.equal((await page.locator("[data-course-self-check-status]").innerText()).trim(), "Self-check recorded");
-    assert.doesNotMatch((await page.locator("[data-course-self-check-status]").innerText()).toLowerCase(), /mastery|completed|passed/);
+    assert.equal(
+      (
+        await page.locator("[data-course-self-check-status]").innerText()
+      ).trim(),
+      "Self-check recorded"
+    );
+    assert.doesNotMatch(
+      (
+        await page.locator("[data-course-self-check-status]").innerText()
+      ).toLowerCase(),
+      /mastery|completed|passed/
+    );
     if (canPersist) {
       await page.waitForFunction((key) => {
         const record = JSON.parse(localStorage.getItem(key) ?? "null");
-        return record?.lessons?.["0001-submit-journey"] === "self-check-recorded";
+        return (
+          record?.lessons?.["0001-submit-journey"] === "self-check-recorded"
+        );
       }, COURSE_ACTIVITY_KEY);
     }
 
     await page.locator("a[data-course-home]").click();
     await page.waitForURL(/index\.html$/);
-    const homeActivityStatus = (await page.locator(`[data-course-activity-status='${lessonId}']`).innerText()).trim();
+    const homeActivityStatus = (
+      await page
+        .locator(`[data-course-activity-status='${lessonId}']`)
+        .innerText()
+    ).trim();
     if (canPersist) {
-      assert.equal(homeActivityStatus, "Self-check recorded", `${mode}: activity returns with the learner to Course Home`);
+      assert.equal(
+        homeActivityStatus,
+        "Self-check recorded",
+        `${mode}: activity returns with the learner to Course Home`
+      );
       assert.equal(await readStartText(page), "Continue Lesson 1");
     } else {
-      assert.equal(await readStartText(page), "Start Lesson 1 →");
-      assert.equal(await page.locator("[data-course-storage-unavailable]").isVisible(), true);
+      assert.equal(await readStartText(page), "Start before Lesson 1 →");
+      assert.equal(
+        await page.locator("[data-course-storage-unavailable]").isVisible(),
+        true
+      );
     }
 
     await page.goto(route(mode, lessonOutput));
-    assert.equal(await tabUntil(page, "#quiz-authority [data-answer='toolbar']"), true, `${mode}: keyboard reaches prediction controls`);
-    assert.equal(await tabUntil(page, "a[data-source-id]"), true, `${mode}: keyboard reaches source citations`);
-    assert.equal(await tabUntil(page, "a[data-course-home]"), true, `${mode}: keyboard reaches Course Home`);
-    assert.equal(await tabUntil(page, "a[data-course-explore]"), true, `${mode}: keyboard reaches Explore code from a lesson`);
-    assert.equal(await tabUntil(page, "a[data-next-lesson]"), true, `${mode}: keyboard reaches next lesson`);
+    assert.equal(
+      await tabUntil(page, "#quiz-authority [data-answer='toolbar']"),
+      true,
+      `${mode}: keyboard reaches prediction controls`
+    );
+    assert.equal(
+      await tabUntil(page, "a[data-source-id]"),
+      true,
+      `${mode}: keyboard reaches source citations`
+    );
+    assert.equal(
+      await tabUntil(page, "a[data-course-home]"),
+      true,
+      `${mode}: keyboard reaches Course Home`
+    );
+    assert.equal(
+      await tabUntil(page, "a[data-course-explore]"),
+      true,
+      `${mode}: keyboard reaches Explore code from a lesson`
+    );
+    assert.equal(
+      await tabUntil(page, "a[data-next-lesson]"),
+      true,
+      `${mode}: keyboard reaches next lesson`
+    );
     await page.goto(route(mode, "lessons/0002-reveal-cutoff.html"));
-    assert.equal(await tabUntil(page, "a[data-previous-lesson]"), true, `${mode}: keyboard reaches previous lesson`);
+    assert.equal(
+      await tabUntil(page, "a[data-previous-lesson]"),
+      true,
+      `${mode}: keyboard reaches previous lesson`
+    );
 
     await page.setViewportSize({ width: 320, height: 800 });
     await page.goto(route(mode, lessonOutput));
     const mobileLayout = await page.evaluate(() => {
-      const actions = [...document.querySelectorAll("[data-course-home], [data-course-explore], [data-next-lesson], [data-previous-lesson], #quiz-authority button, #quiz-phase button, [data-course-self-check]")];
+      const actions = [
+        ...document.querySelectorAll(
+          "[data-course-home], [data-course-explore], [data-next-lesson], [data-previous-lesson], #quiz-authority button, #quiz-phase button, [data-course-self-check]"
+        ),
+      ];
       return {
         viewportWidth: document.documentElement.clientWidth,
         documentWidth: document.documentElement.scrollWidth,
-        actionHeights: actions.map((action) => Math.round(action.getBoundingClientRect().height)),
+        actionHeights: actions.map((action) =>
+          Math.round(action.getBoundingClientRect().height)
+        ),
       };
     });
-    assert.ok(mobileLayout.documentWidth <= mobileLayout.viewportWidth, `${mode}: 320px lesson has no horizontal overflow`);
-    assert.ok(mobileLayout.actionHeights.every((height) => height >= 44), `${mode}: main actions are at least 44px high`);
-    assert.deepEqual(browserErrors, [], `${mode}: no console warnings or errors`);
+    assert.ok(
+      mobileLayout.documentWidth <= mobileLayout.viewportWidth,
+      `${mode}: 320px lesson has no horizontal overflow`
+    );
+    assert.ok(
+      mobileLayout.actionHeights.every((height) => height >= 44),
+      `${mode}: main actions are at least 44px high`
+    );
+    assert.deepEqual(
+      browserErrors,
+      [],
+      `${mode}: no console warnings or errors`
+    );
     await context.close();
   }
 });
@@ -202,9 +370,12 @@ test("malformed and blocked storage keep Start and every lesson link usable", as
     const browserErrors = [];
     t.after(() => context.close());
     page.on("console", (message) => {
-      if (message.type() === "error" || message.type() === "warning") browserErrors.push(`${message.type()}: ${message.text()}`);
+      if (message.type() === "error" || message.type() === "warning")
+        browserErrors.push(`${message.type()}: ${message.text()}`);
     });
-    page.on("pageerror", (error) => browserErrors.push(`pageerror: ${error.message}`));
+    page.on("pageerror", (error) =>
+      browserErrors.push(`pageerror: ${error.message}`)
+    );
     if (scenario === "malformed") {
       await page.addInitScript((key) => {
         try {
@@ -217,32 +388,88 @@ test("malformed and blocked storage keep Start and every lesson link usable", as
       await page.addInitScript(() => {
         Object.defineProperty(window, "localStorage", {
           configurable: true,
-          get() { throw new DOMException("Storage is disabled", "SecurityError"); },
+          get() {
+            throw new DOMException("Storage is disabled", "SecurityError");
+          },
         });
       });
     }
 
     await page.goto(route("server", "index.html"));
-    assert.equal(await readStartText(page), "Start Lesson 1 →");
+    assert.equal(await readStartText(page), "Start before Lesson 1 →");
     assert.equal(await page.locator("[data-lesson-link]").count(), 14);
-    assert.equal(await page.locator("[data-lesson-link]").evaluateAll((links) => links.every((link) => link.getAttribute("href") && !link.hasAttribute("disabled"))), true);
-    assert.equal(await page.locator("[data-course-storage-unavailable]").isVisible(), scenario === "blocked");
-    const firstLessonHref = await page.locator("[data-course-start]").getAttribute("href");
-    assert.equal(firstLessonHref, lessonOutput);
+    assert.equal(await page.locator("[data-build-step]").count(), 8);
+    assert.equal(
+      await page
+        .locator("[data-lesson-link]")
+        .evaluateAll((links) =>
+          links.every(
+            (link) =>
+              link.getAttribute("href") && !link.hasAttribute("disabled")
+          )
+        ),
+      true
+    );
+    assert.equal(
+      await page.locator("[data-course-storage-unavailable]").isVisible(),
+      scenario === "blocked"
+    );
+    const firstLessonHref = await page
+      .locator("[data-course-start]")
+      .getAttribute("href");
+    assert.equal(firstLessonHref, "lessons/0000-before-lesson-one.html");
     await page.locator("[data-course-start]").click({ noWaitAfter: true });
     await page.waitForTimeout(100);
-    assert.ok(new URL(page.url()).pathname.endsWith(lessonOutput), `${scenario}: Start navigates to its href ${firstLessonHref}`);
-    assert.equal(await page.locator("#trace").isVisible(), true, `${scenario}: lesson content remains available`);
+    assert.ok(
+      new URL(page.url()).pathname.endsWith(
+        "lessons/0000-before-lesson-one.html"
+      ),
+      "Start opens the orientation page"
+    );
+    assert.equal(
+      await page.locator("#orientation h1").innerText(),
+      "Find your starting point"
+    );
+    assert.match(
+      await page.locator("#orientation").innerText(),
+      /Where it belongs:/
+    );
+    assert.match(
+      await page.locator("#orientation").innerText(),
+      /How to check it:/
+    );
+    await page
+      .getByText("Explore the Submit trace")
+      .click({ noWaitAfter: true });
+    await page.waitForTimeout(100);
+    assert.ok(
+      new URL(page.url()).pathname.endsWith(lessonOutput),
+      "orientation links to Lesson 1"
+    );
+    assert.equal(
+      await page.locator("#trace").isVisible(),
+      true,
+      `${scenario}: lesson content remains available`
+    );
     assert.equal(await page.locator("#quiz-authority button").count(), 4);
     await page.locator("#quiz-authority [data-answer='engine']").click();
-    assert.match(await page.locator("#authority-feedback").innerText(), /Exactly/);
-    assert.deepEqual(browserErrors, [], `${scenario}: no console warnings or errors with unavailable course storage`);
+    assert.match(
+      await page.locator("#authority-feedback").innerText(),
+      /Exactly/
+    );
+    assert.deepEqual(
+      browserErrors,
+      [],
+      `${scenario}: no console warnings or errors with unavailable course storage`
+    );
     await context.close();
   }
 });
 
 test("Course Home and core lessons stay usable at desktop and 320 CSS pixels", async (t) => {
-  const coverageMap = JSON.parse(await readFile(path.join(learningDir, "coverage-map.json"), "utf8"));
+  const coverageMap = JSON.parse(
+    await readFile(path.join(learningDir, "coverage-map.json"), "utf8")
+  );
   const coreLessonIds = [
     "0001-submit-journey",
     "0004-lobby-to-match",
@@ -255,13 +482,18 @@ test("Course Home and core lessons stay usable at desktop and 320 CSS pixels", a
     assert.ok(lesson, `coverage map includes ${id}`);
     return lesson.output;
   });
-  const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+  const page = await browser.newPage({
+    viewport: { width: 1280, height: 900 },
+  });
   const browserErrors = [];
   t.after(() => page.close());
   page.on("console", (message) => {
-    if (message.type() === "error" || message.type() === "warning") browserErrors.push(`${message.type()}: ${message.text()}`);
+    if (message.type() === "error" || message.type() === "warning")
+      browserErrors.push(`${message.type()}: ${message.text()}`);
   });
-  page.on("pageerror", (error) => browserErrors.push(`pageerror: ${error.message}`));
+  page.on("pageerror", (error) =>
+    browserErrors.push(`pageerror: ${error.message}`)
+  );
 
   for (const width of [1280, 320]) {
     await page.setViewportSize({ width, height: width === 320 ? 800 : 900 });
@@ -269,50 +501,109 @@ test("Course Home and core lessons stay usable at desktop and 320 CSS pixels", a
     const home = await page.evaluate(() => ({
       pageWidth: document.documentElement.scrollWidth,
       viewportWidth: document.documentElement.clientWidth,
-      actions: [...document.querySelectorAll("[data-course-start], [data-lesson-link]")]
-        .map((element) => Math.round(element.getBoundingClientRect().height)),
+      actions: [
+        ...document.querySelectorAll(
+          "[data-course-start], [data-lesson-link], .build-path-list a"
+        ),
+      ].map((element) => Math.round(element.getBoundingClientRect().height)),
     }));
-    assert.ok(home.pageWidth <= home.viewportWidth, `Course Home has no horizontal overflow at ${width}px`);
-    assert.ok(home.actions.every((height) => height >= 44), `Course Home actions meet the 44px target at ${width}px`);
+    assert.ok(
+      home.pageWidth <= home.viewportWidth,
+      `Course Home has no horizontal overflow at ${width}px`
+    );
+    assert.ok(
+      home.actions.every((height) => height >= 44),
+      `Course Home actions meet the 44px target at ${width}px`
+    );
 
     for (const output of coreLessonOutputs) {
       await page.goto(route("server", output));
-      assert.equal(await page.locator("#lesson h1").count(), 1, `${output} renders its lesson heading`);
-      assert.equal(await page.locator("a[data-course-home]").getAttribute("href"), "../index.html");
-      assert.equal(await page.locator("a[data-course-explore]").getAttribute("href"), "../source-map.html");
+      assert.equal(
+        await page.locator("#lesson h1").count(),
+        1,
+        `${output} renders its lesson heading`
+      );
+      assert.equal(
+        await page.locator("a[data-course-home]").getAttribute("href"),
+        "../index.html"
+      );
+      assert.equal(
+        await page.locator("a[data-course-explore]").getAttribute("href"),
+        "../source-map.html"
+      );
       const layout = await page.evaluate(() => ({
         pageWidth: document.documentElement.scrollWidth,
         viewportWidth: document.documentElement.clientWidth,
-        navigationTargets: [...document.querySelectorAll(".lesson-navigation a")]
-          .map((element) => Math.round(element.getBoundingClientRect().height)),
+        navigationTargets: [
+          ...document.querySelectorAll(".lesson-navigation a"),
+        ].map((element) => Math.round(element.getBoundingClientRect().height)),
         overflowing: [...document.querySelectorAll("body *")]
           .map((element) => ({
             element: `${element.tagName.toLowerCase()}${element.id ? `#${element.id}` : ""}${element.className && typeof element.className === "string" ? `.${element.className.trim().replaceAll(/\s+/g, ".")}` : ""}`,
             right: Math.round(element.getBoundingClientRect().right),
           }))
-          .filter(({ right }) => right > document.documentElement.clientWidth + 1)
+          .filter(
+            ({ right }) => right > document.documentElement.clientWidth + 1
+          )
           .slice(0, 8),
       }));
-      assert.ok(layout.pageWidth <= layout.viewportWidth, `${output} has no horizontal overflow at ${width}px; overflowing elements: ${JSON.stringify(layout.overflowing)}`);
-      assert.ok(layout.navigationTargets.every((height) => height >= 44), `${output} navigation meets the 44px target at ${width}px`);
+      assert.ok(
+        layout.pageWidth <= layout.viewportWidth,
+        `${output} has no horizontal overflow at ${width}px; overflowing elements: ${JSON.stringify(layout.overflowing)}`
+      );
+      assert.ok(
+        layout.navigationTargets.every((height) => height >= 44),
+        `${output} navigation meets the 44px target at ${width}px`
+      );
       if (output === "lessons/0014-rewrite-with-tests.html" && width === 320) {
-        const comparisonRegion = page.locator("[aria-label='Test evidence comparison']");
+        const comparisonRegion = page.locator(
+          "[aria-label='Test evidence comparison']"
+        );
         assert.equal(await comparisonRegion.getAttribute("tabindex"), "0");
-        assert.equal(await comparisonRegion.evaluate((element) => element.scrollWidth > element.clientWidth), true, "the evidence table scrolls inside its keyboard-focusable region");
+        assert.equal(
+          await comparisonRegion.evaluate(
+            (element) => element.scrollWidth > element.clientWidth
+          ),
+          true,
+          "the evidence table scrolls inside its keyboard-focusable region"
+        );
       }
-      assert.ok(await page.locator("a[data-source-id]").count() > 0, `${output} has keyboard-reachable source links`);
-      assert.equal(await tabUntil(page, "a[data-course-home]"), true, `${output} keyboard reaches Course Home`);
-      assert.equal(await tabUntil(page, "a[data-course-explore]"), true, `${output} keyboard reaches Explore code`);
+      assert.ok(
+        (await page.locator("a[data-source-id]").count()) > 0,
+        `${output} has keyboard-reachable source links`
+      );
+      assert.equal(
+        await tabUntil(page, "a[data-course-home]"),
+        true,
+        `${output} keyboard reaches Course Home`
+      );
+      assert.equal(
+        await tabUntil(page, "a[data-course-explore]"),
+        true,
+        `${output} keyboard reaches Explore code`
+      );
     }
   }
 
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(route("server", "lessons/0004-lobby-to-match.html"));
   await page.locator("a[data-source-id]").first().click();
-  await page.waitForFunction(() => document.querySelector("#source-dialog")?.open);
+  await page.waitForFunction(
+    () => document.querySelector("#source-dialog")?.open
+  );
   await page.locator("#source-dialog form[method='dialog'] button").click();
-  assert.equal(await page.locator("#source-dialog").evaluate((dialog) => dialog.open), false);
+  assert.equal(
+    await page.locator("#source-dialog").evaluate((dialog) => dialog.open),
+    false
+  );
   await page.reload();
-  assert.equal(await page.locator("#source-dialog").evaluate((dialog) => dialog.open), false);
-  assert.deepEqual(browserErrors, [], "no console warnings or errors on Course Home or core lessons");
+  assert.equal(
+    await page.locator("#source-dialog").evaluate((dialog) => dialog.open),
+    false
+  );
+  assert.deepEqual(
+    browserErrors,
+    [],
+    "no console warnings or errors on Course Home or core lessons"
+  );
 });

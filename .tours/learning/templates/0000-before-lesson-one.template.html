@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Code Arena · {{ORIENTATION_TITLE}}</title>
+    <!-- INLINE_COURSE_STYLES -->
+  </head>
+  <body>
+    <a class="skip-link" href="#orientation">Skip to orientation</a>
+    <main class="page" id="orientation" tabindex="-1">
+      <p class="eyebrow">
+        <a href="../reference.html">Course Home</a> / Before Lesson 1
+      </p>
+      <h1>Find your starting point</h1>
+      <p class="section-intro">
+        First, find where your teammate's repo keeps rules and tests. The paths
+        below are examples from this repo, not rules for every project.
+      </p>
+
+      <section class="section" aria-labelledby="story-title">
+        <h2 id="story-title">One small game story</h2>
+        <p>
+          A Match has players and Rounds. Each Round gives players a Problem.
+          Run checks visible examples without changing the score. A Submission
+          asks the Game to check hidden tests. The Game decides whether Submit
+          is allowed; a Judge runs the code. Reveal shows the score after
+          evaluation.
+        </p>
+        <p>
+          Lesson 1 follows a Submission to the Judge. Before you build it, you
+          need a Match, an active Round, an allowed player, a Problem, and a
+          clock. Read the lesson now if you want; build those parts first so its
+          test has a real starting point.
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="homes-title">
+        <h2 id="homes-title">Find six homes in your teammate's repo</h2>
+        <ol>
+          <li>Find the folder that owns game rules and one rule test.</li>
+          <li>Find the Problem data and tests for visible examples.</li>
+          <li>Find one backend route and its test.</li>
+          <li>Find the frontend Arena screen and a browser test.</li>
+          <li>Find Match storage and its database test.</li>
+          <li>Find the commands to run one test, lint, and the app.</li>
+        </ol>
+        <p>
+          Write those paths and commands in the repo's existing project notes.
+          If the layout is similar to this one, look for rules in
+          <code>packages/arena-game/src/</code>, tests in
+          <code>packages/arena-game/test/</code>, routes in
+          <code>services/game/src/game/</code>, and the screen in
+          <code>frontend/src/</code>.
+        </p>
+        <p>
+          Use the owner that already exists. Create a new folder only when no
+          current folder fits the job. The step cards on Course Home name a
+          possible file and pattern for each part.
+        </p>
+      </section>
+
+      <!-- ORIENTATION_FIRST_STEP -->
+
+      <section class="section" aria-labelledby="first-action-title">
+        <h2 id="first-action-title">Your first coding action</h2>
+        <p>
+          After you find the paths, write a failing test for a Match with one
+          active Round and a fixed clock. Check that an allowed player action
+          succeeds and an action in the wrong phase is rejected. Then implement
+          only enough rule code to pass that test.
+        </p>
+        <p>
+          Use the reference source and test links to understand behavior. Do not
+          copy their code. Write your own implementation and make an equivalent
+          test pass in your teammate's repo.
+        </p>
+        <p>
+          <a class="primary-button" href="../reference.html#build-path"
+            >See the build order</a
+          >
+          <a href="0001-follow-one-submit.html">Explore the Submit trace</a>
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

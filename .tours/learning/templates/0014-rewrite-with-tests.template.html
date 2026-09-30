@@ -140,16 +140,7 @@
     <section class="section" aria-labelledby="rewrite-title">
       <p class="kicker">Turn the reference into your rebuild recipe</p>
       <h2 id="rewrite-title">Write a failing behavior test before you implement each slice</h2>
-      <ol class="flow-list">
-        <li><strong>Freeze and label the target.</strong> Use this reviewed source snapshot. Keep spec/code differences visible: public 1v1 queue, the different 1v1 versus 2v2 grace-expiry behavior, and process-local team-chat history.</li>
-        <li><strong>Build the small domain core.</strong> Match creation, Round phases, score, and transitions; use a fake clock and deterministic fake Judge.</li>
-        <li><strong>Add Run, then Submit.</strong> Test visible feedback separately from counted results; then cover request identity/retries, hidden evaluation, cutoff, score, and immutable Reveal.</li>
-        <li><strong>Add Lobby and authority boundaries.</strong> Test membership, rooms/queue, admission races, who can start, and who can act before wiring more UI.</li>
-        <li><strong>Add persistence and recovery.</strong> Port in-memory contracts first; then run equivalent Postgres restart/concurrency tests against a disposable database.</li>
-        <li><strong>Add frontend and transport.</strong> Render authoritative snapshots, send commands, then verify service and real-browser flows.</li>
-        <li><strong>Add 2v2, shared editing, readiness, and team chat.</strong> Test four distinct users, revision-bound approval, team isolation, reconnect, and the current chat lifetime.</li>
-        <li><strong>Finish with real infrastructure gates.</strong> Run Docker sandbox and full browser matrices in their intended isolated environment. Keep source inspection, unit fakes, Postgres, Docker, and browser results as separate checkboxes.</li>
-      </ol>
+      <p>The <a href="../index.html#build-path">build path on Course Home</a> gives the dependency order and the first file decision. Use each lesson's build card for a small deliverable and an observable test. Compare your result with the reference behavior, then record parity only after your own equivalent test ran and passed.</p>
       <article class="card mt-1">
         <h3>The parity rule</h3>
         <p>For every gate, reuse the same starting state, inputs, and fixed clock when practical. Compare externally visible results—allowed/rejected action, receipt, snapshot/event, score, and private data—not class names. <strong>PASS only when the equivalent test in your rewrite ran and passed.</strong> Not ported, manually inspected, skipped, or only green in this repository means NOT VERIFIED.</p>

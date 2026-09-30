@@ -1,6 +1,6 @@
 # Maintaining the Code Arena course
 
-The build route is authored in `learning-path.json` and the `content/` lessons. The 14 reference lessons are generated from their templates, `coverage-map.json`, the reviewed source snapshot, and the CodeTour reference list. Keep reference claims tied to actual code and tests; do not refresh a snapshot merely to clear a stale status.
+The foundation build route is authored in learning-path.json and the content lessons. The teammate-repo map is separately authored in reference-build-path.json; its validator checks step order, dependencies, lesson IDs, and source/test paths. The 14 reference lessons are generated from their templates, coverage-map.json, the reviewed source snapshot, and the CodeTour reference list. Keep reference claims tied to actual code and tests; do not refresh a snapshot merely to clear a stale status.
 
 ## Routine course checks
 
@@ -12,7 +12,7 @@ node --test .tours/learning/scripts/*.test.mjs
 node .tours/learning/scripts/build-catalog.mjs --check
 ```
 
-Generation rebuilds the build-route home and lesson pages, the reference-lesson home and pages, and `source-map.html`. Prettier ignores these generated pages; edit their source templates and regenerate them instead. Generation does not accept source hashes or change the CodeTour baseline. The test command checks route dependencies, authored lesson content, workspace and progress rules, reference-catalog rules, generated navigation, source previews, and browser behavior. `--check` is read-only: it reports stale source links, uncovered files, invalid anchors, changed tour evidence, and generated-page drift.
+Generation rebuilds the M00–M02 foundation route, the Before Lesson 1 orientation, the teammate-repo map and lesson build cards, the reference-lesson pages, and source-map.html. When generating from a separate integration worktree, set COURSE_EDITOR_ROOT to the learner's checkout so VS Code links and the reference-folder check use that checkout; running from the learner's checkout needs no override.
 
 For product verification, also run the relevant workspace tests and `npm run lint`, `npm run typecheck`, and `npm run build` from the repository root. Run `npm test` when its environment is available. If Docker, PostgreSQL, local socket binding, or Chrome blocks a check, record the command and exact blocker as skipped; do not report that check as passing.
 

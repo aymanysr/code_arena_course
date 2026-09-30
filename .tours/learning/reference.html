@@ -1127,6 +1127,48 @@
   }
 }
 
+@layer components {
+  .build-path-list {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 72ch;
+    padding-inline-start: 1.5rem;
+  }
+
+  .build-path-list > li {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 0.55rem;
+    background: var(--surface);
+  }
+
+  .build-path-list h3 {
+    margin-block-end: 0.4rem;
+  }
+
+  .build-path-list p + p {
+    margin-block-start: 0.45rem;
+  }
+
+  .build-path-list a,
+  #orientation .section a,
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    display: inline-flex;
+    min-block-size: 2.75rem;
+    align-items: center;
+    padding-inline: 0.65rem;
+  }
+
+  [data-build-card] [data-build-source],
+  [data-build-card] [data-build-test] {
+    border: 1px solid var(--border);
+    border-radius: 0.45rem;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1141,12 +1183,24 @@
     <div class="course-home-intro">
       <p class="eyebrow">A guided route through this exact codebase</p>
       <h1>Understand the game, one behavior at a time.</h1>
-      <p class="course-home-lede">Start with one player action. Follow the code that owns its rule, then inspect the test that supports the explanation.</p>
-      <p class="course-start"><a class="primary-button" data-course-start href="lessons/0001-follow-one-submit.html">Start Lesson 1 <span aria-hidden="true">→</span></a></p>
+      <p class="course-home-lede">First find the right folders and run commands in your teammate's repo. Then build one small game rule at a time and use this codebase to trace the behavior.</p>
+      <p class="course-start"><a class="primary-button" data-course-start href="lessons/0000-before-lesson-one.html">Start before Lesson 1 <span aria-hidden="true">→</span></a></p>
       <p class="quiet course-home-snapshot" data-course-snapshot><span class="status status-current">Snapshot internally consistent</span> <span>Source snapshot <code>818ea4603e970d66</code></span></p>
       <p class="quiet course-home-note">A self-check can guide study; it is not proof of mastery.</p>
     </div>
-    <div class="course-batches" id="course-batches" aria-label="Learning path">
+    <section class="section" id="build-path" aria-labelledby="build-path-title">
+      <h2 id="build-path-title">What to build, and why this order</h2>
+      <p class="section-intro">Read the steps from top to bottom. Each step uses something made earlier. The paths are examples from this repo; find the matching owner in your teammate's repo before creating files.</p>
+      <ol class="build-path-list"><li data-build-step="find-homes"><h3>Find the homes</h3><p><strong>Why this comes now:</strong> First find where this repo keeps rules and tests. That way you add files beside the code that owns them.</p><p><strong>Before it:</strong> No earlier build step</p><p><strong>What to create:</strong> Write down the game package, test folder, frontend app, service route, storage module, and run commands.</p><p><strong>Where it belongs:</strong> Use the paths that already exist in your teammate&#39;s repo. If it looks like this repo, inspect packages/, services/, and frontend/ first.</p><p><strong>Pattern:</strong> Keep each rule, route, test, and data file near its current owner.</p><p><strong>How to check it:</strong> You can name the test command and folder where a Match rule test should go.</p><p>Read the related <a href="lessons/0013-running-the-project.html">Lesson 13: The local play script and Compose stack are not the same thing</a> · <a data-build-source href="source-map.html?file=package.json">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Fround-lifecycle.test.ts">test file</a>.</p></li>
+<li data-build-step="match-core"><h3>Make a small Match core</h3><p><strong>Why this comes now:</strong> Submit needs a Match, an active Round, a player, a phase, and a clock.</p><p><strong>Before it:</strong> Find the homes</p><p><strong>What to create:</strong> Create Match and Round state, legal phase changes, score rules, a fixed clock, and a fake Judge test helper.</p><p><strong>Where it belongs:</strong> Use the existing game-rules package. In a similar layout, create packages/arena-game/src/match-rules.ts and packages/arena-game/test/match-rules.test.ts.</p><p><strong>Pattern:</strong> Keep phase and score choices in a pure rule module. Pass in the clock and fake Judge result in tests.</p><p><strong>How to check it:</strong> A fixed-clock test starts a Match and Round, then rejects an action in the wrong phase.</p><p>Read the related <a href="lessons/0003-rounds-and-final-score.html">Lesson 3: What resets each Round—and what decides the Match?</a> · <a data-build-source href="source-map.html?file=packages%2Farena-game%2Fsrc%2Fround-lifecycle.ts">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Fround-lifecycle.test.ts">test file</a>.</p></li>
+<li data-build-step="player-problem-run"><h3>Give a player a Problem and Run</h3><p><strong>Why this comes now:</strong> A player and visible Problem must exist before code can be checked or submitted.</p><p><strong>Before it:</strong> Make a small Match core</p><p><strong>What to create:</strong> Add basic Match entry, one checked Problem, and a Run that returns example feedback without changing the score.</p><p><strong>Where it belongs:</strong> In a similar layout, put Match entry near packages/arena-game/src/lobby.ts and its test near packages/arena-game/test/lobby.test.ts. Put Problem data under packages/problem-bank/problems/.</p><p><strong>Pattern:</strong> Keep Problem data separate from Match rules. Run returns visible feedback and does not change the score.</p><p><strong>How to check it:</strong> An admitted player can Run visible examples. A visitor is rejected, and no Run changes the score.</p><p>Read the related <a href="lessons/0004-lobby-to-match.html">Lesson 4: The Lobby gathers players; Game creates the Match</a> · <a href="lessons/0005-problem-editor-run.html">Lesson 5: The problem file becomes an editor prompt—but Run is not Submit</a> · <a data-build-source href="source-map.html?file=packages%2Farena-game%2Fsrc%2Flobby.ts">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Flobby.test.ts">test file</a>.</p></li>
+<li data-build-step="submit-reveal"><h3>Add Submission and Reveal</h3><p><strong>Why this comes now:</strong> Now the game can decide when code may enter hidden tests and when its score can be shown.</p><p><strong>Before it:</strong> Give a player a Problem and Run</p><p><strong>What to create:</strong> Add Submit, a pending receipt, retry identity, a fake-Judge result, the deadline cutoff, score update, and Reveal.</p><p><strong>Where it belongs:</strong> In a similar layout, extend packages/arena-game/src/engine.ts and add a test in packages/arena-game/test/submit-path.test.ts. Use the Judge interface your repo already has.</p><p><strong>Pattern:</strong> Game rules decide if Submit is legal, storage records acceptance, and the Judge runs code. Use the same request ID for a retry.</p><p><strong>How to check it:</strong> A valid Submit is judged once. Submit after Round close is rejected. Hidden results appear only at Reveal.</p><p>Read the related <a href="lessons/0001-follow-one-submit.html">Lesson 1: A click is a request. The Match engine decides what it means.</a> · <a href="lessons/0002-reveal-cutoff.html">Lesson 2: Closing, cutoff, Reveal: when an in-flight result counts</a> · <a href="lessons/0006-evaluation-retries.html">Lesson 6: A retry is the same Evaluation only when its identity matches</a> · <a href="lessons/0007-judge-boundary.html">Lesson 7: The Game owns the rules; the Judge runs code—but is it really sealed?</a> · <a data-build-source href="source-map.html?file=packages%2Farena-game%2Fsrc%2Fengine.ts">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Fsubmit-path.test.ts">test file</a>.</p></li>
+<li data-build-step="persistence"><h3>Save accepted Match state</h3><p><strong>Why this comes now:</strong> Reconnect and restart need to recover saved Submissions and Reveals.</p><p><strong>Before it:</strong> Add Submission and Reveal</p><p><strong>What to create:</strong> Add one Match storage contract, an in-memory version, then a database adapter and restart tests.</p><p><strong>Where it belongs:</strong> In a similar layout, extend packages/arena-game/src/persistence.ts and packages/arena-game/test/persistence.test.ts, then use the existing database adapter.</p><p><strong>Pattern:</strong> Test one storage contract with memory and the real database. Reject writes based on an old revision.</p><p><strong>How to check it:</strong> After restart, the same accepted Submission and Reveal are loaded. An old write cannot replace newer state.</p><p>Read the related <a href="lessons/0008-persistence-recovery.html">Lesson 8: What survives when the Game service restarts?</a> · <a data-build-source href="source-map.html?file=packages%2Farena-game%2Fsrc%2Fpersistence.ts">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Fpersistence.test.ts">test file</a>.</p></li>
+<li data-build-step="connect-players"><h3>Connect players to the rules</h3><p><strong>Why this comes now:</strong> The screen should send commands and show the Match state owned by the server.</p><p><strong>Before it:</strong> Save accepted Match state</p><p><strong>What to create:</strong> Add a service route, transport, basic Arena screen, and reconnect snapshot behavior.</p><p><strong>Where it belongs:</strong> In a similar layout, find the game service under services/game/src/game/, transport under frontend/src/arena/transport.ts, and screen under frontend/src/components/. Test each at its boundary.</p><p><strong>Pattern:</strong> The screen sends commands and shows server state. Transport handles delivery and reconnect.</p><p><strong>How to check it:</strong> Two browser clients see the same saved Match. After reconnect, the client loads its current state.</p><p>Read the related <a href="lessons/0009-live-connection.html">Lesson 9: Reconnecting gives you a fresh snapshot—not a frozen game</a> · <a href="lessons/0012-arena-screen.html">Lesson 12: The Arena screen is a view of Match state—not another game engine</a> · <a data-build-source href="source-map.html?file=frontend%2Fsrc%2Farena%2Ftransport.ts">source file</a> · <a data-build-test href="source-map.html?file=frontend%2Ftest%2Fmock-transport.test.ts">test file</a>.</p></li>
+<li data-build-step="team-play"><h3>Add two-player teams</h3><p><strong>Why this comes now:</strong> Shared editing and Ready checks need Match rules, storage, and live messages first.</p><p><strong>Before it:</strong> Connect players to the rules</p><p><strong>What to create:</strong> Add 2v2 teams, a shared revision, Readiness reset after edits, team-only chat, and reconnect tests.</p><p><strong>Where it belongs:</strong> In a similar layout, extend packages/arena-game/src/team-collaboration.ts and its test. Keep clients in frontend/src/arena/collab.ts and chat.ts.</p><p><strong>Pattern:</strong> Game rules own Readiness and revision. Collaboration and chat clients deliver team-scoped updates.</p><p><strong>How to check it:</strong> Four users stay separated by team. An edit clears both Readiness approvals.</p><p>Read the related <a href="lessons/0010-team-collaboration.html">Lesson 10: An edit changes the revision—and resets both Ready approvals</a> · <a href="lessons/0011-team-chat.html">Lesson 11: Team chat is a side channel—not editor state or Match state</a> · <a data-build-source href="source-map.html?file=packages%2Farena-game%2Fsrc%2Fteam-collaboration.ts">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Fteam-collaboration.test.ts">test file</a>.</p></li>
+<li data-build-step="real-boundaries"><h3>Check the real boundaries</h3><p><strong>Why this comes now:</strong> Fake tests do not prove PostgreSQL, Docker isolation, or real browser behavior.</p><p><strong>Before it:</strong> Add two-player teams</p><p><strong>What to create:</strong> Run equivalent database, Judge security, and two-client browser checks in your teammate&#39;s repo. Record checks that could not run separately.</p><p><strong>Where it belongs:</strong> Use the existing database, Judge, and browser test folders. In a similar layout, inspect packages/arena-game/test/judge-security.test.ts and frontend/e2e/.</p><p><strong>Pattern:</strong> Keep fake, database, Docker, and real-browser evidence separate. Record the command and result for each.</p><p><strong>How to check it:</strong> Mark PASS only after the matching test runs in your teammate&#39;s repo and passes.</p><p>Read the related <a href="lessons/0014-rewrite-with-tests.html">Lesson 14: A green test is evidence for this repo—not proof of your rewrite</a> · <a data-build-source href="source-map.html?file=packages%2Farena-game%2Fsrc%2Fcontainer-judge.ts">source file</a> · <a data-build-test href="source-map.html?file=packages%2Farena-game%2Ftest%2Fjudge-security.test.ts">test file</a>.</p></li></ol>
+    </section>
+    <div class="course-batches" id="course-batches" aria-label="Trace lessons">
       <section class="course-batch" aria-labelledby="course-batch-1-title">
       <h2 id="course-batch-1-title">Follow one Match</h2>
       <p class="course-batch-description">Start from player actions and trace what the game decides.</p>

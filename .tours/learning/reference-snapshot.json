@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-09-30T18:39:28.343Z",
-  "gitHead": "243e3e7c468ee946f9d7f52a598f15aa4c3ca70e",
+  "recordedAt": "2026-09-30T21:15:54.957Z",
+  "gitHead": "3480ced92a868b6158e44bbbf3b2e1d474a4ddaa",
   "snapshotId": "818ea4603e970d66",
   "files": [
     {
@@ -812,6 +812,5 @@
       "path": "spikes/judge-isolation/spike.sh",
       "sha256": "e3c8e742a89316af41163cf1658b839bd517d430e7c89a7dedc5027b63131383"
     }
-  ],
-  "lessonReviews": ["0013-running-the-project"]
+  ]
 }
