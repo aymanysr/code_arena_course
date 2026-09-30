@@ -1,12 +1,15 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Learn the safe local run paths and the current roles of the Code Arena services.">
-  <meta name="course-lesson-id" content="0013-running-the-project">
-  <title>Code Arena · Lesson 13 · The local play script and Compose stack are not the same thing</title>
-  <style>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Learn the safe local run paths and the current roles of the Code Arena services."
+    />
+    <meta name="course-lesson-id" content="0013-running-the-project" />
+    <title>Code Arena · Lesson 13 · The local play script and Compose stack are not the same thing</title>
+    <style>
 @layer reset, base, layout, components, utilities;
 
 @layer reset {
@@ -1129,205 +1132,519 @@
 }
 
 </style>
-</head>
-<body data-lesson-id="0013-running-the-project" data-course-lesson="0013-running-the-project">
-  <a class="skip-link" href="#lesson">Skip to the lesson</a>
-  <main class="page" id="lesson">
-    <header class="hero">
-      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson 13</p>
-      <h1>The local play script and Compose stack are not the same thing</h1>
-      <p class="hero-copy">In about 10 minutes: Trace the two supported local run paths, identify what each service currently owns, and use the setup files without mistaking scaffolding for product behavior.</p>
-      <p class="mt-1"><span class="status status-current">Source references match 46 pinned files</span> <span class="quiet">Snapshot <code>f10f2ef7328398f8</code></span></p>
-      <div class="stage-bar" aria-label="Lesson stages">
-        <span class="stage-pill" aria-current="step">1 · Predict</span>
-        <span aria-hidden="true" class="flow-arrow">→</span>
-        <span class="stage-pill">2 · Trace</span>
-        <span aria-hidden="true" class="flow-arrow">→</span>
-        <span class="stage-pill">3 · Recall</span>
-      </div>
-    </header>
-
-    <section class="section" aria-labelledby="predict-title">
-      <p class="kicker">First, make a prediction</p>
-      <h2 id="predict-title">If you run <code>npm run up</code>, where does the React game screen come from?</h2>
-      <p class="section-intro">Choose before tracing: Compose starts a frontend container; Nginx serves the frontend; the frontend is not in this Compose stack; or the separate Chat container renders it.</p>
-      <details class="card">
-        <summary>Check your prediction</summary>
-        <p class="mt-1">The frontend is not a service in the current <code>docker-compose.yml</code>. Compose starts PostgreSQL, Redis, Core, Game, the deferred Chat skeleton, and Nginx. The separate <code>scripts/play.sh</code> path builds the Game and frontend, then serves the frontend preview. These are different local workflows; neither is a production deployment proof.</p>
-      </details>
-    </section>
-
-    <section class="section" aria-labelledby="terms-title">
-      <h2 id="terms-title">Key terms</h2>
-      <dl class="card">
-        <dt>Workspace</dt>
-        <dd>The root npm project groups packages, services, and the frontend so shared modules can be built and tested together.</dd>
-        <dt class="mt-1">Compose service</dt>
-        <dd>A local container role with its own build or image, environment, network dependencies, and optional health check.</dd>
-        <dt class="mt-1">Liveness</dt>
-        <dd>“Is this process answering?” The current <code>/health</code> route reports process/model information; it does not prove the application is ready to serve gameplay.</dd>
-        <dt class="mt-1">Readiness</dt>
-        <dd>“Can required dependencies be reached?” The current <code>/ready</code> route checks TCP reachability for PostgreSQL and Redis. It is a separate route, not a gameplay test.</dd>
-        <dt class="mt-1">Judge Worker readiness</dt>
-        <dd>The worker readiness checks Docker and required images through its separate <code>/ready</code> route. Game's health/readiness routes check Game dependencies instead.</dd>
-      </dl>
-    </section>
-
-    <section class="section" aria-labelledby="trace-title">
-      <p class="kicker">Now trace two local run paths</p>
-      <h2 id="trace-title">A local command is not automatically the same stack as Compose</h2>
-      <ol class="flow-list">
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">01</span>
-          <div>
-            <h3>The root package is the command directory</h3>
-            <p>The root manifest declares three npm workspace groups: <code>packages/*</code>, <code>services/*</code>, and <code>frontend</code>. Its aggregate scripts delegate test, typecheck, lint, and build to workspaces. <code>npm run certs</code> creates local TLS material; <code>npm run up</code> delegates to Docker Compose.</p>
-            <div class="source-links">
-              <a href="../source-map.html?file=package.json&amp;line=7" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/package.json:7">Workspace groups · package.json:7</a>
-              <a href="../source-map.html?file=package.json&amp;line=12" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="12" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/package.json:12">Aggregate and runtime commands · package.json:12</a>
-              <a href="../source-map.html?file=frontend%2Findex.html&amp;line=9" data-source-id="source-959f9cada636604d" data-source-path="frontend/index.html" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/index.html:9">The browser's React mount and module entry · index.html:9</a>
-            </div>
-          </div>
-        </li>
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">02</span>
-          <div>
-            <h3>Local play builds the web preview and starts Game directly</h3>
-            <p><code>./scripts/play.sh</code> is a convenience development script, not Compose. It builds the Game workspace and frontend, starts the Game Node process, and serves the frontend preview; its default ports are Game <code>3220</code> and web <code>4173</code>. It uses HTTP for local connections; that is development-only and not evidence for the PDF's HTTPS requirement. It sets <code>DEV_PRINCIPAL=true</code>, so this shortcut does not represent production authentication. Its comments warn that without Postgres Game falls back to memory, and without Docker Run/Submit fail safely.</p>
-            <div class="source-links">
-              <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=2" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:2">Purpose and local/LAN modes · play.sh:2</a>
-              <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=17" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="17" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:17">Development database URL and Game endpoint · play.sh:17</a>
-              <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=23" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="23" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:23">Build and launch Game plus frontend preview · play.sh:23</a>
-              <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=30" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="30" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:30">Cleanup when the script exits · play.sh:30</a>
-            </div>
-            <aside class="concept-note mt-1">
-              <h4>Read before choosing LAN mode</h4>
-              <p>The script exposes its local development server to your LAN when requested. Only use that mode on a network you trust. Its development identity seam and missing production authentication are not hidden by the UI.</p>
-            </aside>
-          </div>
-        </li>
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">03</span>
-          <div>
-            <h3>Compose builds the local service stack—but not the whole game</h3>
-            <p>The Compose comment gives the setup order: create self-signed localhost certificates, copy <code>.env.example</code> to the ignored <code>.env</code>, then start Compose. The services include PostgreSQL, Redis, Core, Game, the Judge Worker, the deferred Chat skeleton, and Nginx. Only Nginx publishes ports 80 and 443; there is no frontend container. Compose sets <code>JUDGE_BACKEND=worker</code> and the Game-side <code>WorkerJudgeAdapter</code> sends requests to <code>JUDGE_WORKER_URL=http://judge-worker:3010</code> over the internal judge network. The worker runs <code>ContainerJudge</code>. Compose mounts the Docker socket into the Judge Worker only. Local direct Game runs default to <code>ContainerJudge</code>; optional Judge0 is another explicitly configured provider.</p>
-            <p class="mt-1">The worker requires <code>JUDGE_WORKER_TOKEN</code>; the value in <code>.env.example</code> is only a placeholder. <code>JUDGE_WORKER_TIMEOUT_MS</code> is 930000 ms. Worker defaults are <code>JUDGE_WORKER_CONCURRENCY=2</code>, <code>JUDGE_WORKER_MAX_QUEUE=8</code>, <code>JUDGE_WORKER_QUEUE_TIMEOUT_MS=30000</code>, and <code>JUDGE_WORKER_JOB_TIMEOUT_MS=900000</code>. Its entrypoint prepares missing judge images. <code>/health</code> is liveness; worker readiness checks Docker and required images through <code>/ready</code>, and Compose waits for that readiness before starting Game. These values describe local Compose configuration, not a production capacity claim.</p>
-            <p class="mt-1">The internal network keeps the worker off the public path: Nginx does not publish or proxy the worker. The Docker socket grants daemon-level authority, so a private Compose network is not proof that running hostile code is safe or isolated from the host.</p>
-            <div class="source-links">
-              <a href="../source-map.html?file=docker-compose.yml&amp;line=1" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:1">Local Compose startup and intentional omissions · docker-compose.yml:1</a>
-              <a href="../source-map.html?file=docker-compose.yml&amp;line=57" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="57" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:57">Judge Worker service, bounded queue, socket mount, and readiness check · docker-compose.yml:57</a>
-              <a href="../source-map.html?file=docker-compose.yml&amp;line=85" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="85" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:85">Compose configures Game to use the internal worker · docker-compose.yml:85</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.ts&amp;line=19" data-source-id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/game/judge-factory.ts:19">Game backend selection and no-fallback rule · judge-factory.ts:19</a>
-              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fmain.ts&amp;line=21" data-source-id="source-d6e914cd95e4e14e" data-source-path="services/judge-worker/src/main.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/main.ts:21">Worker configuration, ContainerJudge, queue, and listener · main.ts:21</a>
-              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fhttp-server.ts&amp;line=183" data-source-id="source-ac47c28cfc201378" data-source-path="services/judge-worker/src/http-server.ts" data-source-line="183" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/http-server.ts:183">Worker HTTP endpoints and liveness/readiness routes · http-server.ts:183</a>
-              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fjob-queue.ts&amp;line=22" data-source-id="source-751066cc12adb6bb" data-source-path="services/judge-worker/src/job-queue.ts" data-source-line="22" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/job-queue.ts:22">Bounded active work and waiting queue settings · job-queue.ts:22</a>
-              <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Freadiness.ts&amp;line=31" data-source-id="source-d6972f22a23c365f" data-source-path="services/judge-worker/src/readiness.ts" data-source-line="31" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/readiness.ts:31">Readiness checks Docker and every configured image · readiness.ts:31</a>
-              <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:19">Public proxy routes omit the internal worker · nginx.conf:19</a>
-              <a href="../source-map.html?file=docker-compose.yml&amp;line=95" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="95" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:95">Nginx is the only published service · docker-compose.yml:95</a>
-              <a href="../source-map.html?file=scripts%2Fgen-dev-certs.sh&amp;line=2" data-source-id="source-353133ae448c8d19" data-source-path="scripts/gen-dev-certs.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/gen-dev-certs.sh:2">Local-only self-signed TLS certificate generation · gen-dev-certs.sh:2</a>
-              <a href="../source-map.html?file=.env.example&amp;line=1" data-source-id="source-a3046da0d15a27e8" data-source-path=".env.example" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.env.example:1">Safe placeholder settings and internal ports · .env.example:1</a>
-              <a href="../source-map.html?file=.gitignore&amp;line=8" data-source-id="source-bc37d034bad56458" data-source-path=".gitignore" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.gitignore:8">Ignore local secrets and generated certificates · .gitignore:8</a>
-              <a href="../source-map.html?file=infra%2Fpostgres%2Finit-db.sh&amp;line=6" data-source-id="source-26975be9396ea409" data-source-path="infra/postgres/init-db.sh" data-source-line="6" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/postgres/init-db.sh:6">Create separate database roles and databases · init-db.sh:6</a>
-            </div>
-          </div>
-        </li>
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">04</span>
-          <div>
-            <h3>Follow an HTTP or WebSocket request through Nginx</h3>
-            <p>Nginx terminates HTTPS/WSS, proxies <code>/api/core/</code> to Core and <code>/api/game/</code> to Game, and sends Socket.IO—including Game-owned <code>/chat</code>—to Game. The separate Chat container is still startup/health scaffolding. The Game module wires the actual game, lobby, collaboration, and team-chat controllers/gateways; Lesson 11 follows the chat behavior itself.</p>
-            <div class="source-links">
-              <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:19">TLS listener and API proxy routes · nginx.conf:19</a>
-              <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=35" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="35" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:35">WebSocket ingress, including Game-owned chat · nginx.conf:35</a>
-              <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.module.ts&amp;line=11" data-source-id="source-d2b17d64c9888904" data-source-path="services/game/src/game/game.module.ts" data-source-line="11" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/game/game.module.ts:11">Game module wiring and development-principal seam · game.module.ts:11</a>
-            </div>
-          </div>
-        </li>
-      </ol>
-    </section>
-
-    <section class="section" aria-labelledby="roles-title">
-      <h2 id="roles-title">What each backend process currently owns</h2>
-      <div class="card">
-        <ul class="flow-list">
-          <li><strong>Game:</strong> the active HTTP/WebSocket application adapter; its module wires the Match, Lobby, collaboration, and team-chat paths to the Arena engine and model.</li>
-          <li><strong>Core:</strong> currently a Nest bootstrap plus <code>/health</code> and <code>/ready</code>; the current module does not implement account/profile product behavior.</li>
-          <li><strong>Chat container:</strong> currently a Nest bootstrap plus health/readiness scaffolding. First-release Match chat is in Game's <code>/chat</code> namespace, not this separate service.</li>
-          <li><strong>PostgreSQL and Redis:</strong> local infrastructure dependencies. The presence of containers and health checks does not show that every feature uses them or that a production deployment has been verified.</li>
-          <li><strong>Nginx:</strong> public local entry point, TLS termination, and reverse proxy; it does not render the React frontend in this Compose configuration.</li>
-        </ul>
-      </div>
-      <div class="source-links mt-1">
-        <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-fb5a0d25b73565bb" data-source-path="services/core/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/main.ts:5">Core process bootstrap · main.ts:5</a>
-        <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-525fb8b7f396195b" data-source-path="services/core/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/app.module.ts:4">Core currently wires only HealthController · app.module.ts:4</a>
-        <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-4067f72ffa5ac117" data-source-path="services/core/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/health.controller.ts:21">Core liveness and dependency-readiness routes · health.controller.ts:21</a>
-        <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-5f12cb4e32097020" data-source-path="services/game/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/main.ts:5">Game process bootstrap · main.ts:5</a>
-        <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fapp.module.ts&amp;line=5" data-source-id="source-9321969d6314b463" data-source-path="services/game/src/app.module.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/app.module.ts:5">Game root module · app.module.ts:5</a>
-        <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-edbe4d34ad2907a9" data-source-path="services/game/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/health.controller.ts:21">Game liveness and dependency-readiness routes · health.controller.ts:21</a>
-        <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-32779476fac96bc6" data-source-path="services/chat/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/main.ts:5">Separate Chat process bootstrap · main.ts:5</a>
-        <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-354e0126aa611161" data-source-path="services/chat/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/app.module.ts:4">Chat currently wires only HealthController · app.module.ts:4</a>
-        <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-5ace2ef1e5538dd0" data-source-path="services/chat/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/health.controller.ts:21">Chat liveness and dependency-readiness routes · health.controller.ts:21</a>
-      </div>
-      <aside class="concept-note mt-1">
-        <h4>Health is not the same as readiness</h4>
-        <p>Each <code>/health</code> route answers from the process. Each <code>/ready</code> checks whether PostgreSQL and Redis accept a TCP connection. Compose's health checks currently call <code>/health</code>, not <code>/ready</code>. No containers were started for this lesson update, so this walkthrough reports configuration and source—not observed health responses.</p>
-      </aside>
-    </section>
-
-    <section class="section" aria-labelledby="build-title">
-      <h2 id="build-title">How the workspace files fit together</h2>
-      <p class="section-intro">These links are a reference shelf, not another list to memorize. Open the ones needed when following a build or setup command.</p>
-      <details class="card">
-        <summary>Open the package, Docker, and tooling source index</summary>
-        <div class="source-links mt-1">
-          <a href="../source-map.html?file=frontend%2Fpackage.json&amp;line=7" data-source-id="source-da6498268e99511d" data-source-path="frontend/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/package.json:7">Frontend scripts and dependencies · frontend/package.json:7</a>
-          <a href="../source-map.html?file=frontend%2Fvite.config.ts&amp;line=5" data-source-id="source-97c6e2c429ec4831" data-source-path="frontend/vite.config.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/vite.config.ts:5">Vite/React/Tailwind dev-server config · vite.config.ts:5</a>
-          <a href="../source-map.html?file=frontend%2Fplaywright.config.ts&amp;line=3" data-source-id="source-1ed7245e0c7c6349" data-source-path="frontend/playwright.config.ts" data-source-line="3" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/playwright.config.ts:3">Browser-test directory and base URL · playwright.config.ts:3</a>
-          <a href="../source-map.html?file=frontend%2Ftsconfig.json&amp;line=2" data-source-id="source-5c19f37df4b2357c" data-source-path="frontend/tsconfig.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/tsconfig.json:2">Frontend TypeScript checking boundary · tsconfig.json:2</a>
-          <a href="../source-map.html?file=packages%2Farena-model%2Fpackage.json&amp;line=8" data-source-id="source-bb263404bc58baad" data-source-path="packages/arena-model/package.json" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/package.json:8">Shared model workspace scripts · arena-model/package.json:8</a>
-          <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.json&amp;line=1" data-source-id="source-ee31895bbb66c288" data-source-path="packages/arena-model/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/tsconfig.json:1">Model typecheck config · arena-model/tsconfig.json:1</a>
-          <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.build.json&amp;line=1" data-source-id="source-20b35343e9295e7b" data-source-path="packages/arena-model/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/tsconfig.build.json:1">Model production build config · arena-model/tsconfig.build.json:1</a>
-          <a href="../source-map.html?file=packages%2Farena-game%2Fpackage.json&amp;line=9" data-source-id="source-436dabd821f55c7a" data-source-path="packages/arena-game/package.json" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/package.json:9">Game engine workspace scripts · arena-game/package.json:9</a>
-          <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.json&amp;line=1" data-source-id="source-fa3014050d5c0356" data-source-path="packages/arena-game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/tsconfig.json:1">Engine typecheck config · arena-game/tsconfig.json:1</a>
-          <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.build.json&amp;line=1" data-source-id="source-01f5e904a4abffa3" data-source-path="packages/arena-game/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/tsconfig.build.json:1">Engine production build config · arena-game/tsconfig.build.json:1</a>
-          <a href="../source-map.html?file=packages%2Farena-harness%2Fpackage.json&amp;line=7" data-source-id="source-60190eefc099b899" data-source-path="packages/arena-harness/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-harness/package.json:7">Fake-backed harness workspace scripts · arena-harness/package.json:7</a>
-          <a href="../source-map.html?file=packages%2Farena-harness%2Ftsconfig.json&amp;line=1" data-source-id="source-6d83685a2dd65a0f" data-source-path="packages/arena-harness/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-harness/tsconfig.json:1">Harness typecheck config · arena-harness/tsconfig.json:1</a>
-          <a href="../source-map.html?file=services%2Fcore%2Fpackage.json&amp;line=2" data-source-id="source-6e38cd4fab1f84b3" data-source-path="services/core/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/package.json:2">Core workspace identity and scripts · core/package.json:2</a>
-          <a href="../source-map.html?file=services%2Fcore%2Ftsconfig.json&amp;line=1" data-source-id="source-b63edc54e579d2d0" data-source-path="services/core/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/tsconfig.json:1">Core compile target and decorators · core/tsconfig.json:1</a>
-          <a href="../source-map.html?file=services%2Fchat%2Fpackage.json&amp;line=2" data-source-id="source-0e6038495c53ae73" data-source-path="services/chat/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/package.json:2">Deferred Chat workspace identity and scripts · chat/package.json:2</a>
-          <a href="../source-map.html?file=services%2Fchat%2Ftsconfig.json&amp;line=1" data-source-id="source-1d23c74cfcec565d" data-source-path="services/chat/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/tsconfig.json:1">Chat compile target and decorators · chat/tsconfig.json:1</a>
-          <a href="../source-map.html?file=services%2Fgame%2Fpackage.json&amp;line=2" data-source-id="source-8fb1c332a4ad7e98" data-source-path="services/game/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/package.json:2">Game workspace identity and scripts · game/package.json:2</a>
-          <a href="../source-map.html?file=services%2Fgame%2Ftsconfig.json&amp;line=1" data-source-id="source-c318ba965cf4aa71" data-source-path="services/game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/tsconfig.json:1">Game compile target and decorators · game/tsconfig.json:1</a>
-          <a href="../source-map.html?file=services%2Fcore%2FDockerfile&amp;line=1" data-source-id="source-bf797b667254a0ff" data-source-path="services/core/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/Dockerfile:1">Core image build context and stages · Core Dockerfile:1</a>
-          <a href="../source-map.html?file=services%2Fchat%2FDockerfile&amp;line=1" data-source-id="source-dc653dedf3dfe3e5" data-source-path="services/chat/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/Dockerfile:1">Chat image build context and stages · Chat Dockerfile:1</a>
-          <a href="../source-map.html?file=services%2Fgame%2FDockerfile&amp;line=1" data-source-id="source-e1e47bf146ffa9ea" data-source-path="services/game/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/Dockerfile:1">Game image dependencies, problem-bank data, and stages · Game Dockerfile:1</a>
+  </head>
+  <body data-lesson-id="0013-running-the-project" data-course-lesson="0013-running-the-project">
+    <a class="skip-link" href="#lesson">Skip to the lesson</a>
+    <main class="page" id="lesson">
+      <header class="hero">
+        <p class="eyebrow">
+          <a href="../source-map.html">Code Arena Learning Map</a> / Lesson
+          13
+        </p>
+        <h1>The local play script and Compose stack are not the same thing</h1>
+        <p class="hero-copy">In about 10 minutes: Trace the two supported local run paths, identify what each service currently owns, and use the setup files without mistaking scaffolding for product behavior.</p>
+        <p class="mt-1">
+          <span class="status status-current">Source references match 47 pinned files</span>
+          <span class="quiet">Snapshot <code>818ea4603e970d66</code></span>
+        </p>
+        <div class="stage-bar" aria-label="Lesson stages">
+          <span class="stage-pill" aria-current="step">1 · Predict</span>
+          <span aria-hidden="true" class="flow-arrow">→</span>
+          <span class="stage-pill">2 · Trace</span>
+          <span aria-hidden="true" class="flow-arrow">→</span>
+          <span class="stage-pill">3 · Recall</span>
         </div>
-      </details>
-      <aside class="concept-note mt-1">
-        <h4>Set up safely when you are ready</h4>
-        <p>For Compose, first generate local certificates, then copy <code>.env.example</code> to <code>.env</code>, then use <code>npm run up</code>. Never copy real secrets into the example or into Git. Do not run both workflows against the same ports without checking whether something is already listening. This lesson did not start or stop Docker, alter environment files, or create certificates.</p>
-      </aside>
-    </section>
+      </header>
 
-    <section class="section" aria-labelledby="recall-title">
-      <p class="kicker">Close the source and recall</p>
-      <h2 id="recall-title">Which route gives you the React UI, and which service owns the current team chat?</h2>
-      <details class="card">
-        <summary>Hint, then check yourself</summary>
-        <p class="mt-1">The convenience script builds and serves the frontend. Compose does not include a frontend container; Nginx proxies API and WebSocket traffic. The active team-chat namespace belongs to Game; the separate Chat container currently exposes only its startup health/readiness surface.</p>
-      </details>
-      <article class="card mt-1">
-        <h3>Rewrite-test prompt</h3>
-        <p>In a separate rewrite, verify the advertised local command in a clean environment. Assert that the Game health route responds and that an unconfigured database does not pretend to be persistent. Then test the Compose routes and each service's actual behavior separately. Do not mark setup docs, a successful image build, or a health check as proof of authentication, chat-product behavior, judge isolation, or production deployment.</p>
-      </article>
-      <nav class="nav-row lesson-navigation" aria-label="Lesson navigation"><a data-course-home href="../index.html">Course Home</a> · <a data-course-explore href="../source-map.html">Explore code</a> · <a data-previous-lesson href="0012-arena-screen.html">← Lesson 12: The Arena screen is a view of Match state—not another game engine</a> · <a data-next-lesson data-primary-course-nav href="0014-rewrite-with-tests.html">Next: Lesson 14, A green test is evidence for this repo—not proof of your rewrite →</a></nav>
-    </section>
+      <section class="section" aria-labelledby="predict-title">
+        <p class="kicker">First, make a prediction</p>
+        <h2 id="predict-title">
+          If you run <code>npm run up</code>, where does the React game screen
+          come from?
+        </h2>
+        <p class="section-intro">
+          Choose before tracing: Compose starts a frontend container; Nginx
+          serves the frontend; the frontend is not in this Compose stack; or the
+          separate Chat container renders it.
+        </p>
+        <details class="card">
+          <summary>Check your prediction</summary>
+          <p class="mt-1">
+            The frontend is not a service in the current
+            <code>docker-compose.yml</code>. Compose starts PostgreSQL, Redis,
+            Core, Game, the deferred Chat skeleton, and Nginx. The separate
+            <code>scripts/play.sh</code> path builds the Game and frontend, then
+            serves the frontend preview. These are different local workflows;
+            neither is a production deployment proof.
+          </p>
+        </details>
+      </section>
 
-    <footer class="footer-note">
-      <p>Source snapshot <code>f10f2ef7328398f8</code>. Commands and Compose configuration were inspected, not executed for this course update. The local play script, Compose stack, and production deployment are distinct environments.</p>
-    </footer>
-  </main>
-  <p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>
+      <section class="section" aria-labelledby="terms-title">
+        <h2 id="terms-title">Key terms</h2>
+        <dl class="card">
+          <dt>Workspace</dt>
+          <dd>
+            The root npm project groups packages, services, and the frontend so
+            shared modules can be built and tested together.
+          </dd>
+          <dt class="mt-1">Compose service</dt>
+          <dd>
+            A local container role with its own build or image, environment,
+            network dependencies, and optional health check.
+          </dd>
+          <dt class="mt-1">Liveness</dt>
+          <dd>
+            “Is this process answering?” The current <code>/health</code> route
+            reports process/model information; it does not prove the application
+            is ready to serve gameplay.
+          </dd>
+          <dt class="mt-1">Readiness</dt>
+          <dd>
+            “Can required dependencies be reached?” The current
+            <code>/ready</code> route checks TCP reachability for PostgreSQL and
+            Redis. It is a separate route, not a gameplay test.
+          </dd>
+          <dt class="mt-1">Judge Worker readiness</dt>
+          <dd>
+            The worker readiness checks Docker and required images through its
+            separate <code>/ready</code> route. Game's health/readiness routes
+            check Game dependencies instead.
+          </dd>
+        </dl>
+      </section>
+
+      <section class="section" aria-labelledby="trace-title">
+        <p class="kicker">Now trace two local run paths</p>
+        <h2 id="trace-title">
+          A local command is not automatically the same stack as Compose
+        </h2>
+        <ol class="flow-list">
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">01</span>
+            <div>
+              <h3>The root package is the command directory</h3>
+              <p>
+                The root manifest declares three npm workspace groups:
+                <code>packages/*</code>, <code>services/*</code>, and
+                <code>frontend</code>. Its aggregate scripts delegate test,
+                typecheck, lint, and build to workspaces. Root
+                <code>pretest</code> builds the workspaces before tests run;
+                Game service tests launch
+                <code>services/game/dist/main.js</code>, so a clean checkout
+                needs that build first. <code>npm run certs</code> creates local
+                TLS material; <code>npm run up</code> delegates to Docker
+                Compose. The root <code>prepare</code> script installs Husky
+                with the dependencies. Before a commit,
+                <code>.husky/pre-commit</code> runs staged-file formatting,
+                typecheck, and the workspace tests. Tests that need Postgres,
+                Docker, or local sockets still need their required environment;
+                a blocked test is not a pass.
+              </p>
+              <div class="source-links">
+                <a href="../source-map.html?file=package.json&amp;line=7" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/package.json:7"
+                  >Workspace groups · package.json:7</a
+                >
+                <a href="../source-map.html?file=package.json&amp;line=12" data-source-id="source-7ae45ad102eab3b6" data-source-path="package.json" data-source-line="12" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/package.json:12"
+                  >Aggregate and runtime commands · package.json:12</a
+                >
+                <a href="../source-map.html?file=.husky%2Fpre-commit&amp;line=1" data-source-id="source-d2bc4bbf14eadc29" data-source-path=".husky/pre-commit" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.husky/pre-commit:1"
+                  >Checks run before each commit · pre-commit:1</a
+                >
+                <a href="../source-map.html?file=frontend%2Findex.html&amp;line=9" data-source-id="source-959f9cada636604d" data-source-path="frontend/index.html" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/index.html:9"
+                  >The browser's React mount and module entry · index.html:9</a
+                >
+              </div>
+            </div>
+          </li>
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">02</span>
+            <div>
+              <h3>
+                Local play builds the web preview and starts Game directly
+              </h3>
+              <p>
+                <code>./scripts/play.sh</code> is a convenience development
+                script, not Compose. It builds the Game workspace and frontend,
+                starts the Game Node process, and serves the frontend preview;
+                its default ports are Game <code>3220</code> and web
+                <code>4173</code>. It uses HTTP for local connections; that is
+                development-only and not evidence for the PDF's HTTPS
+                requirement. It sets <code>DEV_PRINCIPAL=true</code>, so this
+                shortcut does not represent production authentication. Its
+                comments warn that without Postgres Game falls back to memory,
+                and without Docker Run/Submit fail safely.
+              </p>
+              <div class="source-links">
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=2" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:2"
+                  >Purpose and local/LAN modes · play.sh:2</a
+                >
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=17" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="17" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:17"
+                  >Development database URL and Game endpoint · play.sh:17</a
+                >
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=23" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="23" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:23"
+                  >Build and launch Game plus frontend preview · play.sh:23</a
+                >
+                <a href="../source-map.html?file=scripts%2Fplay.sh&amp;line=30" data-source-id="source-1e7beab4fa5bc3ef" data-source-path="scripts/play.sh" data-source-line="30" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/play.sh:30"
+                  >Cleanup when the script exits · play.sh:30</a
+                >
+              </div>
+              <aside class="concept-note mt-1">
+                <h4>Read before choosing LAN mode</h4>
+                <p>
+                  The script exposes its local development server to your LAN
+                  when requested. Only use that mode on a network you trust. Its
+                  development identity seam and missing production
+                  authentication are not hidden by the UI.
+                </p>
+              </aside>
+            </div>
+          </li>
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">03</span>
+            <div>
+              <h3>
+                Compose builds the local service stack—but not the whole game
+              </h3>
+              <p>
+                The Compose comment gives the setup order: create self-signed
+                localhost certificates, copy <code>.env.example</code> to the
+                ignored <code>.env</code>, then start Compose. The services
+                include PostgreSQL, Redis, Core, Game, the Judge Worker, the
+                deferred Chat skeleton, and Nginx. Only Nginx publishes ports 80
+                and 443; there is no frontend container. Compose sets
+                <code>JUDGE_BACKEND=worker</code> and the Game-side
+                <code>WorkerJudgeAdapter</code> sends requests to
+                <code>JUDGE_WORKER_URL=http://judge-worker:3010</code> over the
+                internal judge network. The worker runs
+                <code>ContainerJudge</code>. Compose mounts the Docker socket
+                into the Judge Worker only. Local direct Game runs default to
+                <code>ContainerJudge</code>; optional Judge0 is another
+                explicitly configured provider.
+              </p>
+              <p class="mt-1">
+                The worker requires <code>JUDGE_WORKER_TOKEN</code>; the value
+                in <code>.env.example</code> is only a placeholder.
+                <code>JUDGE_WORKER_TIMEOUT_MS</code> is 930000 ms. Worker
+                defaults are <code>JUDGE_WORKER_CONCURRENCY=2</code>,
+                <code>JUDGE_WORKER_MAX_QUEUE=8</code>,
+                <code>JUDGE_WORKER_QUEUE_TIMEOUT_MS=30000</code>, and
+                <code>JUDGE_WORKER_JOB_TIMEOUT_MS=900000</code>. Its entrypoint
+                prepares missing judge images. <code>/health</code> is liveness;
+                worker readiness checks Docker and required images through
+                <code>/ready</code>, and Compose waits for that readiness before
+                starting Game. These values describe local Compose
+                configuration, not a production capacity claim.
+              </p>
+              <p class="mt-1">
+                The internal network keeps the worker off the public path: Nginx
+                does not publish or proxy the worker. The Docker socket grants
+                daemon-level authority, so a private Compose network is not
+                proof that running hostile code is safe or isolated from the
+                host.
+              </p>
+              <div class="source-links">
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=1" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:1"
+                  >Local Compose startup and intentional omissions ·
+                  docker-compose.yml:1</a
+                >
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=57" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="57" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:57"
+                  >Judge Worker service, bounded queue, socket mount, and
+                  readiness check · docker-compose.yml:57</a
+                >
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=85" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="85" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:85"
+                  >Compose configures Game to use the internal worker ·
+                  docker-compose.yml:85</a
+                >
+                <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fjudge-factory.ts&amp;line=19" data-source-id="source-fcf1b7bca3f4d2ca" data-source-path="services/game/src/game/judge-factory.ts" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/game/judge-factory.ts:19"
+                  >Game backend selection and no-fallback rule ·
+                  judge-factory.ts:19</a
+                >
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fmain.ts&amp;line=21" data-source-id="source-d6e914cd95e4e14e" data-source-path="services/judge-worker/src/main.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/main.ts:21"
+                  >Worker configuration, ContainerJudge, queue, and listener ·
+                  main.ts:21</a
+                >
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fhttp-server.ts&amp;line=183" data-source-id="source-ac47c28cfc201378" data-source-path="services/judge-worker/src/http-server.ts" data-source-line="183" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/http-server.ts:183"
+                  >Worker HTTP endpoints and liveness/readiness routes ·
+                  http-server.ts:183</a
+                >
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Fjob-queue.ts&amp;line=22" data-source-id="source-751066cc12adb6bb" data-source-path="services/judge-worker/src/job-queue.ts" data-source-line="22" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/job-queue.ts:22"
+                  >Bounded active work and waiting queue settings ·
+                  job-queue.ts:22</a
+                >
+                <a href="../source-map.html?file=services%2Fjudge-worker%2Fsrc%2Freadiness.ts&amp;line=31" data-source-id="source-d6972f22a23c365f" data-source-path="services/judge-worker/src/readiness.ts" data-source-line="31" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/judge-worker/src/readiness.ts:31"
+                  >Readiness checks Docker and every configured image ·
+                  readiness.ts:31</a
+                >
+                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:19"
+                  >Public proxy routes omit the internal worker ·
+                  nginx.conf:19</a
+                >
+                <a href="../source-map.html?file=docker-compose.yml&amp;line=95" data-source-id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml" data-source-line="95" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/docker-compose.yml:95"
+                  >Nginx is the only published service ·
+                  docker-compose.yml:95</a
+                >
+                <a href="../source-map.html?file=scripts%2Fgen-dev-certs.sh&amp;line=2" data-source-id="source-353133ae448c8d19" data-source-path="scripts/gen-dev-certs.sh" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/scripts/gen-dev-certs.sh:2"
+                  >Local-only self-signed TLS certificate generation ·
+                  gen-dev-certs.sh:2</a
+                >
+                <a href="../source-map.html?file=.env.example&amp;line=1" data-source-id="source-a3046da0d15a27e8" data-source-path=".env.example" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.env.example:1"
+                  >Safe placeholder settings and internal ports ·
+                  .env.example:1</a
+                >
+                <a href="../source-map.html?file=.gitignore&amp;line=8" data-source-id="source-bc37d034bad56458" data-source-path=".gitignore" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/.gitignore:8"
+                  >Ignore local secrets and generated certificates ·
+                  .gitignore:8</a
+                >
+                <a href="../source-map.html?file=infra%2Fpostgres%2Finit-db.sh&amp;line=6" data-source-id="source-26975be9396ea409" data-source-path="infra/postgres/init-db.sh" data-source-line="6" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/postgres/init-db.sh:6"
+                  >Create separate database roles and databases ·
+                  init-db.sh:6</a
+                >
+              </div>
+            </div>
+          </li>
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">04</span>
+            <div>
+              <h3>Follow an HTTP or WebSocket request through Nginx</h3>
+              <p>
+                Nginx terminates HTTPS/WSS, proxies <code>/api/core/</code> to
+                Core and <code>/api/game/</code> to Game, and sends
+                Socket.IO—including Game-owned <code>/chat</code>—to Game. The
+                separate Chat container is still startup/health scaffolding. The
+                Game module wires the actual game, lobby, collaboration, and
+                team-chat controllers/gateways; Lesson 11 follows the chat
+                behavior itself.
+              </p>
+              <div class="source-links">
+                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=19" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="19" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:19"
+                  >TLS listener and API proxy routes · nginx.conf:19</a
+                >
+                <a href="../source-map.html?file=infra%2Fnginx%2Fnginx.conf&amp;line=35" data-source-id="source-5612d530e1dcfe28" data-source-path="infra/nginx/nginx.conf" data-source-line="35" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/infra/nginx/nginx.conf:35"
+                  >WebSocket ingress, including Game-owned chat ·
+                  nginx.conf:35</a
+                >
+                <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fgame%2Fgame.module.ts&amp;line=11" data-source-id="source-d2b17d64c9888904" data-source-path="services/game/src/game/game.module.ts" data-source-line="11" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/game/game.module.ts:11"
+                  >Game module wiring and development-principal seam ·
+                  game.module.ts:11</a
+                >
+              </div>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" aria-labelledby="roles-title">
+        <h2 id="roles-title">What each backend process currently owns</h2>
+        <div class="card">
+          <ul class="flow-list">
+            <li>
+              <strong>Game:</strong> the active HTTP/WebSocket application
+              adapter; its module wires the Match, Lobby, collaboration, and
+              team-chat paths to the Arena engine and model.
+            </li>
+            <li>
+              <strong>Core:</strong> currently a Nest bootstrap plus
+              <code>/health</code> and <code>/ready</code>; the current module
+              does not implement account/profile product behavior.
+            </li>
+            <li>
+              <strong>Chat container:</strong> currently a Nest bootstrap plus
+              health/readiness scaffolding. First-release Match chat is in
+              Game's <code>/chat</code> namespace, not this separate service.
+            </li>
+            <li>
+              <strong>PostgreSQL and Redis:</strong> local infrastructure
+              dependencies. The presence of containers and health checks does
+              not show that every feature uses them or that a production
+              deployment has been verified.
+            </li>
+            <li>
+              <strong>Nginx:</strong> public local entry point, TLS termination,
+              and reverse proxy; it does not render the React frontend in this
+              Compose configuration.
+            </li>
+          </ul>
+        </div>
+        <div class="source-links mt-1">
+          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-fb5a0d25b73565bb" data-source-path="services/core/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/main.ts:5"
+            >Core process bootstrap · main.ts:5</a
+          >
+          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-525fb8b7f396195b" data-source-path="services/core/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/app.module.ts:4"
+            >Core currently wires only HealthController · app.module.ts:4</a
+          >
+          <a href="../source-map.html?file=services%2Fcore%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-4067f72ffa5ac117" data-source-path="services/core/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/src/health.controller.ts:21"
+            >Core liveness and dependency-readiness routes ·
+            health.controller.ts:21</a
+          >
+          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-5f12cb4e32097020" data-source-path="services/game/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/main.ts:5"
+            >Game process bootstrap · main.ts:5</a
+          >
+          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fapp.module.ts&amp;line=5" data-source-id="source-9321969d6314b463" data-source-path="services/game/src/app.module.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/app.module.ts:5"
+            >Game root module · app.module.ts:5</a
+          >
+          <a href="../source-map.html?file=services%2Fgame%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-edbe4d34ad2907a9" data-source-path="services/game/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/src/health.controller.ts:21"
+            >Game liveness and dependency-readiness routes ·
+            health.controller.ts:21</a
+          >
+          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fmain.ts&amp;line=5" data-source-id="source-32779476fac96bc6" data-source-path="services/chat/src/main.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/main.ts:5"
+            >Separate Chat process bootstrap · main.ts:5</a
+          >
+          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fapp.module.ts&amp;line=4" data-source-id="source-354e0126aa611161" data-source-path="services/chat/src/app.module.ts" data-source-line="4" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/app.module.ts:4"
+            >Chat currently wires only HealthController · app.module.ts:4</a
+          >
+          <a href="../source-map.html?file=services%2Fchat%2Fsrc%2Fhealth.controller.ts&amp;line=21" data-source-id="source-5ace2ef1e5538dd0" data-source-path="services/chat/src/health.controller.ts" data-source-line="21" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/src/health.controller.ts:21"
+            >Chat liveness and dependency-readiness routes ·
+            health.controller.ts:21</a
+          >
+        </div>
+        <aside class="concept-note mt-1">
+          <h4>Health is not the same as readiness</h4>
+          <p>
+            Each <code>/health</code> route answers from the process. Each
+            <code>/ready</code> checks whether PostgreSQL and Redis accept a TCP
+            connection. Compose's health checks currently call
+            <code>/health</code>, not <code>/ready</code>. No containers were
+            started for this lesson update, so this walkthrough reports
+            configuration and source—not observed health responses.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section" aria-labelledby="build-title">
+        <h2 id="build-title">How the workspace files fit together</h2>
+        <p class="section-intro">
+          These links are a reference shelf, not another list to memorize. Open
+          the ones needed when following a build or setup command.
+        </p>
+        <details class="card">
+          <summary>Open the package, Docker, and tooling source index</summary>
+          <div class="source-links mt-1">
+            <a href="../source-map.html?file=frontend%2Fpackage.json&amp;line=7" data-source-id="source-da6498268e99511d" data-source-path="frontend/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/package.json:7"
+              >Frontend scripts and dependencies · frontend/package.json:7</a
+            >
+            <a href="../source-map.html?file=frontend%2Fvite.config.ts&amp;line=5" data-source-id="source-97c6e2c429ec4831" data-source-path="frontend/vite.config.ts" data-source-line="5" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/vite.config.ts:5"
+              >Vite/React/Tailwind dev-server config · vite.config.ts:5</a
+            >
+            <a href="../source-map.html?file=frontend%2Fplaywright.config.ts&amp;line=3" data-source-id="source-1ed7245e0c7c6349" data-source-path="frontend/playwright.config.ts" data-source-line="3" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/playwright.config.ts:3"
+              >Browser-test directory and base URL · playwright.config.ts:3</a
+            >
+            <a href="../source-map.html?file=frontend%2Ftsconfig.json&amp;line=2" data-source-id="source-5c19f37df4b2357c" data-source-path="frontend/tsconfig.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/frontend/tsconfig.json:2"
+              >Frontend TypeScript checking boundary · tsconfig.json:2</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-model%2Fpackage.json&amp;line=8" data-source-id="source-bb263404bc58baad" data-source-path="packages/arena-model/package.json" data-source-line="8" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/package.json:8"
+              >Shared model workspace scripts · arena-model/package.json:8</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.json&amp;line=1" data-source-id="source-ee31895bbb66c288" data-source-path="packages/arena-model/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/tsconfig.json:1"
+              >Model typecheck config · arena-model/tsconfig.json:1</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-model%2Ftsconfig.build.json&amp;line=1" data-source-id="source-20b35343e9295e7b" data-source-path="packages/arena-model/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-model/tsconfig.build.json:1"
+              >Model production build config ·
+              arena-model/tsconfig.build.json:1</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-game%2Fpackage.json&amp;line=9" data-source-id="source-436dabd821f55c7a" data-source-path="packages/arena-game/package.json" data-source-line="9" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/package.json:9"
+              >Game engine workspace scripts · arena-game/package.json:9</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.json&amp;line=1" data-source-id="source-fa3014050d5c0356" data-source-path="packages/arena-game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/tsconfig.json:1"
+              >Engine typecheck config · arena-game/tsconfig.json:1</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-game%2Ftsconfig.build.json&amp;line=1" data-source-id="source-01f5e904a4abffa3" data-source-path="packages/arena-game/tsconfig.build.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-game/tsconfig.build.json:1"
+              >Engine production build config ·
+              arena-game/tsconfig.build.json:1</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-harness%2Fpackage.json&amp;line=7" data-source-id="source-60190eefc099b899" data-source-path="packages/arena-harness/package.json" data-source-line="7" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-harness/package.json:7"
+              >Fake-backed harness workspace scripts ·
+              arena-harness/package.json:7</a
+            >
+            <a href="../source-map.html?file=packages%2Farena-harness%2Ftsconfig.json&amp;line=1" data-source-id="source-6d83685a2dd65a0f" data-source-path="packages/arena-harness/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/packages/arena-harness/tsconfig.json:1"
+              >Harness typecheck config · arena-harness/tsconfig.json:1</a
+            >
+            <a href="../source-map.html?file=services%2Fcore%2Fpackage.json&amp;line=2" data-source-id="source-6e38cd4fab1f84b3" data-source-path="services/core/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/package.json:2"
+              >Core workspace identity and scripts · core/package.json:2</a
+            >
+            <a href="../source-map.html?file=services%2Fcore%2Ftsconfig.json&amp;line=1" data-source-id="source-b63edc54e579d2d0" data-source-path="services/core/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/tsconfig.json:1"
+              >Core compile target and decorators · core/tsconfig.json:1</a
+            >
+            <a href="../source-map.html?file=services%2Fchat%2Fpackage.json&amp;line=2" data-source-id="source-0e6038495c53ae73" data-source-path="services/chat/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/package.json:2"
+              >Deferred Chat workspace identity and scripts ·
+              chat/package.json:2</a
+            >
+            <a href="../source-map.html?file=services%2Fchat%2Ftsconfig.json&amp;line=1" data-source-id="source-1d23c74cfcec565d" data-source-path="services/chat/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/tsconfig.json:1"
+              >Chat compile target and decorators · chat/tsconfig.json:1</a
+            >
+            <a href="../source-map.html?file=services%2Fgame%2Fpackage.json&amp;line=2" data-source-id="source-8fb1c332a4ad7e98" data-source-path="services/game/package.json" data-source-line="2" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/package.json:2"
+              >Game workspace identity and scripts · game/package.json:2</a
+            >
+            <a href="../source-map.html?file=services%2Fgame%2Ftsconfig.json&amp;line=1" data-source-id="source-c318ba965cf4aa71" data-source-path="services/game/tsconfig.json" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/tsconfig.json:1"
+              >Game compile target and decorators · game/tsconfig.json:1</a
+            >
+            <a href="../source-map.html?file=services%2Fcore%2FDockerfile&amp;line=1" data-source-id="source-bf797b667254a0ff" data-source-path="services/core/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/core/Dockerfile:1"
+              >Core image build context and stages · Core Dockerfile:1</a
+            >
+            <a href="../source-map.html?file=services%2Fchat%2FDockerfile&amp;line=1" data-source-id="source-dc653dedf3dfe3e5" data-source-path="services/chat/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/chat/Dockerfile:1"
+              >Chat image build context and stages · Chat Dockerfile:1</a
+            >
+            <a href="../source-map.html?file=services%2Fgame%2FDockerfile&amp;line=1" data-source-id="source-e1e47bf146ffa9ea" data-source-path="services/game/Dockerfile" data-source-line="1" data-editor-url="vscode://file/Users/ayousr/.codex/worktrees/guided-build-course/fearless-meitner/services/game/Dockerfile:1"
+              >Game image dependencies, problem-bank data, and stages · Game
+              Dockerfile:1</a
+            >
+          </div>
+        </details>
+        <aside class="concept-note mt-1">
+          <h4>Set up safely when you are ready</h4>
+          <p>
+            For Compose, first generate local certificates, then copy
+            <code>.env.example</code> to <code>.env</code>, then use
+            <code>npm run up</code>. Never copy real secrets into the example or
+            into Git. Do not run both workflows against the same ports without
+            checking whether something is already listening. This lesson did not
+            start or stop Docker, alter environment files, or create
+            certificates.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section" aria-labelledby="recall-title">
+        <p class="kicker">Close the source and recall</p>
+        <h2 id="recall-title">
+          Which route gives you the React UI, and which service owns the current
+          team chat?
+        </h2>
+        <details class="card">
+          <summary>Hint, then check yourself</summary>
+          <p class="mt-1">
+            The convenience script builds and serves the frontend. Compose does
+            not include a frontend container; Nginx proxies API and WebSocket
+            traffic. The active team-chat namespace belongs to Game; the
+            separate Chat container currently exposes only its startup
+            health/readiness surface.
+          </p>
+        </details>
+        <article class="card mt-1">
+          <h3>Rewrite-test prompt</h3>
+          <p>
+            In a separate rewrite, verify the advertised local command in a
+            clean environment. Assert that the Game health route responds and
+            that an unconfigured database does not pretend to be persistent.
+            Then test the Compose routes and each service's actual behavior
+            separately. Do not mark setup docs, a successful image build, or a
+            health check as proof of authentication, chat-product behavior,
+            judge isolation, or production deployment.
+          </p>
+        </article>
+        <nav class="nav-row lesson-navigation" aria-label="Lesson navigation"><a data-course-home href="../index.html">Course Home</a> · <a data-course-explore href="../source-map.html">Explore code</a> · <a data-previous-lesson href="0012-arena-screen.html">← Lesson 12: The Arena screen is a view of Match state—not another game engine</a> · <a data-next-lesson data-primary-course-nav href="0014-rewrite-with-tests.html">Next: Lesson 14, A green test is evidence for this repo—not proof of your rewrite →</a></nav>
+      </section>
+
+      <footer class="footer-note">
+        <p>
+          Source snapshot <code>818ea4603e970d66</code>. Commands and Compose
+          configuration were inspected, not executed for this course update. The
+          local play script, Compose stack, and production deployment are
+          distinct environments.
+        </p>
+      </footer>
+    </main>
+    <p class="quiet course-storage-unavailable" data-course-storage-unavailable aria-live="polite" hidden></p>
 <script type="module">
 export const COURSE_ACTIVITY_KEY = "code-arena-learning:activity:v1";
 
@@ -1474,7 +1791,7 @@ let courseStorage = null;
 try { courseStorage = globalThis.localStorage ?? null; } catch {}
 installCourseActivity(document, courseStorage, courseLessons);
 </script>
-<div id="source-templates" hidden>
+  <div id="source-templates" hidden>
     <template id="source-a3046da0d15a27e8" data-source-path=".env.example"><span class="hljs-comment"># Copy to .env (git-ignored) and fill in. Never commit real secrets.</span>
 <span class="hljs-comment"># Postgres superuser (used once by init-db.sh, then services use their own roles)</span>
 <span class="hljs-attr">POSTGRES_USER</span>=arena_admin
@@ -1533,6 +1850,10 @@ coverage/
 .env
 # Local dev TLS certs (generated by npm run certs)
 infra/nginx/certs/
+</template>
+<template id="source-d2bc4bbf14eadc29" data-source-path=".husky/pre-commit">npx lint-staged
+npm run typecheck
+npm run test
 </template>
 <template id="source-e45e45baeda1c1e7" data-source-path="docker-compose.yml"><span class="hljs-comment"># Single-host Code Arena stack.</span>
 <span class="hljs-comment"># Boot: npm run certs (once, dev TLS) &amp;&amp; cp .env.example .env &amp;&amp; docker compose up --build</span>
@@ -1892,20 +2213,25 @@ create_pair <span class="hljs-string">&quot;<span class="hljs-variable">$CHAT_DB
     <span class="hljs-string">&quot;frontend&quot;</span>
   <span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;scripts&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;pretest&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm run build&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;test&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm test --workspaces --if-present&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;typecheck&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm run typecheck --workspaces --if-present&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;lint&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm run lint --workspaces --if-present&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;build&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;npm run build --workspaces --if-present&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;certs&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;bash scripts/gen-dev-certs.sh&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;up&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;docker compose up --build&quot;</span><span class="hljs-punctuation">,</span>
-    <span class="hljs-attr">&quot;down&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;docker compose down&quot;</span>
+    <span class="hljs-attr">&quot;down&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;docker compose down&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;prepare&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;husky&quot;</span>
   <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;keywords&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;author&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;license&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;ISC&quot;</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;devDependencies&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span>
+    <span class="hljs-attr">&quot;esbuild&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.28.2&quot;</span><span class="hljs-punctuation">,</span>
     <span class="hljs-attr">&quot;highlight.js&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^11.12.0&quot;</span><span class="hljs-punctuation">,</span>
-    <span class="hljs-attr">&quot;esbuild&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;0.28.2&quot;</span>
+    <span class="hljs-attr">&quot;husky&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^9.1.7&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;lint-staged&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^17.6.0&quot;</span><span class="hljs-punctuation">,</span>
+    <span class="hljs-attr">&quot;prettier&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;^3.9.9&quot;</span>
   <span class="hljs-punctuation">}</span>
 <span class="hljs-punctuation">}</span>
 </template>

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-09-28T17:54:28.492Z",
-  "gitHead": "5a3f507d156b299fe20f10e4b42f9bedae9cd0c3",
-  "snapshotId": "f10f2ef7328398f8",
+  "recordedAt": "2026-09-30T18:39:28.343Z",
+  "gitHead": "243e3e7c468ee946f9d7f52a598f15aa4c3ca70e",
+  "snapshotId": "818ea4603e970d66",
   "files": [
     {
       "path": ".env.example",
@@ -11,6 +11,10 @@
     {
       "path": ".gitignore",
       "sha256": "42dceb09f7aa0b64ad61e049a513a4d46af2fd48e38e0253852e3f7d096da92c"
+    },
+    {
+      "path": ".husky/pre-commit",
+      "sha256": "fd4ead49a76c63247b11def7ae9447d046985987b8eba68ff5cae23959adc161"
     },
     {
       "path": "AGENTS.md",
@@ -258,11 +262,11 @@
     },
     {
       "path": "package-lock.json",
-      "sha256": "9a73e2f313bbea1dfd8510897dff91e4f7fd9b6d9ec899d36acab495bc9798d7"
+      "sha256": "b121fa0eacabfe500b0c8db98f1942433ab94352358fe2c6ed92bd01e7428478"
     },
     {
       "path": "package.json",
-      "sha256": "b091a5849227cf1253b52db8ef8597357369941ae91373d9aa8c9f04cd1a9ffd"
+      "sha256": "c3701ebc00a27a1f7f761e0e2f22a68d34fbc602e192cf1501ba9df1ed8c1fad"
     },
     {
       "path": "packages/arena-game/package.json",
@@ -808,5 +812,6 @@
       "path": "spikes/judge-isolation/spike.sh",
       "sha256": "e3c8e742a89316af41163cf1658b839bd517d430e7c89a7dedc5027b63131383"
     }
-  ]
+  ],
+  "lessonReviews": ["0013-running-the-project"]
 }

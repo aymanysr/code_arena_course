@@ -4,8 +4,8 @@ This record identifies the direct reference files used by the six CodeTours. It 
 
 ## Snapshot
 
-- Recorded: 2026-09-28
-- Git HEAD: `5a3f507d156b299fe20f10e4b42f9bedae9cd0c3`
+- Recorded: 2026-09-30
+- Git HEAD: `243e3e7c468ee946f9d7f52a598f15aa4c3ca70e`
 - Git worktree: dirty; the recorded file hashes capture working-tree content independently of HEAD.
 - Integrity list: [`reference-baseline.sha256`](reference-baseline.sha256), covering 60 direct inputs: all six tours, their anchored source files and named test/spec references, relevant package/test configuration, the Code Arena spec and relevant ADRs, and the 42-subject compliance matrix.
 - Tour links checked: all 58 file-and-line anchors resolve in current files.
@@ -31,13 +31,13 @@ The detailed explanations and evidence links are in [Tour 6](6-rebuild-the-game.
 
 ## Historical test evidence (not rerun by snapshot refresh)
 
-These test results were captured on 2026-09-25. The reference baseline was refreshed on 2026-09-28; tests were not rerun during that refresh. The arena-game and Game-service runs had local Docker access; the frontend unit run did not need Docker.
+These test results were captured on 2026-09-25. The reference baseline was refreshed on 2026-09-30; tests were not rerun during that refresh. The arena-game and Game-service runs had local Docker access; the frontend unit run did not need Docker.
 
-| Command | Result |
-| --- | --- |
+| Command                                                          | Result                                                                                                                                     |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `npm run test --workspace=packages/arena-game -- --reporter=dot` | 22 files passed, 1 skipped; 182 tests passed, 12 skipped. PostgreSQL-only proofs were skipped because their test database was unavailable. |
-| `npm run test --workspace=services/game -- --reporter=dot` | 9 files passed; 52 tests passed. |
-| `npm run test --workspace=frontend -- --reporter=dot` | 8 files passed; 41 tests passed. |
+| `npm run test --workspace=services/game -- --reporter=dot`       | 9 files passed; 52 tests passed.                                                                                                           |
+| `npm run test --workspace=frontend -- --reporter=dot`            | 8 files passed; 41 tests passed.                                                                                                           |
 
 The frontend Playwright end-to-end suite was **not run**. A skipped test is not a pass, and these results verify the reference project only; they do not prove a separate rewrite matches it. The tour's Docker-backed judge/security tests did run and pass in the arena-game suite.
 

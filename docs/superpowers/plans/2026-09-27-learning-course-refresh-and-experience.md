@@ -117,10 +117,7 @@
       "order": 4,
       "title": "Operate and rebuild the reference",
       "description": "Run the project, read its evidence, and define parity gates for a rewrite.",
-      "lessonIds": [
-        "0013-running-the-project",
-        "0014-rewrite-with-tests"
-      ]
+      "lessonIds": ["0013-running-the-project", "0014-rewrite-with-tests"]
     }
   ]
 }
@@ -170,11 +167,13 @@ renderCatalogOutputs(
 ### Task 1: Pin the current drift and the new catalog dispositions
 
 **Files:**
+
 - Modify: `.tours/learning/scripts/build-catalog.test.mjs`
 - Modify: `.tours/learning/coverage-map.json`
 - Inspect: `.tours/learning/reference-snapshot.json`
 
 **Interfaces:**
+
 - Consumes: current `buildCatalogData()` file statuses and `formatAuditReport()` output.
 - Produces: exact test expectations for the 23 initially uncovered files, one `.codex` exclusion, and the affected lesson IDs that Tasks 2-5 must satisfy.
 
@@ -206,7 +205,10 @@ assert.deepEqual(uncovered, [
   "services/judge-worker/tsconfig.build.json",
   "services/judge-worker/tsconfig.json",
 ]);
-assert.deepEqual(data.unclassified.map(({ path }) => path), [".codex/PLAN.md"]);
+assert.deepEqual(
+  data.unclassified.map(({ path }) => path),
+  [".codex/PLAN.md"]
+);
 ```
 
 - [x] **Step 2: Run `node --test .tours/learning/scripts/build-catalog.test.mjs`.** Expected: the new end-state assertions fail because the new paths have no dispositions.
@@ -216,14 +218,35 @@ assert.deepEqual(data.unclassified.map(({ path }) => path), [".codex/PLAN.md"]);
 const taughtByLesson = {
   "frontend/src/arena/lobby-session.ts": ["0004-lobby-to-match"],
   "frontend/src/arena/lobby-session.test.ts": ["0004-lobby-to-match"],
-  "frontend/src/components/ArenaPage.test.tsx": ["0003-rounds-and-final-score", "0012-arena-screen"],
-  "packages/arena-game/test/deadline-closure.test.ts": ["0002-reveal-cutoff", "0003-rounds-and-final-score"],
-  "packages/arena-game/test/post-commit-events.test.ts": ["0008-persistence-recovery", "0009-live-connection"],
-  "packages/arena-game/src/worker-judge.ts": ["0001-submit-journey", "0007-judge-boundary"],
+  "frontend/src/components/ArenaPage.test.tsx": [
+    "0003-rounds-and-final-score",
+    "0012-arena-screen",
+  ],
+  "packages/arena-game/test/deadline-closure.test.ts": [
+    "0002-reveal-cutoff",
+    "0003-rounds-and-final-score",
+  ],
+  "packages/arena-game/test/post-commit-events.test.ts": [
+    "0008-persistence-recovery",
+    "0009-live-connection",
+  ],
+  "packages/arena-game/src/worker-judge.ts": [
+    "0001-submit-journey",
+    "0007-judge-boundary",
+  ],
   "packages/arena-game/test/worker-judge.test.ts": ["0007-judge-boundary"],
-  "packages/arena-game/test/container-judge-trust.test.ts": ["0007-judge-boundary"],
-  "services/game/src/game/judge-factory.ts": ["0001-submit-journey", "0007-judge-boundary", "0013-running-the-project"],
-  "services/game/src/game/judge-factory.test.ts": ["0007-judge-boundary", "0013-running-the-project"],
+  "packages/arena-game/test/container-judge-trust.test.ts": [
+    "0007-judge-boundary",
+  ],
+  "services/game/src/game/judge-factory.ts": [
+    "0001-submit-journey",
+    "0007-judge-boundary",
+    "0013-running-the-project",
+  ],
+  "services/game/src/game/judge-factory.test.ts": [
+    "0007-judge-boundary",
+    "0013-running-the-project",
+  ],
   "services/judge-worker/src/http-server.ts": ["0013-running-the-project"],
   "services/judge-worker/src/job-queue.ts": ["0013-running-the-project"],
   "services/judge-worker/src/main.ts": ["0013-running-the-project"],
@@ -231,11 +254,14 @@ const taughtByLesson = {
   "services/judge-worker/test/http-server.test.ts": ["0014-rewrite-with-tests"],
   "services/judge-worker/test/job-queue.test.ts": ["0014-rewrite-with-tests"],
   "services/judge-worker/test/readiness.test.ts": ["0014-rewrite-with-tests"],
-  "services/judge-worker/test/compose-topology.test.ts": ["0014-rewrite-with-tests"],
+  "services/judge-worker/test/compose-topology.test.ts": [
+    "0014-rewrite-with-tests",
+  ],
 };
 ```
 
 Require explicit support-only reasons for the worker Dockerfile, entrypoint, package manifest, and both TypeScript configuration files. The reason must state that Lesson 13 teaches the service topology through the Compose/runtime anchors while these files are supporting build configuration.
+
 - [x] **Step 4: Add `.codex` to `scope.excluded`.** Use the reason: `Agent planning state; it is neither game runtime nor learner course content.`
 - [x] **Step 5: Verify RED before adding lesson dispositions.** The initial end-state assertion must fail with the 23 uncovered paths. As Tasks 2-5 land, update its exact `expectedRemaining` list and explicitly pending cross-lesson references; Task 1 stays open until the final expected uncovered list is empty. Final catalog gate: 0 uncovered and 0 unclassified.
 - [x] **Step 6: Commit the catalog gate with the first semantic lesson change.** The staged gate checks the exact known remaining paths so each later task keeps the full course suite green. Commit it with Task 2 as `docs(course): teach deadline closure and final reveal`; finish Task 1's zero-uncovered assertion with Task 5.
@@ -243,6 +269,7 @@ Require explicit support-only reasons for the worker Dockerfile, entrypoint, pac
 ### Task 2: Refresh deadline, Reveal, and final-result teaching
 
 **Files:**
+
 - Modify: `.tours/learning/templates/0001-submit-journey.template.html`
 - Modify: `.tours/learning/templates/0002-reveal-cutoff.template.html`
 - Modify: `.tours/learning/templates/0003-rounds-and-final-score.template.html`
@@ -253,6 +280,7 @@ Require explicit support-only reasons for the worker Dockerfile, entrypoint, pac
 - Evidence: `frontend/src/components/ArenaPage.test.tsx`
 
 **Interfaces:**
+
 - Consumes: the current Match deadline definition in `CONTEXT.md` and public `ArenaEngine` commands/events.
 - Produces: current Lessons 1-3 with exact anchors for deadline closure, grace, saved Reveal, immediate completion, and zero unplayed Rounds.
 
@@ -278,12 +306,14 @@ npx vitest run packages/arena-game/test/deadline-closure.test.ts packages/arena-
 ```
 
 Expected: all named tests pass. Record the command and result in the lesson evidence language without expanding the claim beyond those cases.
+
 - [x] **Step 9: Run the course test.** `node --test .tours/learning/scripts/build-catalog.test.mjs` must pass all tests, including the deadline semantics, current source links, and exact pending-disposition list. Source snapshot acceptance remains Task 6.
 - [x] **Step 10: Commit.** Commit `docs(course): teach deadline closure and final reveal`.
 
 ### Task 3: Refresh the invitation-only Lobby lesson
 
 **Files:**
+
 - Modify: `.tours/learning/templates/0004-lobby-to-match.template.html`
 - Modify: `.tours/learning/coverage-map.json`
 - Modify: `.tours/learning/scripts/build-catalog.test.mjs`
@@ -293,6 +323,7 @@ Expected: all named tests pass. Record the command and result in the lesson evid
 - Evidence: `frontend/e2e/live-lobby.spec.ts`
 
 **Interfaces:**
+
 - Consumes: `LobbySession` public snapshot/actions and the existing Lobby HTTP/socket adapter.
 - Produces: Lesson 4 as the invitation-code first-release path with authoritative refresh and stale-response rejection; public queue code is labeled future capability.
 
@@ -309,11 +340,13 @@ npx vitest run frontend/src/arena/lobby-session.test.ts services/game/src/game/l
 ```
 
 Expected: in-memory LobbySession/domain cases pass. In this workspace 18 passed and 2 Postgres cases skipped; the Game service integration suite did not boot (`service did not boot`, consistent with the baseline loopback-bind restriction), so its six cases did not run.
+
 - [x] **Step 8: Run course tests and commit.** `node --test .tours/learning/scripts/build-catalog.test.mjs` passes all 39 tests. Commit `docs(course): teach authoritative invitation lobby`.
 
 ### Task 4: Refresh post-commit events, reconnect, and terminal Arena presentation
 
 **Files:**
+
 - Modify: `.tours/learning/templates/0008-persistence-recovery.template.html`
 - Modify: `.tours/learning/templates/0009-live-connection.template.html`
 - Modify: `.tours/learning/templates/0012-arena-screen.template.html`
@@ -323,6 +356,7 @@ Expected: in-memory LobbySession/domain cases pass. In this workspace 18 passed 
 - Evidence: `frontend/src/components/ArenaPage.test.tsx`
 
 **Interfaces:**
+
 - Consumes: post-commit `ArenaEngine` events stamped with committed Match revision and snapshot-based reconnect.
 - Produces: Lessons 8, 9, and 12 that distinguish durability, transient delivery, reconnect recovery, and staged terminal UI.
 
@@ -339,11 +373,13 @@ npx vitest run packages/arena-game/test/post-commit-events.test.ts packages/aren
 ```
 
 Expected: in-memory/frontend cases pass; service cases that require restricted sockets or Postgres must be reported as environment-gated rather than claimed as passing. This workspace: 29 tests passed; all 10 real-socket/Postgres service scenarios were skipped after the service failed to boot (`service did not boot`).
+
 - [x] **Step 8: Run course tests and commit.** `node --test .tours/learning/scripts/build-catalog.test.mjs` passes 40/40. Commit `9e4b6d5 docs(course): teach committed events and terminal presentation`.
 
 ### Task 5: Refresh Judge worker, runtime topology, and rewrite evidence
 
 **Files:**
+
 - Modify: `.tours/learning/templates/0007-judge-boundary.template.html`
 - Modify: `.tours/learning/templates/0013-running-the-project.template.html`
 - Modify: `.tours/learning/templates/0014-rewrite-with-tests.template.html`
@@ -354,6 +390,7 @@ Expected: in-memory/frontend cases pass; service cases that require restricted s
 - Evidence: `services/judge-worker/`
 
 **Interfaces:**
+
 - Consumes: the `GameJudge` contract, startup-only provider selection, `WorkerJudgeAdapter`, and Judge worker HTTP/job queue boundaries.
 - Produces: current Judge boundary and operations lessons with exact evidence limits and full dispositions for the remaining new files.
 
@@ -371,6 +408,7 @@ Service/Postgres/browser tests: environment-dependent integration evidence.
 ```
 
 Record exact commands and observed results from this implementation run. Do not carry historical pass counts forward as current results.
+
 - [x] **Step 6: Add all remaining dispositions.** Link behavior-bearing worker files to Lessons 7, 13, or 14 using the matrix in Task 1. Mark only the Dockerfile, entrypoint, package manifest, and two `tsconfig` files support-only with the agreed runtime-build reason.
 - [x] **Step 7: Review Lesson 11.** Confirm its chat sources remain unchanged and current; keep it out of `--reviewed-lessons` unless a referenced file actually drifted. The audit shows no Lesson 11 impact.
 - [x] **Step 8: Run focused tests.** Run:
@@ -380,11 +418,13 @@ npx vitest run packages/arena-game/test/worker-judge.test.ts packages/arena-game
 ```
 
 Expected: pure tests pass; any host-network or Docker restriction is recorded beside the exact skipped command.
+
 - [x] **Step 9: Run course tests and commit.** The catalog suite passes 40/40 and reports 0 uncovered and 0 unclassified source files. Commit `docs(course): teach judge worker boundaries`.
 
 ### Task 6: Repair CodeTours and accept one reviewed implementation snapshot
 
 **Files:**
+
 - Modify: `.tours/1-code-arena-big-picture.tour`
 - Modify: `.tours/2-submission-journey.tour`
 - Modify: `.tours/3-match-state-and-rounds.tour`
@@ -398,6 +438,7 @@ Expected: pure tests pass; any host-network or Docker restriction is recorded be
 - Generate: `.tours/learning/lessons/*.html`
 
 **Interfaces:**
+
 - Consumes: reviewed lesson templates, catalog references, actual current source, and `acceptReviewedSnapshot()`.
 - Produces: zero stale lesson links, zero uncovered files, zero unclassified files, valid CodeTour anchors, and one accepted snapshot shared by every generated page.
 
@@ -420,6 +461,7 @@ node --test .tours/learning/scripts/*.test.mjs
 ```
 
 Expected: all tests pass before baseline acceptance.
+
 - [x] **Step 4: Review every affected lesson ID.** Use the audit output to verify that Lessons 1-10 and 12-14 either changed semantically or were re-anchored after inspection. Lesson 11 remains omitted when its sources are unchanged.
 - [x] **Step 5: Accept the reviewed snapshot exactly once.** Run:
 
@@ -428,12 +470,14 @@ node .tours/learning/scripts/build-catalog.mjs --accept-reviewed-snapshot --revi
 ```
 
 Expected: the command records the new content hashes, Git HEAD, worktree status, lesson review list, CodeTour checksums, and regenerates all current lesson pages from the same snapshot ID.
+
 - [x] **Step 6: Run `node .tours/learning/scripts/build-catalog.mjs --check`.** Expected: exit 0 with zero stale, uncovered, unclassified, missing, or invalid items and no generated output drift.
 - [x] **Step 7: Commit the reviewed reference.** Commit `docs(course): accept current implementation reference`.
 
 ### Task 7: Add catalog-owned batches and generate Course Home
 
 **Files:**
+
 - Create: `.tours/learning/templates/course-home.template.html`
 - Create: `.tours/learning/index.html`
 - Modify: `.tours/learning/coverage-map.json`
@@ -443,6 +487,7 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 - Modify: `.tours/learning/assets/course.css`
 
 **Interfaces:**
+
 - Consumes: catalog schema version 2 and current lesson freshness.
 - Produces: validated `batches`, `renderCourseHomeTemplate()`, and generated `.tours/learning/index.html`.
 
@@ -456,13 +501,23 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 ```html
 <a class="skip-link" href="#course">Skip to the course</a>
 <header class="course-header">
-  <nav aria-label="Course"><a aria-current="page" href="index.html">Learn</a><a href="source-map.html">Explore code</a></nav>
+  <nav aria-label="Course">
+    <a aria-current="page" href="index.html">Learn</a
+    ><a href="source-map.html">Explore code</a>
+  </nav>
 </header>
 <main class="page course-home" id="course" tabindex="-1">
   <p class="eyebrow">A guided route through this exact codebase</p>
   <h1>Understand the game, one behavior at a time.</h1>
-  <a class="primary-button" data-course-start href="lessons/0001-follow-one-submit.html">Start Lesson 1</a>
-  <p data-course-activity>Activity stays on this browser and is not a mastery score.</p>
+  <a
+    class="primary-button"
+    data-course-start
+    href="lessons/0001-follow-one-submit.html"
+    >Start Lesson 1</a
+  >
+  <p data-course-activity>
+    Activity stays on this browser and is not a mastery score.
+  </p>
   <!-- COURSE_BATCHES -->
 </main>
 ```
@@ -475,6 +530,7 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 ### Task 8: Add safe activity and consistent generated lesson navigation
 
 **Files:**
+
 - Create: `.tours/learning/assets/course-activity.mjs`
 - Create: `.tours/learning/scripts/course-activity.test.mjs`
 - Modify: `.tours/learning/scripts/build-catalog.mjs`
@@ -483,6 +539,7 @@ Expected: the command records the new content hashes, Git HEAD, worktree status,
 - Modify: `.tours/learning/assets/course.css`
 
 **Interfaces:**
+
 - Consumes: ordered lesson metadata and storage-like `{ getItem, setItem, removeItem }` objects.
 - Produces: the activity functions in Shared Interfaces, generated previous/next navigation, and a Start/Continue action based on last opened lesson.
 
@@ -501,21 +558,24 @@ node --test .tours/learning/scripts/course-activity.test.mjs .tours/learning/scr
 ```
 
 Expected: PASS.
+
 - [x] **Step 10: Commit.** Commit `feat(course): add local activity and resume`.
 
 ### Task 9: Normalize Lesson 1 and validate one complete study session
 
 **Files:**
+
 - Modify: `.tours/learning/templates/0001-submit-journey.template.html`
 - Modify: `.tours/learning/assets/course.css`
 - Create: `.tours/learning/scripts/course-experience.test.mjs`
 - Modify: `.tours/learning/NOTES.md`
 
 **Interfaces:**
+
 - Consumes: shared activity runtime and generated Course Home/lesson navigation.
 - Produces: a non-blocking Lesson 1 pilot and a dated pilot record that determines whether last-lesson resume is enough.
 
-- [ ] **Step 1: Write the browser test before changing Lesson 1.** Generate a small Course Home plus Lesson 1 fixture, serve it and open it through `file://`, then assert:
+- [x] **Step 1: Write the browser test before changing Lesson 1.** Generate a small Course Home plus Lesson 1 fixture, serve it and open it through `file://`, then assert:
 
 ```text
 Course Home starts at Lesson 1 with empty storage.
@@ -529,10 +589,10 @@ At 320 pixels the document has no horizontal page overflow and all main actions 
 No console errors occur on Course Home or Lesson 1.
 ```
 
-- [ ] **Step 2: Run `node --test .tours/learning/scripts/course-experience.test.mjs`.** Expected: FAIL because Lesson 1 still gates its trace and uses its private storage record.
-- [ ] **Step 3: Normalize Lesson 1.** Keep its Submit teaching content and multiple-choice prediction, but render the trace, evidence, retrieval prompt, and rewrite-test prompt in the same visible order as Lessons 2-14. Remove `hidden` gating, private `0001-follow-one-submit` storage, and the extra course-rationale section that interrupts the lesson.
-- [ ] **Step 4: Add shared self-check markup.** Put `data-course-self-check` on the retrieval action and keep the nearby text: `This records activity on this browser. It is not proof of mastery or rewrite parity.`
-- [ ] **Step 5: Run the browser test in direct-file and local-server modes.** Expected: every assertion in Step 1 passes.
+- [x] **Step 2: Run `node --test .tours/learning/scripts/course-experience.test.mjs`.** Expected: FAIL because Lesson 1 still gates its trace and uses its private storage record.
+- [x] **Step 3: Normalize Lesson 1.** Keep its Submit teaching content and multiple-choice prediction, but render the trace, evidence, retrieval prompt, and rewrite-test prompt in the same visible order as Lessons 2-14. Remove `hidden` gating, private `0001-follow-one-submit` storage, and the extra course-rationale section that interrupts the lesson.
+- [x] **Step 4: Add shared self-check markup.** Put `data-course-self-check` on the retrieval action and keep the nearby text: `This records activity on this browser. It is not proof of mastery or rewrite parity.`
+- [x] **Step 5: Run the browser test in direct-file and local-server modes.** Expected: every assertion in Step 1 passes.
 - [ ] **Step 6: Perform the author pilot after the concrete pages are generated.** Ask the course author to:
 
 ```text
@@ -544,11 +604,13 @@ No console errors occur on Course Home or Lesson 1.
 ```
 
 Record the date, route taken, any confusing label, whether resume worked, and the two teach-back answers in `NOTES.md`. If the author resumes the correct lesson and does not report losing the internal stage, retain last-lesson-only activity as specified. A reported stage-resume failure requires a separately reviewed follow-up plan rather than expanding this implementation silently.
+
 - [ ] **Step 7: Commit.** Commit `feat(course): normalize the first learning session`.
 
 ### Task 10: Separate learner and maintainer documentation, then verify the release
 
 **Files:**
+
 - Create: `.tours/learning/MAINTAINING.md`
 - Modify: `.tours/learning/README.md`
 - Modify: `.tours/learning/MISSION.md`
@@ -561,14 +623,15 @@ Record the date, route taken, any confusing label, whether resume worked, and th
 - Review: `prototype/game-ui/42-subject-compliance.md`
 
 **Interfaces:**
+
 - Consumes: the complete generator and reviewed source snapshot.
 - Produces: one learner start route, one code exploration route, one maintainer workflow, and a fully verified generated course.
 
-- [ ] **Step 1: Move maintenance workflow to `MAINTAINING.md`.** Include normal generation, tests, read-only check, impact review, required lesson review list, explicit acceptance, CodeTour baseline behavior, environment-dependent test reporting, and the instruction to review the 42 matrix after project changes.
-- [ ] **Step 2: Shorten `README.md`.** Make the first link Course Home, then link Mission, Explore code, CodeTours, and Maintain the course. Keep the 14-lesson list generated or point to Course Home so lesson order has one authored owner.
-- [ ] **Step 3: Update source-map labeling.** Title it `Explore the exact implementation`, add a `Back to Course Home` link, and keep coverage/freshness prominent for maintainers without presenting it as learner progress.
-- [ ] **Step 4: Regenerate every page.** Run `node .tours/learning/scripts/build-catalog.mjs` only after the source snapshot is current. Generation must not change reference hashes.
-- [ ] **Step 5: Run course verification.** Run:
+- [x] **Step 1: Move maintenance workflow to `MAINTAINING.md`.** Include normal generation, tests, read-only check, impact review, required lesson review list, explicit acceptance, CodeTour baseline behavior, environment-dependent test reporting, and the instruction to review the 42 matrix after project changes.
+- [x] **Step 2: Shorten `README.md`.** Make the first link Course Home, then link Mission, Explore code, CodeTours, and Maintain the course. Keep the 14-lesson list generated or point to Course Home so lesson order has one authored owner.
+- [x] **Step 3: Update source-map labeling.** Title it `Explore the exact implementation`, add a `Back to Course Home` link, and keep coverage/freshness prominent for maintainers without presenting it as learner progress.
+- [x] **Step 4: Regenerate every page.** Run `node .tours/learning/scripts/build-catalog.mjs` only after the source snapshot is current. Generation must not change reference hashes.
+- [x] **Step 5: Run course verification.** Run:
 
 ```sh
 node --test .tours/learning/scripts/*.test.mjs
@@ -576,7 +639,8 @@ node .tours/learning/scripts/build-catalog.mjs --check
 ```
 
 Expected: all tests pass and the check reports zero stale, uncovered, unclassified, missing, invalid, or generated-drift items.
-- [ ] **Step 6: Run project verification.** Run:
+
+- [x] **Step 6: Run project verification.** Run:
 
 ```sh
 npm run lint
@@ -587,9 +651,10 @@ git diff --check
 ```
 
 Expected: lint, typecheck, build, course tests, and non-environment-gated project tests pass. Report Docker, Postgres, service-socket, or browser restrictions as explicit skips with their command and error; do not convert skips into passing evidence.
-- [ ] **Step 7: Perform final browser checks.** In latest stable Chrome, verify Course Home and Lessons 1, 4, 7, 12, and 14 at desktop and 320-pixel widths; use keyboard-only navigation; open/close a source dialog; refresh; test malformed/blocked storage; confirm zero console warnings/errors.
-- [ ] **Step 8: Review 42 compliance.** Compare the course changes with mandatory frontend clarity/responsiveness/accessibility and README honesty requirements in `ft_transcendence.pdf`. Review `prototype/game-ui/42-subject-compliance.md`; leave it unchanged when no game evidence/module status changed, or update it in this commit if the evidence actually changed.
-- [ ] **Step 9: Inspect the final diff.** Confirm only course artifacts, generated outputs, CodeTours/reference files, and any necessary compliance update are present. Ensure `.trigger-tree/` and `.agents/skills/` remain unstaged.
+
+- [x] **Step 7: Perform final browser checks.** In latest stable Chrome, verify Course Home and Lessons 1, 4, 7, 12, and 14 at desktop and 320-pixel widths; use keyboard-only navigation; open/close a source dialog; refresh; test malformed/blocked storage; confirm zero console warnings/errors.
+- [x] **Step 8: Review 42 compliance.** Compare the course changes with mandatory frontend clarity/responsiveness/accessibility and README honesty requirements in `ft_transcendence.pdf`. Review `prototype/game-ui/42-subject-compliance.md`; leave it unchanged when no game evidence/module status changed, or update it in this commit if the evidence actually changed.
+- [x] **Step 9: Inspect the final diff.** Confirm only course artifacts, generated outputs, CodeTours/reference files, and any necessary compliance update are present. Ensure `.trigger-tree/` and `.agents/skills/` remain unstaged.
 - [ ] **Step 10: Commit.** Commit `docs(course): publish refreshed learning route`.
 
 ## Self-Review Record

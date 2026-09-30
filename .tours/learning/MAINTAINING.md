@@ -1,6 +1,6 @@
 # Maintaining the Code Arena course
 
-Course pages are generated from authored lesson templates, `coverage-map.json`, the reviewed source snapshot, and the CodeTour reference list. Keep lesson text tied to actual code and tests; do not refresh a snapshot merely to clear a stale status.
+The build route is authored in `learning-path.json` and the `content/` lessons. The 14 reference lessons are generated from their templates, `coverage-map.json`, the reviewed source snapshot, and the CodeTour reference list. Keep reference claims tied to actual code and tests; do not refresh a snapshot merely to clear a stale status.
 
 ## Routine course checks
 
@@ -12,7 +12,7 @@ node --test .tours/learning/scripts/*.test.mjs
 node .tours/learning/scripts/build-catalog.mjs --check
 ```
 
-Generation rebuilds `index.html`, `source-map.html`, and all lesson pages. It does not accept source hashes or change the CodeTour baseline. The test command checks catalog rules, activity state, generated navigation, source previews, and browser behavior. `--check` is read-only: it reports stale source links, uncovered files, invalid anchors, changed tour evidence, and generated-page drift.
+Generation rebuilds the build-route home and lesson pages, the reference-lesson home and pages, and `source-map.html`. Prettier ignores these generated pages; edit their source templates and regenerate them instead. Generation does not accept source hashes or change the CodeTour baseline. The test command checks route dependencies, authored lesson content, workspace and progress rules, reference-catalog rules, generated navigation, source previews, and browser behavior. `--check` is read-only: it reports stale source links, uncovered files, invalid anchors, changed tour evidence, and generated-page drift.
 
 For product verification, also run the relevant workspace tests and `npm run lint`, `npm run typecheck`, and `npm run build` from the repository root. Run `npm test` when its environment is available. If Docker, PostgreSQL, local socket binding, or Chrome blocks a check, record the command and exact blocker as skipped; do not report that check as passing.
 
@@ -20,7 +20,7 @@ For product verification, also run the relevant workspace tests and `npm run lin
 
 1. Run `node .tours/learning/scripts/build-catalog.mjs --check` and save the complete report. It identifies changed source and evidence inputs, the affected lessons, invalid CodeTour anchors, and files that need a disposition.
 2. Inspect each changed implementation and its tests. Compare observed behavior with the agreed game behavior and the requirements in `ft_transcendence.pdf`; do not use a design note or a passing test as a substitute for implementation evidence.
-3. Review every affected lesson ID named by the impact report. Update its template, source ranges, test description, and related CodeTour step when behavior or evidence changed. If a lesson needs no text change, still inspect it and include its ID in the review list. Add each new in-scope file to a lesson or give it an explicit support-only reason in `coverage-map.json`.
+3. Review every affected reference lesson named by the impact report and each affected build-route step. Update its authored source paths, target-repository file guidance, checks, and related CodeTour step when behavior or evidence changed. If an item needs no text change, still inspect it. Add each new in-scope file to a reference lesson or give it an explicit support-only reason in `coverage-map.json`.
 4. Run the focused game tests for the changed behavior, course tests, lint, and any available build/type checks. Update dated evidence notes to state exactly which tests ran and which were skipped.
 5. Accept only after every affected lesson was reviewed, anchors and course order are valid, and the evidence is current:
 

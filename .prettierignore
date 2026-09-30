@@ -1,0 +1,6 @@
+# Generated course pages must stay byte-for-byte aligned with their templates.
+.tours/learning/index.html
+.tours/learning/reference.html
+.tours/learning/source-map.html
+.tours/learning/lessons/
+.tours/learning/build/

@@ -1,210 +1,527 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Learn the safe local run paths and the current roles of the Code Arena services.">
-  <meta name="course-lesson-id" content="{{LESSON_ID}}">
-  <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
-  <!-- INLINE_COURSE_STYLES -->
-</head>
-<body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
-  <a class="skip-link" href="#lesson">Skip to the lesson</a>
-  <main class="page" id="lesson">
-    <header class="hero">
-      <p class="eyebrow"><a href="../source-map.html">Code Arena Learning Map</a> / Lesson {{LESSON_ORDER}}</p>
-      <h1>{{LESSON_TITLE}}</h1>
-      <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
-      <p class="mt-1">{{LESSON_FRESHNESS}} <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
-      <div class="stage-bar" aria-label="Lesson stages">
-        <span class="stage-pill" aria-current="step">1 · Predict</span>
-        <span aria-hidden="true" class="flow-arrow">→</span>
-        <span class="stage-pill">2 · Trace</span>
-        <span aria-hidden="true" class="flow-arrow">→</span>
-        <span class="stage-pill">3 · Recall</span>
-      </div>
-    </header>
-
-    <section class="section" aria-labelledby="predict-title">
-      <p class="kicker">First, make a prediction</p>
-      <h2 id="predict-title">If you run <code>npm run up</code>, where does the React game screen come from?</h2>
-      <p class="section-intro">Choose before tracing: Compose starts a frontend container; Nginx serves the frontend; the frontend is not in this Compose stack; or the separate Chat container renders it.</p>
-      <details class="card">
-        <summary>Check your prediction</summary>
-        <p class="mt-1">The frontend is not a service in the current <code>docker-compose.yml</code>. Compose starts PostgreSQL, Redis, Core, Game, the deferred Chat skeleton, and Nginx. The separate <code>scripts/play.sh</code> path builds the Game and frontend, then serves the frontend preview. These are different local workflows; neither is a production deployment proof.</p>
-      </details>
-    </section>
-
-    <section class="section" aria-labelledby="terms-title">
-      <h2 id="terms-title">Key terms</h2>
-      <dl class="card">
-        <dt>Workspace</dt>
-        <dd>The root npm project groups packages, services, and the frontend so shared modules can be built and tested together.</dd>
-        <dt class="mt-1">Compose service</dt>
-        <dd>A local container role with its own build or image, environment, network dependencies, and optional health check.</dd>
-        <dt class="mt-1">Liveness</dt>
-        <dd>“Is this process answering?” The current <code>/health</code> route reports process/model information; it does not prove the application is ready to serve gameplay.</dd>
-        <dt class="mt-1">Readiness</dt>
-        <dd>“Can required dependencies be reached?” The current <code>/ready</code> route checks TCP reachability for PostgreSQL and Redis. It is a separate route, not a gameplay test.</dd>
-        <dt class="mt-1">Judge Worker readiness</dt>
-        <dd>The worker readiness checks Docker and required images through its separate <code>/ready</code> route. Game's health/readiness routes check Game dependencies instead.</dd>
-      </dl>
-    </section>
-
-    <section class="section" aria-labelledby="trace-title">
-      <p class="kicker">Now trace two local run paths</p>
-      <h2 id="trace-title">A local command is not automatically the same stack as Compose</h2>
-      <ol class="flow-list">
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">01</span>
-          <div>
-            <h3>The root package is the command directory</h3>
-            <p>The root manifest declares three npm workspace groups: <code>packages/*</code>, <code>services/*</code>, and <code>frontend</code>. Its aggregate scripts delegate test, typecheck, lint, and build to workspaces. <code>npm run certs</code> creates local TLS material; <code>npm run up</code> delegates to Docker Compose.</p>
-            <div class="source-links">
-              <a href="../../../package.json#L7">Workspace groups · package.json:7</a>
-              <a href="../../../package.json#L12">Aggregate and runtime commands · package.json:12</a>
-              <a href="../../../frontend/index.html#L9">The browser's React mount and module entry · index.html:9</a>
-            </div>
-          </div>
-        </li>
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">02</span>
-          <div>
-            <h3>Local play builds the web preview and starts Game directly</h3>
-            <p><code>./scripts/play.sh</code> is a convenience development script, not Compose. It builds the Game workspace and frontend, starts the Game Node process, and serves the frontend preview; its default ports are Game <code>3220</code> and web <code>4173</code>. It uses HTTP for local connections; that is development-only and not evidence for the PDF's HTTPS requirement. It sets <code>DEV_PRINCIPAL=true</code>, so this shortcut does not represent production authentication. Its comments warn that without Postgres Game falls back to memory, and without Docker Run/Submit fail safely.</p>
-            <div class="source-links">
-              <a href="../../../scripts/play.sh#L2">Purpose and local/LAN modes · play.sh:2</a>
-              <a href="../../../scripts/play.sh#L17">Development database URL and Game endpoint · play.sh:17</a>
-              <a href="../../../scripts/play.sh#L23">Build and launch Game plus frontend preview · play.sh:23</a>
-              <a href="../../../scripts/play.sh#L30">Cleanup when the script exits · play.sh:30</a>
-            </div>
-            <aside class="concept-note mt-1">
-              <h4>Read before choosing LAN mode</h4>
-              <p>The script exposes its local development server to your LAN when requested. Only use that mode on a network you trust. Its development identity seam and missing production authentication are not hidden by the UI.</p>
-            </aside>
-          </div>
-        </li>
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">03</span>
-          <div>
-            <h3>Compose builds the local service stack—but not the whole game</h3>
-            <p>The Compose comment gives the setup order: create self-signed localhost certificates, copy <code>.env.example</code> to the ignored <code>.env</code>, then start Compose. The services include PostgreSQL, Redis, Core, Game, the Judge Worker, the deferred Chat skeleton, and Nginx. Only Nginx publishes ports 80 and 443; there is no frontend container. Compose sets <code>JUDGE_BACKEND=worker</code> and the Game-side <code>WorkerJudgeAdapter</code> sends requests to <code>JUDGE_WORKER_URL=http://judge-worker:3010</code> over the internal judge network. The worker runs <code>ContainerJudge</code>. Compose mounts the Docker socket into the Judge Worker only. Local direct Game runs default to <code>ContainerJudge</code>; optional Judge0 is another explicitly configured provider.</p>
-            <p class="mt-1">The worker requires <code>JUDGE_WORKER_TOKEN</code>; the value in <code>.env.example</code> is only a placeholder. <code>JUDGE_WORKER_TIMEOUT_MS</code> is 930000 ms. Worker defaults are <code>JUDGE_WORKER_CONCURRENCY=2</code>, <code>JUDGE_WORKER_MAX_QUEUE=8</code>, <code>JUDGE_WORKER_QUEUE_TIMEOUT_MS=30000</code>, and <code>JUDGE_WORKER_JOB_TIMEOUT_MS=900000</code>. Its entrypoint prepares missing judge images. <code>/health</code> is liveness; worker readiness checks Docker and required images through <code>/ready</code>, and Compose waits for that readiness before starting Game. These values describe local Compose configuration, not a production capacity claim.</p>
-            <p class="mt-1">The internal network keeps the worker off the public path: Nginx does not publish or proxy the worker. The Docker socket grants daemon-level authority, so a private Compose network is not proof that running hostile code is safe or isolated from the host.</p>
-            <div class="source-links">
-              <a href="../../../docker-compose.yml#L1">Local Compose startup and intentional omissions · docker-compose.yml:1</a>
-              <a href="../../../docker-compose.yml#L57">Judge Worker service, bounded queue, socket mount, and readiness check · docker-compose.yml:57</a>
-              <a href="../../../docker-compose.yml#L85">Compose configures Game to use the internal worker · docker-compose.yml:85</a>
-              <a href="../../../services/game/src/game/judge-factory.ts#L19">Game backend selection and no-fallback rule · judge-factory.ts:19</a>
-              <a href="../../../services/judge-worker/src/main.ts#L21">Worker configuration, ContainerJudge, queue, and listener · main.ts:21</a>
-              <a href="../../../services/judge-worker/src/http-server.ts#L183">Worker HTTP endpoints and liveness/readiness routes · http-server.ts:183</a>
-              <a href="../../../services/judge-worker/src/job-queue.ts#L22">Bounded active work and waiting queue settings · job-queue.ts:22</a>
-              <a href="../../../services/judge-worker/src/readiness.ts#L31">Readiness checks Docker and every configured image · readiness.ts:31</a>
-              <a href="../../../infra/nginx/nginx.conf#L19">Public proxy routes omit the internal worker · nginx.conf:19</a>
-              <a href="../../../docker-compose.yml#L95">Nginx is the only published service · docker-compose.yml:95</a>
-              <a href="../../../scripts/gen-dev-certs.sh#L2">Local-only self-signed TLS certificate generation · gen-dev-certs.sh:2</a>
-              <a href="../../../.env.example#L1">Safe placeholder settings and internal ports · .env.example:1</a>
-              <a href="../../../.gitignore#L8">Ignore local secrets and generated certificates · .gitignore:8</a>
-              <a href="../../../infra/postgres/init-db.sh#L6">Create separate database roles and databases · init-db.sh:6</a>
-            </div>
-          </div>
-        </li>
-        <li class="source-step">
-          <span class="step-number" aria-hidden="true">04</span>
-          <div>
-            <h3>Follow an HTTP or WebSocket request through Nginx</h3>
-            <p>Nginx terminates HTTPS/WSS, proxies <code>/api/core/</code> to Core and <code>/api/game/</code> to Game, and sends Socket.IO—including Game-owned <code>/chat</code>—to Game. The separate Chat container is still startup/health scaffolding. The Game module wires the actual game, lobby, collaboration, and team-chat controllers/gateways; Lesson 11 follows the chat behavior itself.</p>
-            <div class="source-links">
-              <a href="../../../infra/nginx/nginx.conf#L19">TLS listener and API proxy routes · nginx.conf:19</a>
-              <a href="../../../infra/nginx/nginx.conf#L35">WebSocket ingress, including Game-owned chat · nginx.conf:35</a>
-              <a href="../../../services/game/src/game/game.module.ts#L11">Game module wiring and development-principal seam · game.module.ts:11</a>
-            </div>
-          </div>
-        </li>
-      </ol>
-    </section>
-
-    <section class="section" aria-labelledby="roles-title">
-      <h2 id="roles-title">What each backend process currently owns</h2>
-      <div class="card">
-        <ul class="flow-list">
-          <li><strong>Game:</strong> the active HTTP/WebSocket application adapter; its module wires the Match, Lobby, collaboration, and team-chat paths to the Arena engine and model.</li>
-          <li><strong>Core:</strong> currently a Nest bootstrap plus <code>/health</code> and <code>/ready</code>; the current module does not implement account/profile product behavior.</li>
-          <li><strong>Chat container:</strong> currently a Nest bootstrap plus health/readiness scaffolding. First-release Match chat is in Game's <code>/chat</code> namespace, not this separate service.</li>
-          <li><strong>PostgreSQL and Redis:</strong> local infrastructure dependencies. The presence of containers and health checks does not show that every feature uses them or that a production deployment has been verified.</li>
-          <li><strong>Nginx:</strong> public local entry point, TLS termination, and reverse proxy; it does not render the React frontend in this Compose configuration.</li>
-        </ul>
-      </div>
-      <div class="source-links mt-1">
-        <a href="../../../services/core/src/main.ts#L5">Core process bootstrap · main.ts:5</a>
-        <a href="../../../services/core/src/app.module.ts#L4">Core currently wires only HealthController · app.module.ts:4</a>
-        <a href="../../../services/core/src/health.controller.ts#L21">Core liveness and dependency-readiness routes · health.controller.ts:21</a>
-        <a href="../../../services/game/src/main.ts#L5">Game process bootstrap · main.ts:5</a>
-        <a href="../../../services/game/src/app.module.ts#L5">Game root module · app.module.ts:5</a>
-        <a href="../../../services/game/src/health.controller.ts#L21">Game liveness and dependency-readiness routes · health.controller.ts:21</a>
-        <a href="../../../services/chat/src/main.ts#L5">Separate Chat process bootstrap · main.ts:5</a>
-        <a href="../../../services/chat/src/app.module.ts#L4">Chat currently wires only HealthController · app.module.ts:4</a>
-        <a href="../../../services/chat/src/health.controller.ts#L21">Chat liveness and dependency-readiness routes · health.controller.ts:21</a>
-      </div>
-      <aside class="concept-note mt-1">
-        <h4>Health is not the same as readiness</h4>
-        <p>Each <code>/health</code> route answers from the process. Each <code>/ready</code> checks whether PostgreSQL and Redis accept a TCP connection. Compose's health checks currently call <code>/health</code>, not <code>/ready</code>. No containers were started for this lesson update, so this walkthrough reports configuration and source—not observed health responses.</p>
-      </aside>
-    </section>
-
-    <section class="section" aria-labelledby="build-title">
-      <h2 id="build-title">How the workspace files fit together</h2>
-      <p class="section-intro">These links are a reference shelf, not another list to memorize. Open the ones needed when following a build or setup command.</p>
-      <details class="card">
-        <summary>Open the package, Docker, and tooling source index</summary>
-        <div class="source-links mt-1">
-          <a href="../../../frontend/package.json#L7">Frontend scripts and dependencies · frontend/package.json:7</a>
-          <a href="../../../frontend/vite.config.ts#L5">Vite/React/Tailwind dev-server config · vite.config.ts:5</a>
-          <a href="../../../frontend/playwright.config.ts#L3">Browser-test directory and base URL · playwright.config.ts:3</a>
-          <a href="../../../frontend/tsconfig.json#L2">Frontend TypeScript checking boundary · tsconfig.json:2</a>
-          <a href="../../../packages/arena-model/package.json#L8">Shared model workspace scripts · arena-model/package.json:8</a>
-          <a href="../../../packages/arena-model/tsconfig.json#L1">Model typecheck config · arena-model/tsconfig.json:1</a>
-          <a href="../../../packages/arena-model/tsconfig.build.json#L1">Model production build config · arena-model/tsconfig.build.json:1</a>
-          <a href="../../../packages/arena-game/package.json#L9">Game engine workspace scripts · arena-game/package.json:9</a>
-          <a href="../../../packages/arena-game/tsconfig.json#L1">Engine typecheck config · arena-game/tsconfig.json:1</a>
-          <a href="../../../packages/arena-game/tsconfig.build.json#L1">Engine production build config · arena-game/tsconfig.build.json:1</a>
-          <a href="../../../packages/arena-harness/package.json#L7">Fake-backed harness workspace scripts · arena-harness/package.json:7</a>
-          <a href="../../../packages/arena-harness/tsconfig.json#L1">Harness typecheck config · arena-harness/tsconfig.json:1</a>
-          <a href="../../../services/core/package.json#L2">Core workspace identity and scripts · core/package.json:2</a>
-          <a href="../../../services/core/tsconfig.json#L1">Core compile target and decorators · core/tsconfig.json:1</a>
-          <a href="../../../services/chat/package.json#L2">Deferred Chat workspace identity and scripts · chat/package.json:2</a>
-          <a href="../../../services/chat/tsconfig.json#L1">Chat compile target and decorators · chat/tsconfig.json:1</a>
-          <a href="../../../services/game/package.json#L2">Game workspace identity and scripts · game/package.json:2</a>
-          <a href="../../../services/game/tsconfig.json#L1">Game compile target and decorators · game/tsconfig.json:1</a>
-          <a href="../../../services/core/Dockerfile#L1">Core image build context and stages · Core Dockerfile:1</a>
-          <a href="../../../services/chat/Dockerfile#L1">Chat image build context and stages · Chat Dockerfile:1</a>
-          <a href="../../../services/game/Dockerfile#L1">Game image dependencies, problem-bank data, and stages · Game Dockerfile:1</a>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Learn the safe local run paths and the current roles of the Code Arena services."
+    />
+    <meta name="course-lesson-id" content="{{LESSON_ID}}" />
+    <title>Code Arena · Lesson {{LESSON_ORDER}} · {{LESSON_TITLE}}</title>
+    <!-- INLINE_COURSE_STYLES -->
+  </head>
+  <body data-lesson-id="{{LESSON_ID}}" data-course-lesson="{{LESSON_ID}}">
+    <a class="skip-link" href="#lesson">Skip to the lesson</a>
+    <main class="page" id="lesson">
+      <header class="hero">
+        <p class="eyebrow">
+          <a href="../source-map.html">Code Arena Learning Map</a> / Lesson
+          {{LESSON_ORDER}}
+        </p>
+        <h1>{{LESSON_TITLE}}</h1>
+        <p class="hero-copy">In about 10 minutes: {{LESSON_GOAL}}</p>
+        <p class="mt-1">
+          {{LESSON_FRESHNESS}}
+          <span class="quiet">Snapshot <code>{{SNAPSHOT_ID}}</code></span>
+        </p>
+        <div class="stage-bar" aria-label="Lesson stages">
+          <span class="stage-pill" aria-current="step">1 · Predict</span>
+          <span aria-hidden="true" class="flow-arrow">→</span>
+          <span class="stage-pill">2 · Trace</span>
+          <span aria-hidden="true" class="flow-arrow">→</span>
+          <span class="stage-pill">3 · Recall</span>
         </div>
-      </details>
-      <aside class="concept-note mt-1">
-        <h4>Set up safely when you are ready</h4>
-        <p>For Compose, first generate local certificates, then copy <code>.env.example</code> to <code>.env</code>, then use <code>npm run up</code>. Never copy real secrets into the example or into Git. Do not run both workflows against the same ports without checking whether something is already listening. This lesson did not start or stop Docker, alter environment files, or create certificates.</p>
-      </aside>
-    </section>
+      </header>
 
-    <section class="section" aria-labelledby="recall-title">
-      <p class="kicker">Close the source and recall</p>
-      <h2 id="recall-title">Which route gives you the React UI, and which service owns the current team chat?</h2>
-      <details class="card">
-        <summary>Hint, then check yourself</summary>
-        <p class="mt-1">The convenience script builds and serves the frontend. Compose does not include a frontend container; Nginx proxies API and WebSocket traffic. The active team-chat namespace belongs to Game; the separate Chat container currently exposes only its startup health/readiness surface.</p>
-      </details>
-      <article class="card mt-1">
-        <h3>Rewrite-test prompt</h3>
-        <p>In a separate rewrite, verify the advertised local command in a clean environment. Assert that the Game health route responds and that an unconfigured database does not pretend to be persistent. Then test the Compose routes and each service's actual behavior separately. Do not mark setup docs, a successful image build, or a health check as proof of authentication, chat-product behavior, judge isolation, or production deployment.</p>
-      </article>
-      <!-- COURSE_LESSON_NAV -->
-    </section>
+      <section class="section" aria-labelledby="predict-title">
+        <p class="kicker">First, make a prediction</p>
+        <h2 id="predict-title">
+          If you run <code>npm run up</code>, where does the React game screen
+          come from?
+        </h2>
+        <p class="section-intro">
+          Choose before tracing: Compose starts a frontend container; Nginx
+          serves the frontend; the frontend is not in this Compose stack; or the
+          separate Chat container renders it.
+        </p>
+        <details class="card">
+          <summary>Check your prediction</summary>
+          <p class="mt-1">
+            The frontend is not a service in the current
+            <code>docker-compose.yml</code>. Compose starts PostgreSQL, Redis,
+            Core, Game, the deferred Chat skeleton, and Nginx. The separate
+            <code>scripts/play.sh</code> path builds the Game and frontend, then
+            serves the frontend preview. These are different local workflows;
+            neither is a production deployment proof.
+          </p>
+        </details>
+      </section>
 
-    <footer class="footer-note">
-      <p>Source snapshot <code>{{SNAPSHOT_ID}}</code>. Commands and Compose configuration were inspected, not executed for this course update. The local play script, Compose stack, and production deployment are distinct environments.</p>
-    </footer>
-  </main>
-  <!-- COURSE_ACTIVITY_RUNTIME -->
-</body>
+      <section class="section" aria-labelledby="terms-title">
+        <h2 id="terms-title">Key terms</h2>
+        <dl class="card">
+          <dt>Workspace</dt>
+          <dd>
+            The root npm project groups packages, services, and the frontend so
+            shared modules can be built and tested together.
+          </dd>
+          <dt class="mt-1">Compose service</dt>
+          <dd>
+            A local container role with its own build or image, environment,
+            network dependencies, and optional health check.
+          </dd>
+          <dt class="mt-1">Liveness</dt>
+          <dd>
+            “Is this process answering?” The current <code>/health</code> route
+            reports process/model information; it does not prove the application
+            is ready to serve gameplay.
+          </dd>
+          <dt class="mt-1">Readiness</dt>
+          <dd>
+            “Can required dependencies be reached?” The current
+            <code>/ready</code> route checks TCP reachability for PostgreSQL and
+            Redis. It is a separate route, not a gameplay test.
+          </dd>
+          <dt class="mt-1">Judge Worker readiness</dt>
+          <dd>
+            The worker readiness checks Docker and required images through its
+            separate <code>/ready</code> route. Game's health/readiness routes
+            check Game dependencies instead.
+          </dd>
+        </dl>
+      </section>
+
+      <section class="section" aria-labelledby="trace-title">
+        <p class="kicker">Now trace two local run paths</p>
+        <h2 id="trace-title">
+          A local command is not automatically the same stack as Compose
+        </h2>
+        <ol class="flow-list">
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">01</span>
+            <div>
+              <h3>The root package is the command directory</h3>
+              <p>
+                The root manifest declares three npm workspace groups:
+                <code>packages/*</code>, <code>services/*</code>, and
+                <code>frontend</code>. Its aggregate scripts delegate test,
+                typecheck, lint, and build to workspaces. Root
+                <code>pretest</code> builds the workspaces before tests run;
+                Game service tests launch
+                <code>services/game/dist/main.js</code>, so a clean checkout
+                needs that build first. <code>npm run certs</code> creates local
+                TLS material; <code>npm run up</code> delegates to Docker
+                Compose. The root <code>prepare</code> script installs Husky
+                with the dependencies. Before a commit,
+                <code>.husky/pre-commit</code> runs staged-file formatting,
+                typecheck, and the workspace tests. Tests that need Postgres,
+                Docker, or local sockets still need their required environment;
+                a blocked test is not a pass.
+              </p>
+              <div class="source-links">
+                <a href="../../../package.json#L7"
+                  >Workspace groups · package.json:7</a
+                >
+                <a href="../../../package.json#L12"
+                  >Aggregate and runtime commands · package.json:12</a
+                >
+                <a href="../../../.husky/pre-commit#L1"
+                  >Checks run before each commit · pre-commit:1</a
+                >
+                <a href="../../../frontend/index.html#L9"
+                  >The browser's React mount and module entry · index.html:9</a
+                >
+              </div>
+            </div>
+          </li>
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">02</span>
+            <div>
+              <h3>
+                Local play builds the web preview and starts Game directly
+              </h3>
+              <p>
+                <code>./scripts/play.sh</code> is a convenience development
+                script, not Compose. It builds the Game workspace and frontend,
+                starts the Game Node process, and serves the frontend preview;
+                its default ports are Game <code>3220</code> and web
+                <code>4173</code>. It uses HTTP for local connections; that is
+                development-only and not evidence for the PDF's HTTPS
+                requirement. It sets <code>DEV_PRINCIPAL=true</code>, so this
+                shortcut does not represent production authentication. Its
+                comments warn that without Postgres Game falls back to memory,
+                and without Docker Run/Submit fail safely.
+              </p>
+              <div class="source-links">
+                <a href="../../../scripts/play.sh#L2"
+                  >Purpose and local/LAN modes · play.sh:2</a
+                >
+                <a href="../../../scripts/play.sh#L17"
+                  >Development database URL and Game endpoint · play.sh:17</a
+                >
+                <a href="../../../scripts/play.sh#L23"
+                  >Build and launch Game plus frontend preview · play.sh:23</a
+                >
+                <a href="../../../scripts/play.sh#L30"
+                  >Cleanup when the script exits · play.sh:30</a
+                >
+              </div>
+              <aside class="concept-note mt-1">
+                <h4>Read before choosing LAN mode</h4>
+                <p>
+                  The script exposes its local development server to your LAN
+                  when requested. Only use that mode on a network you trust. Its
+                  development identity seam and missing production
+                  authentication are not hidden by the UI.
+                </p>
+              </aside>
+            </div>
+          </li>
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">03</span>
+            <div>
+              <h3>
+                Compose builds the local service stack—but not the whole game
+              </h3>
+              <p>
+                The Compose comment gives the setup order: create self-signed
+                localhost certificates, copy <code>.env.example</code> to the
+                ignored <code>.env</code>, then start Compose. The services
+                include PostgreSQL, Redis, Core, Game, the Judge Worker, the
+                deferred Chat skeleton, and Nginx. Only Nginx publishes ports 80
+                and 443; there is no frontend container. Compose sets
+                <code>JUDGE_BACKEND=worker</code> and the Game-side
+                <code>WorkerJudgeAdapter</code> sends requests to
+                <code>JUDGE_WORKER_URL=http://judge-worker:3010</code> over the
+                internal judge network. The worker runs
+                <code>ContainerJudge</code>. Compose mounts the Docker socket
+                into the Judge Worker only. Local direct Game runs default to
+                <code>ContainerJudge</code>; optional Judge0 is another
+                explicitly configured provider.
+              </p>
+              <p class="mt-1">
+                The worker requires <code>JUDGE_WORKER_TOKEN</code>; the value
+                in <code>.env.example</code> is only a placeholder.
+                <code>JUDGE_WORKER_TIMEOUT_MS</code> is 930000 ms. Worker
+                defaults are <code>JUDGE_WORKER_CONCURRENCY=2</code>,
+                <code>JUDGE_WORKER_MAX_QUEUE=8</code>,
+                <code>JUDGE_WORKER_QUEUE_TIMEOUT_MS=30000</code>, and
+                <code>JUDGE_WORKER_JOB_TIMEOUT_MS=900000</code>. Its entrypoint
+                prepares missing judge images. <code>/health</code> is liveness;
+                worker readiness checks Docker and required images through
+                <code>/ready</code>, and Compose waits for that readiness before
+                starting Game. These values describe local Compose
+                configuration, not a production capacity claim.
+              </p>
+              <p class="mt-1">
+                The internal network keeps the worker off the public path: Nginx
+                does not publish or proxy the worker. The Docker socket grants
+                daemon-level authority, so a private Compose network is not
+                proof that running hostile code is safe or isolated from the
+                host.
+              </p>
+              <div class="source-links">
+                <a href="../../../docker-compose.yml#L1"
+                  >Local Compose startup and intentional omissions ·
+                  docker-compose.yml:1</a
+                >
+                <a href="../../../docker-compose.yml#L57"
+                  >Judge Worker service, bounded queue, socket mount, and
+                  readiness check · docker-compose.yml:57</a
+                >
+                <a href="../../../docker-compose.yml#L85"
+                  >Compose configures Game to use the internal worker ·
+                  docker-compose.yml:85</a
+                >
+                <a href="../../../services/game/src/game/judge-factory.ts#L19"
+                  >Game backend selection and no-fallback rule ·
+                  judge-factory.ts:19</a
+                >
+                <a href="../../../services/judge-worker/src/main.ts#L21"
+                  >Worker configuration, ContainerJudge, queue, and listener ·
+                  main.ts:21</a
+                >
+                <a href="../../../services/judge-worker/src/http-server.ts#L183"
+                  >Worker HTTP endpoints and liveness/readiness routes ·
+                  http-server.ts:183</a
+                >
+                <a href="../../../services/judge-worker/src/job-queue.ts#L22"
+                  >Bounded active work and waiting queue settings ·
+                  job-queue.ts:22</a
+                >
+                <a href="../../../services/judge-worker/src/readiness.ts#L31"
+                  >Readiness checks Docker and every configured image ·
+                  readiness.ts:31</a
+                >
+                <a href="../../../infra/nginx/nginx.conf#L19"
+                  >Public proxy routes omit the internal worker ·
+                  nginx.conf:19</a
+                >
+                <a href="../../../docker-compose.yml#L95"
+                  >Nginx is the only published service ·
+                  docker-compose.yml:95</a
+                >
+                <a href="../../../scripts/gen-dev-certs.sh#L2"
+                  >Local-only self-signed TLS certificate generation ·
+                  gen-dev-certs.sh:2</a
+                >
+                <a href="../../../.env.example#L1"
+                  >Safe placeholder settings and internal ports ·
+                  .env.example:1</a
+                >
+                <a href="../../../.gitignore#L8"
+                  >Ignore local secrets and generated certificates ·
+                  .gitignore:8</a
+                >
+                <a href="../../../infra/postgres/init-db.sh#L6"
+                  >Create separate database roles and databases ·
+                  init-db.sh:6</a
+                >
+              </div>
+            </div>
+          </li>
+          <li class="source-step">
+            <span class="step-number" aria-hidden="true">04</span>
+            <div>
+              <h3>Follow an HTTP or WebSocket request through Nginx</h3>
+              <p>
+                Nginx terminates HTTPS/WSS, proxies <code>/api/core/</code> to
+                Core and <code>/api/game/</code> to Game, and sends
+                Socket.IO—including Game-owned <code>/chat</code>—to Game. The
+                separate Chat container is still startup/health scaffolding. The
+                Game module wires the actual game, lobby, collaboration, and
+                team-chat controllers/gateways; Lesson 11 follows the chat
+                behavior itself.
+              </p>
+              <div class="source-links">
+                <a href="../../../infra/nginx/nginx.conf#L19"
+                  >TLS listener and API proxy routes · nginx.conf:19</a
+                >
+                <a href="../../../infra/nginx/nginx.conf#L35"
+                  >WebSocket ingress, including Game-owned chat ·
+                  nginx.conf:35</a
+                >
+                <a href="../../../services/game/src/game/game.module.ts#L11"
+                  >Game module wiring and development-principal seam ·
+                  game.module.ts:11</a
+                >
+              </div>
+            </div>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section" aria-labelledby="roles-title">
+        <h2 id="roles-title">What each backend process currently owns</h2>
+        <div class="card">
+          <ul class="flow-list">
+            <li>
+              <strong>Game:</strong> the active HTTP/WebSocket application
+              adapter; its module wires the Match, Lobby, collaboration, and
+              team-chat paths to the Arena engine and model.
+            </li>
+            <li>
+              <strong>Core:</strong> currently a Nest bootstrap plus
+              <code>/health</code> and <code>/ready</code>; the current module
+              does not implement account/profile product behavior.
+            </li>
+            <li>
+              <strong>Chat container:</strong> currently a Nest bootstrap plus
+              health/readiness scaffolding. First-release Match chat is in
+              Game's <code>/chat</code> namespace, not this separate service.
+            </li>
+            <li>
+              <strong>PostgreSQL and Redis:</strong> local infrastructure
+              dependencies. The presence of containers and health checks does
+              not show that every feature uses them or that a production
+              deployment has been verified.
+            </li>
+            <li>
+              <strong>Nginx:</strong> public local entry point, TLS termination,
+              and reverse proxy; it does not render the React frontend in this
+              Compose configuration.
+            </li>
+          </ul>
+        </div>
+        <div class="source-links mt-1">
+          <a href="../../../services/core/src/main.ts#L5"
+            >Core process bootstrap · main.ts:5</a
+          >
+          <a href="../../../services/core/src/app.module.ts#L4"
+            >Core currently wires only HealthController · app.module.ts:4</a
+          >
+          <a href="../../../services/core/src/health.controller.ts#L21"
+            >Core liveness and dependency-readiness routes ·
+            health.controller.ts:21</a
+          >
+          <a href="../../../services/game/src/main.ts#L5"
+            >Game process bootstrap · main.ts:5</a
+          >
+          <a href="../../../services/game/src/app.module.ts#L5"
+            >Game root module · app.module.ts:5</a
+          >
+          <a href="../../../services/game/src/health.controller.ts#L21"
+            >Game liveness and dependency-readiness routes ·
+            health.controller.ts:21</a
+          >
+          <a href="../../../services/chat/src/main.ts#L5"
+            >Separate Chat process bootstrap · main.ts:5</a
+          >
+          <a href="../../../services/chat/src/app.module.ts#L4"
+            >Chat currently wires only HealthController · app.module.ts:4</a
+          >
+          <a href="../../../services/chat/src/health.controller.ts#L21"
+            >Chat liveness and dependency-readiness routes ·
+            health.controller.ts:21</a
+          >
+        </div>
+        <aside class="concept-note mt-1">
+          <h4>Health is not the same as readiness</h4>
+          <p>
+            Each <code>/health</code> route answers from the process. Each
+            <code>/ready</code> checks whether PostgreSQL and Redis accept a TCP
+            connection. Compose's health checks currently call
+            <code>/health</code>, not <code>/ready</code>. No containers were
+            started for this lesson update, so this walkthrough reports
+            configuration and source—not observed health responses.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section" aria-labelledby="build-title">
+        <h2 id="build-title">How the workspace files fit together</h2>
+        <p class="section-intro">
+          These links are a reference shelf, not another list to memorize. Open
+          the ones needed when following a build or setup command.
+        </p>
+        <details class="card">
+          <summary>Open the package, Docker, and tooling source index</summary>
+          <div class="source-links mt-1">
+            <a href="../../../frontend/package.json#L7"
+              >Frontend scripts and dependencies · frontend/package.json:7</a
+            >
+            <a href="../../../frontend/vite.config.ts#L5"
+              >Vite/React/Tailwind dev-server config · vite.config.ts:5</a
+            >
+            <a href="../../../frontend/playwright.config.ts#L3"
+              >Browser-test directory and base URL · playwright.config.ts:3</a
+            >
+            <a href="../../../frontend/tsconfig.json#L2"
+              >Frontend TypeScript checking boundary · tsconfig.json:2</a
+            >
+            <a href="../../../packages/arena-model/package.json#L8"
+              >Shared model workspace scripts · arena-model/package.json:8</a
+            >
+            <a href="../../../packages/arena-model/tsconfig.json#L1"
+              >Model typecheck config · arena-model/tsconfig.json:1</a
+            >
+            <a href="../../../packages/arena-model/tsconfig.build.json#L1"
+              >Model production build config ·
+              arena-model/tsconfig.build.json:1</a
+            >
+            <a href="../../../packages/arena-game/package.json#L9"
+              >Game engine workspace scripts · arena-game/package.json:9</a
+            >
+            <a href="../../../packages/arena-game/tsconfig.json#L1"
+              >Engine typecheck config · arena-game/tsconfig.json:1</a
+            >
+            <a href="../../../packages/arena-game/tsconfig.build.json#L1"
+              >Engine production build config ·
+              arena-game/tsconfig.build.json:1</a
+            >
+            <a href="../../../packages/arena-harness/package.json#L7"
+              >Fake-backed harness workspace scripts ·
+              arena-harness/package.json:7</a
+            >
+            <a href="../../../packages/arena-harness/tsconfig.json#L1"
+              >Harness typecheck config · arena-harness/tsconfig.json:1</a
+            >
+            <a href="../../../services/core/package.json#L2"
+              >Core workspace identity and scripts · core/package.json:2</a
+            >
+            <a href="../../../services/core/tsconfig.json#L1"
+              >Core compile target and decorators · core/tsconfig.json:1</a
+            >
+            <a href="../../../services/chat/package.json#L2"
+              >Deferred Chat workspace identity and scripts ·
+              chat/package.json:2</a
+            >
+            <a href="../../../services/chat/tsconfig.json#L1"
+              >Chat compile target and decorators · chat/tsconfig.json:1</a
+            >
+            <a href="../../../services/game/package.json#L2"
+              >Game workspace identity and scripts · game/package.json:2</a
+            >
+            <a href="../../../services/game/tsconfig.json#L1"
+              >Game compile target and decorators · game/tsconfig.json:1</a
+            >
+            <a href="../../../services/core/Dockerfile#L1"
+              >Core image build context and stages · Core Dockerfile:1</a
+            >
+            <a href="../../../services/chat/Dockerfile#L1"
+              >Chat image build context and stages · Chat Dockerfile:1</a
+            >
+            <a href="../../../services/game/Dockerfile#L1"
+              >Game image dependencies, problem-bank data, and stages · Game
+              Dockerfile:1</a
+            >
+          </div>
+        </details>
+        <aside class="concept-note mt-1">
+          <h4>Set up safely when you are ready</h4>
+          <p>
+            For Compose, first generate local certificates, then copy
+            <code>.env.example</code> to <code>.env</code>, then use
+            <code>npm run up</code>. Never copy real secrets into the example or
+            into Git. Do not run both workflows against the same ports without
+            checking whether something is already listening. This lesson did not
+            start or stop Docker, alter environment files, or create
+            certificates.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section" aria-labelledby="recall-title">
+        <p class="kicker">Close the source and recall</p>
+        <h2 id="recall-title">
+          Which route gives you the React UI, and which service owns the current
+          team chat?
+        </h2>
+        <details class="card">
+          <summary>Hint, then check yourself</summary>
+          <p class="mt-1">
+            The convenience script builds and serves the frontend. Compose does
+            not include a frontend container; Nginx proxies API and WebSocket
+            traffic. The active team-chat namespace belongs to Game; the
+            separate Chat container currently exposes only its startup
+            health/readiness surface.
+          </p>
+        </details>
+        <article class="card mt-1">
+          <h3>Rewrite-test prompt</h3>
+          <p>
+            In a separate rewrite, verify the advertised local command in a
+            clean environment. Assert that the Game health route responds and
+            that an unconfigured database does not pretend to be persistent.
+            Then test the Compose routes and each service's actual behavior
+            separately. Do not mark setup docs, a successful image build, or a
+            health check as proof of authentication, chat-product behavior,
+            judge isolation, or production deployment.
+          </p>
+        </article>
+        <!-- COURSE_LESSON_NAV -->
+      </section>
+
+      <footer class="footer-note">
+        <p>
+          Source snapshot <code>{{SNAPSHOT_ID}}</code>. Commands and Compose
+          configuration were inspected, not executed for this course update. The
+          local play script, Compose stack, and production deployment are
+          distinct environments.
+        </p>
+      </footer>
+    </main>
+    <!-- COURSE_ACTIVITY_RUNTIME -->
+  </body>
 </html>
