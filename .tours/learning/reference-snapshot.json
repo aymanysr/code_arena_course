@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "recordedAt": "2026-09-27T20:51:48.490Z",
-  "gitHead": "44bde4f5e64871959937fa24e938f3c571bac58b",
+  "recordedAt": "2026-09-30T20:51:24.041Z",
+  "gitHead": "31bd2c9b4721abbb271d9e64ef91fdd50ffa9b28",
   "snapshotId": "4edc506dd9158d21",
   "files": [
     {
@@ -808,20 +808,5 @@
       "path": "spikes/judge-isolation/spike.sh",
       "sha256": "e3c8e742a89316af41163cf1658b839bd517d430e7c89a7dedc5027b63131383"
     }
-  ],
-  "lessonReviews": [
-    "0001-submit-journey",
-    "0002-reveal-cutoff",
-    "0003-rounds-and-final-score",
-    "0004-lobby-to-match",
-    "0005-problem-editor-run",
-    "0006-evaluation-retries",
-    "0007-judge-boundary",
-    "0008-persistence-recovery",
-    "0009-live-connection",
-    "0010-team-collaboration",
-    "0012-arena-screen",
-    "0013-running-the-project",
-    "0014-rewrite-with-tests"
   ]
 }

@@ -3,20 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A searchable, source-linked inventory of Code Arena files and learning coverage.">
-  <title>Code Arena · Learning Map</title>
+  <meta name="description" content="Explore the exact Code Arena implementation, tests, and source coverage.">
+  <title>Code Arena · Explore the exact implementation</title>
   <!-- INLINE_COURSE_STYLES -->
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to learning map</a>
+  <a class="skip-link" href="#main">Skip to code explorer</a>
+  <header class="course-header">
+    <nav aria-label="Course navigation">
+      <a href="index.html">Back to Course Home</a>
+      <a aria-current="page" href="source-map.html">Explore code</a>
+    </nav>
+  </header>
   <main class="page" id="main">
     <header class="hero">
-      <p class="eyebrow">Code Arena · learning workspace</p>
-      <h1>Understand the game one behavior at a time.</h1>
-      <p class="hero-copy">Start with one short lesson. Follow a player action to the code that owns the rule, then check the test.</p>
-      <p class="nav-row"><a class="primary-button" id="start-lesson" href="{{FIRST_LESSON_URL}}">{{FIRST_LESSON_ACTION}} <span aria-hidden="true">→</span></a></p>
+      <p class="eyebrow">Code Arena · source explorer</p>
+      <h1>Explore the exact implementation</h1>
+      <p class="hero-copy">Search the full source inventory and open the referenced code. Coverage tells you whether a source link is current; it does not measure learning progress.</p>
       <p class="mt-1"><span class="status {{SNAPSHOT_STATUS_CLASS}}">{{SNAPSHOT_STATUS}}</span> <span class="quiet">Source snapshot <code>{{SNAPSHOT_ID}}</code></span></p>
-      <p id="lesson-progress" class="quiet mt-1" aria-live="polite">Lesson progress is saved only as started or self-checked on this browser. It is not a mastery score.</p>
     </header>
 
     <section class="section" aria-label="Course navigation">
@@ -323,16 +327,6 @@
         } else {
           result.textContent = `No source preview is available for ${requestedFile} in this scope.`;
         }
-      }
-      try {
-        const progress = JSON.parse(localStorage.getItem("code-arena-learning:0001-follow-one-submit") ?? "null");
-        if (progress?.selfCheckComplete) {
-          document.getElementById("lesson-progress").textContent = "Lesson 1: self-check finished on this browser. This is a reminder, not evidence of mastery; explain the path from memory to your teacher when you return.";
-        } else if (progress?.opened) {
-          document.getElementById("lesson-progress").textContent = "Lesson 1: started on this browser. Continue with the short retrieval questions; you can pause any time.";
-        }
-      } catch {
-        document.getElementById("lesson-progress").textContent = "Lesson progress could not be saved in this browser; the source map and lesson still work.";
       }
     })();
   </script>

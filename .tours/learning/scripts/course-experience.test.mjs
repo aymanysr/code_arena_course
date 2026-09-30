@@ -130,11 +130,14 @@ test("a complete first lesson session works from a direct file and local server"
     assert.ok(new URL(page.url()).pathname.endsWith("lessons/0000-before-lesson-one.html"), `${mode}: Start opens orientation`);
     assert.equal(await page.locator("#homes-title").isVisible(), true, `${mode}: orientation explains where code lives`);
     await page.goto(route(mode, "source-map.html"));
-    assert.equal(await page.locator("#start-lesson").getAttribute("href"), "lessons/0000-before-lesson-one.html");
-    assert.equal((await page.locator("#start-lesson").innerText()).replace(/\s+/g, " ").trim(), "Start with the map →");
-    await page.locator("#start-lesson").click({ noWaitAfter: true });
+    const backToCourseHome = page.getByRole("link", { name: "Back to Course Home" });
+    assert.equal(await backToCourseHome.getAttribute("href"), "index.html");
+    assert.equal(await page.getByRole("link", { name: "Explore code" }).getAttribute("aria-current"), "page");
+    assert.equal(await page.locator("#start-lesson, [data-course-start]").count(), 0);
+    await backToCourseHome.click({ noWaitAfter: true });
     await page.waitForTimeout(100);
-    assert.ok(new URL(page.url()).pathname.endsWith("lessons/0000-before-lesson-one.html"), `${mode}: source map Start opens orientation`);
+    assert.ok(new URL(page.url()).pathname.endsWith("index.html"), `${mode}: source map returns to Course Home`);
+    assert.equal(await readStartText(page), "Start with the map →");
     await page.goto(route(mode, lessonOutput));
     assert.ok(await page.locator("[data-build-card]").count() > 0, `${mode}: Lesson 1 has build context`);
     assert.match(await page.locator("[data-build-source]").first().getAttribute("href"), /^\.\.\/source-map\.html\?file=/);

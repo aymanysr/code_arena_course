@@ -2,10 +2,14 @@
 
 ## Primary evidence: this exact project
 
-- [Complete 14-lesson course start page](README.md)
-  Canonical lesson order, source-map workflow, change/freeze process, and warnings about evidence and parity.
-- [Searchable source and coverage map](source-map.html)
+- [Course Home](index.html)
+  Start Lesson 1, continue the last lesson on this browser, or browse the 14-lesson path.
+- [Explore code](source-map.html)
   Generated inventory of scoped game, test, configuration, and runtime files. Use it to find what is not taught yet or changed since a lesson snapshot.
+- [Course guide](README.md)
+  Route descriptions and links for learners and maintainers.
+- [Maintain the course](MAINTAINING.md)
+  Source-impact review, tests, generated pages, and the explicit reviewed-snapshot workflow.
 - [Lesson 1: follow one Submit](lessons/0001-follow-one-submit.html)
   A short, interactive trace through the real Submit path. Use it to learn the difference between delivery, game authority, and code execution.
 - [CodeTour 1: big picture](../1-code-arena-big-picture.tour) and [CodeTour 2: submission journey](../2-submission-journey.tour)

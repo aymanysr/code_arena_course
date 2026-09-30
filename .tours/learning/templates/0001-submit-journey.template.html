@@ -134,33 +134,21 @@
         <button type="button" data-answer="judge">Judge adapter</button>
       </div>
       <p class="feedback" id="phase-feedback" aria-live="polite">Hint: which component has the current round phase?</p>
-      <div class="card mt-1" id="recall-model" hidden>
+      <div class="card mt-1" id="recall-model">
         <h3>The path, from memory:</h3>
         <p><code>EditorToolbar → CodeWorkspace → live transport → GameController → GameService → ArenaEngine → EvaluationOrchestrator → GameJudge</code></p>
         <p>The engine enforces Match rules; the Judge only runs the program. <code>ContainerJudge</code> is the development default, Compose selects <code>WorkerJudgeAdapter</code> for the worker boundary, and <code>Judge0Adapter</code> is optional configuration. Provider selection happens at startup; failures do not switch providers.</p>
         <p class="mt-1"><a href="../../../packages/arena-game/test/submit-path.test.ts#L6">Read the behavior contract in the Submit tests</a> · <a href="../source-map.html">Find any file or test in the full source map</a></p>
       </div>
-      <div class="button-row mt-1" id="self-check-row" hidden>
+      <article class="card mt-1">
+        <h3>Rewrite-test prompt</h3>
+        <p>Before implementing Submit, test one allowed action and one rejected action with a fake Judge: a player in the active Round can submit, while a player outside the Match or a player after the Round closes cannot. Confirm the allowed action reaches the Judge once and the rejected action does not.</p>
+      </article>
+      <div class="button-row mt-1" id="self-check-row">
         <button type="button" id="self-check" data-course-self-check>I can retell the path from memory</button>
-        <button type="button" class="secondary-button" id="reset-progress">Reset this lesson on this browser</button>
       </div>
       <p class="quiet mt-1" data-course-self-check-note>This records activity on this browser. It is not proof of mastery or rewrite parity.</p>
-      <p class="quiet mt-1" data-course-self-check-status aria-live="polite"></p>
-      <p class="feedback" id="saved-feedback" aria-live="polite" hidden></p>
-    </section>
-
-    <section class="section">
-      <h2>Why this is a good first slice</h2>
-      <div class="grid split">
-        <article class="card">
-          <h3>For your rewrite</h3>
-          <p>You do not need to recreate these class names. First preserve the observable contract: a valid player can submit at the right time; an invalid action is rejected; accepted code is evaluated once; the result is returned without leaking hidden tests.</p>
-        </article>
-        <article class="card">
-          <h3>For this course</h3>
-          <p>CodeTour gives you editor navigation; the source map tells you what is still uncovered; these short lessons give you a chance to predict, inspect, and explain one real behavior. A green test in this repository is evidence about this implementation—not automatic proof that a separate rewrite matches.</p>
-        </article>
-      </div>
+      <p class="quiet" data-course-self-check-status aria-live="polite"></p>
     </section>
 
     <!-- COURSE_LESSON_NAV -->
@@ -172,36 +160,8 @@
   </main>
   <script>
     (() => {
-      const storageKey = "code-arena-learning:0001-follow-one-submit";
-      const buttons = document.querySelectorAll("#quiz-authority button");
-      const phaseButtons = document.querySelectorAll("#quiz-phase button");
       const authorityFeedback = document.getElementById("authority-feedback");
       const phaseFeedback = document.getElementById("phase-feedback");
-      const trace = document.getElementById("trace");
-      const recall = document.getElementById("recall");
-      const recallModel = document.getElementById("recall-model");
-      const selfCheckRow = document.getElementById("self-check-row");
-      const savedFeedback = document.getElementById("saved-feedback");
-      let progress = { opened: true, authorityCorrect: false, phaseCorrect: false, selfCheckComplete: false };
-
-      const save = () => {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(progress));
-        } catch {
-          savedFeedback.hidden = false;
-          savedFeedback.dataset.kind = "hint";
-          savedFeedback.textContent = "This browser did not allow local progress storage. The lesson still works; just tell your teacher what you remember.";
-        }
-      };
-
-      try {
-        const prior = JSON.parse(localStorage.getItem(storageKey) ?? "null");
-        if (prior && typeof prior === "object") progress = { ...progress, ...prior, opened: true };
-      } catch {
-        // The page remains usable when storage is unavailable (for example, some file:// contexts).
-      }
-      save();
-
       const showCorrect = (feedback, text) => {
         feedback.dataset.kind = "correct";
         feedback.textContent = text;
@@ -210,80 +170,26 @@
         feedback.dataset.kind = "hint";
         feedback.textContent = text;
       };
-      const restore = () => {
-        if (progress.authorityCorrect) {
-          showCorrect(authorityFeedback, "Exactly. ArenaEngine knows the current match state, checks whether this player may act, and owns the domain decision. The route and judge have narrower jobs.");
-          trace.hidden = false;
-          recall.hidden = false;
-          document.getElementById("stage-predict").removeAttribute("aria-current");
-          document.getElementById("stage-trace").setAttribute("aria-current", "step");
-        }
-        if (progress.phaseCorrect) {
-          showCorrect(phaseFeedback, "Right. ArenaEngine sees the closed round and rejects the action before the judge is asked to run code.");
-          recallModel.hidden = false;
-          selfCheckRow.hidden = false;
-          document.getElementById("stage-trace").removeAttribute("aria-current");
-          document.getElementById("stage-recall").setAttribute("aria-current", "step");
-        }
-        if (progress.selfCheckComplete) {
-          savedFeedback.hidden = false;
-          savedFeedback.dataset.kind = "correct";
-          savedFeedback.textContent = "Saved on this browser as self-checked. This is not proof of mastery; tell your teacher the path in your own words next time.";
-        }
-      };
 
-      for (const button of buttons) {
+      for (const button of document.querySelectorAll("#quiz-authority button")) {
         button.addEventListener("click", () => {
           if (button.dataset.answer === "engine") {
-            progress.authorityCorrect = true;
-            save();
-            restore();
+            showCorrect(authorityFeedback, "Exactly. ArenaEngine knows the current Match state, checks whether this player may act, and owns the domain decision. The route and Judge have narrower jobs.");
           } else {
-            showHint(authorityFeedback, "Not quite. The toolbar sends a request, the HTTP controller checks basic shape, and the judge runs code. Which layer knows the match phase?");
+            showHint(authorityFeedback, "Not quite. The toolbar sends a request, the HTTP controller checks basic shape, and the Judge runs code. Which layer knows the Match phase?");
           }
         });
       }
 
-      for (const button of phaseButtons) {
+      for (const button of document.querySelectorAll("#quiz-phase button")) {
         button.addEventListener("click", () => {
           if (button.dataset.answer === "engine") {
-            progress.phaseCorrect = true;
-            save();
-            restore();
+            showCorrect(phaseFeedback, "Right. ArenaEngine sees the closed Round and rejects the action before the Judge is asked to run code.");
           } else {
-            showHint(phaseFeedback, "Look for the component that has both the round phase and the player's membership before execution begins.");
+            showHint(phaseFeedback, "Look for the component that has both the Round phase and the player's membership before execution begins.");
           }
         });
       }
-
-      document.getElementById("self-check").addEventListener("click", () => {
-        progress.selfCheckComplete = true;
-        save();
-        restore();
-      });
-
-      document.getElementById("reset-progress").addEventListener("click", () => {
-        progress = { opened: true, authorityCorrect: false, phaseCorrect: false, selfCheckComplete: false };
-        try {
-          localStorage.removeItem(storageKey);
-        } catch {
-          // Reset the visible state even if browser storage is unavailable.
-        }
-        authorityFeedback.textContent = "Pick the component that knows the match phase and player membership.";
-        phaseFeedback.textContent = "Hint: which component has the current round phase?";
-        delete authorityFeedback.dataset.kind;
-        delete phaseFeedback.dataset.kind;
-        recallModel.hidden = true;
-        selfCheckRow.hidden = true;
-        savedFeedback.hidden = true;
-        document.getElementById("stage-predict").setAttribute("aria-current", "step");
-        document.getElementById("stage-trace").removeAttribute("aria-current");
-        document.getElementById("stage-recall").removeAttribute("aria-current");
-        save();
-        buttons[0].focus();
-      });
-
-      restore();
     })();
   </script>
   <!-- COURSE_ACTIVITY_RUNTIME -->

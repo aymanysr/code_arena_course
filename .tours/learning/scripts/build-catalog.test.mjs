@@ -532,10 +532,13 @@ test("renders catalog lessons and carries a validated optional build path", asyn
     assert.match(secondPage, /Source references match 1 pinned files/);
     assert.match(firstPage, /href="\.\.\/source-map\.html\?file=src%2Fengine\.ts&amp;line=1"/);
     assert.match(catalogPage, /class="hljs-keyword"/);
-    assert.match(catalogPage, /id="start-lesson" href="lessons\/0000-before-lesson-one\.html">Start with the map/);
+    assert.match(catalogPage, /<title>Code Arena · Explore the exact implementation<\/title>/);
+    assert.match(catalogPage, /<h1>Explore the exact implementation<\/h1>/);
+    assert.match(catalogPage, /<a href="index\.html">Back to Course Home<\/a>/);
+    assert.match(catalogPage, /<a aria-current="page" href="source-map\.html">Explore code<\/a>/);
     assert.match(catalogPage, /<details class="focus-panel" id="course-list">/);
     assert.ok(catalogPage.indexOf('href="lessons/first.html"') < catalogPage.indexOf('href="lessons/second.html"'));
-    assert.match(catalogPage, /lesson-progress[\s\S]*not a mastery score/);
+    assert.doesNotMatch(catalogPage, /lesson-progress|code-arena-learning:activity:v1|localStorage/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
@@ -1483,8 +1486,10 @@ test("renders the test-evidence capstone and disposes every remaining source pat
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services|infra|scripts)\//);
 
   const readme = await readFile(path.join(learningDir, "README.md"), "utf8");
-  assert.match(readme, /14\.\s+\[/);
-  assert.match(readme, /0014-rewrite-with-tests\.html/);
+  assert.match(readme, /14 short lessons/);
+  assert.match(readme, /Learn: Course Home/);
+  assert.match(readme, /\[Before Lesson 1\]\(lessons\/0000-before-lesson-one\.html\)/);
+  assert.equal([...readme.matchAll(/lessons\/\d{4}-[^)]+\.html/g)].length, 1);
 });
 
 test("rejects lesson template links outside their cited coverage ranges", async () => {
