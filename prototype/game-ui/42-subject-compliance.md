@@ -1,6 +1,6 @@
 # 42 subject compliance matrix
 
-Last reviewed: 2026-09-28 (guided learning-course design; prior Match deadline, Lobby, event-convergence, and source-linked course reviews retained; module rows intentionally unchanged — team sign-off required)
+Last reviewed: 2026-09-28 (guided learning-course design approval and implementation plan; prior Match deadline, Lobby, event-convergence, and source-linked course reviews retained; module rows intentionally unchanged — team sign-off required)
 Authoritative source: [`../../ft_transcendence.pdf`](../../ft_transcendence.pdf), version 21.2
 
 Scope reviewed: game concept, lobby/role-selection prototype, active-match prototype, outcome/recovery/journey prototypes, account/home/profile/policies prototypes, approved equal-coding-role prototype design and implementation plan, numbered file order, draft specification, ADRs, planned module set, UI-only Code Arena spike `09-arena.html` (mocked 1v1/2v2, no realtime/judging/matchmaking), production Match-deadline closure, Lobby reconciliation, and post-commit live-event behavior, plus the source-linked learning-course review for Lessons 1–14. Lesson 11's current chat sources were reviewed and required no refresh. Course content and focused tests do not change a subject-module claim.
@@ -20,8 +20,10 @@ Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player
 The [guided build-course design](../../docs/superpowers/specs/2026-09-28-guided-code-arena-build-course-design.md)
 records the approved C-to-TypeScript teaching direction, visual lesson format,
 dusk theme, practice-workspace phase, and eventual transition into the team's
-repository. The written specification is awaiting learner review; the complete
-guided course and target implementation are not delivered by this change.
+repository. The learner approved the written specification on 2026-09-28. The
+[implementation plan](../../docs/superpowers/plans/2026-09-28-guided-code-arena-build-course.md)
+is awaiting review and preserves the chosen Native execution method. The complete
+guided course and target implementation are not delivered by this documentation change.
 
 Reviewed the PDF's mandatory application, concurrency, validation, identity,
 HTTPS, and accessibility requirements (printed pp.8–9), game/remote-player/
@@ -37,6 +39,13 @@ The read-only catalog check matched source snapshot `4edc506dd9158d21` with
 unclassified files. This is course-reference coverage only. No game test run,
 new runtime capability, completed subject module, or team sign-off is claimed;
 module rows remain unchanged.
+
+The plan-review documentation update was checked separately: the same source
+snapshot and source-link coverage remain current, but the read-only catalog check
+reports this compliance document as one changed checksum input and marks the
+course home/source map outputs stale. That check is not reported as passing.
+No baseline was accepted or generated course page changed during planning; the
+existing reviewed-evidence refresh procedure remains required during execution.
 
 ## 2026-09-25 architecture-slice review
 

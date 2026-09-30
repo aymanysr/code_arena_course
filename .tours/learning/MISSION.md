@@ -12,7 +12,7 @@ I want to understand the exact game implementation that is in this repository, t
 ## Constraints
 - Teach me as a beginner: one concrete idea at a time, with predictions, hints, source links, and short retrieval checks.
 - Treat the current code and tests as the implementation reference. Specs, diagrams, prototypes, and passing tests are different kinds of evidence.
-- Keep CodeTour for navigation in VS Code; use the searchable source map and short lessons to understand and remember.
+- Start from [Course Home](index.html), then follow its ordered lessons. Use [Explore code](source-map.html) when you need to search the full inventory; its source coverage describes freshness, not learning progress. Keep CodeTours for editor navigation in VS Code.
 - Prefer a guided path to a large graph. Keep this course in one folder and make uncovered work visible rather than claiming completeness early.
 
 ## Out of scope

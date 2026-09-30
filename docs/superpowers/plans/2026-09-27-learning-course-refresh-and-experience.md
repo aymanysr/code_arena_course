@@ -515,7 +515,7 @@ Expected: PASS.
 - Consumes: shared activity runtime and generated Course Home/lesson navigation.
 - Produces: a non-blocking Lesson 1 pilot and a dated pilot record that determines whether last-lesson resume is enough.
 
-- [ ] **Step 1: Write the browser test before changing Lesson 1.** Generate a small Course Home plus Lesson 1 fixture, serve it and open it through `file://`, then assert:
+- [x] **Step 1: Write the browser test before changing Lesson 1.** Generate a small Course Home plus Lesson 1 fixture, serve it and open it through `file://`, then assert:
 
 ```text
 Course Home starts at Lesson 1 with empty storage.
@@ -529,10 +529,10 @@ At 320 pixels the document has no horizontal page overflow and all main actions 
 No console errors occur on Course Home or Lesson 1.
 ```
 
-- [ ] **Step 2: Run `node --test .tours/learning/scripts/course-experience.test.mjs`.** Expected: FAIL because Lesson 1 still gates its trace and uses its private storage record.
-- [ ] **Step 3: Normalize Lesson 1.** Keep its Submit teaching content and multiple-choice prediction, but render the trace, evidence, retrieval prompt, and rewrite-test prompt in the same visible order as Lessons 2-14. Remove `hidden` gating, private `0001-follow-one-submit` storage, and the extra course-rationale section that interrupts the lesson.
-- [ ] **Step 4: Add shared self-check markup.** Put `data-course-self-check` on the retrieval action and keep the nearby text: `This records activity on this browser. It is not proof of mastery or rewrite parity.`
-- [ ] **Step 5: Run the browser test in direct-file and local-server modes.** Expected: every assertion in Step 1 passes.
+- [x] **Step 2: Run `node --test .tours/learning/scripts/course-experience.test.mjs`.** Expected: FAIL because Lesson 1 still gates its trace and uses its private storage record.
+- [x] **Step 3: Normalize Lesson 1.** Keep its Submit teaching content and multiple-choice prediction, but render the trace, evidence, retrieval prompt, and rewrite-test prompt in the same visible order as Lessons 2-14. Remove `hidden` gating, private `0001-follow-one-submit` storage, and the extra course-rationale section that interrupts the lesson.
+- [x] **Step 4: Add shared self-check markup.** Put `data-course-self-check` on the retrieval action and keep the nearby text: `This records activity on this browser. It is not proof of mastery or rewrite parity.`
+- [x] **Step 5: Run the browser test in direct-file and local-server modes.** Expected: every assertion in Step 1 passes.
 - [ ] **Step 6: Perform the author pilot after the concrete pages are generated.** Ask the course author to:
 
 ```text
@@ -564,11 +564,11 @@ Record the date, route taken, any confusing label, whether resume worked, and th
 - Consumes: the complete generator and reviewed source snapshot.
 - Produces: one learner start route, one code exploration route, one maintainer workflow, and a fully verified generated course.
 
-- [ ] **Step 1: Move maintenance workflow to `MAINTAINING.md`.** Include normal generation, tests, read-only check, impact review, required lesson review list, explicit acceptance, CodeTour baseline behavior, environment-dependent test reporting, and the instruction to review the 42 matrix after project changes.
-- [ ] **Step 2: Shorten `README.md`.** Make the first link Course Home, then link Mission, Explore code, CodeTours, and Maintain the course. Keep the 14-lesson list generated or point to Course Home so lesson order has one authored owner.
-- [ ] **Step 3: Update source-map labeling.** Title it `Explore the exact implementation`, add a `Back to Course Home` link, and keep coverage/freshness prominent for maintainers without presenting it as learner progress.
-- [ ] **Step 4: Regenerate every page.** Run `node .tours/learning/scripts/build-catalog.mjs` only after the source snapshot is current. Generation must not change reference hashes.
-- [ ] **Step 5: Run course verification.** Run:
+- [x] **Step 1: Move maintenance workflow to `MAINTAINING.md`.** Include normal generation, tests, read-only check, impact review, required lesson review list, explicit acceptance, CodeTour baseline behavior, environment-dependent test reporting, and the instruction to review the 42 matrix after project changes.
+- [x] **Step 2: Shorten `README.md`.** Make the first link Course Home, then link Mission, Explore code, CodeTours, and Maintain the course. Keep the 14-lesson list generated or point to Course Home so lesson order has one authored owner.
+- [x] **Step 3: Update source-map labeling.** Title it `Explore the exact implementation`, add a `Back to Course Home` link, and keep coverage/freshness prominent for maintainers without presenting it as learner progress.
+- [x] **Step 4: Regenerate every page.** Run `node .tours/learning/scripts/build-catalog.mjs` only after the source snapshot is current. Generation must not change reference hashes.
+- [x] **Step 5: Run course verification.** Run:
 
 ```sh
 node --test .tours/learning/scripts/*.test.mjs
@@ -576,7 +576,7 @@ node .tours/learning/scripts/build-catalog.mjs --check
 ```
 
 Expected: all tests pass and the check reports zero stale, uncovered, unclassified, missing, invalid, or generated-drift items.
-- [ ] **Step 6: Run project verification.** Run:
+- [x] **Step 6: Run project verification.** Run:
 
 ```sh
 npm run lint
@@ -587,9 +587,9 @@ git diff --check
 ```
 
 Expected: lint, typecheck, build, course tests, and non-environment-gated project tests pass. Report Docker, Postgres, service-socket, or browser restrictions as explicit skips with their command and error; do not convert skips into passing evidence.
-- [ ] **Step 7: Perform final browser checks.** In latest stable Chrome, verify Course Home and Lessons 1, 4, 7, 12, and 14 at desktop and 320-pixel widths; use keyboard-only navigation; open/close a source dialog; refresh; test malformed/blocked storage; confirm zero console warnings/errors.
-- [ ] **Step 8: Review 42 compliance.** Compare the course changes with mandatory frontend clarity/responsiveness/accessibility and README honesty requirements in `ft_transcendence.pdf`. Review `prototype/game-ui/42-subject-compliance.md`; leave it unchanged when no game evidence/module status changed, or update it in this commit if the evidence actually changed.
-- [ ] **Step 9: Inspect the final diff.** Confirm only course artifacts, generated outputs, CodeTours/reference files, and any necessary compliance update are present. Ensure `.trigger-tree/` and `.agents/skills/` remain unstaged.
+- [x] **Step 7: Perform final browser checks.** In latest stable Chrome, verify Course Home and Lessons 1, 4, 7, 12, and 14 at desktop and 320-pixel widths; use keyboard-only navigation; open/close a source dialog; refresh; test malformed/blocked storage; confirm zero console warnings/errors.
+- [x] **Step 8: Review 42 compliance.** Compare the course changes with mandatory frontend clarity/responsiveness/accessibility and README honesty requirements in `ft_transcendence.pdf`. Review `prototype/game-ui/42-subject-compliance.md`; leave it unchanged when no game evidence/module status changed, or update it in this commit if the evidence actually changed.
+- [x] **Step 9: Inspect the final diff.** Confirm only course artifacts, generated outputs, CodeTours/reference files, and any necessary compliance update are present. Ensure `.trigger-tree/` and `.agents/skills/` remain unstaged.
 - [ ] **Step 10: Commit.** Commit `docs(course): publish refreshed learning route`.
 
 ## Self-Review Record

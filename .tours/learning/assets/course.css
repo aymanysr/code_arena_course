@@ -523,10 +523,15 @@
     border-block-start: 1px solid var(--border);
   }
 
-  .page#lesson .lesson-navigation [data-primary-course-nav] {
+  .page#lesson .lesson-navigation a {
     display: inline-flex;
     min-block-size: 2.75rem;
     align-items: center;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.45rem;
+  }
+
+  .page#lesson .lesson-navigation [data-primary-course-nav] {
     padding: 0.55rem 0.9rem;
     border-radius: 0.55rem;
     background: var(--teal);

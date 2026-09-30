@@ -23,6 +23,7 @@
       { "path": "dist", "reason": "Generated build output; the authored source lives in workspace roots." },
       { "path": "test-results", "reason": "Generated browser-test output, not executable product source." },
       { "path": ".playwright-cli", "reason": "Generated browser inspection snapshots, not authored game source." },
+      { "path": ".playwright-mcp", "reason": "Generated browser inspection captures, not authored game source." },
       { "path": "frontend/test-results", "reason": "Generated Playwright output, not authored application code." },
       { "path": "docs", "reason": "Reference documents are linked from the learning notes; they are not runtime source." },
       { "path": "prototype", "reason": "Design and behavior prototypes are not the current production game implementation." },

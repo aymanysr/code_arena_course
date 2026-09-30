@@ -515,10 +515,13 @@ test("renders multiple catalog lessons from separate templates with ordered navi
     assert.match(secondPage, /Source references match 1 pinned files/);
     assert.match(firstPage, /href="\.\.\/source-map\.html\?file=src%2Fengine\.ts&amp;line=1"/);
     assert.match(catalogPage, /class="hljs-keyword"/);
-    assert.match(catalogPage, /id="start-lesson" href="lessons\/first\.html"/);
+    assert.match(catalogPage, /<title>Code Arena · Explore the exact implementation<\/title>/);
+    assert.match(catalogPage, /<h1>Explore the exact implementation<\/h1>/);
+    assert.match(catalogPage, /<a href="index\.html">Back to Course Home<\/a>/);
+    assert.match(catalogPage, /<a aria-current="page" href="source-map\.html">Explore code<\/a>/);
     assert.match(catalogPage, /<details class="focus-panel" id="course-list">/);
     assert.ok(catalogPage.indexOf('href="lessons/first.html"') < catalogPage.indexOf('href="lessons/second.html"'));
-    assert.match(catalogPage, /lesson-progress[\s\S]*not a mastery score/);
+    assert.doesNotMatch(catalogPage, /lesson-progress|code-arena-learning:activity:v1|localStorage/);
   } finally {
     await rm(tempRoot, { recursive: true, force: true });
   }
@@ -1466,8 +1469,9 @@ test("renders the test-evidence capstone and disposes every remaining source pat
   assert.doesNotMatch(rendered, /href="\.\.\/\.\.\/\.\.\/(?:frontend|packages|services|infra|scripts)\//);
 
   const readme = await readFile(path.join(learningDir, "README.md"), "utf8");
-  assert.match(readme, /14\.\s+\[/);
-  assert.match(readme, /0014-rewrite-with-tests\.html/);
+  assert.match(readme, /14 short lessons/);
+  assert.match(readme, /Learn: Course Home/);
+  assert.doesNotMatch(readme, /lessons\/\d{4}-[^)]+\.html/);
 });
 
 test("rejects lesson template links outside their cited coverage ranges", async () => {
@@ -1593,7 +1597,7 @@ test("requires affected lessons to be reviewed before accepting a snapshot", asy
   }
 });
 
-test("checks README and nav order against the single coverage order", async () => {
+test("checks README order or Course Home delegation against the single coverage order", async () => {
   const tempRoot = await mkdtemp(path.join(os.tmpdir(), "code-arena-course-order-"));
   const learningDir = path.join(tempRoot, "learning");
   try {
@@ -1606,6 +1610,9 @@ test("checks README and nav order against the single coverage order", async () =
     await writeFile(path.join(learningDir, "templates/second.html"), '<nav><!-- COURSE_LESSON_NAV --></nav>');
     await writeFile(path.join(learningDir, "README.md"), "[First](lessons/first.html)\n[Second](lessons/second.html)\n");
     assert.deepEqual(await auditCourseOrder({ lessons, learningDir }), []);
+
+    await writeFile(path.join(learningDir, "README.md"), "[Course Home](index.html)\n");
+    assert.deepEqual(await auditCourseOrder({ lessons, learningDir }), [], "the generated Course Home owns the ordered lesson list");
 
     await writeFile(path.join(learningDir, "README.md"), "[Second](lessons/second.html)\n[First](lessons/first.html)\n");
     const readmeDrift = await auditCourseOrder({ lessons, learningDir });
@@ -1837,6 +1844,9 @@ test("tracks planned dispositions and the exact remaining source files", async (
   }
   assert.ok(coverageMap.scope.excluded.some(({ path: excludedPath, reason }) =>
     excludedPath === ".codex" && reason === "Agent planning state; it is neither game runtime nor learner course content.",
+  ));
+  assert.ok(coverageMap.scope.excluded.some(({ path: excludedPath, reason }) =>
+    excludedPath === ".playwright-mcp" && reason === "Generated browser inspection captures, not authored game source.",
   ));
 });
 
