@@ -43,16 +43,49 @@ export async function bundleBuildRuntime(learningDir) {
   });
   return result.outputFiles[0].text.replace(/<\/script/gi, "<\\/script");
 }
+const ACTS = [
+  {
+    num: "1",
+    title: "The Core Game Loop",
+    goal: "Build a pure TypeScript match engine & scoring simulator in Node.",
+    milestones: ["M00", "M01", "M02", "M03", "M04", "M05"],
+  },
+  {
+    num: "2",
+    title: "Full-Stack & Persistence",
+    goal: "Expose Fastify REST APIs, connect PostgreSQL, and render the React editor.",
+    milestones: ["M06", "M07", "M08"],
+  },
+  {
+    num: "3",
+    title: "Real-Time Multiplayer",
+    goal: "Live WebSockets, presence, Yjs collaborative CRDTs, and Docker sandbox.",
+    milestones: ["M09", "M10", "M11", "M12"],
+  },
+  {
+    num: "4",
+    title: "Production Parity & Handover",
+    goal: "Docker Compose multi-service topology, TLS proxy, and 42 subject compliance.",
+    milestones: ["M13"],
+  },
+];
+
 function route(course, prefix, current) {
-  return `<details class="route" open><summary>Your build route <span>14 milestones</span></summary><nav aria-label="Build route">${course.path.milestones
+  return `<details class="route" open><summary>Your build route <span>4 Acts · 14 milestones</span></summary><nav aria-label="Build route">${course.path.milestones
     .map(
-      (m, i) =>
-        `<details ${m.id === current ? "open" : ""}><summary><span class="route-number">${String(i).padStart(2, "0")}</span>${h(m.title)}</summary><p>${h(m.enables)}</p><ol>${m.lessonIds
+      (m, i) => {
+        const act = ACTS.find((a) => a.milestones.includes(m.id));
+        const isFirstInAct = act && act.milestones[0] === m.id;
+        const actHeader = isFirstInAct
+          ? `<div class="act-header" role="presentation"><span class="act-badge">Act ${act.num}</span><strong>${h(act.title)}</strong><small>${h(act.goal)}</small></div>`
+          : "";
+        return `${actHeader}<details ${m.id === current ? "open" : ""}><summary><span class="route-number">${String(i).padStart(2, "0")}</span>${h(m.title)}</summary><p>${h(m.enables)}</p><ol>${m.lessonIds
           .map((id) => {
             const l = course.path.lessons.find((l) => l.id === id);
             return `<li>${l.status === "ready" ? `<a href="${prefix}${h(l.output)}">${h(l.title)}</a>` : `<span>${h(l.title)} <small>Being written</small></span>`}</li>`;
           })
-          .join("")}</ol></details>`
+          .join("")}</ol></details>`;
+      }
     )
     .join("")}</nav></details>`;
 }
@@ -171,7 +204,7 @@ export async function renderBuildOutputs({
   ).length;
   await page(
     "index.html",
-    `<p class="eyebrow">YOUR GUIDED BUILD PATH</p><h1>Understand one piece.<br>Build it yourself.</h1><p class="lead">From what you know in C to a working multiplayer game. Each lesson explains the idea, shows it changing, then guides one small coding step.</p><aside class="notice"><h2>Before you code</h2><p>Start at M00. This course is not a jump straight into a big app. First you learn the destination, then the rules, then the smallest building step.</p><ul><li><strong>Reference game:</strong> read only. Use it to see how the real behavior works.</li><li><strong>Practice folder:</strong> write your own small version here as you learn.</li><li><strong>Team repo:</strong> inspect this later, after your teammate confirms the real folders, scripts, and commands.</li></ul><p>Do not treat the team repo as ready just because the reference game is open. The browser can save a path; it cannot inspect your teammate’s folder or prove a command works.</p></aside><section class="continue-card"><span class="eyebrow">START WITH THE DESTINATION</span><h2 data-continue-title>${h(first?.title ?? "The first lesson is being written")}</h2><p data-continue-note>First see what the game does. You do not need your friend’s repository yet.</p>${first ? `<a class="primary" data-build-continue href="${h(first.output)}">Start learning <span>→</span></a>` : ""}</section><div class="home-points"><section><span>01</span><h3>See the idea</h3><p>Change an input and follow the values. Connect each explanation to the relevant code.</p></section><section><span>02</span><h3>Write a small part</h3><p>Know which folder and file to use, why it belongs there, and what to change.</p></section><section><span>03</span><h3>Check and connect</h3><p>Run a clear check, understand failures, then see what your new part enables.</p></section></div><aside class="notice">${readyCount} of ${course.path.lessons.length} lessons are available. The full route is shown at the left; ${readyCount < course.path.lessons.length ? "later lessons are still being written" : "all lessons are ready to explore"}. Your game is built by you, one checked step at a time.</aside>`,
+    `<p class="eyebrow">YOUR GUIDED BUILD PATH · 4 ACTS</p><h1>Understand one piece.<br>Build it yourself.</h1><p class="lead">From what you know in C to a working multiplayer game. The course is structured into 4 sequential Acts—from local state machines to full-stack persistence, live WebSockets, and production parity.</p><div class="acts-roadmap"><section class="act-card"><span class="act-badge">ACT 1 · M00–M05</span><h3>The Core Game Loop</h3><p>Build a pure TypeScript match engine &amp; scoring simulator runnable in Node.</p><ul><li>Destination &amp; Monorepo boundary</li><li>C to TypeScript &amp; Unit Testing</li><li>Match State Machine &amp; Clock</li><li>Visible Run, Scoring &amp; Deadlines</li></ul></section><section class="act-card"><span class="act-badge">ACT 2 · M06–M08</span><h3>Full-Stack &amp; Persistence</h3><p>Expose Fastify REST APIs, connect PostgreSQL, and render the React editor.</p><ul><li>Fastify Controller &amp; Zod Validation</li><li>React UI, CodeMirror &amp; Transport</li><li>PostgreSQL Store, Claims &amp; Recovery</li></ul></section><section class="act-card"><span class="act-badge">ACT 3 · M09–M12</span><h3>Real-Time Multiplayer Engine</h3><p>WebSockets, live presence, Yjs collaborative CRDTs, and Docker sandbox.</p><ul><li>Isolated C++/Python Judge Worker</li><li>WebSocket Auth, Lobby &amp; Presence</li><li>2v2 Collaborative Yjs Editing</li><li>Match &amp; Team Chat (Redis Pub/Sub)</li></ul></section><section class="act-card"><span class="act-badge">ACT 4 · M13</span><h3>Production Parity &amp; Handover</h3><p>Docker Compose topology, TLS proxy, and 42 subject compliance.</p><ul><li>Service Composition &amp; Orchestration</li><li>Self-Signed TLS &amp; Reverse Proxy</li><li>Parity Matrix &amp; Project Handover</li></ul></section></div><aside class="notice"><h2>Before you code</h2><p>Start at M00. This course is not a jump straight into a big app. First you learn the destination, then the rules, then the smallest building step.</p><ul><li><strong>Reference game:</strong> read only. Use it to see how the real behavior works.</li><li><strong>Practice folder:</strong> write your own small version here as you learn.</li><li><strong>Team repo:</strong> inspect this later, after your teammate confirms the real folders, scripts, and commands.</li></ul><p>Do not treat the team repo as ready just because the reference game is open. The browser can save a path; it cannot inspect your teammate’s folder or prove a command works.</p></aside><section class="continue-card"><span class="eyebrow">START WITH THE DESTINATION</span><h2 data-continue-title>${h(first?.title ?? "The first lesson is being written")}</h2><p data-continue-note>First see what the game does. You do not need your friend’s repository yet.</p>${first ? `<a class="primary" data-build-continue href="${h(first.output)}">Start learning <span>→</span></a>` : ""}</section><div class="home-points"><section><span>01</span><h3>See the idea</h3><p>Change an input and follow the values. Connect each explanation to the relevant code.</p></section><section><span>02</span><h3>Write a small part</h3><p>Know which folder and file to use, why it belongs there, and what to change.</p></section><section><span>03</span><h3>Check and connect</h3><p>Run a clear check, understand failures, then see what your new part enables.</p></section></div><aside class="notice">${readyCount} of ${course.path.lessons.length} lessons are available. The full route is shown at the left; ${readyCount < course.path.lessons.length ? "later lessons are still being written" : "all lessons are ready to explore"}. Your game is built by you, one checked step at a time.</aside>`,
     null,
     "build-home.template.html"
   );

@@ -4,6 +4,7 @@ import { MockArenaTransport } from "./arena/mock.js";
 import { SocketArenaTransport } from "./arena/socket.js";
 import { LobbyClient } from "./arena/lobby.js";
 import type { MatchMode } from "./arena/types.js";
+import { CourseCompanion } from "./companion/CourseCompanion.js";
 
 const LobbyPage = lazy(() =>
   import("./components/LobbyPage.js").then(({ LobbyPage: page }) => ({ default: page })),
@@ -96,15 +97,72 @@ function AppContent() {
 }
 
 export function App() {
+  const search = typeof window !== "undefined" ? window.location.search : "";
+  const params = new URLSearchParams(search);
+  const isTestPreview = typeof window !== "undefined" && window.location.port === "4173";
+  const initialTab =
+    params.get("tab") === "course" || params.get("course") === "1"
+      ? "course"
+      : params.get("live") === "1" || params.get("tab") === "arena" || isTestPreview
+        ? "arena"
+        : "course";
+  const [activeTab, setActiveTab] = useState<"course" | "arena">(initialTab);
+
   return (
     <Suspense
       fallback={
-        <p className="p-4 font-mono text-sm" role="status">
-          Loading Code Arena…
+        <p className="p-4 font-mono text-sm text-neutral-400" role="status">
+          Loading Code Arena Guide…
         </p>
       }
     >
-      <AppContent />
+      <div className="flex h-screen flex-col bg-neutral-900 text-neutral-100">
+        {/* Top App Tab Switcher */}
+        <div
+          className="flex items-center justify-between border-b border-neutral-800 bg-neutral-900 px-4 py-1.5"
+          role="navigation"
+          aria-label="App Navigation"
+        >
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-pressed={activeTab === "course"}
+              className={`rounded px-3 py-1 font-mono text-xs font-semibold ${
+                activeTab === "course"
+                  ? "bg-teal-700 text-white"
+                  : "border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+              }`}
+              onClick={() => setActiveTab("course")}
+            >
+              📚 Guidebook
+            </button>
+            <button
+              type="button"
+              aria-pressed={activeTab === "arena"}
+              className={`rounded px-3 py-1 font-mono text-xs font-semibold ${
+                activeTab === "arena"
+                  ? "bg-teal-700 text-white"
+                  : "border border-neutral-700 bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+              }`}
+              onClick={() => setActiveTab("arena")}
+            >
+              ⚔️ Play Full Game
+            </button>
+          </div>
+        </div>
+
+        {/* Full-width view for each mode */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === "course" ? (
+            <CourseCompanion onOpenArena={() => setActiveTab("arena")} />
+          ) : (
+            <div className="h-full overflow-y-auto bg-white text-neutral-900">
+              <AppContent />
+            </div>
+          )}
+        </div>
+      </div>
     </Suspense>
   );
 }
+

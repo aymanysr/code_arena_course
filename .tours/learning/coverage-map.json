@@ -36,6 +36,14 @@
     ],
     "excluded": [
       {
+        "path": "bun.lock",
+        "reason": "Alternative package lockfile, not used in Node.js runtime."
+      },
+      {
+        "path": "metadata.json",
+        "reason": "AI Studio applet configuration and capabilities, outside game runtime and learning route."
+      },
+      {
         "path": "node_modules",
         "reason": "Third-party dependencies; inspect package manifests when needed."
       },

@@ -147,7 +147,7 @@ export function TeamChat({
       {/* Contextual quick pings */}
       {client && !readOnly && (
         <div className="flex flex-wrap gap-1 border-t border-neutral-200 bg-neutral-50 px-2 py-1.5" role="toolbar" aria-label="Team quick pings">
-          {TEAM_PINGS.map((p) => (
+          {TEAM_PINGS.map((p: TeamPing) => (
             <button
               key={p}
               type="button"

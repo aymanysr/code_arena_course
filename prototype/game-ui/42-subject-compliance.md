@@ -11,6 +11,12 @@ File order (player path): `index.html` forwards to `00-journey.html` (map, start
 
 Active prototype plan: [`../../docs/superpowers/plans/2026-09-18-critical-player-journey-prototypes.md`](../../docs/superpowers/plans/2026-09-18-critical-player-journey-prototypes.md) covers outcome states, recovery/interruption states, the whole-app journey map, and final selected-direction capture. Planned files are not evidence until their checks pass and this matrix is updated. Post-pivot (2026-09-23), production planning moves to `.scratch/code-arena/` tickets after spec review; this plan is historical.
 
+## 2026-10-01 teammate-repository onboarding guide & milestone scaffolding review
+
+Added an interactive onboarding guide (`TeammateSetupGuide`) and per-milestone IDE scaffolding tab directly into the Code Arena Engineering Companion. This provides concrete step-by-step instructions for 42 students cloning their teammate's repository: git feature branch hygiene, root workspace configuration, single-command directory generation, package dependency installation, TypeScript path resolution, seam-based non-blocking integration with teammate authentication (42 OAuth fallback) and database tables (`arena_` prefix), and Docker compose resource limits (`cpus: "1.0"`, `mem_limit: "256M"`).
+
+No production subject module claims or requirement evidence are altered by this UI companion enhancement; module rows and team sign-off remain unchanged.
+
 ## 2026-09-30 teammate-repository learning path review
 
 Added a plain-language orientation before the Submit lessons and an eight-step build map that explains why each step comes when it does, what to create, where it could belong, the code pattern, and how to check the result. The linked repository paths are examples from the reference project. The course tells learners to find existing owners in their teammate's repository and to run equivalent tests there before claiming parity.

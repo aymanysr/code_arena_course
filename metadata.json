@@ -1,0 +1,9 @@
+{
+  "name": "Code Arena",
+  "description": "Real-time head-to-head competitive coding arena with round lifecycle, problem test-runner, collaborative editor, and live team chat.",
+  "prompt": "Real-time head-to-head competitive coding arena with round lifecycle, problem test-runner, collaborative editor, and live team chat.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

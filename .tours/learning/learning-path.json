@@ -2468,6 +2468,18 @@
       "lessonIds": []
     },
     {
+      "path": "bun.lock",
+      "kind": "exclude",
+      "reason": "Alternative package lockfile, not used in Node.js runtime.",
+      "lessonIds": []
+    },
+    {
+      "path": "metadata.json",
+      "kind": "exclude",
+      "reason": "AI Studio applet configuration and capabilities, outside game runtime and learning route.",
+      "lessonIds": []
+    },
+    {
       "path": "node_modules",
       "kind": "exclude",
       "reason": "Third-party dependencies; inspect package manifests when needed.",
